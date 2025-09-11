@@ -29,20 +29,96 @@
                 <button class="header__toggle" aria-label="Переключить меню">
                     ☰
                 </button>
+                <!-- Кнопка корзины -->
+                <div class="cart-button-container">
+                    <button class="cart-button" id="cartButton" aria-label="Открыть корзину">
+                        <span class="cart-icon">🛒</span>
+                        <span class="cart-count" id="cartCount">0</span>
+                        <span class="cart-total" id="cartTotal">0 грн</span>
+                        <span class="cart-dropdown-toggle" id="cartDropdownToggle">▼</span>
+                    </button>
+                    <!-- Выпадающее окно корзины -->
+                    <div class="cart-dropdown" id="cartDropdown">
+                        <div class="cart-dropdown__content">
+                            <ul class="cart-dropdown__items" id="cartDropdownItems"></ul>
+                            <p class="cart-dropdown__total">Итого: <span id="cartDropdownTotal">0 грн</span></p>
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="header__logo">
-                <!-- Текстовый логотип (можно заменить на <img>) -->
                 <span class="header__logo-text">Логотип</span>
-                <!-- Если нужен реальный логотип, раскомментируйте:
-                <img src="logo.png" alt="Логотип сайта" class="header__logo-img">
-                -->
             </div>
         </div>
     </header>
 
-    <!-- Основной контент (заглушка) -->
+    <!-- Модальное окно корзины -->
+    <dialog class="cart-modal" id="cartModal">
+        <div class="cart-modal__header">
+            <h2>Корзина</h2>
+            <button class="cart-modal__close" id="closeCart" aria-label="Закрыть корзину">×</button>
+        </div>
+        <div class="cart-modal__content">
+            <ul class="cart-items" id="cartItems"></ul>
+            <div class="cart-summary">
+                <p>Общая сумма: <span id="cartModalTotal">0 грн</span></p>
+            </div>
+        </div>
+        <div class="cart-modal__footer">
+            <button class="cart-button--clear" id="clearCart">Очистить корзину</button>
+            <button class="cart-button--checkout">Оформить заказ</button>
+        </div>
+    </dialog>
+
+    <!-- Секция товаров -->
     <main class="container">
-        <p>Основной контент будет здесь.</p>
+        <section class="products">
+            <h2>Товары</h2>
+            <div class="products__grid">
+                <div class="product-card">
+                    <img src="https://placehold.co/200x200" alt="Товар 1" class="product-card__image">
+                    <h3 class="product-card__title">Товар 1</h3>
+                    <p class="product-card__description">Описание товара 1: качественный продукт для повседневного использования.</p>
+                    <p class="product-card__price">100 грн</p>
+                    <button class="product-card__button" data-id="1" data-name="Товар 1" data-price="100">Добавить в корзину</button>
+                </div>
+                <div class="product-card">
+                    <img src="https://placehold.co/200x200" alt="Товар 2" class="product-card__image">
+                    <h3 class="product-card__title">Товар 2</h3>
+                    <p class="product-card__description">Описание товара 2: идеально подходит для профессионалов.</p>
+                    <p class="product-card__price">150 грн</p>
+                    <button class="product-card__button" data-id="2" data-name="Товар 2" data-price="150">Добавить в корзину</button>
+                </div>
+                <div class="product-card">
+                    <img src="https://placehold.co/200x200" alt="Товар 3" class="product-card__image">
+                    <h3 class="product-card__title">Товар 3</h3>
+                    <p class="product-card__description">Описание товара 3: компактный и удобный в использовании.</p>
+                    <p class="product-card__price">200 грн</p>
+                    <button class="product-card__button" data-id="3" data-name="Товар 3" data-price="200">Добавить в корзину</button>
+                </div>
+                <div class="product-card">
+                    <img src="https://placehold.co/200x200" alt="Товар 4" class="product-card__image">
+                    <h3 class="product-card__title">Товар 4</h3>
+                    <p class="product-card__description">Описание товара 4: стильный и современный дизайн.</p>
+                    <p class="product-card__price">250 грн</p>
+                    <button class="product-card__button" data-id="4" data-name="Товар 4" data-price="250">Добавить в корзину</button>
+                </div>
+                <div class="product-card">
+                    <img src="https://placehold.co/200x200" alt="Товар 5" class="product-card__image">
+                    <h3 class="product-card__title">Товар 5</h3>
+                    <p class="product-card__description">Описание товара 5: высокая производительность.</p>
+                    <p class="product-card__price">300 грн</p>
+                    <button class="product-card__button" data-id="5" data-name="Товар 5" data-price="300">Добавить в корзину</button>
+                </div>
+                <div class="product-card">
+                    <img src="https://placehold.co/200x200" alt="Товар 6" class="product-card__image">
+                    <h3 class="product-card__title">Товар 6</h3>
+                    <p class="product-card__description">Описание товара 6: надёжный и долговечный.</p>
+                    <p class="product-card__price">350 грн</p>
+                    <button class="product-card__button" data-id="6" data-name="Товар 6" data-price="350">Добавить в корзину</button>
+                </div>
+            </div>
+        </section>
     </main>
 
     <!-- Подключение внешнего JavaScript -->

@@ -2,6 +2,7 @@
 :root {
     --primary-color: #333;
     --accent-color: #007BFF;
+    --secondary-color: #ff6f61; /* Яркий коралловый для трендовой кнопки */
     --text-color: #fff;
     --font-family: Arial, sans-serif;
     --container-width: 1200px;
@@ -13,7 +14,7 @@
     --cart-button-text: #333;
     --font-thin: 300;
     --font-bold: 700;
-    --transition: all 0.3s ease;
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); /* Плавная кривая Безье */
 }
 
 /* Сброс базовых стилей */
@@ -75,6 +76,7 @@ body {
 
 .header__nav-link:hover {
     color: var(--accent-color);
+    transform: scale(1.05);
 }
 
 /* Стили для кнопки меню (для мобильной версии) */
@@ -90,6 +92,7 @@ body {
 
 .header__toggle:hover {
     color: var(--accent-color);
+    transform: rotate(90deg);
 }
 
 /* Стили для логотипа */
@@ -116,13 +119,14 @@ body {
     position: relative;
     display: flex;
     align-items: center;
+    gap: 0.5rem; /* Отступ между кнопками */
 }
 
 .cart-button {
     background: var(--cart-button-bg);
     color: var(--cart-button-text);
     border: 1px solid #bbb;
-    border-radius: 4px;
+    border-radius: 8px;
     padding: 0.5rem 1rem;
     display: flex;
     align-items: center;
@@ -133,6 +137,29 @@ body {
 
 .cart-button:hover {
     background: #c0c0c0;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.cart-button--secondary {
+    background: linear-gradient(135deg, var(--secondary-color), #ff8a65); /* Трендовый градиент */
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 0.5rem 1rem;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: var(--font-bold);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    transition: var(--transition);
+}
+
+.cart-button--secondary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    background: linear-gradient(135deg, #ff8a65, var(--secondary-color));
 }
 
 .cart-icon-wrapper {
@@ -143,6 +170,11 @@ body {
 .cart-icon {
     font-size: 1.5rem;
     transition: var(--transition);
+}
+
+.cart-button--secondary .cart-icon {
+    font-size: 1.2rem;
+    margin-right: 0.3rem;
 }
 
 .cart-count {
@@ -158,6 +190,11 @@ body {
     min-width: 1rem;
     text-align: center;
     transition: var(--transition);
+}
+
+.cart-button:hover .cart-count,
+.cart-button--secondary:hover .cart-count {
+    transform: scale(1.1);
 }
 
 .cart-text {
@@ -184,6 +221,7 @@ body {
 
 .cart-dropdown-toggle:hover {
     color: var(--accent-color);
+    transform: rotate(180deg);
 }
 
 /* Стили для выпадающего окна корзины */
@@ -225,6 +263,10 @@ body {
     transition: var(--transition);
 }
 
+.cart-dropdown__items li:hover {
+    background: #f8f8f8;
+}
+
 .cart-dropdown__items img {
     width: 50px;
     height: 50px;
@@ -260,6 +302,7 @@ body {
 
 .cart-dropdown__items .cart-dropdown__item-remove:hover {
     color: var(--cart-red);
+    transform: scale(1.2);
 }
 
 .cart-dropdown__summary {
@@ -292,6 +335,7 @@ body {
 
 .cart-dropdown__button--view:hover {
     background: #0056b3;
+    transform: translateY(-2px);
 }
 
 .cart-dropdown__button--checkout {
@@ -301,6 +345,7 @@ body {
 
 .cart-dropdown__button--checkout:hover {
     background: #218838;
+    transform: translateY(-2px);
 }
 
 /* Стили для модального окна корзины */
@@ -315,7 +360,7 @@ body {
     position: fixed;
     top: 50%;
     left: 50%;
-    transform: translate(-50%, -50%) scale(0.9);
+    transform: translate(-50%, -50%) scale(0.95);
     opacity: 0;
     transition: var(--transition);
 }
@@ -327,6 +372,12 @@ body {
 
 .cart-modal::backdrop {
     background: var(--modal-bg);
+    opacity: 0;
+    transition: var(--transition);
+}
+
+.cart-modal[open]::backdrop {
+    opacity: 1;
 }
 
 .cart-modal__header {
@@ -346,6 +397,7 @@ body {
 
 .cart-modal__close:hover {
     color: var(--cart-red);
+    transform: scale(1.2);
 }
 
 .cart-items {
@@ -362,6 +414,10 @@ body {
     transition: var(--transition);
 }
 
+.cart-items li:hover {
+    background: #f8f8f8;
+}
+
 .cart-items li button {
     background: none;
     border: none;
@@ -373,6 +429,7 @@ body {
 
 .cart-items li button:hover {
     color: #cc0000;
+    transform: scale(1.1);
 }
 
 .cart-summary {
@@ -402,6 +459,7 @@ body {
 
 .cart-button--clear:hover {
     background: #cc0000;
+    transform: translateY(-2px);
 }
 
 .cart-button--checkout {
@@ -411,6 +469,7 @@ body {
 
 .cart-button--checkout:hover {
     background: #0056b3;
+    transform: translateY(-2px);
 }
 
 /* Стили для секции товаров */
@@ -446,6 +505,12 @@ body {
 
 .filter-group select:hover {
     border-color: var(--accent-color);
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
+}
+
+.filter-group select:focus {
+    outline: none;
+    border-color: var(--accent-color);
 }
 
 .products__grid {
@@ -464,14 +529,19 @@ body {
 }
 
 .product-card:hover {
-    transform: scale(1.05);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    transform: translateY(-5px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
 }
 
 .product-card__image {
     max-width: 100%;
     height: auto;
     border-radius: 4px;
+    transition: var(--transition);
+}
+
+.product-card:hover .product-card__image {
+    transform: scale(1.03);
 }
 
 .product-card__title {
@@ -503,6 +573,8 @@ body {
 
 .product-card__button:hover {
     background: #0056b3;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 /* Стили для футера */
@@ -552,6 +624,14 @@ body {
         right: 0;
         background-color: var(--primary-color);
         padding: 1rem;
+        opacity: 0;
+        transform: translateY(-10px);
+        transition: var(--transition);
+    }
+
+    .header__nav--open {
+        opacity: 1;
+        transform: translateY(0);
     }
 
     .header__nav-list {
@@ -575,7 +655,8 @@ body {
         max-height: 40px;
     }
 
-    .cart-button {
+    .cart-button,
+    .cart-button--secondary {
         padding: 0.3rem 0.5rem;
         font-size: 0.9rem;
     }
@@ -635,6 +716,11 @@ body {
 
     .filter-group select {
         width: 100%;
+    }
+
+    .cart-button-container {
+        flex-direction: column;
+        gap: 0.3rem;
     }
 }
 

@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let cart = JSON.parse(localStorage.getItem('cart')) || [];
 
     const cartButton = document.getElementById('cartButton');
+    const cartButtonSecondary = document.getElementById('cartButtonSecondary');
     const cartModal = document.getElementById('cartModal');
     const closeCart = document.getElementById('closeCart');
     const clearCart = document.getElementById('clearCart');
@@ -100,9 +101,16 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Открытие модала
+    // Открытие модала (основная кнопка)
     cartButton.addEventListener('click', (e) => {
         if (e.target === cartDropdownToggle) return;
+        cartDropdown.classList.remove('cart-dropdown--open');
+        updateCart();
+        cartModal.showModal();
+    });
+
+    // Открытие модала (вторая кнопка)
+    cartButtonSecondary.addEventListener('click', () => {
         cartDropdown.classList.remove('cart-dropdown--open');
         updateCart();
         cartModal.showModal();
@@ -146,7 +154,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Закрытие выпадающего окна при клике вне
     document.addEventListener('click', (e) => {
-        if (!cartButton.contains(e.target) && !cartDropdown.contains(e.target)) {
+        if (!cartButton.contains(e.target) && !cartButtonSecondary.contains(e.target) && !cartDropdown.contains(e.target)) {
             cartDropdown.classList.remove('cart-dropdown--open');
         }
     });
@@ -167,15 +175,12 @@ document.addEventListener('DOMContentLoaded', () => {
             let priceMatch = true;
             let categoryMatch = true;
 
-            // Фильтр по цене
             if (priceValue === 'low' && price > 200) priceMatch = false;
             if (priceValue === 'medium' && (price < 200 || price > 300)) priceMatch = false;
             if (priceValue === 'high' && price <= 300) priceMatch = false;
 
-            // Фильтр по категории
             if (categoryValue !== 'all' && category !== categoryValue) categoryMatch = false;
 
-            // Показать/скрыть карточку с анимацией
             if (priceMatch && categoryMatch) {
                 card.style.display = 'block';
                 card.style.opacity = '0';

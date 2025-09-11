@@ -46,7 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
             cartItemsList.appendChild(li);
 
-            // Добавление товаров в выпадающее окно с изображением
+            // Добавление товаров в выпадающее окно с изображением и иконкой удаления
             const dropdownLi = document.createElement('li');
             dropdownLi.innerHTML = `
                 <img src="https://placehold.co/50x50" alt="${item.name}" class="cart-dropdown__item-image">
@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div class="cart-dropdown__item-name">${item.name}</div>
                     <div class="cart-dropdown__item-price">${item.quantity} шт. × ${item.price} грн = ${item.price * item.quantity} грн</div>
                 </div>
-                <button class="cart-dropdown__item-remove" data-id="${item.id}">Удалить</button>
+                <button class="cart-dropdown__item-remove" data-id="${item.id}" aria-label="Удалить товар">🗑</button>
             `;
             cartDropdownItems.appendChild(dropdownLi);
         });
@@ -109,7 +109,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Открытие модала
     cartButton.addEventListener('click', (e) => {
-        if (e.target === cartDropdownToggle) return; // Игнорировать клик по стрелочке
+        if (e.target === cartDropdownToggle) return; // Игнорировать клик по птичке
         cartDropdown.classList.remove('cart-dropdown--open');
         updateCart();
         cartModal.showModal();
@@ -148,7 +148,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
         cartDropdown.classList.remove('cart-dropdown--open');
-        alert('Переход к оформлению заказа... (заглушка для реальной логики)'); // Замени на реальную логику (например, redirect)
+        alert('Переход к оформлению заказа... (заглушка для реальной логики)'); // Замени на реальную логику
         // Пример: window.location.href = '/checkout';
     });
 

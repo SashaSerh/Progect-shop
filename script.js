@@ -8,7 +8,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Логика корзины
-    const cart = []; // Пустая корзина, товары добавляются кнопками
+    // Загрузка корзины из localStorage или инициализация пустой
+    let cart = JSON.parse(localStorage.getItem('cart')) || [];
 
     const cartButton = document.getElementById('cartButton');
     const cartModal = document.getElementById('cartModal');
@@ -22,6 +23,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const cartDropdown = document.getElementById('cartDropdown');
     const cartDropdownItems = document.getElementById('cartDropdownItems');
     const cartDropdownTotal = document.getElementById('cartDropdownTotal');
+    const goToCart = document.getElementById('goToCart');
+    const checkoutCart = document.getElementById('checkoutCart');
+
+    // Функция сохранения корзины в localStorage
+    function saveCart() {
+        localStorage.setItem('cart', JSON.stringify(cart));
+    }
 
     // Функция обновления корзины
     function updateCart() {
@@ -38,9 +46,16 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
             cartItemsList.appendChild(li);
 
-            // Добавление товаров в выпадающее окно
+            // Добавление товаров в выпадающее окно с изображением
             const dropdownLi = document.createElement('li');
-            dropdownLi.textContent = `${item.name} - ${item.quantity} шт. - ${item.price * item.quantity} грн`;
+            dropdownLi.innerHTML = `
+                <img src="https://placehold.co/50x50" alt="${item.name}" class="cart-dropdown__item-image">
+                <div class="cart-dropdown__item-info">
+                    <div class="cart-dropdown__item-name">${item.name}</div>
+                    <div class="cart-dropdown__item-price">${item.quantity} шт. × ${item.price} грн = ${item.price * item.quantity} грн</div>
+                </div>
+                <button class="cart-dropdown__item-remove" data-id="${item.id}">Удалить</button>
+            `;
             cartDropdownItems.appendChild(dropdownLi);
         });
 
@@ -49,9 +64,20 @@ document.addEventListener('DOMContentLoaded', () => {
         const totalPrice = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
         cartCount.textContent = totalItems;
-        cartTotal.textContent = `${totalPrice} грн`;
+        cartTotal.textContent = totalPrice;
         cartModalTotal.textContent = `${totalPrice} грн`;
         cartDropdownTotal.textContent = `${totalPrice} грн`;
+
+        // Сохранение корзины
+        saveCart();
+
+        // Добавление обработчиков для кнопок "Удалить" в выпадающем окне
+        document.querySelectorAll('.cart-dropdown__item-remove').forEach(button => {
+            button.addEventListener('click', () => {
+                const id = parseInt(button.dataset.id);
+                removeItem(id);
+            });
+        });
     }
 
     // Функция удаления товара
@@ -106,6 +132,24 @@ document.addEventListener('DOMContentLoaded', () => {
         if (cartDropdown.classList.contains('cart-dropdown--open')) {
             updateCart();
         }
+    });
+
+    // Кнопка "Посмотреть корзину"
+    goToCart.addEventListener('click', () => {
+        cartDropdown.classList.remove('cart-dropdown--open');
+        updateCart();
+        cartModal.showModal();
+    });
+
+    // Кнопка "Оформить заказ"
+    checkoutCart.addEventListener('click', () => {
+        if (cart.length === 0) {
+            alert('Корзина пуста!');
+            return;
+        }
+        cartDropdown.classList.remove('cart-dropdown--open');
+        alert('Переход к оформлению заказа... (заглушка для реальной логики)'); // Замени на реальную логику (например, redirect)
+        // Пример: window.location.href = '/checkout';
     });
 
     // Закрытие выпадающего окна при клике вне

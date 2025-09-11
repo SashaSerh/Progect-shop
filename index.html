@@ -32,16 +32,27 @@
                 <!-- Кнопка корзины -->
                 <div class="cart-button-container">
                     <button class="cart-button" id="cartButton" aria-label="Открыть корзину">
-                        <span class="cart-icon">🛒</span>
-                        <span class="cart-count" id="cartCount">0</span>
-                        <span class="cart-total" id="cartTotal">0 грн</span>
+                        <div class="cart-icon-wrapper">
+                            <span class="cart-icon">🛍</span>
+                            <span class="cart-count" id="cartCount">0</span>
+                        </div>
+                        <div class="cart-text">
+                            <span class="cart-text__items">товаров на</span>
+                            <span class="cart-text__total" id="cartTotal">0 грн</span>
+                        </div>
                         <span class="cart-dropdown-toggle" id="cartDropdownToggle">▼</span>
                     </button>
                     <!-- Выпадающее окно корзины -->
                     <div class="cart-dropdown" id="cartDropdown">
                         <div class="cart-dropdown__content">
                             <ul class="cart-dropdown__items" id="cartDropdownItems"></ul>
-                            <p class="cart-dropdown__total">Итого: <span id="cartDropdownTotal">0 грн</span></p>
+                            <div class="cart-dropdown__summary">
+                                <p class="cart-dropdown__total">Итого: <span id="cartDropdownTotal">0 грн</span></p>
+                            </div>
+                            <div class="cart-dropdown__actions">
+                                <button class="cart-dropdown__button cart-dropdown__button--view" id="goToCart">Посмотреть корзину</button>
+                                <button class="cart-dropdown__button cart-dropdown__button--checkout" id="checkoutCart">Оформить заказ</button>
+                            </div>
                         </div>
                     </div>
                 </div>

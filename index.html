@@ -85,43 +85,62 @@
     <main class="container">
         <section class="products">
             <h2>Товары</h2>
+            <div class="products__filters">
+                <div class="filter-group">
+                    <label for="price-filter">Фильтр по цене:</label>
+                    <select id="price-filter">
+                        <option value="all">Все</option>
+                        <option value="low">До 200 грн</option>
+                        <option value="medium">200–300 грн</option>
+                        <option value="high">Выше 300 грн</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="category-filter">Фильтр по категории:</label>
+                    <select id="category-filter">
+                        <option value="all">Все</option>
+                        <option value="daily">Ежедневные</option>
+                        <option value="professional">Профессиональные</option>
+                    </select>
+                </div>
+            </div>
             <div class="products__grid">
-                <div class="product-card">
+                <div class="product-card" data-price="100" data-category="daily">
                     <img src="https://placehold.co/200x200" alt="Товар 1" class="product-card__image">
                     <h3 class="product-card__title">Товар 1</h3>
                     <p class="product-card__description">Описание товара 1: качественный продукт для повседневного использования.</p>
                     <p class="product-card__price">100 грн</p>
                     <button class="product-card__button" data-id="1" data-name="Товар 1" data-price="100">Добавить в корзину</button>
                 </div>
-                <div class="product-card">
+                <div class="product-card" data-price="150" data-category="daily">
                     <img src="https://placehold.co/200x200" alt="Товар 2" class="product-card__image">
                     <h3 class="product-card__title">Товар 2</h3>
                     <p class="product-card__description">Описание товара 2: идеально подходит для профессионалов.</p>
                     <p class="product-card__price">150 грн</p>
                     <button class="product-card__button" data-id="2" data-name="Товар 2" data-price="150">Добавить в корзину</button>
                 </div>
-                <div class="product-card">
+                <div class="product-card" data-price="200" data-category="daily">
                     <img src="https://placehold.co/200x200" alt="Товар 3" class="product-card__image">
                     <h3 class="product-card__title">Товар 3</h3>
                     <p class="product-card__description">Описание товара 3: компактный и удобный в использовании.</p>
                     <p class="product-card__price">200 грн</p>
                     <button class="product-card__button" data-id="3" data-name="Товар 3" data-price="200">Добавить в корзину</button>
                 </div>
-                <div class="product-card">
+                <div class="product-card" data-price="250" data-category="professional">
                     <img src="https://placehold.co/200x200" alt="Товар 4" class="product-card__image">
                     <h3 class="product-card__title">Товар 4</h3>
                     <p class="product-card__description">Описание товара 4: стильный и современный дизайн.</p>
                     <p class="product-card__price">250 грн</p>
                     <button class="product-card__button" data-id="4" data-name="Товар 4" data-price="250">Добавить в корзину</button>
                 </div>
-                <div class="product-card">
+                <div class="product-card" data-price="300" data-category="professional">
                     <img src="https://placehold.co/200x200" alt="Товар 5" class="product-card__image">
                     <h3 class="product-card__title">Товар 5</h3>
                     <p class="product-card__description">Описание товара 5: высокая производительность.</p>
                     <p class="product-card__price">300 грн</p>
                     <button class="product-card__button" data-id="5" data-name="Товар 5" data-price="300">Добавить в корзину</button>
                 </div>
-                <div class="product-card">
+                <div class="product-card" data-price="350" data-category="professional">
                     <img src="https://placehold.co/200x200" alt="Товар 6" class="product-card__image">
                     <h3 class="product-card__title">Товар 6</h3>
                     <p class="product-card__description">Описание товара 6: надёжный и долговечный.</p>
@@ -131,6 +150,21 @@
             </div>
         </section>
     </main>
+
+    <!-- Футер -->
+    <footer class="footer">
+        <div class="footer__container">
+            <div class="footer__info">
+                <h3>Контакты</h3>
+                <p>Email: info@moysayt.com</p>
+                <p>Телефон: +380 123 456 789</p>
+                <p>Адрес: ул. Примерная, 123, Киев, Украина</p>
+            </div>
+            <div class="footer__copyright">
+                <p>&copy; 2025 Мой сайт. Все права защищены.</p>
+            </div>
+        </div>
+    </footer>
 
     <!-- Подключение внешнего JavaScript -->
     <script src="script.js"></script>

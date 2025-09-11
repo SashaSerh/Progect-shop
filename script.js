@@ -8,7 +8,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Логика корзины
-    // Загрузка корзины из localStorage или инициализация пустой
     let cart = JSON.parse(localStorage.getItem('cart')) || [];
 
     const cartButton = document.getElementById('cartButton');
@@ -33,11 +32,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Функция обновления корзины
     function updateCart() {
-        // Очистка списков
         cartItemsList.innerHTML = '';
         cartDropdownItems.innerHTML = '';
 
-        // Добавление товаров в модал
         cart.forEach(item => {
             const li = document.createElement('li');
             li.innerHTML = `
@@ -46,7 +43,6 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
             cartItemsList.appendChild(li);
 
-            // Добавление товаров в выпадающее окно с изображением и иконкой удаления
             const dropdownLi = document.createElement('li');
             dropdownLi.innerHTML = `
                 <img src="https://placehold.co/50x50" alt="${item.name}" class="cart-dropdown__item-image">
@@ -59,7 +55,6 @@ document.addEventListener('DOMContentLoaded', () => {
             cartDropdownItems.appendChild(dropdownLi);
         });
 
-        // Расчёт количества и суммы
         const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
         const totalPrice = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
@@ -68,10 +63,8 @@ document.addEventListener('DOMContentLoaded', () => {
         cartModalTotal.textContent = `${totalPrice} грн`;
         cartDropdownTotal.textContent = `${totalPrice} грн`;
 
-        // Сохранение корзины
         saveCart();
 
-        // Добавление обработчиков для кнопок "Удалить" в выпадающем окне
         document.querySelectorAll('.cart-dropdown__item-remove').forEach(button => {
             button.addEventListener('click', () => {
                 const id = parseInt(button.dataset.id);
@@ -109,7 +102,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Открытие модала
     cartButton.addEventListener('click', (e) => {
-        if (e.target === cartDropdownToggle) return; // Игнорировать клик по птичке
+        if (e.target === cartDropdownToggle) return;
         cartDropdown.classList.remove('cart-dropdown--open');
         updateCart();
         cartModal.showModal();
@@ -148,8 +141,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
         cartDropdown.classList.remove('cart-dropdown--open');
-        alert('Переход к оформлению заказа... (заглушка для реальной логики)'); // Замени на реальную логику
-        // Пример: window.location.href = '/checkout';
+        alert('Переход к оформлению заказа... (заглушка для реальной логики)');
     });
 
     // Закрытие выпадающего окна при клике вне
@@ -159,6 +151,51 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // Логика фильтров
+    const priceFilter = document.getElementById('price-filter');
+    const categoryFilter = document.getElementById('category-filter');
+    const productCards = document.querySelectorAll('.product-card');
+
+    function applyFilters() {
+        const priceValue = priceFilter.value;
+        const categoryValue = categoryFilter.value;
+
+        productCards.forEach(card => {
+            const price = parseInt(card.dataset.price);
+            const category = card.dataset.category;
+
+            let priceMatch = true;
+            let categoryMatch = true;
+
+            // Фильтр по цене
+            if (priceValue === 'low' && price > 200) priceMatch = false;
+            if (priceValue === 'medium' && (price < 200 || price > 300)) priceMatch = false;
+            if (priceValue === 'high' && price <= 300) priceMatch = false;
+
+            // Фильтр по категории
+            if (categoryValue !== 'all' && category !== categoryValue) categoryMatch = false;
+
+            // Показать/скрыть карточку с анимацией
+            if (priceMatch && categoryMatch) {
+                card.style.display = 'block';
+                card.style.opacity = '0';
+                setTimeout(() => {
+                    card.style.opacity = '1';
+                    card.style.transition = 'opacity 0.3s ease';
+                }, 10);
+            } else {
+                card.style.opacity = '0';
+                setTimeout(() => {
+                    card.style.display = 'none';
+                }, 300);
+            }
+        });
+    }
+
+    priceFilter.addEventListener('change', applyFilters);
+    categoryFilter.addEventListener('change', applyFilters);
+
     // Инициализация
     updateCart();
+    applyFilters();
 });

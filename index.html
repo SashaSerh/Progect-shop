@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Мой новый сайт</title>
+    <title data-i18n="site-title">Монтаж и продажа кондиционеров и рекуператоров</title>
+    <!-- Подключение шрифта Poppins -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap">
     <!-- Подключение внешнего CSS -->
     <link rel="stylesheet" href="styles.css">
 </head>
@@ -11,23 +13,30 @@
     <!-- Шапка сайта -->
     <header class="header">
         <div class="header__container">
-            <div class="header__top">
-                <h1 class="header__title">Мой сайт</h1>
-                <nav class="header__nav">
-                    <ul class="header__nav-list">
-                        <li class="header__nav-item">
-                            <a href="#home" class="header__nav-link">Главная</a>
-                        </li>
-                        <li class="header__nav-item">
-                            <a href="#about" class="header__nav-link">О нас</a>
-                        </li>
-                        <li class="header__nav-item">
-                            <a href="#contact" class="header__nav-link">Контакты</a>
-                        </li>
-                    </ul>
-                </nav>
+            <h1 class="header__title" data-i18n="header-title">Климат Контроль</h1>
+            <nav class="header__nav">
+                <ul class="header__nav-list">
+                    <li class="header__nav-item">
+                        <a href="#home" class="header__nav-link" data-i18n="nav-home">Главная</a>
+                    </li>
+                    <li class="header__nav-item">
+                        <a href="#services" class="header__nav-link" data-i18n="nav-services">Услуги</a>
+                    </li>
+                    <li class="header__nav-item">
+                        <a href="#products" class="header__nav-link" data-i18n="nav-products">Товары</a>
+                    </li>
+                    <li class="header__nav-item">
+                        <a href="#contacts" class="header__nav-link" data-i18n="nav-contacts">Контакты</a>
+                    </li>
+                </ul>
+            </nav>
+            <div class="header__controls">
+                <select class="language-switcher" id="languageSwitcher" aria-label="Выбрать язык">
+                    <option value="ru" selected data-i18n="lang-ru">Русский</option>
+                    <option value="uk" data-i18n="lang-uk">Українська</option>
+                </select>
                 <button class="header__toggle" aria-label="Переключить меню">
-                    ☰
+                    <span class="header__toggle-icon"></span>
                 </button>
                 <!-- Кнопка корзины -->
                 <div class="cart-button-container">
@@ -37,135 +46,223 @@
                             <span class="cart-count" id="cartCount">0</span>
                         </div>
                         <div class="cart-text">
-                            <span class="cart-text__items">товаров на</span>
+                            <span class="cart-text__items" data-i18n="cart-items">товаров на</span>
                             <span class="cart-text__total" id="cartTotal">0 грн</span>
                         </div>
                         <span class="cart-dropdown-toggle" id="cartDropdownToggle">⌄</span>
-                    </button>
-                    <button class="cart-button--secondary" id="cartButtonSecondary" aria-label="Открыть корзину">
-                        <span class="cart-icon">🛒</span>
-                        Корзина
                     </button>
                     <!-- Выпадающее окно корзины -->
                     <div class="cart-dropdown" id="cartDropdown">
                         <div class="cart-dropdown__content">
                             <ul class="cart-dropdown__items" id="cartDropdownItems"></ul>
                             <div class="cart-dropdown__summary">
-                                <p class="cart-dropdown__total">Итого: <span id="cartDropdownTotal">0 грн</span></p>
+                                <p class="cart-dropdown__total" data-i18n="cart-total">Итого: <span id="cartDropdownTotal">0 грн</span></p>
                             </div>
                             <div class="cart-dropdown__actions">
-                                <button class="cart-dropdown__button cart-dropdown__button--view" id="goToCart">Посмотреть корзину</button>
-                                <button class="cart-dropdown__button cart-dropdown__button--checkout" id="checkoutCart">Оформить заказ</button>
+                                <button class="cart-dropdown__button cart-dropdown__button--view" id="goToCart" data-i18n="cart-view">Посмотреть корзину</button>
+                                <button class="cart-dropdown__button cart-dropdown__button--checkout" id="checkoutCart" data-i18n="cart-checkout">Оформить заказ</button>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="header__logo">
-                <span class="header__logo-text">Логотип</span>
-            </div>
         </div>
     </header>
+
+    <!-- Герой секция -->
+    <section class="hero" id="home">
+        <div class="hero__container">
+            <h2 class="hero__title" data-i18n="hero-title">Комфортный климат в вашем доме</h2>
+            <p class="hero__subtitle" data-i18n="hero-subtitle">Профессиональный монтаж и продажа кондиционеров и вентиляционных рекуператоров</p>
+            <a href="#contacts" class="hero__cta" data-i18n="hero-cta">Заказать консультацию</a>
+        </div>
+    </section>
+
+    <!-- Секция услуг -->
+    <section class="services" id="services">
+        <div class="container">
+            <h2 class="services__title" data-i18n="services-title">Наши услуги</h2>
+            <div class="services__grid">
+                <div class="service-card">
+                    <h3 class="service-card__title" data-i18n="service-ac-install-title">Монтаж кондиционеров</h3>
+                    <p class="service-card__description" data-i18n="service-ac-install-desc">Профессиональная установка кондиционеров любой сложности с гарантией.</p>
+                    <button class="service-card__button" data-id="s1" data-name-ru="Монтаж кондиционера" data-name-uk="Монтаж кондиціонера" data-price="5000" data-i18n="service-order">Заказать</button>
+                </div>
+                <div class="service-card">
+                    <h3 class="service-card__title" data-i18n="service-recuperator-install-title">Монтаж рекуператоров</h3>
+                    <p class="service-card__description" data-i18n="service-recuperator-install-desc">Установка вентиляционных систем для свежего воздуха в помещении.</p>
+                    <button class="service-card__button" data-id="s2" data-name-ru="Монтаж рекуператора" data-name-uk="Монтаж рекуператора" data-price="6000" data-i18n="service-order">Заказать</button>
+                </div>
+                <div class="service-card">
+                    <h3 class="service-card__title" data-i18n="service-maintenance-title">Обслуживание систем</h3>
+                    <p class="service-card__description" data-i18n="service-maintenance-desc">Чистка, диагностика и ремонт кондиционеров и рекуператоров.</p>
+                    <button class="service-card__button" data-id="s3" data-name-ru="Обслуживание систем" data-name-uk="Обслуговування систем" data-price="2000" data-i18n="service-order">Заказать</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Секция преимуществ -->
+    <section class="advantages">
+        <div class="container">
+            <h2 class="advantages__title" data-i18n="advantages-title">Почему выбирают нас</h2>
+            <div class="advantages__grid">
+                <div class="advantage-card">
+                    <h3 class="advantage-card__title" data-i18n="advantage-experience-title">Опыт</h3>
+                    <p class="advantage-card__description" data-i18n="advantage-experience-desc">Более 10 лет на рынке климатических систем.</p>
+                </div>
+                <div class="advantage-card">
+                    <h3 class="advantage-card__title" data-i18n="advantage-quality-title">Качество</h3>
+                    <p class="advantage-card__description" data-i18n="advantage-quality-desc">Используем только сертифицированное оборудование.</p>
+                </div>
+                <div class="advantage-card">
+                    <h3 class="advantage-card__title" data-i18n="advantage-warranty-title">Гарантия</h3>
+                    <p class="advantage-card__description" data-i18n="advantage-warranty-desc">Гарантия на монтаж и оборудование до 5 лет.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Секция товаров -->
+    <section class="products" id="products">
+        <div class="container">
+            <h2 class="products__title" data-i18n="products-title">Наши товары</h2>
+            <div class="products__filters">
+                <div class="filter-group">
+                    <label for="price-filter" data-i18n="filter-price-label">Фильтр по цене:</label>
+                    <select id="price-filter">
+                        <option value="all" data-i18n="filter-all">Все</option>
+                        <option value="low" data-i18n="filter-low">До 15000 грн</option>
+                        <option value="medium" data-i18n="filter-medium">15000–30000 грн</option>
+                        <option value="high" data-i18n="filter-high">Выше 30000 грн</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="category-filter" data-i18n="filter-category-label">Фильтр по категории:</label>
+                    <select id="category-filter">
+                        <option value="all" data-i18n="filter-all">Все</option>
+                        <option value="ac" data-i18n="filter-ac">Кондиционеры</option>
+                        <option value="recuperator" data-i18n="filter-recuperator">Рекуператоры</option>
+                    </select>
+                </div>
+            </div>
+            <div class="products__grid">
+                <div class="product-card" data-price="12000" data-category="ac">
+                    <img src="https://placehold.co/200x200" alt="Кондиционер LG Standard" class="product-card__image">
+                    <h3 class="product-card__title" data-i18n="product-lg-title">Кондиционер LG Standard</h3>
+                    <p class="product-card__description" data-i18n="product-lg-desc">Мощность 2.5 кВт, энергоэффективность A++.</p>
+                    <p class="product-card__price">12000 грн</p>
+                    <button class="product-card__button" data-id="1" data-name-ru="Кондиционер LG Standard" data-name-uk="Кондиціонер LG Standard" data-price="12000" data-i18n="add-to-cart">Добавить в корзину</button>
+                </div>
+                <div class="product-card" data-price="18000" data-category="ac">
+                    <img src="https://placehold.co/200x200" alt="Кондиционер Samsung Premium" class="product-card__image">
+                    <h3 class="product-card__title" data-i18n="product-samsung-title">Кондиционер Samsung Premium</h3>
+                    <p class="product-card__description" data-i18n="product-samsung-desc">Мощность 3.5 кВт, инверторный компрессор.</p>
+                    <p class="product-card__price">18000 грн</p>
+                    <button class="product-card__button" data-id="2" data-name-ru="Кондиционер Samsung Premium" data-name-uk="Кондиціонер Samsung Premium" data-price="18000" data-i18n="add-to-cart">Добавить в корзину</button>
+                </div>
+                <div class="product-card" data-price="25000" data-category="ac">
+                    <img src="https://placehold.co/200x200" alt="Кондиционер Daikin Elite" class="product-card__image">
+                    <h3 class="product-card__title" data-i18n="product-daikin-title">Кондиционер Daikin Elite</h3>
+                    <p class="product-card__description" data-i18n="product-daikin-desc">Мощность 5 кВт, Wi-Fi управление.</p>
+                    <p class="product-card__price">25000 грн</p>
+                    <button class="product-card__button" data-id="3" data-name-ru="Кондиционер Daikin Elite" data-name-uk="Кондиціонер Daikin Elite" data-price="25000" data-i18n="add-to-cart">Добавить в корзину</button>
+                </div>
+                <div class="product-card" data-price="20000" data-category="recuperator">
+                    <img src="https://placehold.co/200x200" alt="Рекуператор Prana 150" class="product-card__image">
+                    <h3 class="product-card__title" data-i18n="product-prana-title">Рекуператор Prana 150</h3>
+                    <p class="product-card__description" data-i18n="product-prana-desc">Производительность 135 м³/ч, компактный дизайн.</p>
+                    <p class="product-card__price">20000 грн</p>
+                    <button class="product-card__button" data-id="4" data-name-ru="Рекуператор Prana 150" data-name-uk="Рекуператор Prana 150" data-price="20000" data-i18n="add-to-cart">Добавить в корзину</button>
+                </div>
+                <div class="product-card" data-price="35000" data-category="recuperator">
+                    <img src="https://placehold.co/200x200" alt="Рекуператор Ventoxx Comfort" class="product-card__image">
+                    <h3 class="product-card__title" data-i18n="product-ventoxx-title">Рекуператор Ventoxx Comfort</h3>
+                    <p class="product-card__description" data-i18n="product-ventoxx-desc">Производительность 200 м³/ч, низкий уровень шума.</p>
+                    <p class="product-card__price">35000 грн</p>
+                    <button class="product-card__button" data-id="5" data-name-ru="Рекуператор Ventoxx Comfort" data-name-uk="Рекуператор Ventoxx Comfort" data-price="35000" data-i18n="add-to-cart">Добавить в корзину</button>
+                </div>
+                <div class="product-card" data-price="45000" data-category="recuperator">
+                    <img src="https://placehold.co/200x200" alt="Рекуператор Zehnder ComfoAir" class="product-card__image">
+                    <h3 class="product-card__title" data-i18n="product-zehnder-title">Рекуператор Zehnder ComfoAir</h3>
+                    <p class="product-card__description" data-i18n="product-zehnder-desc">Производительность 350 м³/ч, высокоэффективный теплообменник.</p>
+                    <p class="product-card__price">45000 грн</p>
+                    <button class="product-card__button" data-id="6" data-name-ru="Рекуператор Zehnder ComfoAir" data-name-uk="Рекуператор Zehnder ComfoAir" data-price="45000" data-i18n="add-to-cart">Добавить в корзину</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Секция отзывов -->
+    <section class="reviews">
+        <div class="container">
+            <h2 class="reviews__title" data-i18n="reviews-title">Отзывы наших клиентов</h2>
+            <div class="reviews__carousel">
+                <div class="review-card">
+                    <p class="review-card__text" data-i18n="review-1-text">"Быстро и качественно установили кондиционер. Очень довольны!"</p>
+                    <p class="review-card__author" data-i18n="review-1-author">Анна, Киев</p>
+                </div>
+                <div class="review-card">
+                    <p class="review-card__text" data-i18n="review-2-text">"Рекуператор работает идеально, воздух всегда свежий!"</p>
+                    <p class="review-card__author" data-i18n="review-2-author">Игорь, Одесса</p>
+                </div>
+                <div class="review-card">
+                    <p class="review-card__text" data-i18n="review-3-text">"Профессиональная команда, рекомендую!"</p>
+                    <p class="review-card__author" data-i18n="review-3-author">Олег, Львов</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Секция контактов -->
+    <section class="contacts" id="contacts">
+        <div class="container">
+            <h2 class="contacts__title" data-i18n="contacts-title">Свяжитесь с нами</h2>
+            <div class="contacts__content">
+                <div class="contacts__info">
+                    <p><strong data-i18n="contacts-email-label">Email:</strong> info@climatecontrol.com</p>
+                    <p><strong data-i18n="contacts-phone-label">Телефон:</strong> +380 123 456 789</p>
+                    <p><strong data-i18n="contacts-address-label">Адрес:</strong> ул. Примерная, 123, Киев, Украина</p>
+                </div>
+                <form class="contacts__form">
+                    <input type="text" placeholder="Ваше имя" data-i18n-placeholder="form-name-placeholder" required>
+                    <input type="email" placeholder="Ваш email" data-i18n-placeholder="form-email-placeholder" required>
+                    <textarea placeholder="Ваше сообщение" data-i18n-placeholder="form-message-placeholder" required></textarea>
+                    <button type="submit" data-i18n="form-submit">Отправить</button>
+                </form>
+            </div>
+        </div>
+    </section>
 
     <!-- Модальное окно корзины -->
     <dialog class="cart-modal" id="cartModal">
         <div class="cart-modal__header">
-            <h2>Корзина</h2>
+            <h2 data-i18n="cart-title">Корзина</h2>
             <button class="cart-modal__close" id="closeCart" aria-label="Закрыть корзину">×</button>
         </div>
         <div class="cart-modal__content">
             <ul class="cart-items" id="cartItems"></ul>
             <div class="cart-summary">
-                <p>Общая сумма: <span id="cartModalTotal">0 грн</span></p>
+                <p data-i18n="cart-total">Общая сумма: <span id="cartModalTotal">0 грн</span></p>
             </div>
         </div>
         <div class="cart-modal__footer">
-            <button class="cart-button--clear" id="clearCart">Очистить корзину</button>
-            <button class="cart-button--checkout">Оформить заказ</button>
+            <button class="cart-button--clear" id="clearCart" data-i18n="cart-clear">Очистить корзину</button>
+            <button class="cart-button--checkout" data-i18n="cart-checkout">Оформить заказ</button>
         </div>
     </dialog>
-
-    <!-- Секция товаров -->
-    <main class="container">
-        <section class="products">
-            <h2>Товары</h2>
-            <div class="products__filters">
-                <div class="filter-group">
-                    <label for="price-filter">Фильтр по цене:</label>
-                    <select id="price-filter">
-                        <option value="all">Все</option>
-                        <option value="low">До 200 грн</option>
-                        <option value="medium">200–300 грн</option>
-                        <option value="high">Выше 300 грн</option>
-                    </select>
-                </div>
-                <div class="filter-group">
-                    <label for="category-filter">Фильтр по категории:</label>
-                    <select id="category-filter">
-                        <option value="all">Все</option>
-                        <option value="daily">Ежедневные</option>
-                        <option value="professional">Профессиональные</option>
-                    </select>
-                </div>
-            </div>
-            <div class="products__grid">
-                <div class="product-card" data-price="100" data-category="daily">
-                    <img src="https://placehold.co/200x200" alt="Товар 1" class="product-card__image">
-                    <h3 class="product-card__title">Товар 1</h3>
-                    <p class="product-card__description">Описание товара 1: качественный продукт для повседневного использования.</p>
-                    <p class="product-card__price">100 грн</p>
-                    <button class="product-card__button" data-id="1" data-name="Товар 1" data-price="100">Добавить в корзину</button>
-                </div>
-                <div class="product-card" data-price="150" data-category="daily">
-                    <img src="https://placehold.co/200x200" alt="Товар 2" class="product-card__image">
-                    <h3 class="product-card__title">Товар 2</h3>
-                    <p class="product-card__description">Описание товара 2: идеально подходит для профессионалов.</p>
-                    <p class="product-card__price">150 грн</p>
-                    <button class="product-card__button" data-id="2" data-name="Товар 2" data-price="150">Добавить в корзину</button>
-                </div>
-                <div class="product-card" data-price="200" data-category="daily">
-                    <img src="https://placehold.co/200x200" alt="Товар 3" class="product-card__image">
-                    <h3 class="product-card__title">Товар 3</h3>
-                    <p class="product-card__description">Описание товара 3: компактный и удобный в использовании.</p>
-                    <p class="product-card__price">200 грн</p>
-                    <button class="product-card__button" data-id="3" data-name="Товар 3" data-price="200">Добавить в корзину</button>
-                </div>
-                <div class="product-card" data-price="250" data-category="professional">
-                    <img src="https://placehold.co/200x200" alt="Товар 4" class="product-card__image">
-                    <h3 class="product-card__title">Товар 4</h3>
-                    <p class="product-card__description">Описание товара 4: стильный и современный дизайн.</p>
-                    <p class="product-card__price">250 грн</p>
-                    <button class="product-card__button" data-id="4" data-name="Товар 4" data-price="250">Добавить в корзину</button>
-                </div>
-                <div class="product-card" data-price="300" data-category="professional">
-                    <img src="https://placehold.co/200x200" alt="Товар 5" class="product-card__image">
-                    <h3 class="product-card__title">Товар 5</h3>
-                    <p class="product-card__description">Описание товара 5: высокая производительность.</p>
-                    <p class="product-card__price">300 грн</p>
-                    <button class="product-card__button" data-id="5" data-name="Товар 5" data-price="300">Добавить в корзину</button>
-                </div>
-                <div class="product-card" data-price="350" data-category="professional">
-                    <img src="https://placehold.co/200x200" alt="Товар 6" class="product-card__image">
-                    <h3 class="product-card__title">Товар 6</h3>
-                    <p class="product-card__description">Описание товара 6: надёжный и долговечный.</p>
-                    <p class="product-card__price">350 грн</p>
-                    <button class="product-card__button" data-id="6" data-name="Товар 6" data-price="350">Добавить в корзину</button>
-                </div>
-            </div>
-        </section>
-    </main>
 
     <!-- Футер -->
     <footer class="footer">
         <div class="footer__container">
             <div class="footer__info">
-                <h3>Контакты</h3>
-                <p>Email: info@moysayt.com</p>
-                <p>Телефон: +380 123 456 789</p>
-                <p>Адрес: ул. Примерная, 123, Киев, Украина</p>
+                <h3 data-i18n="footer-contacts-title">Контакты</h3>
+                <p><strong data-i18n="contacts-email-label">Email:</strong> info@climatecontrol.com</p>
+                <p><strong data-i18n="contacts-phone-label">Телефон:</strong> +380 123 456 789</p>
+                <p><strong data-i18n="contacts-address-label">Адрес:</strong> ул. Примерная, 123, Киев, Украина</p>
             </div>
             <div class="footer__copyright">
-                <p>&copy; 2025 Мой сайт. Все права защищены.</p>
+                <p data-i18n="footer-copyright">&copy; 2025 Климат Контроль. Все права защищены.</p>
             </div>
         </div>
     </footer>

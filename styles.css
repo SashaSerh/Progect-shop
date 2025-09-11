@@ -5,6 +5,8 @@
     --text-color: #fff;
     --font-family: Arial, sans-serif;
     --container-width: 1200px;
+    --logo-font-size: 1.5rem;
+    --logo-color: #fff;
 }
 
 /* Сброс базовых стилей */
@@ -33,6 +35,9 @@ body {
     max-width: var(--container-width);
     margin: 0 auto;
     padding: 0 1rem;
+}
+
+.header__top {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -73,6 +78,25 @@ body {
     cursor: pointer;
 }
 
+/* Стили для логотипа */
+.header__logo {
+    margin-top: 1rem;
+    text-align: left;
+}
+
+.header__logo-text {
+    font-size: var(--logo-font-size);
+    color: var(--logo-color);
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+/* Если используется изображение логотипа */
+.header__logo-img {
+    max-height: 50px;
+    width: auto;
+}
+
 /* Медиа-запрос для мобильных устройств */
 @media (max-width: 768px) {
     .header__nav {
@@ -96,6 +120,18 @@ body {
 
     .header__toggle {
         display: block;
+    }
+
+    .header__title {
+        font-size: 1.5rem;
+    }
+
+    .header__logo-text {
+        font-size: 1.2rem;
+    }
+
+    .header__logo-img {
+        max-height: 40px;
     }
 }
 

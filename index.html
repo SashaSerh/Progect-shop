@@ -11,23 +11,32 @@
     <!-- Шапка сайта -->
     <header class="header">
         <div class="header__container">
-            <h1 class="header__title">Мой сайт</h1>
-            <nav class="header__nav">
-                <ul class="header__nav-list">
-                    <li class="header__nav-item">
-                        <a href="#home" class="header__nav-link">Главная</a>
-                    </li>
-                    <li class="header__nav-item">
-                        <a href="#about" class="header__nav-link">О нас</a>
-                    </li>
-                    <li class="header__nav-item">
-                        <a href="#contact" class="header__nav-link">Контакты</a>
-                    </li>
-                </ul>
-            </nav>
-            <button class="header__toggle" aria-label="Переключить меню">
-                ☰
-            </button>
+            <div class="header__top">
+                <h1 class="header__title">Мой сайт</h1>
+                <nav class="header__nav">
+                    <ul class="header__nav-list">
+                        <li class="header__nav-item">
+                            <a href="#home" class="header__nav-link">Главная</a>
+                        </li>
+                        <li class="header__nav-item">
+                            <a href="#about" class="header__nav-link">О нас</a>
+                        </li>
+                        <li class="header__nav-item">
+                            <a href="#contact" class="header__nav-link">Контакты</a>
+                        </li>
+                    </ul>
+                </nav>
+                <button class="header__toggle" aria-label="Переключить меню">
+                    ☰
+                </button>
+            </div>
+            <div class="header__logo">
+                <!-- Текстовый логотип (можно заменить на <img>) -->
+                <span class="header__logo-text">Логотип</span>
+                <!-- Если нужен реальный логотип, раскомментируйте:
+                <img src="logo.png" alt="Логотип сайта" class="header__logo-img">
+                -->
+            </div>
         </div>
     </header>
 

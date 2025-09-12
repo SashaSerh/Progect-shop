@@ -1,0 +1,42 @@
+<header class="header">
+    <div class="header__container container">
+        <h1 class="header__title" data-i18n="header-title">Климат Контроль</h1>
+        <nav class="header__nav">
+            <ul class="header__nav-list">
+                <li class="header__nav-item"><a href="#home" class="header__nav-link" data-i18n="nav-home">Главная</a></li>
+                <li class="header__nav-item"><a href="#services" class="header__nav-link" data-i18n="nav-services">Услуги</a></li>
+                <li class="header__nav-item"><a href="#products" class="header__nav-link" data-i18n="nav-products">Товары</a></li>
+                <li class="header__nav-item"><a href="#contacts" class="header__nav-link" data-i18n="nav-contacts">Контакты</a></li>
+            </ul>
+        </nav>
+        <div class="header__controls">
+            <button class="language-switcher" data-lang="ru">RU</button>
+            <button class="language-switcher" data-lang="uk">UK</button>
+            <button class="theme-toggle" aria-label="Сменить тему"></button>
+            <div class="cart-button-container">
+                <button class="cart-button" id="openCartModal">
+                    <span class="cart-icon-wrapper">
+                        <span class="cart-icon">🛒</span>
+                        <span class="cart-count">0</span>
+                    </span>
+                    <span class="cart-text">
+                        <span class="cart-text__items" data-i18n="cart-items">0 товаров</span>
+                        <span class="cart-text__total">$0.00</span>
+                    </span>
+                    <span class="cart-dropdown-toggle" id="cartDropdownToggle">▼</span>
+                </button>
+                <div class="cart-dropdown">
+                    <ul class="cart-dropdown__items"></ul>
+                    <div class="cart-dropdown__summary" data-i18n="cart-total">Итого: $0.00</div>
+                    <div class="cart-dropdown__actions">
+                        <button class="cart-dropdown__button cart-button--clear" data-i18n="cart-clear">Очистить корзину</button>
+                        <button class="cart-dropdown__button cart-button--checkout" data-i18n="cart-checkout">Оформить заказ</button>
+                    </div>
+                </div>
+            </div>
+            <button class="header__toggle">
+                <span class="header__toggle-icon"></span>
+            </button>
+        </div>
+    </div>
+</header>

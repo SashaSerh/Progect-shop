@@ -1,0 +1,24 @@
+<section id="products" class="products">
+    <div class="container">
+        <h2 class="products__title" data-i18n="products-title">Наши товары</h2>
+        <div class="products__filters">
+            <div class="filter-group">
+                <label for="category" data-i18n="filter-category">Категория:</label>
+                <select id="category">
+                    <option value="all" data-i18n="filter-all">Все</option>
+                    <option value="ac" data-i18n="filter-ac">Кондиционеры</option>
+                    <option value="recuperator" data-i18n="filter-recuperator">Рекуператоры</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="price" data-i18n="filter-price">Цена:</label>
+                <select id="price">
+                    <option value="all" data-i18n="filter-all">Все</option>
+                    <option value="low" data-i18n="filter-low-to-high">От низкой к высокой</option>
+                    <option value="high" data-i18n="filter-high-to-low">От высокой к низкой</option>
+                </select>
+            </div>
+        </div>
+        <div class="products__grid"></div>
+    </div>
+</section>

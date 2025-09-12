@@ -1,0 +1,55 @@
+/* Переменные для тёмной темы */
+:root {
+    --primary-color: rgba(20, 30, 60, 0.4); /* Стекломорфизм */
+    --accent-color: #00ddeb; /* Неоновый голубой */
+    --secondary-color: #ff4fa1; /* Неоновый розовый */
+    --text-color: #f0f0f5; /* Мягкий белый */
+    --nav-text-color: #d0e6ff; /* Голубовато-серый */
+    --text-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+    --font-family: 'Poppins', Arial, sans-serif;
+    --container-width: 1400px;
+    --cart-red: #ff4fa1; /* Неоновый розовый */
+    --modal-bg: rgba(0, 0, 20, 0.6);
+    --button-bg: rgba(255, 255, 255, 0.2);
+    --font-thin: 300;
+    --font-bold: 600;
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    --glow-shadow: 0 0 10px rgba(0, 221, 235, 0.5);
+    --background-color: #0a0a23; /* Современный тёмный фон */
+}
+
+/* Переменные для светлой темы */
+.light-theme {
+    --primary-color: rgba(240, 245, 255, 0.4); /* Светлый стекломорфизм */
+    --accent-color: #66ccff; /* Пастельный голубой */
+    --secondary-color: #ff9f80; /* Персиковый */
+    --text-color: #333333; /* Тёмный текст */
+    --nav-text-color: #1a3c66; /* Тёмный голубой */
+    --text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    --cart-red: #ff9f80; /* Персиковый */
+    --modal-bg: rgba(255, 255, 255, 0.6);
+    --button-bg: rgba(255, 255, 255, 0.2);
+    --background-color: #f0f4ff; /* Светлый пастельный фон */
+    --shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    --glow-shadow: 0 0 10px rgba(102, 204, 255, 0.5);
+}
+
+/* Сброс базовых стилей */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font-family);
+    line-height: 1.6;
+    background: var(--background-color);
+}
+
+.container {
+    max-width: var(--container-width);
+    margin: 0 auto;
+    padding: 0 1.5rem;
+}

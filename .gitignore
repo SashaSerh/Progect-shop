@@ -15,4 +15,5 @@
    .DS_Store
 node_modules/
 dist/
-*.log
+*.log.DS_Store
+icons/

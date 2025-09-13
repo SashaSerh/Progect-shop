@@ -13,6 +13,7 @@
             <button class="language-switcher" data-lang="ru">RU</button>
             <button class="language-switcher" data-lang="uk">UK</button>
             <button class="theme-toggle" aria-label="Сменить тему"></button>
+            <button class="profile-button" id="profileButton" data-i18n="login">Войти</button>
             <div class="cart-button-container">
                 <button class="cart-button" id="openCartModal">
                     <span class="cart-icon-wrapper">
@@ -40,3 +41,11 @@
         </div>
     </div>
 </header>
+
+<!-- Модальное окно для профиля (добавлено здесь, чтобы загружалось с шапкой) -->
+<div class="modal" id="profileModal">
+    <div class="modal__content">
+        <span class="modal__close">&times;</span>
+        <div id="modalContent"></div>
+    </div>
+</div>

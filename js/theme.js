@@ -16,3 +16,27 @@ export function initTheme() {
         document.querySelector('.theme-toggle').classList.add('light-theme');
     }
 }
+
+// export function toggleTheme() {
+//     console.log('Toggling theme');
+//     const body = document.body;
+//     const themeToggle = document.querySelector('.theme-toggle');
+//     body.classList.toggle('light-theme');
+//     if (themeToggle) {
+//         themeToggle.classList.toggle('light-theme');
+//     }
+//     const isLightTheme = body.classList.contains('light-theme');
+//     localStorage.setItem('theme', isLightTheme ? 'light' : 'dark');
+// }
+
+// export function initTheme() {
+//     const savedTheme = localStorage.getItem('theme') || 'dark';
+//     console.log(`Initializing theme: ${savedTheme}`);
+//     if (savedTheme === 'light') {
+//         document.body.classList.add('light-theme');
+//         const themeToggle = document.querySelector('.theme-toggle');
+//         if (themeToggle) {
+//             themeToggle.classList.add('light-theme');
+//         }
+//     }
+// }

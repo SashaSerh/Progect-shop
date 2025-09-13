@@ -39,7 +39,15 @@ export const translations = {
         "cart-total": "Итого: $0.00",
         "cart-clear": "Очистить корзину",
         "cart-checkout": "Оформить заказ",
-        "cart-modal-title": "Ваша корзина"
+        "cart-modal-title": "Ваша корзина",
+        "login": "Войти",
+        "login-title": "Вход",
+        "username": "Имя пользователя",
+        "password": "Пароль",
+        "profile": "Личный кабинет",
+        "profile-title": "Личный кабинет",
+        "welcome": "Добро пожаловать",
+        "logout": "Выйти"
     },
     uk: {
         "site-title": "Клімат Контроль",
@@ -81,7 +89,15 @@ export const translations = {
         "cart-total": "Разом: $0.00",
         "cart-clear": "Очистити кошик",
         "cart-checkout": "Оформити замовлення",
-        "cart-modal-title": "Ваш кошик"
+        "cart-modal-title": "Ваш кошик",
+        "login": "Увійти",
+        "login-title": "Вхід",
+        "username": "Ім'я користувача",
+        "password": "Пароль",
+        "profile": "Особистий кабінет",
+        "profile-title": "Особистий кабінет",
+        "welcome": "Вітаємо",
+        "logout": "Вийти"
     }
 };
 

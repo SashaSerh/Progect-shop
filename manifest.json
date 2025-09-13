@@ -1,0 +1,22 @@
+{
+    "name": "Климат Контроль",
+    "short_name": "Climat",
+    "description": "Монтаж и продажа кондиционеров и рекуператоров",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#0a0a23",
+    "theme_color": "#00ddeb",
+    "orientation": "portrait-primary",
+    "icons": [
+        {
+            "src": "https://via.placeholder.com/192x192?text=Climat",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "https://via.placeholder.com/512x512?text=Climat",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ]
+}

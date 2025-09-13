@@ -5,7 +5,7 @@ export const products = [
         description: { ru: "Энергоэффективный кондиционер", uk: "Енергоефективний кондиціонер" },
         price: 15000,
         category: "ac",
-        image: "https://via.placeholder.com/150"
+        image: "https://picsum.photos/150"  // Placehold.co — стабильный replacement
     },
     {
         id: 2,
@@ -13,7 +13,7 @@ export const products = [
         description: { ru: "Система вентиляции для дома", uk: "Система вентиляції для дому" },
         price: 25000,
         category: "recuperator",
-        image: "https://via.placeholder.com/150"
+        image: "https://picsum.photos/150"  // Placehold.co
     }
 ];
 
@@ -26,7 +26,7 @@ export function renderProducts(lang, translations, filteredProducts = products) 
         const productCard = document.createElement('div');
         productCard.classList.add('product-card');
         productCard.innerHTML = `
-            <img src="${product.image}" alt="${product.name[lang]}" class="product-card__image">
+            <img src="${product.image}" alt="${product.name[lang]}" class="product-card__image" onerror="this.src='https://placehold.co/150x150/blue/white?text=Image+Not+Found'">
             <h3 class="product-card__title">${product.name[lang]}</h3>
             <p class="product-card__description">${product.description[lang]}</p>
             <p class="product-card__price">$${product.price.toFixed(2)}</p>

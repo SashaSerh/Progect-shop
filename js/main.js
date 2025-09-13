@@ -3,6 +3,7 @@ import { toggleTheme, initTheme } from './theme.js';
 import { translations, switchLanguage } from './i18n.js';
 import { products, renderProducts, filterProducts } from './products.js';
 import { initNavigation } from './navigation.js';
+import { updateProfileButton, openModal, closeModal } from './auth.js';
 
 async function loadComponent(containerId, componentPath) {
     try {
@@ -34,12 +35,47 @@ document.addEventListener('DOMContentLoaded', async () => {
         loadComponent('cart-modal-container', 'components/cart.html')
     ]);
 
-    const savedLanguage = localStorage.getItem('language') || 'ru';
+    // Проверка и исправление языка
+    let savedLanguage = localStorage.getItem('language') || 'ru';
+    if (!['ru', 'uk'].includes(savedLanguage)) {
+        console.warn(`Некорректный язык "${savedLanguage}", устанавливаем ru`);
+        savedLanguage = 'ru';
+        localStorage.setItem('language', savedLanguage);
+    }
+
+    // Инициализация
     initTheme();
     switchLanguage(savedLanguage);
     renderProducts(savedLanguage, translations);
     updateCartUI(translations, savedLanguage);
     initNavigation();
+
+    // Инициализация авторизации
+    const profileButton = document.getElementById('profileButton');
+    const profileModal = document.getElementById('profileModal');
+    const modalClose = document.querySelector('.modal__close');
+    
+    if (profileButton && profileModal && modalClose) {
+        updateProfileButton(translations, savedLanguage); // Инициализация кнопки профиля
+        profileButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            openModal(translations, savedLanguage);
+        });
+        modalClose.addEventListener('click', closeModal);
+        window.addEventListener('click', (e) => {
+            if (e.target === profileModal) {
+                closeModal();
+            }
+        });
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && profileModal.style.display === 'flex') {
+                closeModal();
+            }
+        });
+        console.log('Profile button initialized successfully');
+    } else {
+        console.error('Ошибка: Не найдены элементы #profileButton, #profileModal или .modal__close');
+    }
 
     // Обработчики событий
     const categorySelect = document.getElementById('category');
@@ -50,9 +86,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.querySelectorAll('.language-switcher').forEach(button => {
         button.addEventListener('click', () => {
             const lang = button.dataset.lang;
+            if (!['ru', 'uk'].includes(lang)) {
+                console.warn(`Некорректный язык "${lang}", пропускаем`);
+                return;
+            }
             switchLanguage(lang);
             renderProducts(lang, translations);
             updateCartUI(translations, lang);
+            updateProfileButton(translations, lang);
         });
     });
 
@@ -99,7 +140,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     id: productId,
                     name: { ru: button.dataset.nameRu, uk: button.dataset.nameUk },
                     price: parseFloat(button.dataset.price),
-                    image: 'https://via.placeholder.com/150'
+                    image: 'https://picsum.photos/150'
                 };
                 const cartItem = cart.find(item => item.id === productId);
                 if (cartItem) {
@@ -134,4 +175,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         });
     }
+
+    // Обработка ошибок изображений
+    document.addEventListener('error', (e) => {
+        if (e.target.tagName === 'IMG') {
+            e.target.src = 'https://placehold.co/150x150/red/white?text=Image+Error';
+        }
+    }, true);
 });

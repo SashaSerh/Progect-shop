@@ -1,12 +1,11 @@
 .header {
     background: var(--primary-color);
     backdrop-filter: blur(10px);
-    padding: 1.5rem 0;
+    padding: 12px 0;
     position: sticky;
     top: 0;
     z-index: 100;
-    transition: var(--transition);
-    box-shadow: var(--shadow);
+    border-bottom: 0.5px solid rgba(255, 255, 255, 0.2);
 }
 
 .header__container {
@@ -14,32 +13,29 @@
     justify-content: space-between;
     align-items: center;
     flex-wrap: nowrap;
+    padding: 0 16px;
 }
 
 .header__title {
-    font-size: 2rem;
-    font-weight: var(--font-bold);
-    letter-spacing: 1px;
-    text-shadow: var(--text-shadow);
-    color: var(--nav-text-color);
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+    color: var(--text-color);
     transition: var(--transition);
 }
 
 .header__title:hover {
     color: var(--accent-color);
-    transform: scale(1.02);
-    text-shadow: var(--glow-shadow);
 }
 
 .header__nav {
     display: flex;
-    overflow: visible;
 }
 
 .header__nav-list {
     list-style: none;
     display: flex;
-    gap: 2rem;
+    gap: 16px;
     flex-wrap: nowrap;
 }
 
@@ -50,88 +46,61 @@
 .header__nav-link {
     color: var(--nav-text-color);
     text-decoration: none;
-    font-size: 1.1rem;
-    font-weight: var(--font-thin);
-    text-shadow: var(--text-shadow);
+    font-size: 15px;
+    font-weight: 400;
+    padding: 8px 12px;
+    border-radius: 14px;
     transition: var(--transition);
-    padding: 0.5rem 1rem;
-    border-radius: 8px;
-    position: relative;
-    z-index: 1;
 }
 
 .header__nav-link:hover {
-    color: var(--secondary-color);
-    background: rgba(255, 255, 255, 0.1);
-    transform: translateY(-2px);
-    box-shadow: var(--glow-shadow);
+    background: rgba(255, 255, 255, 0.15);
+    color: var(--accent-color);
 }
 
 .light-theme .header__nav-link:hover {
-    background: rgba(0, 0, 0, 0.05);
-}
-
-.header__nav-link::after {
-    content: '';
-    position: absolute;
-    width: 0;
-    height: 2px;
-    background: var(--secondary-color);
-    bottom: 0;
-    left: 0;
-    transition: var(--transition);
-    z-index: -1;
-}
-
-.header__nav-link:hover::after {
-    width: 100%;
+    background: rgba(0, 0, 0, 0.1);
 }
 
 .header__controls {
     display: flex;
     align-items: center;
-    gap: 1rem;
-    margin-left: auto;
+    gap: 8px;
 }
 
 .language-switcher,
 .theme-toggle,
 .profile-button {
-    background: var(--button-bg);
-    color: var(--text-color);
+    background: none;
+    color: var(--accent-color);
     border: none;
-    border-radius: 12px;
-    padding: 0.75rem;
-    font-size: 1rem;
-    font-family: var(--font-family);
-    font-weight: var(--font-bold);
-    text-shadow: var(--text-shadow);
-    backdrop-filter: blur(8px);
+    border-radius: 14px;
+    padding: 8px 12px;
+    font-size: 15px;
+    font-weight: 600;
     cursor: pointer;
     transition: var(--transition);
-    min-width: 50px;
-    text-align: center;
+    display: flex;
+    align-items: center;
 }
 
-.profile-button::before {
-    content: '👤'; /* Иконка пользователя, можно изменить */
-    margin-right: 0.5rem;
+.theme-toggle {
+    padding: 8px;
 }
 
-.theme-toggle::before {
-    content: '🌙';
+.theme-icon {
+    font-size: 20px; /* Размер иконки в стиле iOS */
+    line-height: 1;
 }
 
-.light-theme .theme-toggle::before {
-    content: '☀️';
+.light-theme .theme-icon::before {
+    content: ''; /* SF Symbol для солнца (светлая тема) */
 }
 
 .language-switcher:hover,
 .theme-toggle:hover,
 .profile-button:hover {
-    background: linear-gradient(135deg, var(--accent-color), var(--secondary-color));
-    transform: translateY(-3px);
-    box-shadow: var(--glow-shadow);
+    background: var(--button-bg);
 }
 
 .language-switcher:focus,
@@ -146,8 +115,7 @@
     background: none;
     border: none;
     cursor: pointer;
-    padding: 0.5rem;
-    transition: var(--transition);
+    padding: 8px;
 }
 
 .header__toggle-icon {
@@ -190,7 +158,6 @@
     transform: rotate(-45deg) translate(5px, -5px);
 }
 
-/* Стили модалки для профиля (добавлено) */
 .modal {
     display: none;
     position: fixed;
@@ -203,82 +170,68 @@
     z-index: 200;
     align-items: center;
     justify-content: center;
-    transition: var(--transition);
 }
 
 .modal__content {
     background: var(--primary-color);
-    border-radius: 12px;
-    padding: 2rem;
+    border-radius: 14px;
+    padding: 20px;
     max-width: 400px;
     width: 90%;
     box-shadow: var(--shadow);
-    position: relative;
-    text-align: center;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.light-theme .modal__content {
-    border: 1px solid rgba(0, 0, 0, 0.1);
+    border: none;
 }
 
 .modal__close {
     position: absolute;
-    top: 10px;
-    right: 15px;
-    font-size: 1.5rem;
+    top: 12px;
+    right: 12px;
+    font-size: 20px;
     cursor: pointer;
     color: var(--text-color);
     transition: var(--transition);
 }
 
 .modal__close:hover {
-    color: var(--secondary-color);
+    color: var(--cart-red);
 }
 
 .modal__field {
-    margin: 1rem 0;
+    margin: 12px 0;
 }
 
 .modal__field label {
     display: block;
-    font-size: 1rem;
+    font-size: 15px;
     color: var(--text-color);
-    margin-bottom: 0.5rem;
-    text-shadow: var(--text-shadow);
+    margin-bottom: 6px;
 }
 
 .modal__field input {
     width: 100%;
-    padding: 0.75rem;
-    border: 1px solid var(--button-bg);
-    border-radius: 8px;
-    font-size: 1rem;
-    background: rgba(255, 255, 255, 0.1);
+    padding: 10px;
+    border: none;
+    border-radius: 10px;
+    font-size: 15px;
+    background: var(--button-bg);
     color: var(--text-color);
     backdrop-filter: blur(8px);
 }
 
 .modal__button {
-    background: var(--button-bg);
-    color: var(--text-color);
+    background: var(--accent-color);
+    color: #FFFFFF;
     border: none;
-    border-radius: 12px;
-    padding: 0.75rem 1.5rem;
-    font-size: 1rem;
-    font-family: var(--font-family);
-    font-weight: var(--font-bold);
+    border-radius: 14px;
+    padding: 12px;
+    font-size: 15px;
+    font-weight: 600;
     cursor: pointer;
     transition: var(--transition);
-    margin-top: 1rem;
-    text-shadow: var(--text-shadow);
-    backdrop-filter: blur(8px);
 }
 
 .modal__button:hover {
-    background: linear-gradient(135deg, var(--accent-color), var(--secondary-color));
-    transform: translateY(-3px);
-    box-shadow: var(--glow-shadow);
+    background: #005BB5;
 }
 
 .modal__button--logout {
@@ -286,7 +239,7 @@
 }
 
 .modal__button--logout:hover {
-    background: #da190b;
+    background: #D32F2F;
 }
 
 @media (max-width: 768px) {
@@ -301,31 +254,19 @@
         left: 0;
         right: 0;
         background: var(--primary-color);
-        backdrop-filter: blur(12px);
-        padding: 1.5rem;
-        opacity: 0;
-        transform: translateY(-10px);
-        transition: var(--transition);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
-    .light-theme .header__nav--open {
-        border: 1px solid rgba(0, 0, 0, 0.1);
-    }
-
-    .header__nav--open {
-        opacity: 1;
-        transform: translateY(0);
+        backdrop-filter: blur(10px);
+        padding: 16px;
+        border-bottom: 0.5px solid rgba(255, 255, 255, 0.2);
     }
 
     .header__nav-list {
         flex-direction: column;
-        gap: 1.5rem;
+        gap: 12px;
     }
 
     .header__nav-link {
-        font-size: 1.2rem;
-        padding: 0.75rem;
+        font-size: 17px;
+        padding: 10px;
     }
 
     .header__toggle {
@@ -333,35 +274,26 @@
     }
 
     .header__title {
-        font-size: 1.6rem;
+        font-size: 15px;
     }
 
     .header__controls {
-        flex-direction: column;
-        gap: 0.5rem;
+        gap: 6px;
     }
 
     .language-switcher,
     .theme-toggle,
     .profile-button {
-        width: 100%;
-        padding: 0.5rem;
-        min-width: 40px;
-        font-size: 0.9rem;
+        padding: 6px 10px;
+        font-size: 14px;
+    }
+
+    .theme-icon {
+        font-size: 18px;
     }
 
     .modal__content {
-        padding: 1.5rem;
+        padding: 16px;
         width: 95%;
-    }
-
-    .modal__field input {
-        padding: 0.5rem;
-        font-size: 0.9rem;
-    }
-
-    .modal__button {
-        padding: 0.5rem 1rem;
-        font-size: 0.9rem;
     }
 }

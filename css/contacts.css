@@ -1,19 +1,18 @@
 .contacts {
-    padding: 4rem 0;
+    padding: 40px 0;
 }
 
 .contacts__title {
-    font-size: 2rem;
-    font-weight: var(--font-bold);
+    font-size: 34px;
+    font-weight: 600;
     text-align: center;
-    margin-bottom: 2rem;
-    color: var(--nav-text-color);
-    text-shadow: var(--text-shadow);
+    margin-bottom: 24px;
+    color: var(--text-color);
 }
 
 .contacts__content {
     display: flex;
-    gap: 2rem;
+    gap: 16px;
     flex-wrap: wrap;
 }
 
@@ -23,10 +22,9 @@
 }
 
 .contacts__info p {
-    font-size: 1rem;
+    font-size: 15px;
     color: var(--text-color);
-    margin-bottom: 0.5rem;
-    text-shadow: var(--text-shadow);
+    margin-bottom: 8px;
 }
 
 .contacts__form {
@@ -34,31 +32,29 @@
     min-width: 250px;
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: 12px;
 }
 
 .contacts__form input,
 .contacts__form textarea {
     background: var(--button-bg);
     color: var(--text-color);
-    padding: 0.75rem;
+    padding: 10px;
     border: none;
-    border-radius: 12px;
-    font-size: 1rem;
+    border-radius: 10px;
+    font-size: 15px;
     backdrop-filter: blur(8px);
-    transition: var(--transition);
 }
 
 .contacts__form input:focus,
 .contacts__form textarea:focus {
-    background: linear-gradient(135deg, var(--accent-color), var(--secondary-color));
+    outline: none;
     box-shadow: 0 0 5px var(--glow-shadow);
 }
 
 .contacts__form input::placeholder,
 .contacts__form textarea::placeholder {
     color: var(--nav-text-color);
-    text-shadow: var(--text-shadow);
 }
 
 .contacts__form textarea {
@@ -67,27 +63,22 @@
 }
 
 .contacts__form button {
-    background: var(--button-bg);
-    color: var(--text-color);
+    background: var(--accent-color);
+    color: #FFFFFF;
     border: none;
-    padding: 0.75rem;
-    border-radius: 12px;
-    cursor: pointer;
-    font-weight: var(--font-bold);
-    text-shadow: var(--text-shadow);
-    backdrop-filter: blur(8px);
-    transition: var(--transition);
+    padding: 12px;
+    border-radius: 14px;
+    font-size: 15px;
+    font-weight: 600;
 }
 
 .contacts__form button:hover {
-    background: linear-gradient(135deg, var(--accent-color), var(--secondary-color));
-    transform: translateY(-2px);
-    box-shadow: var(--glow-shadow);
+    background: #005BB5;
 }
 
 @media (max-width: 768px) {
     .contacts__title {
-        font-size: 1.6rem;
+        font-size: 28px;
     }
 
     .contacts__content {

@@ -39,7 +39,7 @@ export function updateCartUI(translations, lang) {
                 <p class="cart-dropdown__item-name">${item.name[lang]}</p>
                 <p class="cart-dropdown__item-price">$${item.price.toFixed(2)} x ${item.quantity}</p>
             </div>
-            <button class="cart-dropdown__item-remove" data-id="${item.id}">✕</button>
+            <button class="cart-dropdown__item-remove" data-id="${item.id}">􀆄</button>
         `;
         cartDropdownItems.appendChild(dropdownItem);
 
@@ -83,18 +83,44 @@ export function toggleCartDropdown(e) {
     console.log('Toggling cart dropdown');
     e.stopPropagation();
     const cartDropdown = document.querySelector('.cart-dropdown');
-    if (cartDropdown) cartDropdown.classList.toggle('cart-dropdown--open');
+    if (cartDropdown) {
+        cartDropdown.classList.toggle('cart-dropdown--open');
+        cartDropdown.animate([
+            { opacity: 0, transform: 'translateY(-10px)' },
+            { opacity: 1, transform: 'translateY(0)' }
+        ], {
+            duration: 300,
+            easing: 'ease-in-out'
+        });
+    }
 }
 
 export function openCartModal(e) {
     console.log('Opening cart modal');
     e.stopPropagation();
     const cartModal = document.querySelector('.cart-modal');
-    if (cartModal) cartModal.showModal();
+    if (cartModal) {
+        cartModal.showModal();
+        cartModal.animate([
+            { transform: 'translate(-50%, -50%) scale(0.95)', opacity: 0 },
+            { transform: 'translate(-50%, -50%) scale(1)', opacity: 1 }
+        ], {
+            duration: 300,
+            easing: 'ease-in-out'
+        });
+    }
 }
 
 export function closeCartModal() {
     console.log('Closing cart modal');
     const cartModal = document.querySelector('.cart-modal');
-    if (cartModal) cartModal.close();
+    if (cartModal) {
+        cartModal.animate([
+            { transform: 'translate(-50%, -50%) scale(1)', opacity: 1 },
+            { transform: 'translate(-50%, -50%) scale(0.95)', opacity: 0 }
+        ], {
+            duration: 300,
+            easing: 'ease-in-out'
+        }).onfinish = () => cartModal.close();
+    }
 }

@@ -12,29 +12,21 @@
         <div class="header__controls">
             <button class="language-switcher" data-lang="ru">RU</button>
             <button class="language-switcher" data-lang="uk">UK</button>
-            <button class="theme-toggle" aria-label="Сменить тему"></button>
-            <button class="profile-button" id="profileButton" data-i18n="login">Войти</button>
-            <div class="cart-button-container">
-                <button class="cart-button" id="openCartModal">
-                    <span class="cart-icon-wrapper">
-                        <span class="cart-icon">🛒</span>
-                        <span class="cart-count">0</span>
-                    </span>
-                    <span class="cart-text">
-                        <span class="cart-text__items" data-i18n="cart-items">0 товаров</span>
-                        <span class="cart-text__total">$0.00</span>
-                    </span>
-                    <span class="cart-dropdown-toggle" id="cartDropdownToggle">▼</span>
-                </button>
-                <div class="cart-dropdown">
-                    <ul class="cart-dropdown__items"></ul>
-                    <div class="cart-dropdown__summary" data-i18n="cart-total">Итого: $0.00</div>
-                    <div class="cart-dropdown__actions">
-                        <button class="cart-dropdown__button cart-button--clear" data-i18n="cart-clear">Очистить корзину</button>
-                        <button class="cart-dropdown__button cart-button--checkout" data-i18n="cart-checkout">Оформить заказ</button>
-                    </div>
-                </div>
-            </div>
+            <button class="theme-toggle" aria-label="Сменить тему">
+                <span class="theme-icon">􀆺</span> <!-- SF Symbol для луны (тёмная тема) -->
+            </button>
+            <button class="profile-button" id="profileButton" data-i18n="login">􀉪 Войти</button>
+            <button class="cart-button" id="openCartModal">
+                <span class="cart-icon-wrapper">
+                    <span class="cart-icon">􀍪</span>
+                    <span class="cart-count">0</span>
+                </span>
+                <span class="cart-text">
+                    <span class="cart-text__items" data-i18n="cart-items">0 товаров</span>
+                    <span class="cart-text__total">$0.00</span>
+                </span>
+                <span class="cart-dropdown-toggle" id="cartDropdownToggle">􀄥</span>
+            </button>
             <button class="header__toggle">
                 <span class="header__toggle-icon"></span>
             </button>
@@ -42,10 +34,9 @@
     </div>
 </header>
 
-<!-- Модальное окно для профиля (добавлено здесь, чтобы загружалось с шапкой) -->
 <div class="modal" id="profileModal">
     <div class="modal__content">
-        <span class="modal__close">&times;</span>
+        <span class="modal__close">􀆄</span>
         <div id="modalContent"></div>
     </div>
 </div>

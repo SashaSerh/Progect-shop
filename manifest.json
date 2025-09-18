@@ -4,8 +4,8 @@
     "description": "Монтаж и продажа кондиционеров и рекуператоров",
     "start_url": "/",
     "display": "standalone",
-    "background_color": "#0a0a23",
-    "theme_color": "#00ddeb",
+    "background_color": "#000000",
+    "theme_color": "#007AFF",
     "orientation": "portrait-primary",
     "icons": [
         {
@@ -18,5 +18,7 @@
             "sizes": "512x512",
             "type": "image/png"
         }
-    ]
+    ],
+    "apple-mobile-web-app-capable": "yes",
+    "apple-mobile-web-app-status-bar-style": "black-translucent"
 }

@@ -47,7 +47,8 @@ export const translations = {
         "profile": "Личный кабинет",
         "profile-title": "Личный кабинет",
         "welcome": "Добро пожаловать",
-        "logout": "Выйти"
+        "logout": "Выйти",
+        "cart-empty": "Корзина пуста"
     },
     uk: {
         "site-title": "Клімат Контроль",
@@ -97,7 +98,8 @@ export const translations = {
         "profile": "Особистий кабінет",
         "profile-title": "Особистий кабінет",
         "welcome": "Вітаємо",
-        "logout": "Вийти"
+        "logout": "Вийти",
+        "cart-empty": "Кошик порожній"
     }
 };
 

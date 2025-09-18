@@ -682,6 +682,27 @@ body {
 
 .light-theme .cart-dropdown__items li {
     border-bottom: 0.5px solid rgba(0, 0, 0, 0.2);
+
+}
+
+.cart-button {
+    position: relative;
+}
+
+.cart-dropdown {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: var(--primary-color);
+    backdrop-filter: blur(10px);
+    border-radius: 14px;
+    box-shadow: var(--shadow);
+    width: 320px;
+    max-height: 400px;
+    overflow-y: auto;
+    padding: 16px;
+    z-index: 101;
 }
 
 .cart-dropdown__items img {

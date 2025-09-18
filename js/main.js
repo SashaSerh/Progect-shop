@@ -34,6 +34,35 @@ document.addEventListener('DOMContentLoaded', async () => {
         loadComponent('footer-container', 'components/footer.html'),
         loadComponent('cart-modal-container', 'components/cart.html')
     ]);
+    await loadComponent('cart-modal-container', 'components/cart.html');
+    const openCartModalButton = document.querySelector('#openCartModal');
+    const cartModal = document.querySelector('#cartModal');
+
+    if (openCartModalButton && cartModal) {
+        openCartModalButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            cartModal.showModal();
+            cartModal.style.display = 'block';
+            updateCartUI(translations, savedLanguage);
+        });
+    } else {
+        console.error('Cart modal or button not found');
+    }
+
+    const closeModalButton = document.querySelector('.cart-modal__close');
+    if (closeModalButton) {
+        closeModalButton.addEventListener('click', closeCartModal);
+    }
+
+    // Закрытие модального окна при клике вне его
+    if (cartModal) {
+        cartModal.addEventListener('click', (e) => {
+            if (e.target === cartModal) {
+                closeCartModal();
+            }
+        });
+    }
+
 
     // Проверка и исправление языка
     let savedLanguage = localStorage.getItem('language') || 'ru';
@@ -91,26 +120,37 @@ document.addEventListener('DOMContentLoaded', async () => {
                 return;
             }
             switchLanguage(lang);
+            savedLanguage = lang; // Обновляем savedLanguage
             renderProducts(lang, translations);
             updateCartUI(translations, lang);
             updateProfileButton(translations, lang);
         });
     });
-
+    const cartDropdownToggle = document.querySelector('#cartDropdownToggle');
+const cartDropdown = document.querySelector('#cartDropdown');
+if (cartDropdownToggle && cartDropdown) {
+    cartDropdownToggle.addEventListener('click', toggleCartDropdown);
+    // Закрытие выпадающего меню при клике вне его
+    document.addEventListener('click', (e) => {
+        if (!cartDropdown.contains(e.target) && !cartDropdownToggle.contains(e.target)) {
+            cartDropdown.classList.remove('cart-dropdown--open');
+        }
+    });
+}
     const themeToggle = document.querySelector('.theme-toggle');
     if (themeToggle) themeToggle.addEventListener('click', toggleTheme);
 
-    const openCartModalButton = document.querySelector('#openCartModal');
-    if (openCartModalButton) openCartModalButton.addEventListener('click', openCartModal);
+    // const openCartModalButton = document.querySelector('#openCartModal');
+    // if (openCartModalButton) openCartModalButton.addEventListener('click', openCartModal);
 
-    const cartDropdownToggle = document.querySelector('#cartDropdownToggle');
-    if (cartDropdownToggle) cartDropdownToggle.addEventListener('click', toggleCartDropdown);
+    // const cartDropdownToggle = document.querySelector('#cartDropdownToggle');
+    // if (cartDropdownToggle) cartDropdownToggle.addEventListener('click', toggleCartDropdown);
 
     const checkoutButton = document.querySelector('.cart-button--checkout');
     if (checkoutButton) checkoutButton.addEventListener('click', openCartModal);
 
-    const closeModalButton = document.querySelector('.cart-modal__close');
-    if (closeModalButton) closeModalButton.addEventListener('click', closeCartModal);
+    // const closeModalButton = document.querySelector('.cart-modal__close');
+    // if (closeModalButton) closeModalButton.addEventListener('click', closeCartModal);
 
     const clearCartButton = document.querySelector('.cart-button--clear');
     if (clearCartButton) clearCartButton.addEventListener('click', () => {
@@ -119,40 +159,40 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     const productsGrid = document.querySelector('.products__grid');
-    if (productsGrid) {
-        productsGrid.addEventListener('click', (e) => {
-            if (e.target.classList.contains('product-card__button')) {
-                const productId = parseInt(e.target.dataset.id);
-                addToCart(productId, products);
-                updateCartUI(translations, savedLanguage);
-            }
-        });
-    }
+   if (productsGrid) {
+    productsGrid.addEventListener('click', (e) => {
+        if (e.target.classList.contains('product-card__button')) {
+            const productId = e.target.dataset.id; // Оставляем как строку
+            addToCart(productId, products);
+            updateCartUI(translations, savedLanguage);
+        }
+    });
+}
 
     const servicesGrid = document.querySelector('.services__grid');
-    if (servicesGrid) {
-        servicesGrid.addEventListener('click', (e) => {
-            if (e.target.classList.contains('service-card__button')) {
-                const button = e.target;
-                const productId = button.dataset.id;
-                const lang = localStorage.getItem('language') || 'ru';
-                const product = {
-                    id: productId,
-                    name: { ru: button.dataset.nameRu, uk: button.dataset.nameUk },
-                    price: parseFloat(button.dataset.price),
-                    image: 'https://picsum.photos/150'
-                };
-                const cartItem = cart.find(item => item.id === productId);
-                if (cartItem) {
-                    cartItem.quantity += 1;
-                } else {
-                    cart.push({ ...product, quantity: 1 });
-                }
-                saveCart();
-                updateCartUI(translations, lang);
+  if (servicesGrid) {
+    servicesGrid.addEventListener('click', (e) => {
+        if (e.target.classList.contains('service-card__button')) {
+            const button = e.target;
+            const productId = button.dataset.id; // Оставляем как строку
+            const lang = localStorage.getItem('language') || 'ru';
+            const product = {
+                id: productId,
+                name: { ru: button.dataset.nameRu, uk: button.dataset.nameUk },
+                price: parseFloat(button.dataset.price),
+                image: 'https://picsum.photos/150'
+            };
+            const cartItem = cart.find(item => item.id === productId); // Сравнение как строки
+            if (cartItem) {
+                cartItem.quantity += 1;
+            } else {
+                cart.push({ ...product, quantity: 1 });
             }
-        });
-    }
+            saveCart();
+            updateCartUI(translations, lang);
+        }
+    });
+}
 
     const cartDropdownItems = document.querySelector('.cart-dropdown__items');
     if (cartDropdownItems) {
@@ -182,4 +222,5 @@ document.addEventListener('DOMContentLoaded', async () => {
             e.target.src = 'https://placehold.co/150x150/red/white?text=Image+Error';
         }
     }, true);
+    
 });

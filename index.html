@@ -3,29 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <meta name="description" content="Профессиональная установка и обслуживание кондиционеров, рекуператоров и систем климат-контроля. Качественные решения для вашего дома и офиса.">
+
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title data-i18n="site-title">Климат Контроль</title>
-    <link rel="stylesheet" href="css/base.css">
-    <link rel="stylesheet" href="css/hero.css">
-    <link rel="stylesheet" href="css/header.css">
-    <link rel="stylesheet" href="css/cart.css">
-    <link rel="stylesheet" href="css/products.css">
-    <link rel="stylesheet" href="css/services.css">
-    <link rel="stylesheet" href="css/contacts.css">
-    <link rel="stylesheet" href="css/footer.css">
-    <link rel="icon" href="/icons/icon-192x192.png">
-    <link rel="stylesheet" href="https://developer.apple.com/sf-symbols/fonts/SF-Symbols.woff2">
-</head>
+    
+    <title data-i18n="site-title">Климат Контроль | Установка кондиционеров и вентиляции</title>
+    
+ <link rel="stylesheet" href="css/main.css">
+    </head>
 <body>
-    <div id="header-container"></div>
+
+    <header id="header-container">
+        <div class="header__container container">
+            <a href="/" class="header__title">Климат Контроль</a>
+            <nav>
+                <ul class="header__nav-list">
+                    <li><a href="#services-container" class="header__nav-link">Услуги</a></li>
+                    <li><a href="#products-container" class="header__nav-link">Товары</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
     <main>
-        <div id="hero-container"></div>
-        <div id="services-container"></div>
-        <div id="products-container"></div>
-        <div id="contacts-container"></div>
+        <section id="hero-container">
+            <div class="hero__container container">
+                <h1 class="hero__title">Создаем идеальный климат в вашем доме</h1>
+                <p class="hero__subtitle">Профессиональный монтаж и сервис</p>
+            </div>
+        </section>
+
+        <section id="services-container" class="container">
+            <h2 class="services__title">Наши услуги</h2>
+            <p>Загрузка доступных услуг...</p>
+        </section>
+
+        <section id="products-container" class="container">
+            <h2 class="products__title">Каталог оборудования</h2>
+            <p>Загрузка товаров...</p>
+        </section>
+
+        <section id="contacts-container" class="container">
+            <h2 class="contacts__title">Свяжитесь с нами</h2>
+            <p>Загрузка контактной информации...</p>
+        </section>
     </main>
-    <div id="footer-container"></div>
+
+    <footer id="footer-container">
+        <div class="footer__container container">
+            <p class="footer__copyright">© 2025 Климат Контроль. Все права защищены.</p>
+        </div>
+    </footer>
+
     <div id="cart-modal-container"></div>
 
     <script type="module" src="js/main.js"></script>

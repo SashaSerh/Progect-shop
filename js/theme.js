@@ -1,5 +1,4 @@
 export function toggleTheme() {
-    console.log('Toggling theme');
     const body = document.body;
     const themeToggle = document.querySelector('.theme-toggle');
     const themeIcon = document.querySelector('.theme-icon');
@@ -8,7 +7,7 @@ export function toggleTheme() {
         themeToggle.classList.toggle('light-theme');
     }
     if (themeIcon) {
-       themeIcon.textContent = body.classList.contains('light-theme') ? '☀️' : '🌙';
+        themeIcon.textContent = body.classList.contains('light-theme') ? '☀️' : '🌙';
     }
     const isLightTheme = body.classList.contains('light-theme');
     localStorage.setItem('theme', isLightTheme ? 'light' : 'dark');
@@ -17,7 +16,6 @@ export function toggleTheme() {
 
 export function initTheme() {
     const savedTheme = localStorage.getItem('theme') || 'dark';
-    console.log(`Initializing theme: ${savedTheme}`);
     const body = document.body;
     const themeToggle = document.querySelector('.theme-toggle');
     const themeIcon = document.querySelector('.theme-icon');
@@ -26,12 +24,8 @@ export function initTheme() {
         if (themeToggle) {
             themeToggle.classList.add('light-theme');
         }
-        if (themeIcon) {
-       themeIcon.textContent = body.classList.contains('light-theme') ? '☀️' : '🌙';
-        }
-    } else {
-        if (themeIcon) {
-            themeIcon.textContent = body.classList.contains('light-theme') ? '☀️' : '🌙';
-        }
+    }
+    if (themeIcon) {
+        themeIcon.textContent = body.classList.contains('light-theme') ? '☀️' : '🌙';
     }
 }

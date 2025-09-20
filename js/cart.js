@@ -1,15 +1,12 @@
-// export let cart = JSON.parse(localStorage.getItem('cart')) || [];
 export let cart = (() => {
     const savedCart = localStorage.getItem('cart');
     try {
         const parsedCart = JSON.parse(savedCart) || [];
-        // Валидация структуры корзины
         return parsedCart.filter(item => 
             item.id && 
-            item.name && 
-            typeof item.name === 'object' && 
+            item.name && typeof item.name === 'object' && 
             item.price && 
-            typeof item.quantity === 'number'
+            typeof item.quantity === 'number' && item.quantity > 0
         );
     } catch (error) {
         console.error('Error parsing cart from localStorage:', error);
@@ -19,7 +16,6 @@ export let cart = (() => {
 
 export function saveCart() {
     localStorage.setItem('cart', JSON.stringify(cart));
-    console.log('Cart saved:', cart);
 }
 
 export function updateCartUI(translations, lang) {
@@ -36,10 +32,10 @@ export function updateCartUI(translations, lang) {
         return;
     }
 
-    const itemCount = cart.reduce((sum, item) => sum + (item.quantity || 0), 0);
-    const totalPrice = cart.reduce((sum, item) => sum + (item.price || 0) * (item.quantity || 0), 0);
+    const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+    const totalPrice = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
-    cartCount.textContent = itemCount || 0;
+    cartCount.textContent = itemCount;
     cartItemsText.textContent = `${itemCount} ${translations[lang]?.['cart-items']?.split(' ')[1] || 'товаров'}`;
     cartTotalText.textContent = `$${totalPrice.toFixed(2)}`;
     cartDropdownSummary.textContent = `${translations[lang]?.['cart-total']?.split(':')[0] || 'Итого'}: $${totalPrice.toFixed(2)}`;
@@ -67,7 +63,7 @@ export function updateCartUI(translations, lang) {
                 <p class="cart-dropdown__item-name">${itemName}</p>
                 <p class="cart-dropdown__item-price">$${itemPrice.toFixed(2)} x ${itemQuantity}</p>
             </div>
-            <button class="cart-dropdown__item-remove" data-id="${item.id}">􀆄</button>
+            <button class="cart-dropdown__item-remove" data-id="${item.id}">✕</button>
         `;
         cartDropdownItems.appendChild(dropdownItem);
 
@@ -81,13 +77,12 @@ export function updateCartUI(translations, lang) {
 }
 
 export function addToCart(productId, products) {
-    console.log('Adding to cart:', productId);
-    const product = products.find(p => p.id == productId); // Используем == для совместимости
+    const product = products.find(p => p.id === Number(productId));
     if (!product) {
         console.warn(`Product with id ${productId} not found`);
         return;
     }
-    const cartItem = cart.find(item => item.id == productId);
+    const cartItem = cart.find(item => item.id === product.id);
     if (cartItem) {
         cartItem.quantity += 1;
     } else {
@@ -97,23 +92,24 @@ export function addToCart(productId, products) {
 }
 
 export function removeFromCart(productId) {
-    console.log('Removing from cart:', productId);
-    cart = cart.filter(item => item.id != productId); // Используем != для совместимости
+    cart = cart.filter(item => item.id !== Number(productId));
     saveCart();
 }
 
 export function clearCart() {
-    console.log('Clearing cart');
     cart = [];
     saveCart();
 }
 
 export function toggleCartDropdown(e) {
-    console.log('Toggling cart dropdown');
     e.stopPropagation();
     const cartDropdown = document.querySelector('.cart-dropdown');
+    const toggleBtn = document.querySelector('#cartDropdownToggle');
     if (cartDropdown) {
         cartDropdown.classList.toggle('cart-dropdown--open');
+        if (toggleBtn) {
+            toggleBtn.setAttribute('aria-expanded', cartDropdown.classList.contains('cart-dropdown--open'));
+        }
         cartDropdown.animate([
             { opacity: 0, transform: 'translateY(-10px)' },
             { opacity: 1, transform: 'translateY(0)' }
@@ -125,7 +121,6 @@ export function toggleCartDropdown(e) {
 }
 
 export function openCartModal(e) {
-    console.log('Opening cart modal');
     e.stopPropagation();
     const cartModal = document.querySelector('.cart-modal');
     if (cartModal) {
@@ -141,10 +136,8 @@ export function openCartModal(e) {
 }
 
 export function closeCartModal() {
-    console.log('Closing cart modal');
     const cartModal = document.querySelector('.cart-modal');
     if (cartModal) {
         cartModal.close();
-        cartModal.style.display = 'none'; // Явно скрываем, чтобы избежать проблем
     }
 }

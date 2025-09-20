@@ -104,7 +104,6 @@ export const translations = {
 };
 
 export function switchLanguage(lang) {
-    console.log(`Switching language to: ${lang}`);
     document.querySelectorAll('[data-i18n]').forEach(element => {
         const key = element.getAttribute('data-i18n');
         if (translations[lang][key]) {
@@ -119,5 +118,13 @@ export function switchLanguage(lang) {
         }
     });
 
+    document.querySelectorAll('option[data-i18n]').forEach(option => {
+        const key = option.getAttribute('data-i18n');
+        if (translations[lang][key]) {
+            option.textContent = translations[lang][key];
+        }
+    });
+
+    document.title = translations[lang]['site-title'] || 'Климат Контроль';
     localStorage.setItem('language', lang);
 }

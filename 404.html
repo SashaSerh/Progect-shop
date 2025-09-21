@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ru" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Страница не найдена. Вернитесь на главную страницу Климат Контроль.">
+    <meta name="robots" content="noindex">
+    <title data-i18n="404-title">404 - Страница не найдена</title>
+    <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+    <header class="header" role="banner">
+        <div class="header__container container">
+            <a href="/" class="header__title" data-i18n="header-title" aria-label="Логотип и ссылка на главную">Климат Контроль</a>
+            <nav class="header__nav" aria-label="Основная навигация">
+                <ul class="header__nav-list">
+                    <li class="header__nav-item"><a href="#home" class="header__nav-link" data-i18n="nav-home">Главная</a></li>
+                    <li class="header__nav-item"><a href="#services" class="header__nav-link" data-i18n="nav-services">Услуги</a></li>
+                    <li class="header__nav-item"><a href="#products" class="header__nav-link" data-i18n="nav-products">Товары</a></li>
+                    <li class="header__nav-item"><a href="#contacts" class="header__nav-link" data-i18n="nav-contacts">Контакты</a></li>
+                </ul>
+            </nav>
+            <div class="header__controls">
+                <button class="language-switcher" data-lang="ru" aria-label="Переключить на русский">RU</button>
+                <button class="language-switcher" data-lang="uk" aria-label="Переключить на украинский">UK</button>
+                <button class="theme-toggle" aria-label="Переключить тему">
+                    <span class="theme-icon">🌙</span>
+                </button>
+                <button class="profile-button" id="profileButton" data-i18n="login" aria-label="Войти или профиль">Войти</button>
+                <button class="cart-button" id="openCartModal" aria-label="Открыть корзину" aria-haspopup="dialog">
+                    <span class="cart-icon-wrapper">
+                        <span class="cart-icon" aria-hidden="true">🛒</span>
+                        <span class="cart-count" aria-live="polite">0</span>
+                    </span>
+                    <span class="cart-text">
+                        <span class="cart-text__items" data-i18n="cart-items">0 товаров</span>
+                        <span class="cart-text__total">$0.00</span>
+                    </span>
+                    <span class="cart-dropdown-toggle" id="cartDropdownToggle" aria-controls="cartDropdown" aria-expanded="false" aria-label="Открыть выпадающее меню корзины">▼</span>
+                </button>
+                <button class="header__toggle" aria-controls="header-nav" aria-expanded="false" aria-label="Открыть меню навигации">
+                    <span class="header__toggle-icon" aria-hidden="true"></span>
+                </button>
+            </div>
+        </div>
+    </header>
+    <main>
+        <section class="container fade-in-section">
+            <h1 data-i18n="404-title">404 - Страница не найдена</h1>
+            <p data-i18n="404-message">Извините, запрашиваемая страница не существует.</p>
+            <a href="/" class="hero__cta" data-i18n="404-cta" role="button">Вернуться на главную</a>
+        </section>
+    </main>
+    <footer class="footer fade-in-section">
+        <div class="footer__container container">
+            <div class="footer__info">
+                <h3 data-i18n="footer-title">Климат Контроль</h3>
+                <p data-i18n="contacts-email">Email: info@climat-control.com</p>
+                <p data-i18n="contacts-phone">Телефон: +380-800-555-1234</p>
+                <p data-i18n="contacts-address">Адрес: ул. Климатическая, 123, Киев</p>
+            </div>
+            <div class="footer__copyright">
+                <p data-i18n="footer-copyright">&copy; 2025 Климат Контроль. Все права защищены.</p>
+            </div>
+        </div>
+    </footer>
+    <script type="module" src="js/main.js" defer></script>
+</body>
+</html>

@@ -1,12 +1,12 @@
-<dialog class="cart-modal" id="cartModal" role="dialog" aria-modal="true" aria-label="Ваша корзина">
+<dialog class="cart-modal fade-in" id="cartModal" role="dialog" aria-modal="true" aria-labelledby="cart-modal-title">
     <div class="cart-modal__header">
-        <h2 data-i18n="cart-modal-title">Ваша корзина</h2>
-        <button class="cart-modal__close" aria-label="Закрыть">✕</button>
+        <h2 id="cart-modal-title" data-i18n="cart-modal-title">Ваша корзина</h2>
+        <button class="cart-modal__close" aria-label="Закрыть модальное окно">✕</button>
     </div>
-    <ul class="cart-items"></ul>
-    <div class="cart-summary" data-i18n="cart-total">Итого: $0.00</div>
+    <ul class="cart-items" aria-label="Элементы корзины"></ul>
+    <div class="cart-summary" data-i18n="cart-total" aria-live="polite">Итого: $0.00</div>
     <div class="cart-modal__footer">
-        <button class="cart-button--clear" data-i18n="cart-clear">Очистить корзину</button>
-        <button class="cart-button--checkout" data-i18n="cart-checkout">Оформить заказ</button>
+        <button class="cart-button--clear pulse" data-i18n="cart-clear">Очистить корзину</button>
+        <button class="cart-button--checkout pulse" data-i18n="cart-checkout">Оформить заказ</button>
     </div>
 </dialog>

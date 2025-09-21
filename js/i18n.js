@@ -75,7 +75,7 @@ export const translations = {
         "filter-ac": "Кондиціонери",
         "filter-recuperator": "Рекуператори",
         "filter-low-to-high": "Від низької до високої",
-        "filter-high-to-low": "Від високої до низької",
+        "filter-high-to-low": "Від високої до низкої",
         "contacts-title": "Зв’яжіться з нами",
         "contacts-email": "Email: info@climat-control.com",
         "contacts-phone": "Телефон: +380-800-555-1234",

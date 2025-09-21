@@ -26,11 +26,11 @@ export function renderLoginModal(translations = {}, lang = 'ru') {
         <form id="loginForm">
             <div class="modal__field">
                 <label for="username" data-i18n="username">${translations[lang]?.['username'] || 'Имя пользователя'}</label>
-                <input type="text" id="username" placeholder="Введите имя" required minlength="3">
+                <input type="text" id="username" placeholder="Введите имя" required minlength="3" aria-label="Имя пользователя">
             </div>
             <div class="modal__field">
                 <label for="password" data-i18n="password">${translations[lang]?.['password'] || 'Пароль'}</label>
-                <input type="password" id="password" placeholder="Введите пароль" required minlength="6">
+                <input type="password" id="password" placeholder="Введите пароль" required minlength="6" aria-label="Пароль">
             </div>
             <button type="submit" class="modal__button" data-i18n="login">${translations[lang]?.['login'] || 'Войти'}</button>
         </form>

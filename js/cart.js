@@ -77,7 +77,7 @@ export function updateCartUI(translations, lang) {
 }
 
 export function addToCart(productId, products) {
-    const product = products.find(p => p.id === Number(productId));
+    const product = products.find(p => p.id === productId);
     if (!product) {
         console.warn(`Product with id ${productId} not found`);
         return;
@@ -92,7 +92,7 @@ export function addToCart(productId, products) {
 }
 
 export function removeFromCart(productId) {
-    cart = cart.filter(item => item.id !== Number(productId));
+    cart = cart.filter(item => item.id !== productId);
     saveCart();
 }
 

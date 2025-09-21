@@ -1,7 +1,7 @@
-<header class="header">
+<header class="header" role="banner">
     <div class="header__container container">
-        <a href="#home" class="header__title" data-i18n="header-title">Климат Контроль</a>
-        <nav class="header__nav">
+        <a href="#home" class="header__title" data-i18n="header-title" aria-label="Логотип и ссылка на главную">Климат Контроль</a>
+        <nav class="header__nav" aria-label="Основная навигация">
             <ul class="header__nav-list">
                 <li class="header__nav-item"><a href="#home" class="header__nav-link" data-i18n="nav-home">Главная</a></li>
                 <li class="header__nav-item"><a href="#services" class="header__nav-link" data-i18n="nav-services">Услуги</a></li>
@@ -10,37 +10,37 @@
             </ul>
         </nav>
         <div class="header__controls">
-            <button class="language-switcher" data-lang="ru">RU</button>
-            <button class="language-switcher" data-lang="uk">UK</button>
-            <button class="theme-toggle" aria-label="Сменить тему">
+            <button class="language-switcher" data-lang="ru" aria-label="Переключить на русский">RU</button>
+            <button class="language-switcher" data-lang="uk" aria-label="Переключить на украинский">UK</button>
+            <button class="theme-toggle" aria-label="Переключить тему">
                 <span class="theme-icon">🌙</span>
             </button>
-            <button class="profile-button" id="profileButton" data-i18n="login">Войти</button>
-            <button class="cart-button" id="openCartModal" aria-label="Открыть корзину">
+            <button class="profile-button" id="profileButton" data-i18n="login" aria-label="Войти или профиль">Войти</button>
+            <button class="cart-button" id="openCartModal" aria-label="Открыть корзину" aria-haspopup="dialog">
                 <span class="cart-icon-wrapper">
-                    <span class="cart-icon">🛒</span>
+                    <span class="cart-icon" aria-hidden="true">🛒</span>
                     <span class="cart-count" aria-live="polite">0</span>
                 </span>
                 <span class="cart-text">
                     <span class="cart-text__items" data-i18n="cart-items">0 товаров</span>
                     <span class="cart-text__total">$0.00</span>
                 </span>
-                <button class="cart-dropdown-toggle" id="cartDropdownToggle" aria-controls="cartDropdown" aria-expanded="false">▼</button>
+                <span class="cart-dropdown-toggle" id="cartDropdownToggle" aria-controls="cartDropdown" aria-expanded="false" aria-label="Открыть выпадающее меню корзины">▼</span>
             </button>
-            <button class="header__toggle" aria-label="Открыть меню">
-                <span class="header__toggle-icon"></span>
+            <button class="header__toggle" aria-controls="header-nav" aria-expanded="false" aria-label="Открыть меню навигации">
+                <span class="header__toggle-icon" aria-hidden="true"></span>
             </button>
         </div>
     </div>
 </header>
-<div class="modal" id="profileModal">
+<div class="modal" id="profileModal" role="dialog" aria-modal="true" aria-label="Модальное окно профиля">
     <div class="modal__content">
-        <span class="modal__close" aria-label="Закрыть">✕</span>
+        <button class="modal__close" aria-label="Закрыть модальное окно">✕</button>
         <div id="modalContent"></div>
     </div>
 </div>
-<div class="cart-dropdown" id="cartDropdown" role="region" aria-label="Предпросмотр корзины">
-    <ul class="cart-dropdown__items"></ul>
-    <div class="cart-dropdown__summary" data-i18n="cart-total">Итого: $0.00</div>
+<div class="cart-dropdown" id="cartDropdown" role="region" aria-label="Предпросмотр корзины" aria-hidden="true">
+    <ul class="cart-dropdown__items" aria-label="Элементы в корзине"></ul>
+    <div class="cart-dropdown__summary" data-i18n="cart-total" aria-live="polite">Итого: $0.00</div>
     <button class="cart-dropdown__button" id="openCartModal" data-i18n="cart-checkout">Оформить заказ</button>
 </div>

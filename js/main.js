@@ -43,7 +43,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (openCartModalButton && cartModal) {
         openCartModalButton.addEventListener('click', (e) => {
             e.stopPropagation();
-            cartModal.showModal();
+            openCartModal(e);
             updateCartUI(translations, savedLanguage);
         });
     }
@@ -157,17 +157,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (servicesGrid) {
         servicesGrid.addEventListener('click', (e) => {
             if (e.target.classList.contains('service-card__button')) {
-                const button = e.target;
-                const productId = button.dataset.id;
-                const lang = localStorage.getItem('language') || 'ru';
-                const product = {
-                    id: productId,
-                    name: { ru: button.dataset.nameRu, uk: button.dataset.nameUk },
-                    price: parseFloat(button.dataset.price),
-                    image: 'https://picsum.photos/150'
-                };
-                addToCart(productId, [product]);
-                updateCartUI(translations, lang);
+                const productId = e.target.dataset.id;
+                addToCart(productId, products);
+                updateCartUI(translations, savedLanguage);
             }
         });
     }
@@ -193,6 +185,30 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         });
     }
+
+    const scrollToTopButton = document.querySelector('.scroll-to-top');
+    if (scrollToTopButton) {
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 300) {
+                scrollToTopButton.classList.add('visible');
+            } else {
+                scrollToTopButton.classList.remove('visible');
+            }
+        });
+        scrollToTopButton.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    }
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+            }
+        });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.fade-in-section').forEach(el => observer.observe(el));
 
     document.addEventListener('error', (e) => {
         if (e.target.tagName === 'IMG') {

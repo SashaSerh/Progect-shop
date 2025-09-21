@@ -14,28 +14,45 @@ export const products = [
         price: 25000,
         category: "recuperator",
         image: "https://picsum.photos/150"
+    },
+    {
+        id: "s1",
+        name: { ru: "Монтаж кондиционера", uk: "Монтаж кондиціонера" },
+        description: { ru: "Профессиональная установка любой сложности", uk: "Професійна установка будь-якої складності" },
+        price: 5000,
+        category: "service",
+        image: "https://picsum.photos/150"
+    },
+    {
+        id: "s2",
+        name: { ru: "Монтаж рекуператора", uk: "Монтаж рекуператора" },
+        description: { ru: "Вентиляционные системы для свежего воздуха", uk: "Вентиляційні системи для свіжого повітря" },
+        price: 6000,
+        category: "service",
+        image: "https://picsum.photos/150"
+    },
+    {
+        id: "s3",
+        name: { ru: "Обслуживание систем", uk: "Обслуговування систем" },
+        description: { ru: "Чистка и ремонт климатического оборудования", uk: "Чищення та ремонт кліматичного обладнання" },
+        price: 2000,
+        category: "service",
+        image: "https://picsum.photos/150"
     }
 ];
 
-let lastFiltered = null;
-let lastLang = null;
-
-export function renderProducts(lang, translations, filteredProducts = products) {
-    if (lastFiltered === filteredProducts && lastLang === lang) return;
-    lastFiltered = filteredProducts;
-    lastLang = lang;
-
+export function renderProducts(lang, translations) {
     const productsGrid = document.querySelector('.products__grid');
     if (!productsGrid) return;
     productsGrid.innerHTML = '';
-    filteredProducts.forEach(product => {
+    products.forEach(product => {
         const productCard = document.createElement('div');
         productCard.classList.add('product-card');
         productCard.innerHTML = `
             <img src="${product.image}" alt="${product.name[lang]}" class="product-card__image" loading="lazy" onerror="this.src='https://placehold.co/150x150/blue/white?text=Image+Not+Found'">
             <h3 class="product-card__title">${product.name[lang]}</h3>
             <p class="product-card__description">${product.description[lang]}</p>
-            <p class="product-card__price">$${product.price.toLocaleString('en-US', { minimumFractionDigits: 2 })}</p>
+            <p class="product-card__price">${product.price.toLocaleString('en-US', { minimumFractionDigits: 2 })}</p>
             <button class="product-card__button" data-id="${product.id}" data-i18n="service-order">${translations[lang]['service-order']}</button>
         `;
         productsGrid.appendChild(productCard);

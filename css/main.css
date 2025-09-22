@@ -123,7 +123,7 @@ body {
 .theme-toggle,
 .profile-button {
     background: none;
-    color: var(--accent-color);
+    color: var(--nav-text-color);
     border: none;
     border-radius: 14px;
     padding: 8px 12px;
@@ -633,7 +633,7 @@ body {
 .cart-button {
     position: relative;
     background: none;
-    color: var(--accent-color);
+    color: var(--nav-text-color);
     border: none;
     border-radius: 14px;
     padding: 8px 16px;
@@ -691,7 +691,7 @@ body {
     background: none;
     border: none;
     cursor: pointer;
-    color: var(--accent-color);
+    /* color: var(--accent-color); */
     order: 2;
 }
 

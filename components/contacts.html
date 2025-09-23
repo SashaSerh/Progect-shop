@@ -1,4 +1,4 @@
-<section id="contacts" class="contacts fade-in">
+<section class="contacts fade-in-section" id="contacts">
     <div class="container">
         <h2 class="contacts__title" data-i18n="contacts-title">Свяжитесь с нами</h2>
         <div class="contacts__content">
@@ -7,12 +7,12 @@
                 <p data-i18n="contacts-phone">Телефон: +380-800-555-1234</p>
                 <p data-i18n="contacts-address">Адрес: ул. Климатическая, 123, Киев</p>
             </div>
-            <form class="contacts__form">
-                <input type="text" placeholder="Ваше имя" data-i18n-placeholder="form-name" required aria-label="Ваше имя">
-                <input type="email" placeholder="Ваш email" data-i18n-placeholder="form-email" required aria-label="Ваш email">
-                <textarea placeholder="Ваше сообщение" data-i18n-placeholder="form-message" required aria-label="Ваше сообщение"></textarea>
-                <button type="submit" data-i18n="form-submit" class="pulse">Отправить сообщение</button>
-            </form>
+            <div class="contacts__form">
+                <input type="text" placeholder="Ваше имя" data-i18n-placeholder="form-name">
+                <input type="email" placeholder="Ваш email" data-i18n-placeholder="form-email">
+                <textarea placeholder="Ваше сообщение" data-i18n-placeholder="form-message"></textarea>
+                <button data-i18n="form-submit">Отправить сообщение</button>
+            </div>
         </div>
     </div>
 </section>

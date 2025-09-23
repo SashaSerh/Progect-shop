@@ -104,6 +104,10 @@
                 </form>
             </div>
         </section>
+        <section id="about" class="container fade-in-section">
+    <h2 data-i18n="about-title">О нас</h2>
+    <p data-i18n="about-desc">Мы - команда экспертов по климат-контролю с 10+ лет опыта.</p>
+</section>
     </main>
     <footer id="footer-container" class="footer fade-in-section">
         <div class="footer__container container">
@@ -363,7 +367,7 @@ body {
     box-shadow: var(--shadow);
     border: none;
     position: relative;
-    animation: slideIn 0.3s ease-out;
+    /* animation: slideIn 0.3s ease-out; */
 }
 
 .light-theme .modal__content {
@@ -712,7 +716,7 @@ body {
     max-width: 100%;
     height: auto;
     border-radius: 10px;
-    loading: lazy;
+
 }
 
 .product-card__title {
@@ -872,7 +876,7 @@ body {
     object-fit: cover;
     border-radius: 8px;
     margin-right: 12px;
-    loading: lazy;
+   
 }
 
 .cart-dropdown__item-name {
@@ -1186,29 +1190,29 @@ body {
 }
 
 /* Анимации */
-.fade-in-section {
+/* .fade-in-section {
     opacity: 0;
     transform: translateY(20px);
     transition: opacity 0.6s ease-out, transform 0.6s ease-out;
-}
-
+} */
+/* 
 .fade-in-section.visible {
     opacity: 1;
     transform: translateY(0);
-}
+} */
 
-@supports (animation-timeline: scroll()) {
+/* @supports (animation-timeline: scroll()) {
     .fade-in-section {
         animation: fadeIn linear;
         animation-timeline: view();
         animation-range: entry 25% cover 50%;
     }
-}
-
+} */
+/* 
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(20px); }
     to { opacity: 1; transform: translateY(0); }
-}
+} */
 === ./js/products.js ===
 export const products = [
     {
@@ -1264,7 +1268,7 @@ export function renderProducts(lang, translations) {
             <img src="${product.image}" alt="${product.name[lang]}" class="product-card__image" loading="lazy" onerror="this.src='https://placehold.co/150x150/blue/white?text=Image+Not+Found'">
             <h3 class="product-card__title">${product.name[lang]}</h3>
             <p class="product-card__description">${product.description[lang]}</p>
-            <p class="product-card__price">${product.price.toLocaleString('en-US', { minimumFractionDigits: 2 })}</p>
+            <p class="product-card__price">${product.price.toLocaleString('uk-UA', { minimumFractionDigits: 2 })} грн</p>
             <button class="product-card__button" data-id="${product.id}" data-i18n="service-order">${translations[lang]['service-order']}</button>
         `;
         productsGrid.appendChild(productCard);
@@ -1326,9 +1330,9 @@ export function updateCartUI(translations, lang) {
 
     cartCount.textContent = itemCount;
     cartItemsText.textContent = `${itemCount} ${translations[lang]?.['cart-items']?.split(' ')[1] || 'товаров'}`;
-    cartTotalText.textContent = `$${totalPrice.toFixed(2)}`;
-    cartDropdownSummary.textContent = `${translations[lang]?.['cart-total']?.split(':')[0] || 'Итого'}: $${totalPrice.toFixed(2)}`;
-    cartSummary.textContent = `${translations[lang]?.['cart-total']?.split(':')[0] || 'Итого'}: $${totalPrice.toFixed(2)}`;
+    cartTotalText.textContent = `${totalPrice.toFixed(2)} грн`;
+    cartDropdownSummary.textContent = `${translations[lang]?.['cart-total']?.split(':')[0] || 'Итого'}: ${totalPrice.toFixed(2)} грн`;
+    cartSummary.textContent = `${translations[lang]?.['cart-total']?.split(':')[0] || 'Итого'}: ${totalPrice.toFixed(2)} грн`;
 
     cartDropdownItems.innerHTML = '';
     cartModalItems.innerHTML = '';
@@ -1350,7 +1354,7 @@ export function updateCartUI(translations, lang) {
             <img src="${itemImage}" alt="${itemName}" onerror="this.src='https://placehold.co/150x150/red/white?text=Image+Error'">
             <div class="cart-dropdown__item-info">
                 <p class="cart-dropdown__item-name">${itemName}</p>
-                <p class="cart-dropdown__item-price">$${itemPrice.toFixed(2)} x ${itemQuantity}</p>
+                <p class="cart-dropdown__item-price">${itemPrice.toFixed(2)} грн x ${itemQuantity}</p>
             </div>
             <button class="cart-dropdown__item-remove" data-id="${item.id}">✕</button>
         `;
@@ -1358,7 +1362,7 @@ export function updateCartUI(translations, lang) {
 
         const modalItem = document.createElement('li');
         modalItem.innerHTML = `
-            ${itemName} - $${itemPrice.toFixed(2)} x ${itemQuantity}
+            ${itemName} - ${itemPrice.toFixed(2)} грн x ${itemQuantity}
             <button class="cart-item-remove" data-id="${item.id}">${translations[lang]?.['cart-clear']?.split(' ')[0] || 'Удалить'}</button>
         `;
         cartModalItems.appendChild(modalItem);
@@ -1850,7 +1854,11 @@ export const translations = {
         "profile-title": "Личный кабинет",
         "welcome": "Добро пожаловать",
         "logout": "Выйти",
-        "cart-empty": "Корзина пуста"
+        "cart-empty": "Корзина пуста",
+        "nav-about": "О нас",
+        "about-title": "О нас",
+        "about-desc": "Мы - команда экспертов по климат-контролю с 10+ лет опыта.",
+        "orders-title": "Мои заказы"
     },
     uk: {
         "site-title": "Клімат Контроль",
@@ -1901,7 +1909,11 @@ export const translations = {
         "profile-title": "Особистий кабінет",
         "welcome": "Вітаємо",
         "logout": "Вийти",
-        "cart-empty": "Кошик порожній"
+        "cart-empty": "Кошик порожній",
+        "nav-about": "Про нас",
+        "about-title": "Про нас",
+        "about-desc": "Ми - команда експертів з клімат-контролю з 10+ років досвіду.",
+        "orders-title": "Мої замовлення"
     }
 };
 
@@ -2119,6 +2131,7 @@ export function switchLanguage(lang) {
                 <li class="header__nav-item"><a href="#home" class="header__nav-link" data-i18n="nav-home">Главная</a></li>
                 <li class="header__nav-item"><a href="#services" class="header__nav-link" data-i18n="nav-services">Услуги</a></li>
                 <li class="header__nav-item"><a href="#products" class="header__nav-link" data-i18n="nav-products">Товары</a></li>
+                <li class="header__nav-item"><a href="#about" class="header__nav-link" data-i18n="nav-about">О нас</a></li>
                 <li class="header__nav-item"><a href="#contacts" class="header__nav-link" data-i18n="nav-contacts">Контакты</a></li>
             </ul>
         </nav>

@@ -41,11 +41,11 @@ export const products = [
     }
 ];
 
-export function renderProducts(lang, translations) {
+export function renderProducts(lang, translations, filteredProducts = products) {
     const productsGrid = document.querySelector('.products__grid');
     if (!productsGrid) return;
     productsGrid.innerHTML = '';
-    products.forEach(product => {
+    filteredProducts.forEach(product => {
         const productCard = document.createElement('div');
         productCard.classList.add('product-card');
         productCard.innerHTML = `

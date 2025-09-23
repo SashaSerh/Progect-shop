@@ -25,6 +25,58 @@ async function loadComponent(containerId, componentPath) {
     }
 }
 
+function toggleCatalogDropdown(e) {
+    e.stopPropagation();
+    const catalogDropdown = document.querySelector('#catalogDropdown');
+    const catalogButton = document.querySelector('#catalogButton');
+    if (catalogDropdown) {
+        catalogDropdown.classList.toggle('catalog-dropdown--open');
+        if (catalogButton) {
+            catalogButton.setAttribute('aria-expanded', catalogDropdown.classList.contains('catalog-dropdown--open'));
+        }
+    }
+}
+
+function performSearch(query, lang) {
+    const filteredProducts = products.filter(product => 
+        product.name[lang].toLowerCase().includes(query.toLowerCase())
+    );
+    renderProducts(lang, translations, filteredProducts);
+    window.scrollTo({ top: document.querySelector('#products-container').offsetTop, behavior: 'smooth' });
+}
+
+function showSearchSuggestions(query, lang) {
+    const searchDropdown = document.querySelector('#searchDropdown');
+    const searchList = document.querySelector('.search-dropdown__list');
+    if (!searchDropdown || !searchList) return;
+
+    searchList.innerHTML = '';
+    if (query.length < 2) {
+        searchDropdown.classList.remove('search-dropdown--open');
+        return;
+    }
+
+    const suggestions = products.filter(product => 
+        product.name[lang].toLowerCase().includes(query.toLowerCase())
+    ).slice(0, 5); // Limit to 5 suggestions
+
+    if (suggestions.length === 0) {
+        searchDropdown.classList.remove('search-dropdown--open');
+        return;
+    }
+
+    suggestions.forEach(product => {
+        const li = document.createElement('li');
+        const a = document.createElement('a');
+        a.href = `#product-${product.id}`;
+        a.textContent = product.name[lang];
+        li.appendChild(a);
+        searchList.appendChild(li);
+    });
+
+    searchDropdown.classList.add('search-dropdown--open');
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
     await Promise.all([
         loadComponent('header-container', 'components/header.html'),
@@ -126,6 +178,52 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (e.key === 'Escape' && cartDropdown.classList.contains('cart-dropdown--open')) {
                 cartDropdown.classList.remove('cart-dropdown--open');
                 cartDropdownToggle.setAttribute('aria-expanded', 'false');
+            }
+        });
+    }
+
+    const catalogButton = document.querySelector('#catalogButton');
+    const catalogDropdown = document.querySelector('#catalogDropdown');
+    if (catalogButton && catalogDropdown) {
+        catalogButton.addEventListener('click', toggleCatalogDropdown);
+        document.addEventListener('click', (e) => {
+            if (!catalogDropdown.contains(e.target) && !catalogButton.contains(e.target)) {
+                catalogDropdown.classList.remove('catalog-dropdown--open');
+                catalogButton.setAttribute('aria-expanded', 'false');
+            }
+        });
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && catalogDropdown.classList.contains('catalog-dropdown--open')) {
+                catalogDropdown.classList.remove('catalog-dropdown--open');
+                catalogButton.setAttribute('aria-expanded', 'false');
+            }
+        });
+    }
+
+    const searchInput = document.querySelector('#site-search');
+    const searchButton = document.querySelector('#searchButton');
+    const searchDropdown = document.querySelector('#searchDropdown');
+    if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+            showSearchSuggestions(e.target.value, savedLanguage);
+        });
+        searchInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                performSearch(e.target.value, savedLanguage);
+                searchDropdown.classList.remove('search-dropdown--open');
+            }
+        });
+    }
+    if (searchButton) {
+        searchButton.addEventListener('click', () => {
+            performSearch(searchInput.value, savedLanguage);
+            searchDropdown.classList.remove('search-dropdown--open');
+        });
+    }
+    if (searchDropdown) {
+        document.addEventListener('click', (e) => {
+            if (!searchDropdown.contains(e.target) && !searchInput.contains(e.target)) {
+                searchDropdown.classList.remove('search-dropdown--open');
             }
         });
     }

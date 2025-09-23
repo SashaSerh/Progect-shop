@@ -52,7 +52,9 @@ export const translations = {
         "nav-about": "О нас",
         "about-title": "О нас",
         "about-desc": "Мы - команда экспертов по климат-контролю с 10+ лет опыта.",
-        "orders-title": "Мои заказы"
+        "orders-title": "Мои заказы",
+        "catalog": "Каталог",
+        "search-placeholder": "Поиск по сайту"
     },
     uk: {
         "site-title": "Клімат Контроль",
@@ -107,7 +109,9 @@ export const translations = {
         "nav-about": "Про нас",
         "about-title": "Про нас",
         "about-desc": "Ми - команда експертів з клімат-контролю з 10+ років досвіду.",
-        "orders-title": "Мої замовлення"
+        "orders-title": "Мої замовлення",
+        "catalog": "Каталог",
+        "search-placeholder": "Пошук по сайту"
     }
 };
 

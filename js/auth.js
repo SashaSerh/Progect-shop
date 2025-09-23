@@ -1,104 +1,70 @@
-export function updateProfileButton(translations = {}, lang = 'ru') {
+export function updateProfileButton(translations, lang) {
     const profileButton = document.getElementById('profileButton');
-    if (!profileButton) {
-        console.error('Элемент #profileButton не найден!');
-        return;
+    const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+    if (profileButton) {
+        profileButton.textContent = translations[lang][isLoggedIn ? 'profile' : 'login'];
+        profileButton.setAttribute('aria-label', translations[lang][isLoggedIn ? 'profile' : 'login']);
     }
-    const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
-    const key = isAuthenticated ? 'profile' : 'login';
-    
-    if (!translations || !translations[lang]) {
-        profileButton.textContent = isAuthenticated ? 'Личный кабинет' : 'Войти';
-    } else {
-        profileButton.textContent = translations[lang][key] || (isAuthenticated ? 'Личный кабинет' : 'Войти');
-    }
-    profileButton.setAttribute('data-i18n', key);
 }
 
-export function renderLoginModal(translations = {}, lang = 'ru') {
+export function openModal(translations, lang) {
     const modalContent = document.getElementById('modalContent');
-    if (!modalContent) {
-        console.error('Элемент #modalContent не найден!');
-        return;
-    }
-    modalContent.innerHTML = `
-        <h2 data-i18n="login-title">${translations[lang]?.['login-title'] || 'Вход'}</h2>
-        <form id="loginForm">
-            <div class="modal__field">
-                <label for="username" data-i18n="username">${translations[lang]?.['username'] || 'Имя пользователя'}</label>
-                <input type="text" id="username" placeholder="Введите имя" required minlength="3" aria-label="Имя пользователя">
-            </div>
-            <div class="modal__field">
-                <label for="password" data-i18n="password">${translations[lang]?.['password'] || 'Пароль'}</label>
-                <input type="password" id="password" placeholder="Введите пароль" required minlength="6" aria-label="Пароль">
-            </div>
-            <button type="submit" class="modal__button" data-i18n="login">${translations[lang]?.['login'] || 'Войти'}</button>
-        </form>
-    `;
-    const loginForm = document.getElementById('loginForm');
-    if (loginForm) {
-        loginForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const username = document.getElementById('username').value.trim();
-            const password = document.getElementById('password').value.trim();
-            if (username && password) {
-                localStorage.setItem('isAuthenticated', 'true');
-                localStorage.setItem('username', username);
-                closeModal();
-                updateProfileButton(translations, lang);
-                renderProfileModal(translations, lang);
-            } else {
-                alert('Введите логин и пароль!');
-            }
-        });
-    }
-}
-
-export function renderProfileModal(translations = {}, lang = 'ru') {
-    const modalContent = document.getElementById('modalContent');
-    if (!modalContent) {
-        console.error('Элемент #modalContent не найден!');
-        return;
-    }
-    const username = localStorage.getItem('username') || 'Пользователь';
-    modalContent.innerHTML = `
-        <h2 data-i18n="profile-title">${translations[lang]?.['profile-title'] || 'Личный кабинет'}</h2>
-        <p data-i18n="welcome">${(translations[lang]?.['welcome'] || 'Добро пожаловать')}, ${username}!</p>
-        <button class="modal__button modal__button--logout" data-i18n="logout">${translations[lang]?.['logout'] || 'Выйти'}</button>
-    `;
-    const logoutBtn = document.querySelector('.modal__button--logout');
-    if (logoutBtn) {
-        logoutBtn.addEventListener('click', () => {
-            localStorage.removeItem('isAuthenticated');
-            localStorage.removeItem('username');
-            closeModal();
-            updateProfileButton(translations, lang);
-        });
-    }
-}
-
-export function openModal(translations = {}, lang = 'ru') {
     const profileModal = document.getElementById('profileModal');
-    if (!profileModal) {
-        console.error('Элемент #profileModal не найден!');
-        return;
-    }
-    profileModal.style.display = 'flex';
-    document.body.style.overflow = 'hidden';
-    const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
-    if (isAuthenticated) {
-        renderProfileModal(translations, lang);
+    const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+
+    if (!modalContent || !profileModal) return;
+
+    if (isLoggedIn) {
+        modalContent.innerHTML = `
+            <h2 data-i18n="profile-title">${translations[lang]['profile-title']}</h2>
+            <p data-i18n="welcome">${translations[lang]['welcome']}, ${localStorage.getItem('username') || 'User'}!</p>
+            <h3 data-i18n="orders-title">${translations[lang]['orders-title']}</h3>
+            <p>${translations[lang]['cart-empty']}</p>
+            <button class="modal__button modal__button--logout" data-i18n="logout">${translations[lang]['logout']}</button>
+        `;
+        const logoutButton = modalContent.querySelector('.modal__button--logout');
+        if (logoutButton) {
+            logoutButton.addEventListener('click', () => {
+                localStorage.removeItem('isLoggedIn');
+                localStorage.removeItem('username');
+                updateProfileButton(translations, lang);
+                closeModal();
+            });
+        }
     } else {
-        renderLoginModal(translations, lang);
+        modalContent.innerHTML = `
+            <h2 data-i18n="login-title">${translations[lang]['login-title']}</h2>
+            <div class="modal__field">
+                <label for="username" data-i18n="username">${translations[lang]['username']}</label>
+                <input type="text" id="username" required>
+            </div>
+            <div class="modal__field">
+                <label for="password" data-i18n="password">${translations[lang]['password']}</label>
+                <input type="password" id="password" required>
+            </div>
+            <button class="modal__button" data-i18n="login">${translations[lang]['login']}</button>
+        `;
+        const loginButton = modalContent.querySelector('.modal__button');
+        if (loginButton) {
+            loginButton.addEventListener('click', () => {
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
+                if (username && password) {
+                    localStorage.setItem('isLoggedIn', 'true');
+                    localStorage.setItem('username', username);
+                    updateProfileButton(translations, lang);
+                    closeModal();
+                }
+            });
+        }
     }
+
+    profileModal.style.display = 'flex';
 }
 
 export function closeModal() {
     const profileModal = document.getElementById('profileModal');
-    if (!profileModal) {
-        console.error('Элемент #profileModal не найден!');
-        return;
+    if (profileModal) {
+        profileModal.style.display = 'none';
     }
-    profileModal.style.display = 'none';
-    document.body.style.overflow = 'auto';
 }

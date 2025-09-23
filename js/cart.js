@@ -37,9 +37,9 @@ export function updateCartUI(translations, lang) {
 
     cartCount.textContent = itemCount;
     cartItemsText.textContent = `${itemCount} ${translations[lang]?.['cart-items']?.split(' ')[1] || 'товаров'}`;
-    cartTotalText.textContent = `$${totalPrice.toFixed(2)}`;
-    cartDropdownSummary.textContent = `${translations[lang]?.['cart-total']?.split(':')[0] || 'Итого'}: $${totalPrice.toFixed(2)}`;
-    cartSummary.textContent = `${translations[lang]?.['cart-total']?.split(':')[0] || 'Итого'}: $${totalPrice.toFixed(2)}`;
+    cartTotalText.textContent = `${totalPrice.toFixed(2)} грн`;
+    cartDropdownSummary.textContent = `${translations[lang]?.['cart-total']?.split(':')[0] || 'Итого'}: ${totalPrice.toFixed(2)} грн`;
+    cartSummary.textContent = `${translations[lang]?.['cart-total']?.split(':')[0] || 'Итого'}: ${totalPrice.toFixed(2)} грн`;
 
     cartDropdownItems.innerHTML = '';
     cartModalItems.innerHTML = '';
@@ -61,7 +61,7 @@ export function updateCartUI(translations, lang) {
             <img src="${itemImage}" alt="${itemName}" onerror="this.src='https://placehold.co/150x150/red/white?text=Image+Error'">
             <div class="cart-dropdown__item-info">
                 <p class="cart-dropdown__item-name">${itemName}</p>
-                <p class="cart-dropdown__item-price">$${itemPrice.toFixed(2)} x ${itemQuantity}</p>
+                <p class="cart-dropdown__item-price">${itemPrice.toFixed(2)} грн x ${itemQuantity}</p>
             </div>
             <button class="cart-dropdown__item-remove" data-id="${item.id}">✕</button>
         `;
@@ -69,7 +69,7 @@ export function updateCartUI(translations, lang) {
 
         const modalItem = document.createElement('li');
         modalItem.innerHTML = `
-            ${itemName} - $${itemPrice.toFixed(2)} x ${itemQuantity}
+            ${itemName} - ${itemPrice.toFixed(2)} грн x ${itemQuantity}
             <button class="cart-item-remove" data-id="${item.id}">${translations[lang]?.['cart-clear']?.split(' ')[0] || 'Удалить'}</button>
         `;
         cartModalItems.appendChild(modalItem);

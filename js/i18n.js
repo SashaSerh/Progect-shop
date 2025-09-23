@@ -48,7 +48,11 @@ export const translations = {
         "profile-title": "Личный кабинет",
         "welcome": "Добро пожаловать",
         "logout": "Выйти",
-        "cart-empty": "Корзина пуста"
+        "cart-empty": "Корзина пуста",
+        "nav-about": "О нас",
+        "about-title": "О нас",
+        "about-desc": "Мы - команда экспертов по климат-контролю с 10+ лет опыта.",
+        "orders-title": "Мои заказы"
     },
     uk: {
         "site-title": "Клімат Контроль",
@@ -99,7 +103,11 @@ export const translations = {
         "profile-title": "Особистий кабінет",
         "welcome": "Вітаємо",
         "logout": "Вийти",
-        "cart-empty": "Кошик порожній"
+        "cart-empty": "Кошик порожній",
+        "nav-about": "Про нас",
+        "about-title": "Про нас",
+        "about-desc": "Ми - команда експертів з клімат-контролю з 10+ років досвіду.",
+        "orders-title": "Мої замовлення"
     }
 };
 

@@ -52,7 +52,7 @@ export function renderProducts(lang, translations) {
             <img src="${product.image}" alt="${product.name[lang]}" class="product-card__image" loading="lazy" onerror="this.src='https://placehold.co/150x150/blue/white?text=Image+Not+Found'">
             <h3 class="product-card__title">${product.name[lang]}</h3>
             <p class="product-card__description">${product.description[lang]}</p>
-            <p class="product-card__price">${product.price.toLocaleString('en-US', { minimumFractionDigits: 2 })}</p>
+            <p class="product-card__price">${product.price.toLocaleString('uk-UA', { minimumFractionDigits: 2 })} грн</p>
             <button class="product-card__button" data-id="${product.id}" data-i18n="service-order">${translations[lang]['service-order']}</button>
         `;
         productsGrid.appendChild(productCard);

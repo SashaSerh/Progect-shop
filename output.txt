@@ -1,25 +1,51 @@
 === ./index.html ===
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ru" dir="ltr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
     <meta name="description" content="Профессиональная установка и обслуживание кондиционеров, рекуператоров и систем климат-контроля. Качественные решения для вашего дома и офиса.">
-
-    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="keywords" content="кондиционеры, рекуператоры, климат контроль, монтаж, сервис">
+    <meta name="robots" content="index, follow">
+    <meta property="og:title" content="Климат Контроль">
+    <meta property="og:description" content="Профессиональная установка и обслуживание кондиционеров.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://example.com/">
+    <meta property="og:image" content="https://example.com/icons/icon-512x512.png">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    
     <title data-i18n="site-title">Климат Контроль | Установка кондиционеров и вентиляции</title>
-    
- <link rel="stylesheet" href="css/main.css">
-    </head>
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="css/main.css">
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "Климат Контроль",
+      "url": "https://example.com/",
+      "logo": "https://example.com/icons/icon-512x512.png",
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "telephone": "+380-800-555-1234",
+        "contactType": "customer service",
+        "areaServed": "UA",
+        "availableLanguage": ["Russian", "Ukrainian"]
+      },
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "ул. Климатическая, 123",
+        "addressLocality": "Киев",
+        "postalCode": "00000",
+        "addressCountry": "UA"
+      }
+    }
+    </script>
+</head>
 <body>
-
-    <header id="header-container">
+    <header id="header-container" class="header">
         <div class="header__container container">
-            <a href="/" class="header__title">Климат Контроль</a>
-            <nav>
+            <a href="/" class="header__title" aria-label="Главная страница">Климат Контроль</a>
+            <nav aria-label="Основная навигация">
                 <ul class="header__nav-list">
                     <li><a href="#services-container" class="header__nav-link">Услуги</a></li>
                     <li><a href="#products-container" class="header__nav-link">Товары</a></li>
@@ -27,76 +53,119 @@
             </nav>
         </div>
     </header>
-
     <main>
-        <section id="hero-container">
+        <section id="hero-container" class="hero fade-in-section">
             <div class="hero__container container">
-                <h1 class="hero__title">Создаем идеальный климат в вашем доме</h1>
-                <p class="hero__subtitle">Профессиональный монтаж и сервис</p>
+                <h1 class="hero__title" data-i18n="hero-title">Создаем идеальный климат в вашем доме</h1>
+                <p class="hero__subtitle" data-i18n="hero-subtitle">Профессиональный монтаж и сервис</p>
+                <a href="#products" class="hero__cta" data-i18n="hero-cta" role="button">Посмотреть товары</a>
             </div>
         </section>
-
-        <section id="services-container" class="container">
-            <h2 class="services__title">Наши услуги</h2>
-            <p>Загрузка доступных услуг...</p>
+        <section id="services-container" class="container fade-in-section">
+            <h2 class="services__title" data-i18n="services-title">Наши услуги</h2>
+            <div class="services__grid"></div>
         </section>
-
-        <section id="products-container" class="container">
-            <h2 class="products__title">Каталог оборудования</h2>
-            <p>Загрузка товаров...</p>
+        <section id="products-container" class="container fade-in-section">
+            <h2 class="products__title" data-i18n="products-title">Каталог оборудования</h2>
+            <div class="products__filters">
+                <div class="filter-group">
+                    <label for="category" data-i18n="filter-category">Категория:</label>
+                    <select id="category">
+                        <option value="all" data-i18n="filter-all">Все</option>
+                        <option value="ac" data-i18n="filter-ac">Кондиционеры</option>
+                        <option value="recuperator" data-i18n="filter-recuperator">Рекуператоры</option>
+                        <option value="service" data-i18n="filter-service">Услуги</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="price" data-i18n="filter-price">Цена:</label>
+                    <select id="price">
+                        <option value="all" data-i18n="filter-all">Все</option>
+                        <option value="low" data-i18n="filter-low-to-high">От низкой к высокой</option>
+                        <option value="high" data-i18n="filter-high-to-low">От высокой к низкой</option>
+                    </select>
+                </div>
+            </div>
+            <div class="products__grid"></div>
         </section>
-
-        <section id="contacts-container" class="container">
-            <h2 class="contacts__title">Свяжитесь с нами</h2>
-            <p>Загрузка контактной информации...</p>
+        <section id="contacts-container" class="container fade-in-section">
+            <h2 class="contacts__title" data-i18n="contacts-title">Свяжитесь с нами</h2>
+            <div class="contacts__content">
+                <div class="contacts__info">
+                    <p data-i18n="contacts-email">Email: info@climat-control.com</p>
+                    <p data-i18n="contacts-phone">Телефон: +380-800-555-1234</p>
+                    <p data-i18n="contacts-address">Адрес: ул. Климатическая, 123, Киев</p>
+                </div>
+                <form class="contacts__form">
+                    <input type="text" placeholder="Ваше имя" data-i18n-placeholder="form-name" required aria-label="Ваше имя">
+                    <input type="email" placeholder="Ваш email" data-i18n-placeholder="form-email" required aria-label="Ваш email">
+                    <textarea placeholder="Ваше сообщение" data-i18n-placeholder="form-message" required aria-label="Ваше сообщение"></textarea>
+                    <button type="submit" data-i18n="form-submit">Отправить сообщение</button>
+                </form>
+            </div>
         </section>
     </main>
-
-    <footer id="footer-container">
+    <footer id="footer-container" class="footer fade-in-section">
         <div class="footer__container container">
-            <p class="footer__copyright">© 2025 Климат Контроль. Все права защищены.</p>
+            <div class="footer__info">
+                <h3 data-i18n="footer-title">Климат Контроль</h3>
+                <p data-i18n="contacts-email">Email: info@climat-control.com</p>
+                <p data-i18n="contacts-phone">Телефон: +380-800-555-1234</p>
+                <p data-i18n="contacts-address">Адрес: ул. Климатическая, 123, Киев</p>
+            </div>
+            <div class="footer__copyright">
+                <p data-i18n="footer-copyright">© 2025 Климат Контроль. Все права защищены.</p>
+            </div>
         </div>
     </footer>
-
     <div id="cart-modal-container"></div>
-
-    <script type="module" src="js/main.js"></script>
+    <button class="scroll-to-top" aria-label="Прокрутить наверх">↑</button>
+    <script type="module" src="js/main.js" defer></script>
+    <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/service-worker.js')
+          .then(reg => console.log('Service Worker зарегистрирован:', reg))
+          .catch(err => console.error('Ошибка регистрации Service Worker:', err));
+      });
+    }
+    </script>
 </body>
 </html>
 === ./css/main.css ===
 /* Переменные для тёмной темы */
 :root {
     --font-family: -apple-system, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-    --primary-color: rgba(30, 30, 30, 0.7); /* Тёмный фон с blur */
-    --accent-color: #007AFF; /* iOS-голубой */
-    --secondary-color: #FF2D55; /* iOS-красный */
-    --text-color: #FFFFFF; /* Белый текст */
-    --nav-text-color: #D1D1D6; /* Светло-серый для навигации */
-    --cart-red: #FF3B30; /* iOS-красный для удаления */
-    --modal-bg: rgba(0, 0, 0, 0.4); /* Полупрозрачный фон модалок */
-    --button-bg: rgba(255, 255, 255, 0.15); /* Полупрозрачные кнопки */
-    --font-thin: 400; /* SF Pro Regular */
-    --font-bold: 600; /* SF Pro Semibold */
-    --transition: all 0.3s ease-in-out; /* Плавные анимации iOS */
-    --shadow: 0 2px 8px rgba(0, 0, 0, 0.15); /* Мягкая тень */
-    --glow-shadow: 0 0 12px rgba(0, 122, 255, 0.3); /* Лёгкое свечение */
-    --background-color: #000000; /* Чёрный фон */
-    --container-width: 1200px; /* Уменьшен для мобильной адаптивности */
+    --primary-color: rgba(30, 30, 30, 0.7);
+    --accent-color: #007AFF;
+    --secondary-color: #FF2D55;
+    --text-color: #FFFFFF;
+    --nav-text-color: #D1D1D6;
+    --cart-red: #FF3B30;
+    --modal-bg: rgba(0, 0, 0, 0.4);
+    --button-bg: rgba(255, 255, 255, 0.15);
+    --font-thin: 400;
+    --font-bold: 600;
+    --transition: all 0.3s ease-in-out;
+    --shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    --glow-shadow: 0 0 12px rgba(0, 122, 255, 0.3);
+    --background-color: #000000;
+    --container-width: 1200px;
 }
 
 /* Переменные для светлой темы */
 .light-theme {
-    --primary-color: rgba(242, 242, 247, 0.9); /* Светлый фон с blur */
-    --accent-color: #007AFF; /* iOS-голубой */
-    --secondary-color: #FF9500; /* iOS-оранжевый */
-    --text-color: #000000; /* Чёрный текст */
-    --nav-text-color: #1C2526; /* Тёмный для навигации */
-    --cart-red: #FF3B30; /* iOS-красный */
-    --modal-bg: rgba(255, 255, 255, 0.7); /* Светлый фон модалок */
-    --button-bg: rgba(0, 0, 0, 0.1); /* Лёгкий фон кнопок */
-    --background-color: #F2F2F7; /* Светлый фон iOS */
-    --shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Мягкая тень */
-    --glow-shadow: 0 0 12px rgba(0, 122, 255, 0.2); /* Лёгкое свечение */
+    --primary-color: rgba(242, 242, 247, 0.9);
+    --accent-color: #007AFF;
+    --secondary-color: #FF9500;
+    --text-color: #000000;
+    --nav-text-color: #1C2526;
+    --cart-red: #FF3B30;
+    --modal-bg: rgba(255, 255, 255, 0.7);
+    --button-bg: rgba(0, 0, 0, 0.1);
+    --background-color: #F2F2F7;
+    --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    --glow-shadow: 0 0 12px rgba(0, 122, 255, 0.2);
 }
 
 /* Сброс базовых стилей */
@@ -115,8 +184,9 @@ body {
 .container {
     max-width: var(--container-width);
     margin: 0 auto;
-    padding: 0 16px; /* Стандартные отступы iOS */
+    padding: 0 16px;
 }
+
 .header {
     background: var(--primary-color);
     backdrop-filter: blur(10px);
@@ -136,11 +206,12 @@ body {
 }
 
 .header__title {
-    font-size: 17px;
+    font-size: clamp(15px, 4vw, 17px);
     font-weight: 600;
     letter-spacing: 0.2px;
     color: var(--text-color);
-    transition: var(--transition);
+    text-decoration: none;
+    transition: color var(--transition);
 }
 
 .header__title:hover {
@@ -158,10 +229,6 @@ body {
     flex-wrap: nowrap;
 }
 
-.header__nav-item {
-    position: relative;
-}
-
 .header__nav-link {
     color: var(--nav-text-color);
     text-decoration: none;
@@ -169,7 +236,7 @@ body {
     font-weight: 400;
     padding: 8px 12px;
     border-radius: 14px;
-    transition: var(--transition);
+    transition: background var(--transition), color var(--transition);
 }
 
 .header__nav-link:hover {
@@ -191,14 +258,14 @@ body {
 .theme-toggle,
 .profile-button {
     background: none;
-    color: var(--accent-color);
+    color: var(--nav-text-color);
     border: none;
     border-radius: 14px;
     padding: 8px 12px;
     font-size: 15px;
     font-weight: 600;
     cursor: pointer;
-    transition: var(--transition);
+    transition: background var(--transition);
     display: flex;
     align-items: center;
 }
@@ -208,12 +275,8 @@ body {
 }
 
 .theme-icon {
-    font-size: 20px; /* Размер иконки в стиле iOS */
+    font-size: 20px;
     line-height: 1;
-}
-
-.light-theme .theme-icon::before {
-    content: ''; /* SF Symbol для солнца (светлая тема) */
 }
 
 .language-switcher:hover,
@@ -243,7 +306,7 @@ body {
     height: 2px;
     background: var(--text-color);
     position: relative;
-    transition: var(--transition);
+    transition: background var(--transition);
 }
 
 .header__toggle-icon::before,
@@ -254,7 +317,7 @@ body {
     height: 2px;
     background: var(--text-color);
     left: 0;
-    transition: var(--transition);
+    transition: transform var(--transition);
 }
 
 .header__toggle-icon::before {
@@ -295,10 +358,21 @@ body {
     background: var(--primary-color);
     border-radius: 14px;
     padding: 20px;
-    max-width: 400px;
+    max-width: 600px;
     width: 90%;
     box-shadow: var(--shadow);
     border: none;
+    position: relative;
+    animation: slideIn 0.3s ease-out;
+}
+
+.light-theme .modal__content {
+    background: rgba(242, 242, 247, 0.9);
+}
+
+@keyframes slideIn {
+    from { transform: translateY(-20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
 }
 
 .modal__close {
@@ -308,7 +382,7 @@ body {
     font-size: 20px;
     cursor: pointer;
     color: var(--text-color);
-    transition: var(--transition);
+    transition: color var(--transition);
 }
 
 .modal__close:hover {
@@ -346,7 +420,7 @@ body {
     font-size: 15px;
     font-weight: 600;
     cursor: pointer;
-    transition: var(--transition);
+    transition: background var(--transition);
 }
 
 .modal__button:hover {
@@ -359,6 +433,10 @@ body {
 
 .modal__button--logout:hover {
     background: #D32F2F;
+}
+
+.light-theme .modal__button {
+    color: #000000;
 }
 
 @media (max-width: 768px) {
@@ -416,10 +494,26 @@ body {
         width: 95%;
     }
 }
+
+@media (max-width: 480px) {
+    .container {
+        max-width: 100%;
+        padding: 0 8px;
+    }
+
+    .header__container {
+        padding: 0 8px;
+    }
+}
+
 .hero {
     padding: 40px 0;
     background: linear-gradient(135deg, var(--accent-color), var(--secondary-color));
     text-align: center;
+    background-attachment: fixed;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
 }
 
 .hero__container {
@@ -429,14 +523,14 @@ body {
 }
 
 .hero__title {
-    font-size: 34px; /* iOS: крупный заголовок */
+    font-size: clamp(28px, 5vw, 34px);
     font-weight: 600;
     color: var(--text-color);
     margin-bottom: 12px;
 }
 
 .hero__subtitle {
-    font-size: 17px; /* iOS: подзаголовок */
+    font-size: clamp(15px, 3vw, 17px);
     color: var(--nav-text-color);
     margin-bottom: 16px;
 }
@@ -450,7 +544,7 @@ body {
     text-decoration: none;
     font-size: 15px;
     font-weight: 600;
-    transition: var(--transition);
+    transition: background var(--transition);
 }
 
 .hero__cta:hover {
@@ -471,12 +565,13 @@ body {
         font-size: 14px;
     }
 }
+
 .services {
     padding: 40px 0;
 }
 
 .services__title {
-    font-size: 34px;
+    font-size: clamp(28px, 5vw, 34px);
     font-weight: 600;
     text-align: center;
     margin-bottom: 24px;
@@ -497,6 +592,7 @@ body {
     text-align: center;
     box-shadow: var(--shadow);
     border: none;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .service-card:hover {
@@ -525,6 +621,7 @@ body {
     border-radius: 14px;
     font-size: 15px;
     font-weight: 600;
+    transition: background var(--transition);
 }
 
 .service-card__button:hover {
@@ -536,12 +633,13 @@ body {
         font-size: 28px;
     }
 }
+
 .products {
     padding: 40px 0;
 }
 
 .products__title {
-    font-size: 34px;
+    font-size: clamp(28px, 5vw, 34px);
     font-weight: 600;
     text-align: center;
     margin-bottom: 24px;
@@ -576,6 +674,7 @@ body {
     font-size: 15px;
     cursor: pointer;
     backdrop-filter: blur(8px);
+    transition: background var(--transition);
 }
 
 .filter-group select:hover {
@@ -601,10 +700,11 @@ body {
     text-align: center;
     box-shadow: var(--shadow);
     border: none;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .product-card:hover {
-    transform: translateY(-4px);
+    transform: scale(1.05);
     box-shadow: var(--glow-shadow);
 }
 
@@ -612,6 +712,7 @@ body {
     max-width: 100%;
     height: auto;
     border-radius: 10px;
+    loading: lazy;
 }
 
 .product-card__title {
@@ -642,6 +743,7 @@ body {
     border-radius: 14px;
     font-size: 15px;
     font-weight: 600;
+    transition: background var(--transition);
 }
 
 .product-card__button:hover {
@@ -662,9 +764,11 @@ body {
         width: 100%;
     }
 }
+
 .cart-button {
+    position: relative;
     background: none;
-    color: var(--accent-color);
+    color: var(--nav-text-color);
     border: none;
     border-radius: 14px;
     padding: 8px 16px;
@@ -673,10 +777,16 @@ body {
     cursor: pointer;
     font-size: 15px;
     font-weight: 600;
+    transition: background var(--transition);
 }
 
 .cart-button:hover {
     background: var(--button-bg);
+}
+
+.cart-button:focus {
+    outline: none;
+    box-shadow: 0 0 5px var(--glow-shadow);
 }
 
 .cart-icon-wrapper {
@@ -685,7 +795,7 @@ body {
 }
 
 .cart-icon {
-    font-size: 20px; /* SF Symbols */
+    font-size: 20px;
 }
 
 .cart-count {
@@ -712,7 +822,12 @@ body {
 
 .cart-dropdown-toggle {
     font-size: 14px;
-    margin-left: 8px;
+    margin-left: auto;
+    background: none;
+    border: none;
+    cursor: pointer;
+    /* color: var(--accent-color); */
+    order: 2;
 }
 
 .cart-dropdown-toggle:hover {
@@ -723,16 +838,17 @@ body {
     display: none;
     position: absolute;
     top: 100%;
-    right: 0;
+    right: 20px;
     background: var(--primary-color);
     backdrop-filter: blur(10px);
     border-radius: 14px;
     box-shadow: var(--shadow);
-    width: 320px;
+    width: 340px;
     max-height: 400px;
     overflow-y: auto;
     padding: 16px;
     z-index: 101;
+    transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
 .cart-dropdown--open {
@@ -748,27 +864,6 @@ body {
 
 .light-theme .cart-dropdown__items li {
     border-bottom: 0.5px solid rgba(0, 0, 0, 0.2);
-
-}
-
-.cart-button {
-    position: relative;
-}
-
-.cart-dropdown {
-    display: none;
-    position: absolute;
-    top: 100%;
-    right: 0;
-    background: var(--primary-color);
-    backdrop-filter: blur(10px);
-    border-radius: 14px;
-    box-shadow: var(--shadow);
-    width: 320px;
-    max-height: 400px;
-    overflow-y: auto;
-    padding: 16px;
-    z-index: 101;
 }
 
 .cart-dropdown__items img {
@@ -777,6 +872,7 @@ body {
     object-fit: cover;
     border-radius: 8px;
     margin-right: 12px;
+    loading: lazy;
 }
 
 .cart-dropdown__item-name {
@@ -812,6 +908,7 @@ body {
     padding: 12px;
     font-size: 15px;
     font-weight: 600;
+    transition: background var(--transition);
 }
 
 .cart-dropdown__button:hover {
@@ -821,7 +918,8 @@ body {
 .cart-modal {
     border-radius: 14px;
     padding: 20px;
-    max-width: 90%;
+    max-width: 600px;
+    width: 90%;
     background: var(--primary-color);
     backdrop-filter: blur(10px);
     box-shadow: var(--shadow);
@@ -830,6 +928,10 @@ body {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
+}
+
+.light-theme .cart-modal {
+    background: rgba(242, 242, 247, 0.9);
 }
 
 .cart-modal__header {
@@ -850,6 +952,7 @@ body {
     font-size: 20px;
     cursor: pointer;
     color: var(--text-color);
+    transition: color var(--transition);
 }
 
 .cart-modal__close:hover {
@@ -858,8 +961,8 @@ body {
 
 .cart-items li {
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    justify-content: space-between;
     padding: 12px 0;
     border-bottom: 0.5px solid rgba(255, 255, 255, 0.2);
 }
@@ -873,6 +976,7 @@ body {
     border: none;
     color: var(--cart-red);
     font-size: 16px;
+    transition: color var(--transition);
 }
 
 .cart-summary {
@@ -896,6 +1000,7 @@ body {
     padding: 12px;
     font-size: 15px;
     font-weight: 600;
+    transition: background var(--transition);
 }
 
 .cart-button--clear:hover,
@@ -926,13 +1031,18 @@ body {
     .cart-modal {
         padding: 16px;
     }
+
+    .cart-text {
+        display: none;
+    }
 }
+
 .contacts {
     padding: 40px 0;
 }
 
 .contacts__title {
-    font-size: 34px;
+    font-size: clamp(28px, 5vw, 34px);
     font-weight: 600;
     text-align: center;
     margin-bottom: 24px;
@@ -973,6 +1083,7 @@ body {
     border-radius: 10px;
     font-size: 15px;
     backdrop-filter: blur(8px);
+    transition: box-shadow var(--transition);
 }
 
 .contacts__form input:focus,
@@ -999,6 +1110,7 @@ body {
     border-radius: 14px;
     font-size: 15px;
     font-weight: 600;
+    transition: background var(--transition);
 }
 
 .contacts__form button:hover {
@@ -1014,6 +1126,7 @@ body {
         flex-direction: column;
     }
 }
+
 .footer {
     padding: 24px 0;
 }
@@ -1046,6 +1159,56 @@ body {
     font-size: 14px;
     color: var(--nav-text-color);
 }
+
+.scroll-to-top {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: var(--accent-color);
+    color: #FFFFFF;
+    border: none;
+    border-radius: 50%;
+    width: 48px;
+    height: 48px;
+    font-size: 24px;
+    cursor: pointer;
+    display: none;
+    z-index: 100;
+    transition: background var(--transition), opacity 0.3s ease;
+}
+
+.scroll-to-top:hover {
+    background: #005BB5;
+}
+
+.scroll-to-top.visible {
+    display: block;
+}
+
+/* Анимации */
+.fade-in-section {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+
+.fade-in-section.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+@supports (animation-timeline: scroll()) {
+    .fade-in-section {
+        animation: fadeIn linear;
+        animation-timeline: view();
+        animation-range: entry 25% cover 50%;
+    }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
 === ./js/products.js ===
 export const products = [
     {
@@ -1054,7 +1217,7 @@ export const products = [
         description: { ru: "Энергоэффективный кондиционер", uk: "Енергоефективний кондиціонер" },
         price: 15000,
         category: "ac",
-        image: "https://picsum.photos/150"  // Placehold.co — стабильный replacement
+        image: "https://picsum.photos/150"
     },
     {
         id: 2,
@@ -1062,23 +1225,46 @@ export const products = [
         description: { ru: "Система вентиляции для дома", uk: "Система вентиляції для дому" },
         price: 25000,
         category: "recuperator",
-        image: "https://picsum.photos/150"  // Placehold.co
+        image: "https://picsum.photos/150"
+    },
+    {
+        id: "s1",
+        name: { ru: "Монтаж кондиционера", uk: "Монтаж кондиціонера" },
+        description: { ru: "Профессиональная установка любой сложности", uk: "Професійна установка будь-якої складності" },
+        price: 5000,
+        category: "service",
+        image: "https://picsum.photos/150"
+    },
+    {
+        id: "s2",
+        name: { ru: "Монтаж рекуператора", uk: "Монтаж рекуператора" },
+        description: { ru: "Вентиляционные системы для свежего воздуха", uk: "Вентиляційні системи для свіжого повітря" },
+        price: 6000,
+        category: "service",
+        image: "https://picsum.photos/150"
+    },
+    {
+        id: "s3",
+        name: { ru: "Обслуживание систем", uk: "Обслуговування систем" },
+        description: { ru: "Чистка и ремонт климатического оборудования", uk: "Чищення та ремонт кліматичного обладнання" },
+        price: 2000,
+        category: "service",
+        image: "https://picsum.photos/150"
     }
 ];
 
-export function renderProducts(lang, translations, filteredProducts = products) {
-    console.log('Rendering products for language:', lang);
+export function renderProducts(lang, translations) {
     const productsGrid = document.querySelector('.products__grid');
     if (!productsGrid) return;
     productsGrid.innerHTML = '';
-    filteredProducts.forEach(product => {
+    products.forEach(product => {
         const productCard = document.createElement('div');
         productCard.classList.add('product-card');
         productCard.innerHTML = `
-            <img src="${product.image}" alt="${product.name[lang]}" class="product-card__image" onerror="this.src='https://placehold.co/150x150/blue/white?text=Image+Not+Found'">
+            <img src="${product.image}" alt="${product.name[lang]}" class="product-card__image" loading="lazy" onerror="this.src='https://placehold.co/150x150/blue/white?text=Image+Not+Found'">
             <h3 class="product-card__title">${product.name[lang]}</h3>
             <p class="product-card__description">${product.description[lang]}</p>
-            <p class="product-card__price">$${product.price.toFixed(2)}</p>
+            <p class="product-card__price">${product.price.toLocaleString('en-US', { minimumFractionDigits: 2 })}</p>
             <button class="product-card__button" data-id="${product.id}" data-i18n="service-order">${translations[lang]['service-order']}</button>
         `;
         productsGrid.appendChild(productCard);
@@ -1101,18 +1287,15 @@ export function filterProducts(lang, translations) {
     renderProducts(lang, translations, filteredProducts);
 }
 === ./js/cart.js ===
-// export let cart = JSON.parse(localStorage.getItem('cart')) || [];
 export let cart = (() => {
     const savedCart = localStorage.getItem('cart');
     try {
         const parsedCart = JSON.parse(savedCart) || [];
-        // Валидация структуры корзины
         return parsedCart.filter(item => 
             item.id && 
-            item.name && 
-            typeof item.name === 'object' && 
+            item.name && typeof item.name === 'object' && 
             item.price && 
-            typeof item.quantity === 'number'
+            typeof item.quantity === 'number' && item.quantity > 0
         );
     } catch (error) {
         console.error('Error parsing cart from localStorage:', error);
@@ -1122,7 +1305,6 @@ export let cart = (() => {
 
 export function saveCart() {
     localStorage.setItem('cart', JSON.stringify(cart));
-    console.log('Cart saved:', cart);
 }
 
 export function updateCartUI(translations, lang) {
@@ -1139,10 +1321,10 @@ export function updateCartUI(translations, lang) {
         return;
     }
 
-    const itemCount = cart.reduce((sum, item) => sum + (item.quantity || 0), 0);
-    const totalPrice = cart.reduce((sum, item) => sum + (item.price || 0) * (item.quantity || 0), 0);
+    const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+    const totalPrice = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
-    cartCount.textContent = itemCount || 0;
+    cartCount.textContent = itemCount;
     cartItemsText.textContent = `${itemCount} ${translations[lang]?.['cart-items']?.split(' ')[1] || 'товаров'}`;
     cartTotalText.textContent = `$${totalPrice.toFixed(2)}`;
     cartDropdownSummary.textContent = `${translations[lang]?.['cart-total']?.split(':')[0] || 'Итого'}: $${totalPrice.toFixed(2)}`;
@@ -1170,7 +1352,7 @@ export function updateCartUI(translations, lang) {
                 <p class="cart-dropdown__item-name">${itemName}</p>
                 <p class="cart-dropdown__item-price">$${itemPrice.toFixed(2)} x ${itemQuantity}</p>
             </div>
-            <button class="cart-dropdown__item-remove" data-id="${item.id}">􀆄</button>
+            <button class="cart-dropdown__item-remove" data-id="${item.id}">✕</button>
         `;
         cartDropdownItems.appendChild(dropdownItem);
 
@@ -1184,13 +1366,12 @@ export function updateCartUI(translations, lang) {
 }
 
 export function addToCart(productId, products) {
-    console.log('Adding to cart:', productId);
-    const product = products.find(p => p.id == productId); // Используем == для совместимости
+    const product = products.find(p => p.id === productId);
     if (!product) {
         console.warn(`Product with id ${productId} not found`);
         return;
     }
-    const cartItem = cart.find(item => item.id == productId);
+    const cartItem = cart.find(item => item.id === product.id);
     if (cartItem) {
         cartItem.quantity += 1;
     } else {
@@ -1200,23 +1381,24 @@ export function addToCart(productId, products) {
 }
 
 export function removeFromCart(productId) {
-    console.log('Removing from cart:', productId);
-    cart = cart.filter(item => item.id != productId); // Используем != для совместимости
+    cart = cart.filter(item => item.id !== productId);
     saveCart();
 }
 
 export function clearCart() {
-    console.log('Clearing cart');
     cart = [];
     saveCart();
 }
 
 export function toggleCartDropdown(e) {
-    console.log('Toggling cart dropdown');
     e.stopPropagation();
     const cartDropdown = document.querySelector('.cart-dropdown');
+    const toggleBtn = document.querySelector('#cartDropdownToggle');
     if (cartDropdown) {
         cartDropdown.classList.toggle('cart-dropdown--open');
+        if (toggleBtn) {
+            toggleBtn.setAttribute('aria-expanded', cartDropdown.classList.contains('cart-dropdown--open'));
+        }
         cartDropdown.animate([
             { opacity: 0, transform: 'translateY(-10px)' },
             { opacity: 1, transform: 'translateY(0)' }
@@ -1228,7 +1410,6 @@ export function toggleCartDropdown(e) {
 }
 
 export function openCartModal(e) {
-    console.log('Opening cart modal');
     e.stopPropagation();
     const cartModal = document.querySelector('.cart-modal');
     if (cartModal) {
@@ -1244,38 +1425,33 @@ export function openCartModal(e) {
 }
 
 export function closeCartModal() {
-    console.log('Closing cart modal');
     const cartModal = document.querySelector('.cart-modal');
     if (cartModal) {
         cartModal.close();
-        cartModal.style.display = 'none'; // Явно скрываем, чтобы избежать проблем
     }
 }
 === ./js/auth.js ===
 export function updateProfileButton(translations = {}, lang = 'ru') {
     const profileButton = document.getElementById('profileButton');
     if (!profileButton) {
-        console.error('Ошибка: Элемент #profileButton не найден!');
+        console.error('Элемент #profileButton не найден!');
         return;
     }
     const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
     const key = isAuthenticated ? 'profile' : 'login';
     
-    // Проверка translations и lang
     if (!translations || !translations[lang]) {
-        console.warn(`Translations для языка "${lang}" не найдены, используем fallback`);
         profileButton.textContent = isAuthenticated ? 'Личный кабинет' : 'Войти';
     } else {
         profileButton.textContent = translations[lang][key] || (isAuthenticated ? 'Личный кабинет' : 'Войти');
     }
     profileButton.setAttribute('data-i18n', key);
-    console.log(`updateProfileButton: lang=${lang}, isAuthenticated=${isAuthenticated}, text=${profileButton.textContent}`);
 }
 
 export function renderLoginModal(translations = {}, lang = 'ru') {
     const modalContent = document.getElementById('modalContent');
     if (!modalContent) {
-        console.error('Ошибка: Элемент #modalContent не найден!');
+        console.error('Элемент #modalContent не найден!');
         return;
     }
     modalContent.innerHTML = `
@@ -1283,11 +1459,11 @@ export function renderLoginModal(translations = {}, lang = 'ru') {
         <form id="loginForm">
             <div class="modal__field">
                 <label for="username" data-i18n="username">${translations[lang]?.['username'] || 'Имя пользователя'}</label>
-                <input type="text" id="username" placeholder="Введите имя" required>
+                <input type="text" id="username" placeholder="Введите имя" required minlength="3" aria-label="Имя пользователя">
             </div>
             <div class="modal__field">
                 <label for="password" data-i18n="password">${translations[lang]?.['password'] || 'Пароль'}</label>
-                <input type="password" id="password" placeholder="Введите пароль" required>
+                <input type="password" id="password" placeholder="Введите пароль" required minlength="6" aria-label="Пароль">
             </div>
             <button type="submit" class="modal__button" data-i18n="login">${translations[lang]?.['login'] || 'Войти'}</button>
         </form>
@@ -1296,8 +1472,8 @@ export function renderLoginModal(translations = {}, lang = 'ru') {
     if (loginForm) {
         loginForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value.trim();
             if (username && password) {
                 localStorage.setItem('isAuthenticated', 'true');
                 localStorage.setItem('username', username);
@@ -1314,7 +1490,7 @@ export function renderLoginModal(translations = {}, lang = 'ru') {
 export function renderProfileModal(translations = {}, lang = 'ru') {
     const modalContent = document.getElementById('modalContent');
     if (!modalContent) {
-        console.error('Ошибка: Элемент #modalContent не найден!');
+        console.error('Элемент #modalContent не найден!');
         return;
     }
     const username = localStorage.getItem('username') || 'Пользователь';
@@ -1337,7 +1513,7 @@ export function renderProfileModal(translations = {}, lang = 'ru') {
 export function openModal(translations = {}, lang = 'ru') {
     const profileModal = document.getElementById('profileModal');
     if (!profileModal) {
-        console.error('Ошибка: Элемент #profileModal не найден!');
+        console.error('Элемент #profileModal не найден!');
         return;
     }
     profileModal.style.display = 'flex';
@@ -1353,7 +1529,7 @@ export function openModal(translations = {}, lang = 'ru') {
 export function closeModal() {
     const profileModal = document.getElementById('profileModal');
     if (!profileModal) {
-        console.error('Ошибка: Элемент #profileModal не найден!');
+        console.error('Элемент #profileModal не найден!');
         return;
     }
     profileModal.style.display = 'none';
@@ -1361,7 +1537,6 @@ export function closeModal() {
 }
 === ./js/theme.js ===
 export function toggleTheme() {
-    console.log('Toggling theme');
     const body = document.body;
     const themeToggle = document.querySelector('.theme-toggle');
     const themeIcon = document.querySelector('.theme-icon');
@@ -1370,7 +1545,7 @@ export function toggleTheme() {
         themeToggle.classList.toggle('light-theme');
     }
     if (themeIcon) {
-       themeIcon.textContent = body.classList.contains('light-theme') ? '☀️' : '🌙';
+        themeIcon.textContent = body.classList.contains('light-theme') ? '☀️' : '🌙';
     }
     const isLightTheme = body.classList.contains('light-theme');
     localStorage.setItem('theme', isLightTheme ? 'light' : 'dark');
@@ -1379,7 +1554,6 @@ export function toggleTheme() {
 
 export function initTheme() {
     const savedTheme = localStorage.getItem('theme') || 'dark';
-    console.log(`Initializing theme: ${savedTheme}`);
     const body = document.body;
     const themeToggle = document.querySelector('.theme-toggle');
     const themeIcon = document.querySelector('.theme-icon');
@@ -1388,13 +1562,9 @@ export function initTheme() {
         if (themeToggle) {
             themeToggle.classList.add('light-theme');
         }
-        if (themeIcon) {
-       themeIcon.textContent = body.classList.contains('light-theme') ? '☀️' : '🌙';
-        }
-    } else {
-        if (themeIcon) {
-            themeIcon.textContent = body.classList.contains('light-theme') ? '☀️' : '🌙';
-        }
+    }
+    if (themeIcon) {
+        themeIcon.textContent = body.classList.contains('light-theme') ? '☀️' : '🌙';
     }
 }
 === ./js/main.js ===
@@ -1408,7 +1578,9 @@ import { updateProfileButton, openModal, closeModal } from './auth.js';
 async function loadComponent(containerId, componentPath) {
     try {
         const response = await fetch(componentPath);
-        if (!response.ok) throw new Error(`Failed to load ${componentPath}: ${response.status}`);
+        if (!response.ok) {
+            throw new Error(`Failed to load ${componentPath}: ${response.status}`);
+        }
         const html = await response.text();
         const container = document.getElementById(containerId);
         if (container) {
@@ -1418,13 +1590,12 @@ async function loadComponent(containerId, componentPath) {
         }
     } catch (error) {
         console.error(`Error loading component ${componentPath}:`, error);
+        const container = document.getElementById(containerId);
+        if (container) container.innerHTML = '<p>Ошибка загрузки компонента</p>';
     }
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
-    console.log('DOM loaded, initializing components');
-    
-    // Загрузка компонентов
     await Promise.all([
         loadComponent('header-container', 'components/header.html'),
         loadComponent('hero-container', 'components/hero.html'),
@@ -1434,27 +1605,23 @@ document.addEventListener('DOMContentLoaded', async () => {
         loadComponent('footer-container', 'components/footer.html'),
         loadComponent('cart-modal-container', 'components/cart.html')
     ]);
-    await loadComponent('cart-modal-container', 'components/cart.html');
+
     const openCartModalButton = document.querySelector('#openCartModal');
     const cartModal = document.querySelector('#cartModal');
+    const closeModalButton = document.querySelector('.cart-modal__close');
 
     if (openCartModalButton && cartModal) {
         openCartModalButton.addEventListener('click', (e) => {
             e.stopPropagation();
-            cartModal.showModal();
-            cartModal.style.display = 'block';
+            openCartModal(e);
             updateCartUI(translations, savedLanguage);
         });
-    } else {
-        console.error('Cart modal or button not found');
     }
 
-    const closeModalButton = document.querySelector('.cart-modal__close');
     if (closeModalButton) {
         closeModalButton.addEventListener('click', closeCartModal);
     }
 
-    // Закрытие модального окна при клике вне его
     if (cartModal) {
         cartModal.addEventListener('click', (e) => {
             if (e.target === cartModal) {
@@ -1463,29 +1630,24 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-
-    // Проверка и исправление языка
     let savedLanguage = localStorage.getItem('language') || 'ru';
     if (!['ru', 'uk'].includes(savedLanguage)) {
-        console.warn(`Некорректный язык "${savedLanguage}", устанавливаем ru`);
         savedLanguage = 'ru';
         localStorage.setItem('language', savedLanguage);
     }
 
-    // Инициализация
     initTheme();
     switchLanguage(savedLanguage);
     renderProducts(savedLanguage, translations);
     updateCartUI(translations, savedLanguage);
     initNavigation();
 
-    // Инициализация авторизации
     const profileButton = document.getElementById('profileButton');
     const profileModal = document.getElementById('profileModal');
     const modalClose = document.querySelector('.modal__close');
     
     if (profileButton && profileModal && modalClose) {
-        updateProfileButton(translations, savedLanguage); // Инициализация кнопки профиля
+        updateProfileButton(translations, savedLanguage);
         profileButton.addEventListener('click', (e) => {
             e.stopPropagation();
             openModal(translations, savedLanguage);
@@ -1501,12 +1663,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 closeModal();
             }
         });
-        console.log('Profile button initialized successfully');
-    } else {
-        console.error('Ошибка: Не найдены элементы #profileButton, #profileModal или .modal__close');
     }
 
-    // Обработчики событий
     const categorySelect = document.getElementById('category');
     const priceSelect = document.getElementById('price');
     if (categorySelect) categorySelect.addEventListener('change', () => filterProducts(savedLanguage, translations));
@@ -1515,42 +1673,38 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.querySelectorAll('.language-switcher').forEach(button => {
         button.addEventListener('click', () => {
             const lang = button.dataset.lang;
-            if (!['ru', 'uk'].includes(lang)) {
-                console.warn(`Некорректный язык "${lang}", пропускаем`);
-                return;
-            }
+            if (!['ru', 'uk'].includes(lang)) return;
             switchLanguage(lang);
-            savedLanguage = lang; // Обновляем savedLanguage
+            savedLanguage = lang;
             renderProducts(lang, translations);
             updateCartUI(translations, lang);
             updateProfileButton(translations, lang);
         });
     });
+
     const cartDropdownToggle = document.querySelector('#cartDropdownToggle');
-const cartDropdown = document.querySelector('#cartDropdown');
-if (cartDropdownToggle && cartDropdown) {
-    cartDropdownToggle.addEventListener('click', toggleCartDropdown);
-    // Закрытие выпадающего меню при клике вне его
-    document.addEventListener('click', (e) => {
-        if (!cartDropdown.contains(e.target) && !cartDropdownToggle.contains(e.target)) {
-            cartDropdown.classList.remove('cart-dropdown--open');
-        }
-    });
-}
+    const cartDropdown = document.querySelector('#cartDropdown');
+    if (cartDropdownToggle && cartDropdown) {
+        cartDropdownToggle.addEventListener('click', toggleCartDropdown);
+        document.addEventListener('click', (e) => {
+            if (!cartDropdown.contains(e.target) && !cartDropdownToggle.contains(e.target)) {
+                cartDropdown.classList.remove('cart-dropdown--open');
+                cartDropdownToggle.setAttribute('aria-expanded', 'false');
+            }
+        });
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && cartDropdown.classList.contains('cart-dropdown--open')) {
+                cartDropdown.classList.remove('cart-dropdown--open');
+                cartDropdownToggle.setAttribute('aria-expanded', 'false');
+            }
+        });
+    }
+
     const themeToggle = document.querySelector('.theme-toggle');
     if (themeToggle) themeToggle.addEventListener('click', toggleTheme);
 
-    // const openCartModalButton = document.querySelector('#openCartModal');
-    // if (openCartModalButton) openCartModalButton.addEventListener('click', openCartModal);
-
-    // const cartDropdownToggle = document.querySelector('#cartDropdownToggle');
-    // if (cartDropdownToggle) cartDropdownToggle.addEventListener('click', toggleCartDropdown);
-
     const checkoutButton = document.querySelector('.cart-button--checkout');
     if (checkoutButton) checkoutButton.addEventListener('click', openCartModal);
-
-    // const closeModalButton = document.querySelector('.cart-modal__close');
-    // if (closeModalButton) closeModalButton.addEventListener('click', closeCartModal);
 
     const clearCartButton = document.querySelector('.cart-button--clear');
     if (clearCartButton) clearCartButton.addEventListener('click', () => {
@@ -1559,40 +1713,26 @@ if (cartDropdownToggle && cartDropdown) {
     });
 
     const productsGrid = document.querySelector('.products__grid');
-   if (productsGrid) {
-    productsGrid.addEventListener('click', (e) => {
-        if (e.target.classList.contains('product-card__button')) {
-            const productId = e.target.dataset.id; // Оставляем как строку
-            addToCart(productId, products);
-            updateCartUI(translations, savedLanguage);
-        }
-    });
-}
+    if (productsGrid) {
+        productsGrid.addEventListener('click', (e) => {
+            if (e.target.classList.contains('product-card__button')) {
+                const productId = e.target.dataset.id;
+                addToCart(productId, products);
+                updateCartUI(translations, savedLanguage);
+            }
+        });
+    }
 
     const servicesGrid = document.querySelector('.services__grid');
-  if (servicesGrid) {
-    servicesGrid.addEventListener('click', (e) => {
-        if (e.target.classList.contains('service-card__button')) {
-            const button = e.target;
-            const productId = button.dataset.id; // Оставляем как строку
-            const lang = localStorage.getItem('language') || 'ru';
-            const product = {
-                id: productId,
-                name: { ru: button.dataset.nameRu, uk: button.dataset.nameUk },
-                price: parseFloat(button.dataset.price),
-                image: 'https://picsum.photos/150'
-            };
-            const cartItem = cart.find(item => item.id === productId); // Сравнение как строки
-            if (cartItem) {
-                cartItem.quantity += 1;
-            } else {
-                cart.push({ ...product, quantity: 1 });
+    if (servicesGrid) {
+        servicesGrid.addEventListener('click', (e) => {
+            if (e.target.classList.contains('service-card__button')) {
+                const productId = e.target.dataset.id;
+                addToCart(productId, products);
+                updateCartUI(translations, savedLanguage);
             }
-            saveCart();
-            updateCartUI(translations, lang);
-        }
-    });
-}
+        });
+    }
 
     const cartDropdownItems = document.querySelector('.cart-dropdown__items');
     if (cartDropdownItems) {
@@ -1616,20 +1756,48 @@ if (cartDropdownToggle && cartDropdown) {
         });
     }
 
-    // Обработка ошибок изображений
+    const scrollToTopButton = document.querySelector('.scroll-to-top');
+    if (scrollToTopButton) {
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 300) {
+                scrollToTopButton.classList.add('visible');
+            } else {
+                scrollToTopButton.classList.remove('visible');
+            }
+        });
+        scrollToTopButton.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    }
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+            }
+        });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.fade-in-section').forEach(el => observer.observe(el));
+
     document.addEventListener('error', (e) => {
         if (e.target.tagName === 'IMG') {
             e.target.src = 'https://placehold.co/150x150/red/white?text=Image+Error';
         }
     }, true);
-    
 });
 === ./js/navigation.js ===
 export function initNavigation() {
-    document.querySelector('.header__toggle').addEventListener('click', () => {
-        document.querySelector('.header__nav').classList.toggle('header__nav--open');
-        document.querySelector('.header__toggle').classList.toggle('header__toggle--open');
-    });
+    const toggle = document.querySelector('.header__toggle');
+    if (toggle) {
+        toggle.addEventListener('click', () => {
+            const nav = document.querySelector('.header__nav');
+            nav.classList.toggle('header__nav--open');
+            toggle.classList.toggle('header__toggle--open');
+            const expanded = nav.classList.contains('header__nav--open');
+            toggle.setAttribute('aria-expanded', expanded);
+        });
+    }
 }
 === ./js/i18n.js ===
 export const translations = {
@@ -1709,7 +1877,7 @@ export const translations = {
         "filter-ac": "Кондиціонери",
         "filter-recuperator": "Рекуператори",
         "filter-low-to-high": "Від низької до високої",
-        "filter-high-to-low": "Від високої до низької",
+        "filter-high-to-low": "Від високої до низкої",
         "contacts-title": "Зв’яжіться з нами",
         "contacts-email": "Email: info@climat-control.com",
         "contacts-phone": "Телефон: +380-800-555-1234",
@@ -1738,7 +1906,6 @@ export const translations = {
 };
 
 export function switchLanguage(lang) {
-    console.log(`Switching language to: ${lang}`);
     document.querySelectorAll('[data-i18n]').forEach(element => {
         const key = element.getAttribute('data-i18n');
         if (translations[lang][key]) {
@@ -1753,18 +1920,96 @@ export function switchLanguage(lang) {
         }
     });
 
+    document.querySelectorAll('option[data-i18n]').forEach(option => {
+        const key = option.getAttribute('data-i18n');
+        if (translations[lang][key]) {
+            option.textContent = translations[lang][key];
+        }
+    });
+
+    document.title = translations[lang]['site-title'] || 'Климат Контроль';
     localStorage.setItem('language', lang);
 }
+=== ./404.html ===
+<!DOCTYPE html>
+<html lang="ru" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Страница не найдена. Вернитесь на главную страницу Климат Контроль.">
+    <meta name="robots" content="noindex">
+    <title data-i18n="404-title">404 - Страница не найдена</title>
+    <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+    <header class="header" role="banner">
+        <div class="header__container container">
+            <a href="/" class="header__title" data-i18n="header-title" aria-label="Логотип и ссылка на главную">Климат Контроль</a>
+            <nav class="header__nav" aria-label="Основная навигация">
+                <ul class="header__nav-list">
+                    <li class="header__nav-item"><a href="#home" class="header__nav-link" data-i18n="nav-home">Главная</a></li>
+                    <li class="header__nav-item"><a href="#services" class="header__nav-link" data-i18n="nav-services">Услуги</a></li>
+                    <li class="header__nav-item"><a href="#products" class="header__nav-link" data-i18n="nav-products">Товары</a></li>
+                    <li class="header__nav-item"><a href="#contacts" class="header__nav-link" data-i18n="nav-contacts">Контакты</a></li>
+                </ul>
+            </nav>
+            <div class="header__controls">
+                <button class="language-switcher" data-lang="ru" aria-label="Переключить на русский">RU</button>
+                <button class="language-switcher" data-lang="uk" aria-label="Переключить на украинский">UK</button>
+                <button class="theme-toggle" aria-label="Переключить тему">
+                    <span class="theme-icon">🌙</span>
+                </button>
+                <button class="profile-button" id="profileButton" data-i18n="login" aria-label="Войти или профиль">Войти</button>
+                <button class="cart-button" id="openCartModal" aria-label="Открыть корзину" aria-haspopup="dialog">
+                    <span class="cart-icon-wrapper">
+                        <span class="cart-icon" aria-hidden="true">🛒</span>
+                        <span class="cart-count" aria-live="polite">0</span>
+                    </span>
+                    <span class="cart-text">
+                        <span class="cart-text__items" data-i18n="cart-items">0 товаров</span>
+                        <span class="cart-text__total">$0.00</span>
+                    </span>
+                    <span class="cart-dropdown-toggle" id="cartDropdownToggle" aria-controls="cartDropdown" aria-expanded="false" aria-label="Открыть выпадающее меню корзины">▼</span>
+                </button>
+                <button class="header__toggle" aria-controls="header-nav" aria-expanded="false" aria-label="Открыть меню навигации">
+                    <span class="header__toggle-icon" aria-hidden="true"></span>
+                </button>
+            </div>
+        </div>
+    </header>
+    <main>
+        <section class="container fade-in-section">
+            <h1 data-i18n="404-title">404 - Страница не найдена</h1>
+            <p data-i18n="404-message">Извините, запрашиваемая страница не существует.</p>
+            <a href="/" class="hero__cta" data-i18n="404-cta" role="button">Вернуться на главную</a>
+        </section>
+    </main>
+    <footer class="footer fade-in-section">
+        <div class="footer__container container">
+            <div class="footer__info">
+                <h3 data-i18n="footer-title">Климат Контроль</h3>
+                <p data-i18n="contacts-email">Email: info@climat-control.com</p>
+                <p data-i18n="contacts-phone">Телефон: +380-800-555-1234</p>
+                <p data-i18n="contacts-address">Адрес: ул. Климатическая, 123, Киев</p>
+            </div>
+            <div class="footer__copyright">
+                <p data-i18n="footer-copyright">&copy; 2025 Климат Контроль. Все права защищены.</p>
+            </div>
+        </div>
+    </footer>
+    <script type="module" src="js/main.js" defer></script>
+</body>
+</html>
 === ./components/hero.html ===
-<section id="home" class="hero">
+<section id="home" class="hero fade-in" aria-labelledby="hero-title">
     <div class="hero__container container">
-        <h2 class="hero__title" data-i18n="hero-title">Комфортный климат в вашем доме</h2>
+        <h2 id="hero-title" class="hero__title" data-i18n="hero-title">Комфортный климат в вашем доме</h2>
         <p class="hero__subtitle" data-i18n="hero-subtitle">Профессиональный монтаж и продажа кондиционеров и рекуператоров.</p>
-        <a href="#products" class="hero__cta" data-i18n="hero-cta">Посмотреть товары</a>
+        <a href="#products" class="hero__cta pulse" data-i18n="hero-cta" role="button">Посмотреть товары</a>
     </div>
 </section>
 === ./components/contacts.html ===
-<section id="contacts" class="contacts">
+<section id="contacts" class="contacts fade-in">
     <div class="container">
         <h2 class="contacts__title" data-i18n="contacts-title">Свяжитесь с нами</h2>
         <div class="contacts__content">
@@ -1774,22 +2019,22 @@ export function switchLanguage(lang) {
                 <p data-i18n="contacts-address">Адрес: ул. Климатическая, 123, Киев</p>
             </div>
             <form class="contacts__form">
-                <input type="text" placeholder="Ваше имя" data-i18n-placeholder="form-name" required>
-                <input type="email" placeholder="Ваш email" data-i18n-placeholder="form-email" required>
-                <textarea placeholder="Ваше сообщение" data-i18n-placeholder="form-message" required></textarea>
-                <button type="submit" data-i18n="form-submit">Отправить сообщение</button>
+                <input type="text" placeholder="Ваше имя" data-i18n-placeholder="form-name" required aria-label="Ваше имя">
+                <input type="email" placeholder="Ваш email" data-i18n-placeholder="form-email" required aria-label="Ваш email">
+                <textarea placeholder="Ваше сообщение" data-i18n-placeholder="form-message" required aria-label="Ваше сообщение"></textarea>
+                <button type="submit" data-i18n="form-submit" class="pulse">Отправить сообщение</button>
             </form>
         </div>
     </div>
 </section>
 === ./components/products.html ===
-<section id="products" class="products">
+<section id="products" class="products fade-in">
     <div class="container">
         <h2 class="products__title" data-i18n="products-title">Наши товары</h2>
         <div class="products__filters">
             <div class="filter-group">
                 <label for="category" data-i18n="filter-category">Категория:</label>
-                <select id="category">
+                <select id="category" aria-label="Фильтр по категории">
                     <option value="all" data-i18n="filter-all">Все</option>
                     <option value="ac" data-i18n="filter-ac">Кондиционеры</option>
                     <option value="recuperator" data-i18n="filter-recuperator">Рекуператоры</option>
@@ -1797,7 +2042,7 @@ export function switchLanguage(lang) {
             </div>
             <div class="filter-group">
                 <label for="price" data-i18n="filter-price">Цена:</label>
-                <select id="price">
+                <select id="price" aria-label="Фильтр по цене">
                     <option value="all" data-i18n="filter-all">Все</option>
                     <option value="low" data-i18n="filter-low-to-high">От низкой к высокой</option>
                     <option value="high" data-i18n="filter-high-to-low">От высокой к низкой</option>
@@ -1808,7 +2053,7 @@ export function switchLanguage(lang) {
     </div>
 </section>
 === ./components/footer.html ===
-<footer class="footer">
+<footer class="footer fade-in">
     <div class="footer__container container">
         <div class="footer__info">
             <h3 data-i18n="footer-title">Климат Контроль</h3>
@@ -1822,39 +2067,39 @@ export function switchLanguage(lang) {
     </div>
 </footer>
 === ./components/services.html ===
-<section id="services" class="services">
+<section id="services" class="services fade-in">
     <div class="container">
         <h2 class="services__title" data-i18n="services-title">Наши услуги</h2>
         <div class="services__grid">
-            <div class="service-card">
+            <div class="service-card card">
                 <h3 class="service-card__title" data-i18n="service-ac-install-title">Монтаж кондиционеров</h3>
                 <p class="service-card__description" data-i18n="service-ac-install-desc">Профессиональная установка любой сложности.</p>
-                <button class="service-card__button" data-id="s1" data-name-ru="Монтаж кондиционера" data-name-uk="Монтаж кондиціонерів" data-price="5000" data-i18n="service-order">Заказать</button>
+                <button class="service-card__button pulse" data-id="s1" data-name-ru="Монтаж кондиционера" data-name-uk="Монтаж кондиціонерів" data-price="5000" data-i18n="service-order">Заказать</button>
             </div>
-            <div class="service-card">
+            <div class="service-card card">
                 <h3 class="service-card__title" data-i18n="service-recuperator-install-title">Монтаж рекуператоров</h3>
                 <p class="service-card__description" data-i18n="service-recuperator-install-desc">Вентиляционные системы для свежего воздуха.</p>
-                <button class="service-card__button" data-id="s2" data-name-ru="Монтаж рекуператора" data-name-uk="Монтаж рекуператорів" data-price="6000" data-i18n="service-order">Заказать</button>
+                <button class="service-card__button pulse" data-id="s2" data-name-ru="Монтаж рекуператора" data-name-uk="Монтаж рекуператорів" data-price="6000" data-i18n="service-order">Заказать</button>
             </div>
-            <div class="service-card">
+            <div class="service-card card">
                 <h3 class="service-card__title" data-i18n="service-maintenance-title">Обслуживание систем</h3>
                 <p class="service-card__description" data-i18n="service-maintenance-desc">Чистка и ремонт климатического оборудования.</p>
-                <button class="service-card__button" data-id="s3" data-name-ru="Обслуживание систем" data-name-uk="Обслуговування систем" data-price="2000" data-i18n="service-order">Заказать</button>
+                <button class="service-card__button pulse" data-id="s3" data-name-ru="Обслуживание систем" data-name-uk="Обслуговування систем" data-price="2000" data-i18n="service-order">Заказать</button>
             </div>
         </div>
     </div>
 </section>
 === ./components/cart.html ===
-<dialog class="cart-modal" id="cartModal">
+<dialog class="cart-modal fade-in" id="cartModal" role="dialog" aria-modal="true" aria-labelledby="cart-modal-title">
     <div class="cart-modal__header">
-        <h2 data-i18n="cart-modal-title">Ваша корзина</h2>
-        <button class="cart-modal__close">✕</button>
+        <h2 id="cart-modal-title" data-i18n="cart-modal-title">Ваша корзина</h2>
+        <button class="cart-modal__close" aria-label="Закрыть модальное окно">✕</button>
     </div>
-    <ul class="cart-items"></ul>
-    <div class="cart-summary" data-i18n="cart-total">Итого: $0.00</div>
+    <ul class="cart-items" aria-label="Элементы корзины"></ul>
+    <div class="cart-summary" data-i18n="cart-total" aria-live="polite">Итого: $0.00</div>
     <div class="cart-modal__footer">
-        <button class="cart-button--clear" data-i18n="cart-clear">Очистить корзину</button>
-        <button class="cart-button--checkout" data-i18n="cart-checkout">Оформить заказ</button>
+        <button class="cart-button--clear pulse" data-i18n="cart-clear">Очистить корзину</button>
+        <button class="cart-button--checkout pulse" data-i18n="cart-checkout">Оформить заказ</button>
     </div>
 </dialog>
 === ./components/product-card.html ===
@@ -1866,10 +2111,10 @@ export function switchLanguage(lang) {
     <button class="product-card__button" data-id="{id}" data-i18n="service-order">Заказать</button>
 </div>
 === ./components/header.html ===
-<header class="header">
+<header class="header" role="banner">
     <div class="header__container container">
-        <h1 class="header__title" data-i18n="header-title">Климат Контроль</h1>
-        <nav class="header__nav">
+        <a href="#home" class="header__title" data-i18n="header-title" aria-label="Логотип и ссылка на главную">Климат Контроль</a>
+        <nav class="header__nav" aria-label="Основная навигация">
             <ul class="header__nav-list">
                 <li class="header__nav-item"><a href="#home" class="header__nav-link" data-i18n="nav-home">Главная</a></li>
                 <li class="header__nav-item"><a href="#services" class="header__nav-link" data-i18n="nav-services">Услуги</a></li>
@@ -1878,39 +2123,38 @@ export function switchLanguage(lang) {
             </ul>
         </nav>
         <div class="header__controls">
-            <button class="language-switcher" data-lang="ru">RU</button>
-            <button class="language-switcher" data-lang="uk">UK</button>
-            <button class="theme-toggle" aria-label="Сменить тему">
-                <span class="theme-icon">􀆺</span> <!-- SF Symbol для луны (тёмная тема) -->
+            <button class="language-switcher" data-lang="ru" aria-label="Переключить на русский">RU</button>
+            <button class="language-switcher" data-lang="uk" aria-label="Переключить на украинский">UK</button>
+            <button class="theme-toggle" aria-label="Переключить тему">
+                <span class="theme-icon">🌙</span>
             </button>
-            <button class="profile-button" id="profileButton" data-i18n="login">􀉪 Войти</button>
-            <button class="cart-button" id="openCartModal">
+            <button class="profile-button" id="profileButton" data-i18n="login" aria-label="Войти или профиль">Войти</button>
+            <button class="cart-button" id="openCartModal" aria-label="Открыть корзину" aria-haspopup="dialog">
                 <span class="cart-icon-wrapper">
-                    <span class="cart-icon">􀍪</span>
-                    <span class="cart-count">0</span>
+                    <span class="cart-icon" aria-hidden="true">🛒</span>
+                    <span class="cart-count" aria-live="polite">0</span>
                 </span>
                 <span class="cart-text">
                     <span class="cart-text__items" data-i18n="cart-items">0 товаров</span>
                     <span class="cart-text__total">$0.00</span>
                 </span>
-                <span class="cart-dropdown-toggle" id="cartDropdownToggle">􀄥</span>
+                <span class="cart-dropdown-toggle" id="cartDropdownToggle" aria-controls="cartDropdown" aria-expanded="false" aria-label="Открыть выпадающее меню корзины">▼</span>
             </button>
-            <button class="header__toggle">
-                <span class="header__toggle-icon"></span>
+            <button class="header__toggle" aria-controls="header-nav" aria-expanded="false" aria-label="Открыть меню навигации">
+                <span class="header__toggle-icon" aria-hidden="true"></span>
             </button>
         </div>
     </div>
 </header>
-
-<div class="modal" id="profileModal">
+<div class="modal" id="profileModal" role="dialog" aria-modal="true" aria-label="Модальное окно профиля">
     <div class="modal__content">
-        <span class="modal__close">􀆄</span>
+        <button class="modal__close" aria-label="Закрыть модальное окно">✕</button>
         <div id="modalContent"></div>
     </div>
 </div>
-<div class="cart-dropdown" id="cartDropdown">
-    <ul class="cart-dropdown__items"></ul>
-    <div class="cart-dropdown__summary" data-i18n="cart-total">Итого: $0.00</div>
+<div class="cart-dropdown" id="cartDropdown" role="region" aria-label="Предпросмотр корзины" aria-hidden="true">
+    <ul class="cart-dropdown__items" aria-label="Элементы в корзине"></ul>
+    <div class="cart-dropdown__summary" data-i18n="cart-total" aria-live="polite">Итого: $0.00</div>
     <button class="cart-dropdown__button" id="openCartModal" data-i18n="cart-checkout">Оформить заказ</button>
 </div>
 === ./components/service-card.html ===
@@ -2100,12 +2344,12 @@ export function switchLanguage(lang) {
     "orientation": "portrait-primary",
     "icons": [
         {
-            "src": "/icons/icon-192x192.png",
+            "src": "/icons/icon-icon192x192.png",
             "sizes": "192x192",
             "type": "image/png"
         },
         {
-            "src": "/icons/icon-512x512.png",
+            "src": "/icons/icon-icon512x512.png",
             "sizes": "512x512",
             "type": "image/png"
         }
@@ -2113,3 +2357,46 @@ export function switchLanguage(lang) {
     "apple-mobile-web-app-capable": "yes",
     "apple-mobile-web-app-status-bar-style": "black-translucent"
 }
+=== ./service-worker.js ===
+const CACHE_NAME = 'climat-control-v1';
+const urlsToCache = [
+    '/',
+    '/index.html',
+    '/css/main.css',
+    '/js/main.js',
+    '/js/cart.js',
+    '/js/products.js',
+    '/components/header.html',
+    '/components/hero.html',
+    '/components/services.html',
+    '/components/products.html',
+    '/components/contacts.html',
+    '/components/footer.html',
+    '/components/cart.html'
+];
+
+self.addEventListener('install', event => {
+    event.waitUntil(
+        caches.open(CACHE_NAME)
+            .then(cache => cache.addAll(urlsToCache))
+            .then(() => self.skipWaiting())
+    );
+});
+
+self.addEventListener('activate', event => {
+    event.waitUntil(
+        caches.keys().then(cacheNames => {
+            return Promise.all(
+                cacheNames.filter(name => name !== CACHE_NAME)
+                    .map(name => caches.delete(name))
+            );
+        }).then(() => self.clients.claim())
+    );
+});
+
+self.addEventListener('fetch', event => {
+    event.respondWith(
+        caches.match(event.request)
+            .then(response => response || fetch(event.request))
+    );
+});

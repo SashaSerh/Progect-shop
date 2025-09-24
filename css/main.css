@@ -1,6 +1,6 @@
 /* Переменные для тёмной темы */
 :root {
-    --font-family: -apple-system, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    --font-family: 'Montserrat', sans-serif;
     --primary-color: rgba(30, 30, 30, 0.7);
     --accent-color: #007AFF;
     --secondary-color: #FF2D55;
@@ -9,12 +9,16 @@
     --cart-red: #FF3B30;
     --modal-bg: rgba(0, 0, 0, 0.4);
     --button-bg: rgba(255, 255, 255, 0.15);
+    --button-bg-hover: rgba(255, 255, 255, 0.25);
     --font-thin: 400;
     --font-bold: 600;
     --transition: all 0.3s ease-in-out;
     --shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     --glow-shadow: 0 0 12px rgba(0, 122, 255, 0.3);
     --background-color: #000000;
+    --background-color-secondary:  #007B9E;
+    --background-color-secondary-hover: #006B8A;
+    --white-text-color: #FFFFFF;
     --container-width: 1200px;
 }
 
@@ -28,9 +32,13 @@
     --cart-red: #FF3B30;
     --modal-bg: rgba(255, 255, 255, 0.7);
     --button-bg: rgba(0, 0, 0, 0.1);
+    --button-bg-hover: rgba(255, 255, 255, 0.25);
     --background-color: #F2F2F7;
     --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     --glow-shadow: 0 0 12px rgba(0, 122, 255, 0.2);
+    --white-text-color: #FFFFFF;
+    --background-color-secondary: #00A8E8;
+    --background-color-secondary-hover: #008CBA;
 }
 
 /* Сброс базовых стилей */
@@ -119,7 +127,7 @@ body {
 
 .header__nav-link:hover {
     background: rgba(255, 255, 255, 0.15);
-    color: var(--accent-color);
+    /* color: var(--accent-color); */
 }
 
 .light-theme .header__nav-link:hover {
@@ -171,8 +179,8 @@ body {
 }
 
 .catalog-button {
-    background: none;
-    color: var(--nav-text-color);
+    background: var(--background-color-secondary);
+    color: var(--white-text-color);
     border: none;
     border-radius: 14px;
     padding: 8px 12px;
@@ -187,11 +195,12 @@ body {
 }
 
 .catalog-button:hover {
-    background: var(--button-bg);
+    background: var(--background-color-secondary-hover);
 }
 
 .catalog-icon {
     font-size: 20px;
+    
 }
 
 .search-container {
@@ -228,10 +237,12 @@ body {
 
 .header__phones {
     display: flex;
-    gap: 16px;
+    flex-direction: column;
+    /* gap: 16px; */
     color: var(--text-color);
     font-size: 15px;
     margin-right: 16px;
+    font-weight: 800;
 }
 
 .header__phones a {
@@ -240,7 +251,7 @@ body {
 }
 
 .header__phones a:hover {
-    color: var(--accent-color);
+    /* color: var(--accent-color); */
 }
 
 .catalog-dropdown,
@@ -539,7 +550,7 @@ body {
 }
 
 .hero__cta {
-    background: var(--accent-color);
+    background: var(--background-color-secondary);
     color: #FFFFFF;
     border: none;
     padding: 12px 24px;
@@ -551,7 +562,7 @@ body {
 }
 
 .hero__cta:hover {
-    background: #005BB5;
+    background: var(--background-color-secondary-hover);
 }
 
 @media (max-width: 768px) {
@@ -617,7 +628,7 @@ body {
 }
 
 .service-card__button {
-    background: var(--accent-color);
+    background: var(--background-color-secondary);
     color: #FFFFFF;
     border: none;
     padding: 12px;
@@ -628,7 +639,7 @@ body {
 }
 
 .service-card__button:hover {
-    background: #005BB5;
+    background: var(--background-color-secondary-hover);
 }
 
 @media (max-width: 768px) {
@@ -738,7 +749,7 @@ body {
 }
 
 .product-card__button {
-    background: var(--accent-color);
+    background: var(--background-color-secondary);
     color: #FFFFFF;
     border: none;
     padding: 12px;
@@ -749,7 +760,7 @@ body {
 }
 
 .product-card__button:hover {
-    background: #005BB5;
+    background: var(--background-color-secondary-hover);
 }
 
 @media (max-width: 768px) {
@@ -780,10 +791,11 @@ body {
     font-size: 15px;
     font-weight: 600;
     transition: background var(--transition);
+    background: var(--button-bg);
 }
 
 .cart-button:hover {
-    background: var(--button-bg);
+    background: var(--button-bg-hover);
 }
 
 .cart-button:focus {
@@ -802,12 +814,15 @@ body {
 
 .cart-count {
     position: absolute;
-    top: -6px;
+    top: -4px;
     right: -6px;
     background-color: var(--cart-red);
+    /* min-height: 15px; */
+    width: 13px;
+    height: 13px;
     color: #FFFFFF;
     border-radius: 50%;
-    padding: 4px 8px;
+    /* padding: 0px 1px; */
     font-size: 12px;
     font-weight: 600;
 }
@@ -1103,7 +1118,7 @@ body {
 }
 
 .contacts__form button {
-    background: var(--accent-color);
+    background: var(--background-color-secondary);
     color: #FFFFFF;
     border: none;
     padding: 12px;
@@ -1114,7 +1129,7 @@ body {
 }
 
 .contacts__form button:hover {
-    background: #005BB5;
+    background: var(--background-color-secondary-hover);
 }
 
 @media (max-width: 768px) {
@@ -1164,7 +1179,7 @@ body {
     position: fixed;
     bottom: 20px;
     right: 20px;
-    background: var(--accent-color);
+    background: var(--background-color-secondary);
     color: #FFFFFF;
     border: none;
     border-radius: 50%;
@@ -1178,7 +1193,7 @@ body {
 }
 
 .scroll-to-top:hover {
-    background: #005BB5;
+    background: var(--background-color-secondary-hover);
 }
 
 .scroll-to-top.visible {

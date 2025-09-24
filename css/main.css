@@ -250,9 +250,6 @@ body {
     text-decoration: none;
 }
 
-.header__phones a:hover {
-    /* color: var(--accent-color); */
-}
 
 .catalog-dropdown,
 .search-dropdown {

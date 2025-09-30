@@ -103,9 +103,9 @@ body {
     overflow: visible; /* Позволяет иконке выходить за границы */
 }
 
-.header__title:hover {
+/* .header__title:hover {
     color: var(--accent-color);
-}
+} */
 
 .header__logo {
     width: 40px;
@@ -115,10 +115,88 @@ body {
     transform: scale(3.0); /* Увеличивает иконку в 2 раза */
 }
 
-.header__logo:hover {
-    transform: scale(3.0) rotate(-360deg); /* Поворот против часовой стрелки */
+/* .header__logo:hover {
+    transform: scale(3.0) rotate(-360deg);  
     transition: transform 0.8s ease-in-out;
+} */
+
+.header__brand-text {
+    margin-left: 12px;
+    font-size: clamp(18px, 4vw, 22px);
+    font-weight: 800; /* Максимальный доступный вес для большинства шрифтов */
+    letter-spacing: 0.5px;
+    font-family: 'Montserrat', Arial Black, sans-serif; /* Добавляем запасные жирные шрифты */
+    text-shadow: 0.5px 0.5px 0px rgba(0, 0, 0, 0.3); /* Добавляем тень для эффекта жирности */
 }
+
+.clima-text {
+    color: #FF3B30; /* Красный цвет для Clima */
+    -webkit-text-stroke: 0.3px rgba(0, 0, 0, 0.2); /* Контур текста для WebKit */
+}
+
+.tech-text {
+    color: #007AFF; /* Синий цвет для Tech */
+    -webkit-text-stroke: 0.3px rgba(0, 0, 0, 0.2); /* Контур текста для WebKit */
+}
+
+/* Адаптация для светлой темы */
+.light-theme .clima-text {
+    color: #FF2D55; /* Красный для светлой темы */
+}
+
+.light-theme .tech-text {
+    color: #007AFF; /* Синий остается тем же */
+}
+/* ===================================================================== */
+/* Эффекты при наведении на текст */
+/* Более яркий красный при наведении */
+
+/* .header__brand-text:hover .clima-text {
+    color: #FF6B6B; 
+    transition: color 0.3s ease;
+} */
+
+/* ================================================================ */
+/* Более яркий синий при наведении */
+
+/* .header__brand-text:hover .tech-text {
+    color: #4DA6FF; 
+    transition: color 0.3s ease;
+} */
+
+/* =================================================================== */
+
+/* Адаптивность для мобильных устройств */
+@media (max-width: 768px) {
+    .header__brand-text {
+        font-size: clamp(14px, 3vw, 18px);
+        margin-left: 8px;
+    }
+    
+    .header__logo {
+        transform: scale(2.0); /* Меньший масштаб на мобильных */
+    }
+    
+    .header__logo:hover {
+        transform: scale(2.0) rotate(-360deg);
+    }
+}
+
+@media (max-width: 480px) {
+    .header__brand-text {
+        font-size: 14px;
+        margin-left: 6px;
+    }
+    
+    .header__logo {
+        transform: scale(1.5);
+    }
+    
+    .header__logo:hover {
+        transform: scale(1.5) rotate(-360deg);
+    }
+}
+
 .light-theme .header__logo {
     fill: var(--text-color);
 }
@@ -270,10 +348,10 @@ body {
     display: flex;
     flex-direction: column;
     /* gap: 16px; */
-    color: var(--text-color);
+    color: var(--nav-text-color);
     font-size: 15px;
     margin-right: 16px;
-    font-weight: 800;
+    font-weight: 300;
 }
 
 .header__phones a {

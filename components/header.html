@@ -20,7 +20,12 @@
             </div>
         </div>
         <div class="header__main-bar">
-            <a href="#home" class="header__title" data-i18n="header-title" aria-label="Логотип и ссылка на главную">Климат Контроль</a>
+                        <a href="#hero" class="header__title">
+                <svg class="header__logo" aria-hidden="true">
+                    <use class="icon" href="icons/icons-sprite.svg#icon-logo"></use>
+                </svg>
+                <span class="visually-hidden">Климат Контроль</span>
+            </a>
             <button class="catalog-button" id="catalogButton" aria-haspopup="true" aria-controls="catalogDropdown" aria-expanded="false" aria-label="Открыть меню каталога">
                 <span class="catalog-icon"><img src="icons/squares-button-of-view-options.svg" alt="Каталог" style="width: 24px; height: 24px; vertical-align:middle; fill: currentColor;" /></span>
                 <!-- <span data-i18n="catalog">Каталог</span> -->

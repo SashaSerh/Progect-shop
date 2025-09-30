@@ -98,10 +98,41 @@ body {
     text-decoration: none;
     transition: color var(--transition);
     margin-right: 16px;
+    display: flex;
+    align-items: center;
+    overflow: visible; /* Позволяет иконке выходить за границы */
 }
 
 .header__title:hover {
     color: var(--accent-color);
+}
+
+.header__logo {
+    width: 40px;
+    height: 40px;
+    fill: var(--text-color);
+    transition: fill var(--transition), transform var(--transition);
+    transform: scale(3.0); /* Увеличивает иконку в 2 раза */
+}
+
+.header__logo:hover {
+    transform: scale(3.0) rotate(-360deg); /* Поворот против часовой стрелки */
+    transition: transform 0.8s ease-in-out;
+}
+.light-theme .header__logo {
+    fill: var(--text-color);
+}
+
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
 }
 
 .header__nav {
@@ -1195,4 +1226,11 @@ body {
 
 .scroll-to-top.visible {
     display: block;
+}
+.icon{
+    width: 100%;
+    height: 100%;
+    display: block;
+    fill: var(--text-color);
+    transition: fill var(--transition);
 }

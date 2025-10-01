@@ -20,6 +20,18 @@
     --background-color-secondary-hover: #006B8A;
     --white-text-color: #FFFFFF;
     --container-width: 1200px;
+    
+    /* 2025 Мобильные тренды */
+    --glass-bg: rgba(255, 255, 255, 0.1);
+    --glass-border: rgba(255, 255, 255, 0.2);
+    --glass-blur: blur(10px);
+    --modern-radius: 16px;
+    --micro-transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    --thumb-size: 44px;
+    --mobile-padding: 20px;
+    --trend-purple: #B19CD9;
+    --trend-green: #10B981;
+    --trend-orange: #F59E0B;
 }
 
 /* Переменные для светлой темы */
@@ -39,6 +51,10 @@
     --white-text-color: #FFFFFF;
     --background-color-secondary: #00A8E8;
     --background-color-secondary-hover: #008CBA;
+    
+    /* Светлая тема для мобильных трендов */
+    --glass-bg: rgba(255, 255, 255, 0.8);
+    --glass-border: rgba(0, 0, 0, 0.1);
 }
 
 /* Сброс базовых стилей */
@@ -110,15 +126,37 @@ body {
 .header__logo {
     width: 40px;
     height: 40px;
-    fill: var(--text-color);
-    transition: fill var(--transition), transform var(--transition);
-    transform: scale(3.0); /* Увеличивает иконку в 2 раза */
+    object-fit: contain; /* Для правильного масштабирования изображения */
+    transition: transform var(--transition), filter var(--transition);
+    transform: scale(3.0); /* Увеличивает иконку в 3 раза */
 }
 
-/* .header__logo:hover {
-    transform: scale(3.0) rotate(-360deg);  
+.header__logo:hover {
+    transform: scale(3.0) rotate(-360deg); /* Поворот против часовой стрелки */
     transition: transform 0.8s ease-in-out;
-} */
+}
+
+/* Изменение цвета логотипа для разных тем */
+.light-theme .header__logo {
+    filter: brightness(0.8) saturate(1.2); /* Делаем немного темнее для светлой темы */
+}
+
+/* Альтернативные цветовые схемы для логотипа */
+.header__logo.red-scheme {
+    filter: hue-rotate(180deg) saturate(1.5); /* Красная схема */
+}
+
+.header__logo.green-scheme {
+    filter: hue-rotate(90deg) saturate(1.3); /* Зеленая схема */
+}
+
+.header__logo.purple-scheme {
+    filter: hue-rotate(270deg) saturate(1.4); /* Фиолетовая схема */
+}
+
+.header__logo.grayscale {
+    filter: grayscale(100%); /* Черно-белая схема */
+}
 
 .header__brand-text {
     margin-left: 12px;
@@ -130,22 +168,22 @@ body {
 }
 
 .clima-text {
-    color: #FF3B30; /* Красный цвет для Clima */
+    color: var(--nav-text-color); /* Красный цвет для Clima */
     -webkit-text-stroke: 0.3px rgba(0, 0, 0, 0.2); /* Контур текста для WebKit */
 }
 
 .tech-text {
-    color: #007AFF; /* Синий цвет для Tech */
+    color: var(--nav-text-color); /* Синий цвет для Tech */
     -webkit-text-stroke: 0.3px rgba(0, 0, 0, 0.2); /* Контур текста для WebKit */
 }
 
 /* Адаптация для светлой темы */
 .light-theme .clima-text {
-    color: #FF2D55; /* Красный для светлой темы */
+    color: var(--nav-text-color); /* Красный для светлой темы */
 }
 
 .light-theme .tech-text {
-    color: #007AFF; /* Синий остается тем же */
+    color: var(--nav-text-color); /* Синий остается тем же */
 }
 /* ===================================================================== */
 /* Эффекты при наведении на текст */
@@ -1311,4 +1349,342 @@ body {
     display: block;
     fill: var(--text-color);
     transition: fill var(--transition);
+}
+
+/* ===== 2025 MOBILE DESIGN TRENDS (MOBILE ONLY) ===== */
+@media (max-width: 768px) {
+  :root {
+    /* Glassmorphism colors */
+    --glass-bg: rgba(255, 255, 255, 0.25);
+    --glass-border: rgba(255, 255, 255, 0.18);
+    --glass-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+    
+    /* Modern spacing and radiuses */
+    --modern-radius: 16px;
+    --micro-transition: 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+    
+    /* Thumb-friendly sizes */
+    --thumb-size: 44px;
+    --thumb-spacing: 12px;
+  }
+
+  [data-theme="dark"] {
+    --glass-bg: rgba(0, 0, 0, 0.25);
+    --glass-border: rgba(255, 255, 255, 0.1);
+  }
+
+  /* Glassmorphism cards */
+  .glass-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--modern-radius);
+    box-shadow: var(--glass-shadow);
+    transition: transform var(--micro-transition);
+  }
+
+  .glass-card:hover {
+    transform: translateY(-2px);
+  }
+
+  /* Modern buttons */
+  .modern-button {
+    min-height: var(--thumb-size);
+    border-radius: 22px;
+    font-weight: 600;
+    letter-spacing: 0.025em;
+    transition: all var(--micro-transition);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .modern-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+  }
+
+  .modern-button:hover::before {
+    left: 100%;
+  }
+
+  /* FAB (Floating Action Button) */
+  .fab {
+    position: fixed;
+    bottom: 80px;
+    right: 20px;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    cursor: pointer;
+    transition: all var(--micro-transition);
+    z-index: 1000;
+  }
+
+  .fab:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.4);
+  }
+
+  /* Mobile Navigation */
+  .mobile-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid var(--glass-border);
+    padding: 8px 0;
+    z-index: 1000;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+  }
+
+  .mobile-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-decoration: none;
+    color: var(--text-color);
+    transition: all var(--micro-transition);
+    padding: 8px 12px;
+    border-radius: 12px;
+    min-width: var(--thumb-size);
+    min-height: var(--thumb-size);
+  }
+
+  .mobile-nav-item:hover {
+    background: var(--glass-bg);
+    transform: translateY(-2px);
+  }
+
+  .mobile-nav-icon {
+    font-size: 20px;
+    margin-bottom: 4px;
+  }
+
+  .mobile-nav-text {
+    font-size: 10px;
+    font-weight: 500;
+  }
+}
+
+/* Glassmorphism эффекты */
+.glass-card {
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--modern-radius);
+    transition: var(--micro-transition);
+}
+
+.glass-card:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+/* Современные кнопки для мобильных */
+.modern-button {
+    min-height: var(--thumb-size);
+    border-radius: 22px;
+    padding: 12px 24px;
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    color: var(--text-color);
+    font-weight: 600;
+    transition: var(--micro-transition);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.modern-button:hover {
+    transform: translateY(-1px);
+    background: var(--button-bg-hover);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.modern-button:active {
+    transform: translateY(0);
+    transition: var(--micro-transition);
+}
+
+/* Floating Action Button */
+.fab {
+    position: fixed;
+    bottom: var(--mobile-padding);
+    right: var(--mobile-padding);
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--accent-color);
+    color: white;
+    border: none;
+    box-shadow: 0 4px 16px rgba(0, 122, 255, 0.3);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    transition: var(--micro-transition);
+    z-index: 1000;
+}
+
+.fab:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 20px rgba(0, 122, 255, 0.4);
+}
+
+/* Карточки с мягким дизайном */
+.soft-card {
+    background: var(--glass-bg);
+    border-radius: var(--modern-radius);
+    padding: var(--mobile-padding);
+    backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    transition: var(--micro-transition);
+    margin-bottom: 16px;
+}
+
+.soft-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
+}
+
+/* Современная навигация для мобильных */
+.mobile-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    border-top: 1px solid var(--glass-border);
+    padding: 12px;
+    display: flex;
+    justify-content: space-around;
+    z-index: 100;
+}
+
+.mobile-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    color: var(--nav-text-color);
+    text-decoration: none;
+    transition: var(--micro-transition);
+    min-width: var(--thumb-size);
+    padding: 8px;
+    border-radius: 12px;
+}
+
+.mobile-nav-item:hover,
+.mobile-nav-item.active {
+    color: var(--accent-color);
+    background: var(--button-bg);
+}
+
+.mobile-nav-icon {
+    font-size: 20px;
+}
+
+.mobile-nav-text {
+    font-size: 12px;
+    font-weight: 500;
+}
+
+/* Микро-анимации */
+.micro-bounce {
+    animation: microBounce 0.4s ease-out;
+}
+
+@keyframes microBounce {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.micro-fade-in {
+    animation: microFadeIn 0.3s ease-out;
+}
+
+@keyframes microFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Адаптация для мобильных устройств */
+@media (max-width: 768px) {
+    /* Увеличиваем области касания */
+    .header__nav-link,
+    .language-switcher,
+    .theme-toggle,
+    .catalog-button,
+    .search-button {
+        min-height: var(--thumb-size);
+        min-width: var(--thumb-size);
+    }
+    
+    /* Применяем glassmorphism к карточкам */
+    .service-card,
+    .product-card {
+        background: var(--glass-bg);
+        backdrop-filter: var(--glass-blur);
+        border: 1px solid var(--glass-border);
+        transition: var(--micro-transition);
+    }
+    
+    .service-card:hover,
+    .product-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Современные отступы */
+    .container {
+        padding: 0 var(--mobile-padding);
+    }
+    
+    /* Floating кнопки */
+    .scroll-to-top {
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        background: var(--accent-color);
+        box-shadow: 0 4px 16px rgba(0, 122, 255, 0.3);
+        transition: var(--micro-transition);
+    }
+    
+    .scroll-to-top:hover {
+        transform: scale(1.1);
+        box-shadow: 0 6px 20px rgba(0, 122, 255, 0.4);
+    }
 }

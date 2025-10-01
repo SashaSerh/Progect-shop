@@ -314,3 +314,137 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }, true);
 });
+
+// Функция для изменения цветовой схемы логотипа
+function changeLogoColorScheme(scheme) {
+    const logo = document.querySelector('.header__logo');
+    if (!logo) return;
+    
+    // Удаляем все существующие цветовые схемы
+    logo.classList.remove('red-scheme', 'green-scheme', 'purple-scheme', 'grayscale');
+    
+    // Добавляем новую схему, если она указана
+    if (scheme && scheme !== 'default') {
+        logo.classList.add(`${scheme}-scheme`);
+    }
+    
+    // Сохраняем выбор в localStorage
+    localStorage.setItem('logoColorScheme', scheme || 'default');
+}
+
+// Инициализация цветовой схемы логотипа при загрузке
+function initLogoColorScheme() {
+    const savedScheme = localStorage.getItem('logoColorScheme') || 'default';
+    changeLogoColorScheme(savedScheme);
+}
+
+// Экспорт функций для использования в других файлах
+window.changeLogoColorScheme = changeLogoColorScheme;
+window.initLogoColorScheme = initLogoColorScheme;
+
+// Инициализация при загрузке DOM
+document.addEventListener('DOMContentLoaded', () => {
+    // Небольшая задержка для загрузки логотипа
+    setTimeout(initLogoColorScheme, 100);
+    
+    // Инициализация современных мобильных эффектов
+    initModernMobileEffects();
+    
+    // Переинициализация мобильных эффектов при изменении размера окна
+    let resizeTimeout;
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(() => {
+            initModernMobileEffects();
+        }, 250);
+    });
+});
+
+// Современные мобильные эффекты
+function initModernMobileEffects() {
+    // Проверяем, что это мобильное устройство
+    if (window.innerWidth > 768) {
+        return; // Не применяем эффекты на десктопе
+    }
+    
+    // Добавляем микро-анимации для кнопок
+    const buttons = document.querySelectorAll('.modern-button');
+    buttons.forEach(button => {
+        button.addEventListener('click', function() {
+            this.classList.add('micro-bounce');
+            setTimeout(() => {
+                this.classList.remove('micro-bounce');
+            }, 400);
+        });
+    });
+    
+    // Intersection Observer для fade-in анимаций
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+    
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('micro-fade-in');
+            }
+        });
+    }, observerOptions);
+    
+    // Наблюдаем за карточками
+    document.querySelectorAll('.glass-card, .soft-card').forEach(el => {
+        observer.observe(el);
+    });
+    
+    // Активная навигация для мобильных
+    const mobileNavItems = document.querySelectorAll('.mobile-nav-item[href]');
+    mobileNavItems.forEach(item => {
+        item.addEventListener('click', function(e) {
+            // Убираем активный класс у всех
+            mobileNavItems.forEach(nav => nav.classList.remove('active'));
+            // Добавляем активный класс к текущему
+            this.classList.add('active');
+            
+            // Плавная прокрутка
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                e.preventDefault();
+                target.scrollIntoView({ 
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        });
+    });
+    
+    // Динамическое изменение цвета header при прокрутке (только на мобильных)
+    let lastScrollY = window.scrollY;
+    window.addEventListener('scroll', () => {
+        if (window.innerWidth <= 768) { // Только для мобильных
+            const header = document.querySelector('.header');
+            if (header) {
+                if (window.scrollY > 100) {
+                    header.style.backdropFilter = 'blur(20px)';
+                    header.style.background = 'var(--glass-bg)';
+                } else {
+                    header.style.backdropFilter = 'blur(10px)';
+                    header.style.background = 'var(--primary-color)';
+                }
+            }
+        }
+        lastScrollY = window.scrollY;
+    });
+    
+    // Haptic feedback для мобильных (если поддерживается)
+    if ('vibrate' in navigator) {
+        document.querySelectorAll('.modern-button, .fab, .mobile-nav-item').forEach(element => {
+            element.addEventListener('touchstart', () => {
+                navigator.vibrate(10); // Короткая вибрация
+            });
+        });
+    }
+}
+
+// Экспорт функций
+window.initModernMobileEffects = initModernMobileEffects;

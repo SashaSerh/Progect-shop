@@ -11,11 +11,52 @@
         </div>
     </div>
     <div class="footer__social">
-        <a href="#" aria-label="Facebook" class="footer__social-link"><img src="../icons/icon-facebook.png" alt="Facebook" style="width: 24px; height: 24px;"></a>
-        <a href="#" aria-label="Telegram" class="footer__social-link"><img src="../icons/icon-telegram.png" alt="Telegram" style="width: 24px; height: 24px;"></a>
-        <a href="#" aria-label="Instagram" class="footer__social-link"><img src="../icons/icon-instagram.png" alt="Instagram" style="width: 24px; height: 24px;"></a>
-        <!-- <a href="#" aria-label="LinkedIn" class="footer__social-link"><img src="../icons/linkedin-icon.png" alt="LinkedIn" style="width: 24px; height: 24px;"></a> -->
+        <a href="#" aria-label="Facebook" class="footer__social-link"><img src="icons/icon-facebook.png" alt="Facebook" style="width: 24px; height: 24px;"></a>
+        <a href="#" aria-label="Telegram" class="footer__social-link"><img src="icons/icon-telegram.png" alt="Telegram" style="width: 24px; height: 24px;"></a>
+        <a href="#" aria-label="Instagram" class="footer__social-link"><img src="icons/icon-instagram.png" alt="Instagram" style="width: 24px; height: 24px;"></a>
+        <!-- <a href="#" aria-label="LinkedIn" class="footer__social-link"><img src="icons/linkedin-icon.png" alt="LinkedIn" style="width: 24px; height: 24px;"></a> -->
     </div>
+
+    <!-- Современная мобильная навигация (только для мобильных) -->
+    <nav class="mobile-nav" style="display: none;">
+        <a href="#hero" class="mobile-nav-item active">
+            <span class="mobile-nav-icon">🏠</span>
+            <span class="mobile-nav-text" data-i18n="nav-home">Главная</span>
+        </a>
+        <a href="#services" class="mobile-nav-item">
+            <span class="mobile-nav-icon">🔧</span>
+            <span class="mobile-nav-text" data-i18n="nav-services">Услуги</span>
+        </a>
+        <a href="#products" class="mobile-nav-item">
+            <span class="mobile-nav-icon">🛍️</span>
+            <span class="mobile-nav-text" data-i18n="nav-products">Товары</span>
+        </a>
+        <a href="#contacts" class="mobile-nav-item">
+            <span class="mobile-nav-icon">📞</span>
+            <span class="mobile-nav-text" data-i18n="nav-contacts">Контакты</span>
+        </a>
+        <button class="mobile-nav-item" onclick="document.querySelector('#cartModal').style.display='block'">
+            <span class="mobile-nav-icon">🛒</span>
+            <span class="mobile-nav-text" data-i18n="cart">Корзина</span>
+        </button>
+    </nav>
+
+    <!-- Floating Action Button для быстрых действий (только для мобильных) -->
+    <button class="fab" title="Быстрая помощь" onclick="alert('Свяжитесь с нами: +380-800-555-1234')" style="display: none;">
+        💬
+    </button>
+
+<style>
+@media (max-width: 768px) {
+    .mobile-nav {
+        display: flex !important;
+    }
+    
+    .fab {
+        display: flex !important;
+    }
+}
+</style>
 
 
 </footer>

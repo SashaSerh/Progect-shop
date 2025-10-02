@@ -1327,7 +1327,7 @@ body {
     border: none;
     border-radius: 50%;
     cursor: pointer;
-    display: none;
+    display: flex; /* Изменяем на flex для постоянного отображения */
     transition: all 0.3s ease;
 }
 
@@ -1337,7 +1337,10 @@ body {
 }
 
 .scroll-to-top.visible {
-    display: block;
+    /* Класс visible теперь отвечает за появление кнопки */
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
 }
 .icon{
     width: 100%;
@@ -1433,16 +1436,16 @@ body {
   }
 }
 
-/* Дополнительные стили для различения кнопок */
+/* Дополнительные стили для кнопок */
 .scroll-to-top {
-  /* Стилизуем кнопку "наверх" в том же стиле что и FAB */
+  /* Стилизуем кнопку "наверх" с адаптивными цветами */
   width: 56px !important;
   height: 56px !important;
-  background: linear-gradient(135deg, #6c757d, #495057) !important;
+  background: #007B9E !important; /* Цвет для темной темы */
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+  box-shadow: 0 4px 15px rgba(0, 123, 158, 0.3);
   order: 2; /* Кнопка "наверх" будет снизу */
   position: relative !important; /* Убираем fixed позиционирование */
   font-size: 24px; /* Одинаковый размер иконки */
@@ -1453,20 +1456,40 @@ body {
   justify-content: center;
   cursor: pointer;
   transition: all 0.3s ease;
+  opacity: 0;
+  transform: translateY(20px);
+  pointer-events: none;
+}
+
+/* Цвета для светлой темы */
+.light-theme .scroll-to-top {
+  background: #00A8E8 !important;
+  box-shadow: 0 4px 15px rgba(0, 168, 232, 0.3);
+}
+
+.light-theme .scroll-to-top:hover {
+  background: #0085B8 !important; /* Темнее на 20% от #00A8E8 */
+  box-shadow: 0 6px 20px rgba(0, 133, 184, 0.4);
+}
+
+.scroll-to-top.visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
 }
 
 .scroll-to-top:hover {
-  background: linear-gradient(135deg, #495057, #343a40) !important;
+  background: #006B8A !important; /* Цвет hover для темной темы */
   transform: scale(1.1);
-  box-shadow: 0 6px 20px rgba(108, 117, 125, 0.4);
+  box-shadow: 0 6px 20px rgba(0, 107, 138, 0.4);
 }
 
 .fab {
-  /* FAB остается яркой и заметной */
+  /* FAB с адаптивными цветами */
   width: 56px !important;
   height: 56px !important;
-  background: linear-gradient(135deg, var(--primary-color), #007bff) !important;
-  box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+  background: #007B9E !important; /* Цвет для темной темы */
+  box-shadow: 0 4px 15px rgba(0, 123, 158, 0.3);
   border: 1px solid rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
@@ -1483,10 +1506,21 @@ body {
   border: none;
 }
 
+/* Цвета для светлой темы */
+.light-theme .fab {
+  background: #00A8E8 !important;
+  box-shadow: 0 4px 15px rgba(0, 168, 232, 0.3);
+}
+
+.light-theme .fab:hover {
+  background: #0085B8 !important; /* Темнее на 20% от #00A8E8 */
+  box-shadow: 0 6px 20px rgba(0, 133, 184, 0.4);
+}
+
 .fab:hover {
   transform: scale(1.1);
-  box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
-  background: linear-gradient(135deg, #007bff, #0056b3) !important;
+  box-shadow: 0 6px 20px rgba(0, 107, 138, 0.4);
+  background: #006B8A !important; /* Цвет hover для темной темы */
 }
 @media (max-width: 768px) {
 

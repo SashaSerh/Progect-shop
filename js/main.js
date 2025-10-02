@@ -286,15 +286,33 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const scrollToTopButton = document.querySelector('.scroll-to-top');
     if (scrollToTopButton) {
+        let lastScrollTop = 0;
+        let scrollThreshold = 200; // Минимальный скролл для появления кнопки
+        
         window.addEventListener('scroll', () => {
-            if (window.scrollY > 300) {
+            const currentScroll = window.pageYOffset || document.documentElement.scrollTop;
+            
+            // Показываем кнопку когда прокрутили вниз больше чем на 200px
+            if (currentScroll > scrollThreshold) {
                 scrollToTopButton.classList.add('visible');
             } else {
                 scrollToTopButton.classList.remove('visible');
             }
+            
+            lastScrollTop = currentScroll <= 0 ? 0 : currentScroll; // Для мобильных браузеров
         });
+        
         scrollToTopButton.addEventListener('click', () => {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            window.scrollTo({ 
+                top: 0, 
+                behavior: 'smooth' 
+            });
+            
+            // Добавляем небольшую анимацию нажатия
+            scrollToTopButton.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                scrollToTopButton.style.transform = '';
+            }, 150);
         });
     }
 

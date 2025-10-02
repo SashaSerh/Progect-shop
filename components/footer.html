@@ -20,31 +20,29 @@
     <!-- Современная мобильная навигация (только для мобильных) -->
     <nav class="mobile-nav" style="display: none;">
         <a href="#hero" class="mobile-nav-item active">
-            <span class="mobile-nav-icon">🏠</span>
-            <span class="mobile-nav-text" data-i18n="nav-home">Главная</span>
+            <span class="mobile-nav-icon"><img src="icons/home-icon.svg" alt="Главная" style="width: 24px; height: 24px;"></span>
+            <!-- <span class="mobile-nav-text" data-i18n="nav-home">Главная</span> -->
         </a>
         <a href="#services" class="mobile-nav-item">
-            <span class="mobile-nav-icon">🔧</span>
-            <span class="mobile-nav-text" data-i18n="nav-services">Услуги</span>
+            <span class="mobile-nav-icon"><img src="icons/wrench-icon.svg" alt="Услуги" style="width: 24px; height: 24px;"></span>
+            <!-- <span class="mobile-nav-text" data-i18n="nav-services">Услуги</span> -->
         </a>
         <a href="#products" class="mobile-nav-item">
-            <span class="mobile-nav-icon">🛍️</span>
-            <span class="mobile-nav-text" data-i18n="nav-products">Товары</span>
+            <span class="mobile-nav-icon"><img src="icons/shopping-bag-icon.svg" alt="Товары" style="width: 24px; height: 24px;"></span>
+            <!-- <span class="mobile-nav-text" data-i18n="nav-products">Товары</span> -->
         </a>
         <a href="#contacts" class="mobile-nav-item">
-            <span class="mobile-nav-icon">📞</span>
-            <span class="mobile-nav-text" data-i18n="nav-contacts">Контакты</span>
+            <span class="mobile-nav-icon"><img src="icons/telephone-icon.svg" alt="Контакты" style="width: 24px; height: 24px;"></span>
+            <!-- <span class="mobile-nav-text" data-i18n="nav-contacts">Контакты</span> -->
         </a>
         <button class="mobile-nav-item" onclick="document.querySelector('#cartModal').style.display='block'">
-            <span class="mobile-nav-icon">🛒</span>
-            <span class="mobile-nav-text" data-i18n="cart">Корзина</span>
+            <span class="mobile-nav-icon"><img src="icons/cart512x512.svg" alt="Корзина" style="width: 24px; height: 24px;"></span>
+            <!-- <span class="mobile-nav-text" data-i18n="cart">Корзина</span> -->
         </button>
     </nav>
 
-    <!-- Floating Action Button для быстрых действий (только для мобильных) -->
-    <button class="fab" title="Быстрая помощь" onclick="alert('Свяжитесь с нами: +380-800-555-1234')" style="display: none;">
-        💬
-    </button>
+    <!-- Floating Action Button для быстрых действий -->
+    <!-- FAB перемещена в floating-buttons контейнер в index.html -->
 
 <style>
 @media (max-width: 768px) {
@@ -52,8 +50,16 @@
         display: flex !important;
     }
     
+    /* Позиционирование FAB для мобильных - выше мобильной навигации */
     .fab {
-        display: flex !important;
+        bottom: 90px !important; /* Поднимаем выше мобильной навигации */
+    }
+}
+
+@media (min-width: 769px) {
+    /* Позиционирование FAB для десктопа */
+    .fab {
+        bottom: 20px !important;
     }
 }
 </style>

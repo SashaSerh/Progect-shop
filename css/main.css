@@ -20,6 +20,9 @@
     --background-color-secondary-hover: #006B8A;
     --white-text-color: #FFFFFF;
     --container-width: 1200px;
+     --fab-bottom: 20px;
+     --fab-right: 20px;
+     --fab-gap: 16px; /* Расстояние между кнопками */
     
     /* 2025 Мобильные тренды */
     --glass-bg: rgba(255, 255, 255, 0.1);
@@ -1320,9 +1323,6 @@ body {
 }
 
 .scroll-to-top {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
     background: var(--background-color-secondary);
     color: #FFFFFF;
     border: none;
@@ -1332,12 +1332,12 @@ body {
     font-size: 24px;
     cursor: pointer;
     display: none;
-    z-index: 100;
-    transition: background var(--transition), opacity 0.3s ease;
+    transition: background var(--transition), opacity 0.3s ease, transform 0.3s ease;
 }
 
 .scroll-to-top:hover {
     background: var(--background-color-secondary-hover);
+    transform: scale(1.1);
 }
 
 .scroll-to-top.visible {
@@ -1366,6 +1366,8 @@ body {
     /* Thumb-friendly sizes */
     --thumb-size: 44px;
     --thumb-spacing: 12px;
+    --fab-bottom: 110px;
+    --fab-gap: 12px;
   }
 
   [data-theme="dark"] {
@@ -1414,7 +1416,7 @@ body {
     left: 100%;
   }
 
-  /* FAB (Floating Action Button) */
+  /* FAB (Floating Action Button) - для мобильных */
   .fab {
     position: fixed;
     bottom: 80px;
@@ -1439,6 +1441,61 @@ body {
     transform: scale(1.1);
     box-shadow: 0 6px 16px rgba(0,0,0,0.4);
   }
+}
+
+/* Floating buttons container для лучшей группировки */
+.floating-buttons {
+  position: fixed;
+  right: var(--fab-right);
+  bottom: var(--fab-bottom);
+  display: flex;
+  flex-direction: column;
+  gap: var(--fab-gap);
+  z-index: 1000;
+  align-items: center; /* Центрируем кнопки для идеального выравнивания */
+}
+
+@media (max-width: 768px) {
+  .floating-buttons {
+    bottom: 110px; /* Поднимаем всю группу выше мобильной навигации */
+    gap: 12px;
+  }
+}
+
+/* Дополнительные стили для различения кнопок */
+.scroll-to-top {
+  /* Делаем кнопку "наверх" того же размера что и FAB */
+  width: 56px !important;
+  height: 56px !important;
+  background: rgba(108, 117, 125, 0.9) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  order: 2; /* Кнопка "наверх" будет снизу */
+  position: relative !important; /* Убираем fixed позиционирование */
+  font-size: 24px; /* Одинаковый размер иконки */
+}
+
+.scroll-to-top:hover {
+  background: rgba(108, 117, 125, 1) !important;
+  transform: scale(1.1);
+}
+
+.fab {
+  /* FAB остается яркой и заметной */
+  width: 56px !important;
+  height: 56px !important;
+  background: linear-gradient(135deg, var(--primary-color), #007bff) !important;
+  box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+  order: 1; /* FAB будет сверху */
+  position: relative !important; /* Убираем fixed позиционирование */
+  font-size: 24px; /* Одинаковый размер иконки */
+}
+
+.fab:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
+}
+@media (max-width: 768px) {
 
   /* Mobile Navigation */
   .mobile-nav {

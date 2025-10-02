@@ -437,13 +437,22 @@ function initModernMobileEffects() {
     });
     
     // Haptic feedback для мобильных (если поддерживается)
-    if ('vibrate' in navigator) {
-        document.querySelectorAll('.modern-button, .fab, .mobile-nav-item').forEach(element => {
+    if ('vibrate' in navigator && window.innerWidth <= 768) {
+        document.querySelectorAll('.modern-button, .mobile-nav-item').forEach(element => {
             element.addEventListener('touchstart', () => {
                 navigator.vibrate(10); // Короткая вибрация
             });
         });
     }
+    
+    // FAB кнопка работает на всех устройствах (без ограничения по ширине экрана)
+    document.querySelectorAll('.fab').forEach(element => {
+        element.addEventListener('click', () => {
+            if ('vibrate' in navigator) {
+                navigator.vibrate(25); // Короткая вибрация для FAB
+            }
+        });
+    });
 }
 
 // Экспорт функций

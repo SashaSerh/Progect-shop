@@ -119,7 +119,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     initTheme();
-    bindThemeEvents(); // Привязываем обработчики тем
     switchLanguage(savedLanguage);
     renderProducts(savedLanguage, translations);
     updateCartUI(translations, savedLanguage);
@@ -127,6 +126,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     // Инициализация мобильного заголовка
     initMobileHeader();
+    
+    // Привязываем обработчики тем ПОСЛЕ инициализации мобильного хедера
+    bindThemeEvents();
 
     const profileButton = document.getElementById('profileButton');
     const profileModal = document.getElementById('profileModal');
@@ -589,6 +591,9 @@ function initMobileHeader() {
         });
     }
 
+    // Инициализация тоглов в мобильном хедере
+    initMobileToggles();
+
     // Закрытие меню при нажатии Escape
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape' && mobileNav.classList.contains('active')) {
@@ -617,6 +622,49 @@ function initMobileHeader() {
     console.log('Мобильный заголовок инициализирован');
 }
 
+// Функция инициализации мобильных тоглов
+function initMobileToggles() {
+    const mobileThemeToggle = document.querySelector('.mobile-theme-toggle');
+    const mobileLanguageSwitchers = document.querySelectorAll('.mobile-language-switcher .language-switcher');
+
+    // Инициализация тогла темы
+    if (mobileThemeToggle) {
+        mobileThemeToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (typeof toggleTheme === 'function') {
+                toggleTheme();
+            }
+            
+            // Обратная связь
+            if (navigator.vibrate) {
+                navigator.vibrate(30);
+            }
+        });
+    }
+
+    // Инициализация переключателей языка
+    mobileLanguageSwitchers.forEach(switcher => {
+        switcher.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const lang = switcher.getAttribute('data-lang');
+            
+            // Переключаем язык (убираем добавление/удаление активного класса)
+            if (typeof switchLanguage === 'function') {
+                switchLanguage(lang);
+            }
+            
+            // Обратная связь
+            if (navigator.vibrate) {
+                navigator.vibrate(30);
+            }
+        });
+    });
+
+    // Убираем установку начального состояния языка
+    console.log('Мобильные тоглы инициализированы');
+}
+
 // Экспорт функций
 window.initModernMobileEffects = initModernMobileEffects;
 window.initMobileHeader = initMobileHeader;
+window.initMobileToggles = initMobileToggles;

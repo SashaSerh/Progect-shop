@@ -65,8 +65,8 @@ function updateAllThemeIcons(theme) {
  * Вызывается после загрузки компонентов
  */
 export function bindThemeEvents() {
-    // Находим все кнопки переключения тем
-    const themeButtons = document.querySelectorAll('.theme-toggle, .mobile-theme-toggle');
+    // Находим все кнопки переключения тем (исключаем мобильные - они обрабатываются отдельно)
+    const themeButtons = document.querySelectorAll('.theme-toggle:not(.mobile-theme-toggle)');
     
     themeButtons.forEach(button => {
         // Удаляем старые обработчики для избежания дублирования
@@ -74,8 +74,6 @@ export function bindThemeEvents() {
         // Добавляем новый обработчик
         button.addEventListener('click', toggleTheme);
     });
-    
-    console.log(`Привязано ${themeButtons.length} кнопок переключения тем`);
 }
 
 /**
@@ -96,3 +94,8 @@ export function setTheme(theme) {
     localStorage.setItem('theme', theme);
     updateAllThemeIcons(theme);
 }
+
+// Экспорт в глобальную область для совместимости
+window.toggleTheme = toggleTheme;
+window.initTheme = initTheme;
+window.setTheme = setTheme;

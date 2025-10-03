@@ -140,3 +140,6 @@ export function switchLanguage(lang) {
     document.title = translations[lang]['site-title'] || 'Климат Контроль';
     localStorage.setItem('language', lang);
 }
+
+// Экспорт в глобальную область для совместимости
+window.switchLanguage = switchLanguage;

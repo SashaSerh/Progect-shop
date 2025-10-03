@@ -1,25 +1,105 @@
 <header class="header" role="banner">
     <div class="header__container container">
-        <div class="header__top-bar">
-            <nav class="header__nav" aria-label="Основная навигация">
-                <ul class="header__nav-list">
-                    <li class="header__nav-item"><a href="#home" class="header__nav-link" data-i18n="nav-home">Главная</a></li>
-                    <li class="header__nav-item"><a href="#services" class="header__nav-link" data-i18n="nav-services">Услуги</a></li>
-                    <li class="header__nav-item"><a href="#products" class="header__nav-link" data-i18n="nav-products">Товары</a></li>
-                    <li class="header__nav-item"><a href="#about" class="header__nav-link" data-i18n="nav-about">О нас</a></li>
-                    <li class="header__nav-item"><a href="#contacts" class="header__nav-link" data-i18n="nav-contacts">Контакты</a></li>
-                </ul>
-            </nav>
-            <div class="header__controls">
-                <button class="profile-button" id="profileButton" data-i18n="login" aria-label="Войти или профиль">Войти</button>
-                <button class="theme-toggle" aria-label="Переключить тему">
-                    <span class="theme-icon">🌙</span>
-                </button>
-                <button class="language-switcher" data-lang="ru" aria-label="Переключить на русский">RU</button>
-                <button class="language-switcher" data-lang="uk" aria-label="Переключить на украинский">UK</button>
-            </div>
+        <!-- Мобильная версия заголовка -->
+        <div class="header__mobile">
+            <!-- Логотип слева -->
+            <a href="#hero" class="header__mobile-brand">
+                <img src="icons/logo-icon.svg" alt="ClimaTech Logo" class="header__mobile-logo">
+                <span class="header__mobile-text">
+                    <span class="clima-text">Clima</span><span class="tech-text">Tech</span>
+                </span>
+            </a>
+            
+            <!-- Гамбургер меню справа -->
+            <button class="hamburger-toggle" aria-label="Открыть меню навигации" aria-expanded="false">
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+            </button>
         </div>
-        <div class="header__main-bar">
+
+        <!-- Мобильное выпадающее меню -->
+        <nav class="mobile-nav" role="navigation" aria-hidden="true">
+            <ul class="mobile-nav__list">
+                <li class="mobile-nav__item">
+                    <a href="#home" class="mobile-nav__link" data-i18n="nav-home">Главная</a>
+                </li>
+                <li class="mobile-nav__item">
+                    <a href="#services" class="mobile-nav__link" data-i18n="nav-services">Услуги</a>
+                </li>
+                <li class="mobile-nav__item">
+                    <a href="#products" class="mobile-nav__link" data-i18n="nav-products">Товары</a>
+                </li>
+                <li class="mobile-nav__item">
+                    <a href="#about" class="mobile-nav__link" data-i18n="nav-about">О нас</a>
+                </li>
+                <li class="mobile-nav__item">
+                    <a href="#contacts" class="mobile-nav__link" data-i18n="nav-contacts">Контакты</a>
+                </li>
+                
+                <!-- Управление -->
+                <li class="mobile-nav__divider"></li>
+                <li class="mobile-nav__item">
+                    <button class="mobile-nav__cart" id="mobileCartButton" aria-label="Корзина">
+                        <span class="cart-icon">🛒</span>
+                        <span data-i18n="cart">Корзина</span>
+                        <span class="cart-count">0</span>
+                    </button>
+                </li>
+                <li class="mobile-nav__item">
+                    <button class="mobile-nav__profile" id="mobileProfileButton" data-i18n="login" aria-label="Войти">
+                        Войти
+                    </button>
+                </li>
+                
+                <!-- Настройки -->
+                <li class="mobile-nav__divider"></li>
+                <li class="mobile-nav__item mobile-nav__controls">
+                    <button class="theme-toggle mobile-theme-toggle" aria-label="Переключить тему">
+                        <span class="theme-icon">🌙</span>
+                        <span>Тема</span>
+                    </button>
+                    <div class="mobile-language-switcher">
+                        <button class="language-switcher" data-lang="ru" aria-label="Русский">RU</button>
+                        <button class="language-switcher" data-lang="uk" aria-label="Українська">UK</button>
+                    </div>
+                </li>
+                
+                <!-- Телефоны -->
+                <li class="mobile-nav__divider"></li>
+                <li class="mobile-nav__item mobile-nav__phones">
+                    <a href="tel:+380633353410" aria-label="Позвонить +380-63-335-34-10">
+                        📞 +380-63-335-34-10
+                    </a>
+                    <a href="tel:+380995543499" aria-label="Позвонить +380-99-554-34-99">
+                        📞 +380-99-554-34-99
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Десктопная версия заголовка -->
+        <div class="header__desktop">
+            <div class="header__top-bar">
+                <nav class="header__nav" aria-label="Основная навигация">
+                    <ul class="header__nav-list">
+                        <li class="header__nav-item"><a href="#home" class="header__nav-link" data-i18n="nav-home">Главная</a></li>
+                        <li class="header__nav-item"><a href="#services" class="header__nav-link" data-i18n="nav-services">Услуги</a></li>
+                        <li class="header__nav-item"><a href="#products" class="header__nav-link" data-i18n="nav-products">Товары</a></li>
+                        <li class="header__nav-item"><a href="#about" class="header__nav-link" data-i18n="nav-about">О нас</a></li>
+                        <li class="header__nav-item"><a href="#contacts" class="header__nav-link" data-i18n="nav-contacts">Контакты</a></li>
+                    </ul>
+                </nav>
+                <div class="header__controls">
+                    <button class="profile-button" id="profileButton" data-i18n="login" aria-label="Войти или профиль">Войти</button>
+                    <button class="theme-toggle" aria-label="Переключить тему">
+                        <span class="theme-icon">🌙</span>
+                    </button>
+                    <button class="language-switcher" data-lang="ru" aria-label="Переключить на русский">RU</button>
+                    <button class="language-switcher" data-lang="uk" aria-label="Переключить на украинский">UK</button>
+                </div>
+            </div>
+            <div class="header__main-bar">
                         <a href="#hero" class="header__title">
                 <img src="icons/logo-icon.svg" alt="ClimaTech Logo" class="header__logo" aria-hidden="true">
                 <span class="header__brand-text">
@@ -55,6 +135,7 @@
             <button class="header__toggle" aria-controls="header-nav" aria-expanded="false" aria-label="Открыть меню навигации">
                 <span class="header__toggle-icon" aria-hidden="true"></span>
             </button>
+            </div>
         </div>
     </div>
 </header>

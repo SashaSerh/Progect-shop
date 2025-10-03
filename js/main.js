@@ -1,5 +1,5 @@
 import { cart, saveCart, updateCartUI, addToCart, removeFromCart, clearCart, toggleCartDropdown, openCartModal, closeCartModal } from './cart.js';
-import { toggleTheme, initTheme } from './theme.js';
+import { toggleTheme, initTheme, bindThemeEvents } from './theme.js';
 import { translations, switchLanguage } from './i18n.js';
 import { products, renderProducts, filterProducts } from './products.js';
 import { initNavigation } from './navigation.js';
@@ -119,10 +119,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     initTheme();
+    bindThemeEvents(); // Привязываем обработчики тем
     switchLanguage(savedLanguage);
     renderProducts(savedLanguage, translations);
     updateCartUI(translations, savedLanguage);
     initNavigation();
+    
+    // Инициализация мобильного заголовка
+    initMobileHeader();
 
     const profileButton = document.getElementById('profileButton');
     const profileModal = document.getElementById('profileModal');
@@ -228,8 +232,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    const themeToggle = document.querySelector('.theme-toggle');
-    if (themeToggle) themeToggle.addEventListener('click', toggleTheme);
+    // Старый обработчик удален - теперь bindThemeEvents() обрабатывает все кнопки тем
 
     const checkoutButton = document.querySelector('.cart-button--checkout');
     if (checkoutButton) checkoutButton.addEventListener('click', openCartModal);
@@ -473,5 +476,147 @@ function initModernMobileEffects() {
     });
 }
 
+// Функция инициализации мобильного заголовка
+function initMobileHeader() {
+    const hamburgerToggle = document.querySelector('.hamburger-toggle');
+    const mobileNav = document.querySelector('.mobile-nav');
+    const mobileNavLinks = document.querySelectorAll('.mobile-nav__link');
+    const mobileCartButton = document.querySelector('.mobile-nav__cart');
+    const mobileProfileButton = document.querySelector('.mobile-nav__profile');
+    const mobileNavOverlay = document.createElement('div');
+
+    if (!hamburgerToggle || !mobileNav) {
+        console.log('Мобильный заголовок не найден');
+        return;
+    }
+
+    // Создаем overlay для закрытия меню при клике вне его
+    mobileNavOverlay.className = 'mobile-nav-overlay';
+    mobileNavOverlay.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.3);
+        z-index: 998;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+    `;
+    document.body.appendChild(mobileNavOverlay);
+
+    // Функция открытия/закрытия мобильного меню
+    function toggleMobileNav(open = null) {
+        const isOpen = open !== null ? open : !mobileNav.classList.contains('active');
+        
+        if (isOpen) {
+            hamburgerToggle.classList.add('active');
+            mobileNav.classList.add('active');
+            mobileNavOverlay.style.opacity = '1';
+            mobileNavOverlay.style.visibility = 'visible';
+            document.body.style.overflow = 'hidden'; // Блокируем прокрутку
+            hamburgerToggle.setAttribute('aria-expanded', 'true');
+            mobileNav.setAttribute('aria-hidden', 'false');
+        } else {
+            hamburgerToggle.classList.remove('active');
+            mobileNav.classList.remove('active');
+            mobileNavOverlay.style.opacity = '0';
+            mobileNavOverlay.style.visibility = 'hidden';
+            document.body.style.overflow = ''; // Разблокируем прокрутку
+            hamburgerToggle.setAttribute('aria-expanded', 'false');
+            mobileNav.setAttribute('aria-hidden', 'true');
+        }
+    }
+
+    // Обработчик клика по гамбургеру
+    hamburgerToggle.addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggleMobileNav();
+        
+        // Добавляем тактильную обратную связь
+        if (navigator.vibrate) {
+            navigator.vibrate(50);
+        }
+    });
+
+    // Закрытие меню при клике по overlay
+    mobileNavOverlay.addEventListener('click', () => {
+        toggleMobileNav(false);
+    });
+
+    // Закрытие меню при клике по ссылкам навигации
+    mobileNavLinks.forEach(link => {
+        link.addEventListener('click', () => {
+            toggleMobileNav(false);
+            
+            // Добавляем анимацию клика
+            link.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                link.style.transform = '';
+            }, 150);
+        });
+    });
+
+    // Обработчик мобильной корзины
+    if (mobileCartButton) {
+        mobileCartButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            toggleMobileNav(false);
+            
+            // Открываем корзину (используем существующую функцию)
+            if (typeof openCartModal === 'function') {
+                openCartModal();
+            }
+            
+            // Обновляем UI корзины
+            if (typeof updateCartUI === 'function' && typeof translations !== 'undefined' && typeof savedLanguage !== 'undefined') {
+                updateCartUI(translations, savedLanguage);
+            }
+        });
+    }
+
+    // Обработчик мобильного профиля
+    if (mobileProfileButton) {
+        mobileProfileButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            toggleMobileNav(false);
+            
+            // Открываем модальное окно профиля (используем существующую функцию)
+            if (typeof openModal === 'function' && typeof translations !== 'undefined' && typeof savedLanguage !== 'undefined') {
+                openModal(translations, savedLanguage);
+            }
+        });
+    }
+
+    // Закрытие меню при нажатии Escape
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && mobileNav.classList.contains('active')) {
+            toggleMobileNav(false);
+        }
+    });
+
+    // Эффект прокрутки для мобильного заголовка
+    let lastScrollTop = 0;
+    const mobileHeader = document.querySelector('.header__mobile');
+    
+    if (mobileHeader) {
+        window.addEventListener('scroll', () => {
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            
+            if (scrollTop > 10) {
+                mobileHeader.classList.add('scrolled');
+            } else {
+                mobileHeader.classList.remove('scrolled');
+            }
+            
+            lastScrollTop = scrollTop;
+        }, { passive: true });
+    }
+
+    console.log('Мобильный заголовок инициализирован');
+}
+
 // Экспорт функций
 window.initModernMobileEffects = initModernMobileEffects;
+window.initMobileHeader = initMobileHeader;

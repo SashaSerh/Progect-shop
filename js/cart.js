@@ -54,7 +54,8 @@ export function closeCartModal() {
 }
 
 export function updateCartUI(translations, lang) {
-    const cartCount = document.querySelector('.cart-count');
+    // Обновляем ВСЕ счетчики корзины (мобильный и десктопный)
+    const cartCounts = document.querySelectorAll('.cart-count');
     const cartItemsText = document.querySelector('.cart-text__items');
     const cartTotalText = document.querySelector('.cart-text__total');
     const cartDropdownItems = document.querySelector('.cart-dropdown__items');
@@ -68,7 +69,11 @@ export function updateCartUI(translations, lang) {
         return product ? sum + product.price * item.quantity : sum;
     }, 0);
 
-    if (cartCount) cartCount.textContent = totalItems;
+    // Обновляем все счетчики корзины (мобильный и десктопный)
+    cartCounts.forEach(cartCount => {
+        if (cartCount) cartCount.textContent = totalItems;
+    });
+    
     if (cartItemsText) cartItemsText.textContent = translations[lang]['cart-items'].replace('0', totalItems);
     if (cartTotalText) cartTotalText.textContent = `${totalPrice.toLocaleString('uk-UA', { minimumFractionDigits: 2 })} грн`;
     if (cartDropdownSummary) cartDropdownSummary.textContent = translations[lang]['cart-total'].replace('$0.00', `${totalPrice.toLocaleString('uk-UA', { minimumFractionDigits: 2 })} грн`);

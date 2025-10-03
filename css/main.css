@@ -783,6 +783,7 @@ body {
     font-size: 15px;
     font-weight: 600;
     transition: background var(--transition);
+    cursor: pointer;
 }
 
 .service-card__button:hover {
@@ -904,6 +905,7 @@ body {
     font-size: 15px;
     font-weight: 600;
     transition: background var(--transition);
+    cursor: pointer;
 }
 
 .product-card__button:hover {
@@ -1525,7 +1527,7 @@ body {
 @media (max-width: 768px) {
 
   /* Mobile Navigation */
-  .mobile-nav {
+  .bottom-nav {
     position: fixed;
     bottom: 0;
     left: 0;
@@ -1541,7 +1543,7 @@ body {
     align-items: center;
   }
 
-  .mobile-nav-item {
+  .bottom-nav-item {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -1554,17 +1556,17 @@ body {
     min-height: var(--thumb-size);
   }
 
-  .mobile-nav-item:hover {
+  .bottom-nav-item:hover {
     background: var(--glass-bg);
     transform: translateY(-2px);
   }
 
-  .mobile-nav-icon {
+  .bottom-nav-icon {
     font-size: 20px;
     margin-bottom: 4px;
   }
 
-  .mobile-nav-text {
+  .bottom-nav-text {
     font-size: 10px;
     font-weight: 500;
   }
@@ -1633,7 +1635,7 @@ body {
 }
 
 /* Современная навигация для мобильных */
-.mobile-nav {
+.bottom-nav {
     position: fixed;
     bottom: 0;
     left: 0;
@@ -1647,7 +1649,7 @@ body {
     z-index: 100;
 }
 
-.mobile-nav-item {
+.bottom-nav-item {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -1660,17 +1662,17 @@ body {
     border-radius: 12px;
 }
 
-.mobile-nav-item:hover,
-.mobile-nav-item.active {
+.bottom-nav-item:hover,
+.bottom-nav-item.active {
     color: var(--accent-color);
     background: var(--button-bg);
 }
 
-.mobile-nav-icon {
+.bottom-nav-icon {
     font-size: 20px;
 }
 
-.mobile-nav-text {
+.bottom-nav-text {
     font-size: 12px;
     font-weight: 500;
 }
@@ -1731,5 +1733,349 @@ body {
     /* Современные отступы */
     .container {
         padding: 0 var(--mobile-padding);
+    }
+}
+
+/* ===== МОБИЛЬНАЯ ВЕРСИЯ ЗАГОЛОВКА ===== */
+
+/* По умолчанию скрываем мобильную версию */
+.header__mobile {
+    display: none;
+}
+
+.mobile-nav {
+    display: none;
+}
+
+/* Мобильные стили */
+@media (max-width: 768px) {
+    /* Переменные для мобильного дизайна */
+    :root {
+        --mobile-glassmorphism: rgba(255, 255, 255, 0.25);
+        --mobile-glassmorphism-dark: rgba(0, 0, 0, 0.25);
+        --mobile-glass-border: rgba(255, 255, 255, 0.18);
+        --mobile-glass-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+        --mobile-modern-radius: 16px;
+        --mobile-micro-transition: 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+        --mobile-thumb-size: 44px;
+    }
+
+    /* Скрываем десктопную версию */
+    .header__desktop {
+        display: none !important;
+    }
+
+    /* Показываем мобильную версию */
+    .header__mobile {
+        display: flex !important;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 20px;
+        height: 60px;
+        background: var(--mobile-glassmorphism);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border-bottom: 1px solid var(--mobile-glass-border);
+        transition: all var(--mobile-micro-transition);
+    }
+
+    /* Логотип и бренд */
+    .header__mobile-brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        text-decoration: none;
+        flex-shrink: 0;
+    }
+
+    .header__mobile-logo {
+        width: 32px;
+        height: 32px;
+        transition: transform var(--mobile-micro-transition);
+    }
+
+    .header__mobile-logo:hover {
+        transform: scale(1.1);
+    }
+
+    .header__mobile-text {
+        font-size: 18px;
+        font-weight: 600;
+        color: var(--text-color);
+    }
+
+    .clima-text {
+        color: var(--accent-color);
+    }
+
+    .tech-text {
+        color: var(--primary-color);
+    }
+
+    /* Гамбургер меню */
+    .hamburger-toggle {
+        background: transparent;
+        border: none;
+        padding: 8px;
+        cursor: pointer;
+        border-radius: 12px;
+        transition: all var(--mobile-micro-transition);
+        width: var(--mobile-thumb-size);
+        height: var(--mobile-thumb-size);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 4px;
+        touch-action: manipulation;
+    }
+
+    .hamburger-toggle:hover,
+    .hamburger-toggle:active {
+        background: rgba(255, 255, 255, 0.1);
+        transform: scale(0.95);
+    }
+
+    .hamburger-line {
+        display: block;
+        width: 20px;
+        height: 2px;
+        background: var(--text-color);
+        border-radius: 2px;
+        transition: all var(--mobile-micro-transition);
+    }
+
+    /* Анимация гамбургера в X */
+    .hamburger-toggle.active .hamburger-line:nth-child(1) {
+        transform: translateY(6px) rotate(45deg);
+    }
+
+    .hamburger-toggle.active .hamburger-line:nth-child(2) {
+        opacity: 0;
+        transform: translateX(-10px);
+    }
+
+    .hamburger-toggle.active .hamburger-line:nth-child(3) {
+        transform: translateY(-6px) rotate(-45deg);
+    }
+
+    /* Мобильное навигационное меню */
+    .mobile-nav {
+        position: fixed;
+        top: 60px;
+        left: 0;
+        right: 0;
+        background: var(--mobile-glassmorphism);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border-bottom: 1px solid var(--mobile-glass-border);
+        max-height: calc(100vh - 60px);
+        overflow-y: auto;
+        transform: translateY(-100%);
+        opacity: 0;
+        visibility: hidden;
+        transition: all var(--mobile-micro-transition);
+        z-index: 999;
+        box-shadow: var(--mobile-glass-shadow);
+    }
+
+    .mobile-nav.active {
+        transform: translateY(0);
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .mobile-nav__list {
+        list-style: none;
+        padding: 20px;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .mobile-nav__item {
+        border-radius: var(--mobile-modern-radius);
+        overflow: hidden;
+    }
+
+    .mobile-nav__link {
+        display: flex;
+        align-items: center;
+        padding: 16px 20px;
+        text-decoration: none;
+        color: var(--text-color);
+        font-size: 16px;
+        font-weight: 500;
+        transition: all var(--mobile-micro-transition);
+        min-height: var(--mobile-thumb-size);
+        border-radius: var(--mobile-modern-radius);
+    }
+
+    .mobile-nav__link:hover,
+    .mobile-nav__link:active {
+        background: rgba(255, 255, 255, 0.1);
+        transform: translateX(8px);
+    }
+
+    .mobile-nav__link.active {
+        background: var(--accent-color);
+        color: white;
+        box-shadow: 0 4px 16px rgba(74, 144, 226, 0.3);
+    }
+
+    /* Кнопки в мобильном меню */
+    .mobile-nav__cart,
+    .mobile-nav__profile {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 16px 20px;
+        background: transparent;
+        border: none;
+        color: var(--text-color);
+        font-size: 16px;
+        font-weight: 500;
+        cursor: pointer;
+        width: 100%;
+        text-align: left;
+        border-radius: var(--mobile-modern-radius);
+        transition: all var(--mobile-micro-transition);
+        min-height: var(--mobile-thumb-size);
+    }
+
+    .mobile-nav__cart:hover,
+    .mobile-nav__profile:hover {
+        background: rgba(255, 255, 255, 0.1);
+        transform: translateX(8px);
+    }
+
+    /* Разделители */
+    .mobile-nav__divider {
+        height: 1px;
+        background: var(--mobile-glass-border);
+        margin: 16px 0;
+        border-radius: 1px;
+    }
+
+    /* Элементы управления */
+    .mobile-nav__controls {
+        display: flex !important;
+        flex-direction: column;
+        gap: 12px;
+        padding: 16px 20px;
+    }
+
+    .mobile-theme-toggle {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: transparent;
+        border: none;
+        color: var(--text-color);
+        font-size: 16px;
+        padding: 12px 16px;
+        border-radius: var(--mobile-modern-radius);
+        cursor: pointer;
+        transition: all var(--mobile-micro-transition);
+    }
+
+    .mobile-theme-toggle:hover {
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    .mobile-language-switcher {
+        display: flex;
+        gap: 8px;
+    }
+
+    .mobile-language-switcher .language-switcher {
+        flex: 1;
+        padding: 12px 16px;
+        background: rgba(255, 255, 255, 0.1);
+        border: none;
+        color: var(--text-color);
+        border-radius: 12px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: all var(--mobile-micro-transition);
+    }
+
+    .mobile-language-switcher .language-switcher:hover,
+    .mobile-language-switcher .language-switcher.active {
+        background: var(--accent-color);
+        color: white;
+        transform: scale(1.05);
+    }
+
+    /* Телефоны в мобильном меню */
+    .mobile-nav__phones {
+        display: flex !important;
+        flex-direction: column;
+        gap: 8px;
+        padding: 16px 20px;
+    }
+
+    .mobile-nav__phones a {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 16px;
+        color: var(--text-color);
+        text-decoration: none;
+        border-radius: var(--mobile-modern-radius);
+        transition: all var(--mobile-micro-transition);
+        background: rgba(255, 255, 255, 0.05);
+    }
+
+    .mobile-nav__phones a:hover {
+        background: rgba(255, 255, 255, 0.1);
+        transform: translateX(8px);
+    }
+
+    /* Счетчик корзины */
+    .cart-count {
+        background: var(--accent-color);
+        color: white;
+        border-radius: 50%;
+        padding: 2px 6px;
+        font-size: 12px;
+        font-weight: 600;
+        min-width: 18px;
+        text-align: center;
+    }
+
+    /* Темная тема для мобильной версии */
+    .light-theme .header__mobile {
+        --mobile-glassmorphism: rgba(26, 26, 26, 0.85);
+        --mobile-glass-border: rgba(255, 255, 255, 0.1);
+    }
+
+    .light-theme .mobile-nav {
+        --mobile-glassmorphism: rgba(26, 26, 26, 0.9);
+        --mobile-glass-border: rgba(255, 255, 255, 0.1);
+    }
+
+    /* Эффект прокрутки для мобильного заголовка */
+    .header__mobile.scrolled {
+        background: rgba(255, 255, 255, 0.95);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .light-theme .header__mobile.scrolled {
+        background: rgba(26, 26, 26, 0.95);
+        box-shadow: 0 4px 20px rgba(255, 255, 255, 0.1);
+    }
+}
+
+/* Десктопная версия - сохраняем существующие стили */
+@media (min-width: 769px) {
+    .header__mobile,
+    .mobile-nav {
+        display: none !important;
+    }
+
+    .header__desktop {
+        display: block !important;
     }
 }

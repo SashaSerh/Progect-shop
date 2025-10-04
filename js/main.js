@@ -483,7 +483,6 @@ function initMobileHeader() {
     const hamburgerToggle = document.querySelector('.hamburger-toggle');
     const mobileNav = document.querySelector('.mobile-nav');
     const mobileNavLinks = document.querySelectorAll('.mobile-nav__link');
-    const mobileCartButton = document.querySelector('.mobile-nav__cart');
     const mobileProfileButton = document.querySelector('.mobile-nav__profile');
     const mobileNavOverlay = document.createElement('div');
 
@@ -491,6 +490,12 @@ function initMobileHeader() {
         console.log('Мобильный заголовок не найден');
         return;
     }
+
+    // Инициализация доступности: запрещаем фокус на скрытых элементах
+    const focusableElements = mobileNav.querySelectorAll('a, button, input, textarea, select, [tabindex]:not([tabindex="-1"])');
+    focusableElements.forEach(el => {
+        el.setAttribute('tabindex', '-1');
+    });
 
     // Создаем overlay для закрытия меню при клике вне его
     mobileNavOverlay.className = 'mobile-nav-overlay';
@@ -500,7 +505,7 @@ function initMobileHeader() {
         left: 0;
         right: 0;
         bottom: 0;
-        background: rgba(0, 0, 0, 0.3);
+        background: transparent;
         z-index: 998;
         opacity: 0;
         visibility: hidden;
@@ -511,6 +516,7 @@ function initMobileHeader() {
     // Функция открытия/закрытия мобильного меню
     function toggleMobileNav(open = null) {
         const isOpen = open !== null ? open : !mobileNav.classList.contains('active');
+        const focusableElements = mobileNav.querySelectorAll('a, button, input, textarea, select, [tabindex]:not([tabindex="-1"])');
         
         if (isOpen) {
             hamburgerToggle.classList.add('active');
@@ -520,6 +526,11 @@ function initMobileHeader() {
             document.body.style.overflow = 'hidden'; // Блокируем прокрутку
             hamburgerToggle.setAttribute('aria-expanded', 'true');
             mobileNav.setAttribute('aria-hidden', 'false');
+            
+            // Разрешаем фокус на элементах меню
+            focusableElements.forEach(el => {
+                el.removeAttribute('tabindex');
+            });
         } else {
             hamburgerToggle.classList.remove('active');
             mobileNav.classList.remove('active');
@@ -528,6 +539,11 @@ function initMobileHeader() {
             document.body.style.overflow = ''; // Разблокируем прокрутку
             hamburgerToggle.setAttribute('aria-expanded', 'false');
             mobileNav.setAttribute('aria-hidden', 'true');
+            
+            // Запрещаем фокус на элементах меню
+            focusableElements.forEach(el => {
+                el.setAttribute('tabindex', '-1');
+            });
         }
     }
 
@@ -560,24 +576,6 @@ function initMobileHeader() {
         });
     });
 
-    // Обработчик мобильной корзины
-    if (mobileCartButton) {
-        mobileCartButton.addEventListener('click', (e) => {
-            e.stopPropagation();
-            toggleMobileNav(false);
-            
-            // Открываем корзину (используем существующую функцию)
-            if (typeof openCartModal === 'function') {
-                openCartModal();
-            }
-            
-            // Обновляем UI корзины
-            if (typeof updateCartUI === 'function' && typeof translations !== 'undefined' && typeof savedLanguage !== 'undefined') {
-                updateCartUI(translations, savedLanguage);
-            }
-        });
-    }
-
     // Обработчик мобильного профиля
     if (mobileProfileButton) {
         mobileProfileButton.addEventListener('click', (e) => {
@@ -590,6 +588,31 @@ function initMobileHeader() {
             }
         });
     }
+
+    // Закрытие меню по клавише Escape
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && mobileNav.classList.contains('active')) {
+            toggleMobileNav(false);
+            hamburgerToggle.focus(); // Возвращаем фокус на кнопку
+        }
+    });
+
+    // Улучшенная навигация по клавиатуре в меню
+    mobileNav.addEventListener('keydown', (e) => {
+        if (e.key === 'Tab') {
+            const focusableElements = mobileNav.querySelectorAll('a:not([tabindex="-1"]), button:not([tabindex="-1"])');
+            const firstElement = focusableElements[0];
+            const lastElement = focusableElements[focusableElements.length - 1];
+
+            if (e.shiftKey && document.activeElement === firstElement) {
+                e.preventDefault();
+                lastElement.focus();
+            } else if (!e.shiftKey && document.activeElement === lastElement) {
+                e.preventDefault();
+                firstElement.focus();
+            }
+        }
+    });
 
     // Инициализация тоглов в мобильном хедере
     initMobileToggles();

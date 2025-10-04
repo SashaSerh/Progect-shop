@@ -4,7 +4,6 @@
     --primary-color: rgba(30, 30, 30, 0.7);
     --accent-color: #007AFF;
     --secondary-color: #FF2D55;
-    --text-color: #FFFFFF;
     --nav-text-color: #D1D1D6;
     --cart-red: #FF3B30;
     --modal-bg: rgba(0, 0, 0, 0.4);
@@ -42,7 +41,6 @@
     --primary-color: rgba(242, 242, 247, 0.9);
     --accent-color: #007AFF;
     --secondary-color: #FF9500;
-    --text-color: #000000;
     --nav-text-color: #1C2526;
     --cart-red: #FF3B30;
     --modal-bg: rgba(255, 255, 255, 0.7);
@@ -58,6 +56,7 @@
     /* Светлая тема для мобильных трендов */
     --glass-bg: rgba(255, 255, 255, 0.8);
     --glass-border: rgba(0, 0, 0, 0.1);
+    --glass-blur: blur(15px);
 }
 
 /* Сброс базовых стилей */
@@ -113,7 +112,7 @@ body {
     font-size: clamp(15px, 4vw, 17px);
     font-weight: 600;
     letter-spacing: 0.2px;
-    color: var(--text-color);
+    color: var(--nav-text-color);
     text-decoration: none;
     transition: color var(--transition);
     margin-right: 16px;
@@ -239,7 +238,7 @@ body {
 }
 
 .light-theme .header__logo {
-    fill: var(--text-color);
+    fill: var(--nav-text-color);
 }
 
 .visually-hidden {
@@ -367,7 +366,7 @@ body {
 #site-search {
     background: transparent;
     border: none;
-    color: var(--text-color);
+    color: var(--nav-text-color);
     font-size: 15px;
     flex: 1;
 }
@@ -431,7 +430,7 @@ body {
 
 .catalog-dropdown__list a,
 .search-dropdown__list a {
-    color: var(--text-color);
+    color: var(--nav-text-color);
     text-decoration: none;
 }
 
@@ -452,7 +451,7 @@ body {
     display: block;
     width: 24px;
     height: 2px;
-    background: var(--text-color);
+    background: var(--nav-text-color);
     position: relative;
     transition: background var(--transition);
 }
@@ -463,7 +462,7 @@ body {
     position: absolute;
     width: 24px;
     height: 2px;
-    background: var(--text-color);
+    background: var(--nav-text-color);
     left: 0;
     transition: transform var(--transition);
 }
@@ -528,7 +527,7 @@ body {
     right: 12px;
     font-size: 20px;
     cursor: pointer;
-    color: var(--text-color);
+    color: var(--nav-text-color);
     transition: color var(--transition);
 }
 
@@ -543,7 +542,7 @@ body {
 .modal__field label {
     display: block;
     font-size: 15px;
-    color: var(--text-color);
+    color: var(--nav-text-color);
     margin-bottom: 6px;
 }
 
@@ -554,7 +553,7 @@ body {
     border-radius: 10px;
     font-size: 15px;
     background: var(--button-bg);
-    color: var(--text-color);
+    color: var(--nav-text-color);
     backdrop-filter: blur(8px);
 }
 
@@ -686,7 +685,7 @@ body {
 .hero__title {
     font-size: clamp(28px, 5vw, 34px);
     font-weight: 600;
-    color: var(--text-color);
+    color: var(--nav-text-color);
     margin-bottom: 12px;
 }
 
@@ -736,7 +735,7 @@ body {
     font-weight: 600;
     text-align: center;
     margin-bottom: 24px;
-    color: var(--text-color);
+    color: var(--nav-text-color);
 }
 
 .services__grid {
@@ -765,7 +764,7 @@ body {
     font-size: 17px;
     font-weight: 600;
     margin-bottom: 8px;
-    color: var(--text-color);
+    color: var(--nav-text-color);
 }
 
 .service-card__description {
@@ -805,7 +804,7 @@ body {
     font-weight: 600;
     text-align: center;
     margin-bottom: 24px;
-    color: var(--text-color);
+    color: var(--nav-text-color);
 }
 
 .products__filters {
@@ -824,12 +823,12 @@ body {
 .filter-group label {
     font-size: 15px;
     font-weight: 600;
-    color: var(--text-color);
+    color: var(--nav-text-color);
 }
 
 .filter-group select {
     background: var(--button-bg);
-    color: var(--text-color);
+    color: var(--nav-text-color);
     border: none;
     border-radius: 14px;
     padding: 10px;
@@ -880,7 +879,7 @@ body {
     font-size: 17px;
     font-weight: 600;
     margin: 12px 0;
-    color: var(--text-color);
+    color: var(--nav-text-color);
 }
 
 .product-card__description {
@@ -1115,7 +1114,7 @@ body {
     border: none;
     font-size: 20px;
     cursor: pointer;
-    color: var(--text-color);
+    color: var(--nav-text-color);
     transition: color var(--transition);
 }
 
@@ -1210,7 +1209,7 @@ body {
     font-weight: 600;
     text-align: center;
     margin-bottom: 24px;
-    color: var(--text-color);
+    color: var(--nav-text-color);
 }
 
 .contacts__content {
@@ -1226,7 +1225,7 @@ body {
 
 .contacts__info p {
     font-size: 15px;
-    color: var(--text-color);
+    color: var(--nav-text-color);
     margin-bottom: 8px;
 }
 
@@ -1241,7 +1240,7 @@ body {
 .contacts__form input,
 .contacts__form textarea {
     background: var(--button-bg);
-    color: var(--text-color);
+    color: var(--nav-text-color);
     padding: 10px;
     border: none;
     border-radius: 10px;
@@ -1305,7 +1304,7 @@ body {
     font-size: 17px;
     font-weight: 600;
     margin-bottom: 8px;
-    color: var(--text-color);
+    color: var(--nav-text-color);
 }
 
 .footer__info p {
@@ -1348,7 +1347,7 @@ body {
     width: 100%;
     height: 100%;
     display: block;
-    fill: var(--text-color);
+    fill: var(--nav-text-color);
     transition: fill var(--transition);
 }
 
@@ -1536,7 +1535,7 @@ body {
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border-top: 1px solid var(--glass-border);
-    padding: 8px 0;
+    padding: 2px 0;
     z-index: 1000;
     display: flex;
     justify-content: space-around;
@@ -1548,27 +1547,27 @@ body {
     flex-direction: column;
     align-items: center;
     text-decoration: none;
-    color: var(--text-color);
+    color: var(--nav-text-color);
     transition: all var(--micro-transition);
-    padding: 8px 12px;
-    border-radius: 12px;
-    min-width: var(--thumb-size);
-    min-height: var(--thumb-size);
+    padding: 4px 8px;
+    border-radius: 8px;
+    min-width: 40px;
   }
 
   .bottom-nav-item:hover {
     background: var(--glass-bg);
-    transform: translateY(-2px);
+    transform: translateY(-1px);
   }
 
   .bottom-nav-icon {
     font-size: 20px;
-    margin-bottom: 4px;
+    margin-bottom: 2px;
   }
 
   .bottom-nav-text {
-    font-size: 10px;
+    font-size: 9px;
     font-weight: 500;
+    line-height: 1;
   }
 }
 
@@ -1595,7 +1594,7 @@ body {
     background: var(--glass-bg);
     backdrop-filter: var(--glass-blur);
     border: 1px solid var(--glass-border);
-    color: var(--text-color);
+    color: var(--nav-text-color);
     font-weight: 600;
     transition: var(--micro-transition);
     cursor: pointer;
@@ -1643,7 +1642,7 @@ body {
     background: var(--glass-bg);
     backdrop-filter: var(--glass-blur);
     border-top: 1px solid var(--glass-border);
-    padding: 12px;
+    padding: 4px;
     display: flex;
     justify-content: space-around;
     z-index: 100;
@@ -1653,13 +1652,13 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 4px;
+    gap: 2px;
     color: var(--nav-text-color);
     text-decoration: none;
     transition: var(--micro-transition);
-    min-width: var(--thumb-size);
-    padding: 8px;
-    border-radius: 12px;
+    min-width: 40px;
+    padding: 4px;
+    border-radius: 8px;
 }
 
 .bottom-nav-item:hover,
@@ -1673,8 +1672,9 @@ body {
 }
 
 .bottom-nav-text {
-    font-size: 12px;
+    font-size: 9px;
     font-weight: 500;
+    line-height: 1;
 }
 
 /* Микро-анимации */
@@ -1901,7 +1901,7 @@ body {
         display: block;
         width: 20px;
         height: 2px;
-        background: var(--text-color);
+        background: var(--nav-text-color);
         border-radius: 2px;
         transition: all var(--mobile-micro-transition);
     }
@@ -1923,20 +1923,47 @@ body {
     /* Мобильное навигационное меню */
     .mobile-nav {
         display: block !important;
-        position: fixed;
-        top: 60px;
-        left: 0;
-        right: 0;
-        background: var(--background-color);
-        border-bottom: 1px solid var(--button-bg);
-        max-height: calc(100vh - 60px);
-        overflow-y: auto;
+        position: fixed !important;
+        top: 60px !important;
+        left: 0 !important;
+        right: 0 !important;
+        /* Fallback для браузеров без поддержки backdrop-filter */
+        background: rgba(255, 255, 255, 0.9) !important;
+        background: var(--glass-bg) !important;
+        /* Усиленный стекломорфизм */
+        backdrop-filter: var(--glass-blur) saturate(180%) brightness(1.1) !important;
+        -webkit-backdrop-filter: var(--glass-blur) saturate(180%) brightness(1.1) !important;
+        border: none !important;
+        border-bottom: 1px solid var(--glass-border) !important;
+        border-radius: 0 !important;
+        max-height: calc(100vh - 60px) !important;
+        overflow-y: auto !important;
         transform: translateY(-100%);
         opacity: 0;
         visibility: hidden;
         transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
-        z-index: 999;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        z-index: 999 !important;
+        /* Дополнительная тень для эффекта глубины */
+        box-shadow: 
+            0 4px 20px rgba(0, 0, 0, 0.1),
+            inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+    }
+    
+    /* Поддержка backdrop-filter */
+    @supports (backdrop-filter: blur(10px)) {
+        .mobile-nav {
+            background: var(--glass-bg) !important;
+        }
+    }
+    
+    /* Дополнительная специфичность для гарантии применения стилей */
+    @media (max-width: 768px) {
+        .mobile-nav.mobile-nav {
+            background: var(--glass-bg) !important;
+            backdrop-filter: var(--glass-blur) saturate(180%) brightness(1.1) !important;
+            -webkit-backdrop-filter: var(--glass-blur) saturate(180%) brightness(1.1) !important;
+            border-bottom: 1px solid var(--glass-border) !important;
+        }
     }
 
     .mobile-nav.active {
@@ -1964,7 +1991,7 @@ body {
         align-items: center;
         padding: 16px 20px;
         text-decoration: none;
-        color: var(--text-color);
+        color: var(--nav-text-color);
         font-size: 16px;
         font-weight: 500;
         transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
@@ -1985,7 +2012,6 @@ body {
     }
 
     /* Кнопки в мобильном меню */
-    .mobile-nav__cart,
     .mobile-nav__profile {
         display: flex;
         align-items: center;
@@ -1993,7 +2019,7 @@ body {
         padding: 16px 20px;
         background: transparent;
         border: none;
-        color: var(--text-color);
+        color: var(--nav-text-color);
         font-size: 16px;
         font-weight: 500;
         cursor: pointer;
@@ -2004,7 +2030,6 @@ body {
         min-height: var(--mobile-thumb-size);
     }
 
-    .mobile-nav__cart:hover,
     .mobile-nav__profile:hover {
         background: rgba(255, 255, 255, 0.1);
         transform: translateX(8px);
@@ -2031,7 +2056,7 @@ body {
         align-items: center;
         gap: 8px;
         padding: 12px 16px;
-        color: var(--text-color);
+        color: var(--nav-text-color);
         text-decoration: none;
         border-radius: var(--mobile-modern-radius);
         transition: all var(--mobile-micro-transition);
@@ -2063,11 +2088,7 @@ body {
 
     /* Тоглы в светлой теме - наследуют стили десктопной версии */
 
-    .light-theme .mobile-nav {
-        background: #FFFFFF;
-        border-bottom: 1px solid #E5E5E7;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-    }
+    /* Светлая тема наследует стили от основного .mobile-nav */
 
     /* Эффект прокрутки отключен - мобильный хедер остается прозрачным */
     .header__mobile.scrolled {
@@ -2083,7 +2104,10 @@ body {
 
 /* Десктопная версия - сохраняем существующие стили */
 @media (min-width: 769px) {
-    .header__mobile,
+    .header__mobile {
+        display: none !important;
+    }
+
     .mobile-nav {
         display: none !important;
     }

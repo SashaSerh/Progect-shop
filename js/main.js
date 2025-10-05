@@ -480,7 +480,8 @@ function initModernMobileEffects() {
 
 // Функция инициализации мобильного заголовка
 function initMobileHeader() {
-    const hamburgerToggle = document.querySelector('.hamburger-toggle');
+    // Поддержка как старого, так и нового хедера
+    const hamburgerToggle = document.querySelector('.hamburger-toggle') || document.querySelector('.minimal-menu-btn');
     const mobileNav = document.querySelector('.mobile-nav');
     const mobileNavLinks = document.querySelectorAll('.mobile-nav__link');
     const mobileProfileButton = document.querySelector('.mobile-nav__profile');

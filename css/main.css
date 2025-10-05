@@ -1366,7 +1366,7 @@ body {
     /* Thumb-friendly sizes */
     --thumb-size: 44px;
     --thumb-spacing: 12px;
-    --fab-bottom: 110px;
+    --fab-bottom: 20px;
     --fab-gap: 12px;
   }
 
@@ -1523,53 +1523,6 @@ body {
   box-shadow: 0 6px 20px rgba(0, 107, 138, 0.4);
   background: #006B8A !important; /* Цвет hover для темной темы */
 }
-@media (max-width: 768px) {
-
-  /* Mobile Navigation */
-  .bottom-nav {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: var(--glass-bg);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border-top: 1px solid var(--glass-border);
-    padding: 2px 0;
-    z-index: 1000;
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-  }
-
-  .bottom-nav-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-decoration: none;
-    color: var(--nav-text-color);
-    transition: all var(--micro-transition);
-    padding: 4px 8px;
-    border-radius: 8px;
-    min-width: 40px;
-  }
-
-  .bottom-nav-item:hover {
-    background: var(--glass-bg);
-    transform: translateY(-1px);
-  }
-
-  .bottom-nav-icon {
-    font-size: 20px;
-    margin-bottom: 2px;
-  }
-
-  .bottom-nav-text {
-    font-size: 9px;
-    font-weight: 500;
-    line-height: 1;
-  }
-}
 
 /* Glassmorphism эффекты */
 .glass-card {
@@ -1631,50 +1584,6 @@ body {
 .soft-card:hover {
     transform: translateY(-4px);
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
-}
-
-/* Современная навигация для мобильных */
-.bottom-nav {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: var(--glass-bg);
-    backdrop-filter: var(--glass-blur);
-    border-top: 1px solid var(--glass-border);
-    padding: 4px;
-    display: flex;
-    justify-content: space-around;
-    z-index: 100;
-}
-
-.bottom-nav-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 2px;
-    color: var(--nav-text-color);
-    text-decoration: none;
-    transition: var(--micro-transition);
-    min-width: 40px;
-    padding: 4px;
-    border-radius: 8px;
-}
-
-.bottom-nav-item:hover,
-.bottom-nav-item.active {
-    color: var(--accent-color);
-    background: var(--button-bg);
-}
-
-.bottom-nav-icon {
-    font-size: 20px;
-}
-
-.bottom-nav-text {
-    font-size: 9px;
-    font-weight: 500;
-    line-height: 1;
 }
 
 /* Микро-анимации */
@@ -1920,6 +1829,91 @@ body {
         transform: translateY(-6px) rotate(-45deg);
     }
 
+    /* ======= МИНИМАЛИСТИЧНЫЙ МОБИЛЬНЫЙ ХЕДЕР ======= */
+    .minimal-mobile-header {
+        display: flex !important;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px 20px;
+        height: 64px;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+        border-radius: 20px;
+        transition: all 0.3s ease;
+    }
+
+    .minimal-brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        text-decoration: none;
+        flex-shrink: 0;
+    }
+
+    .minimal-logo {
+        width: 40px;
+        height: 40px;
+        transition: transform 0.3s ease;
+    }
+
+    .minimal-logo:hover {
+        transform: scale(1.05);
+    }
+
+    .minimal-brand-text {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        font-size: 20px;
+        font-weight: 600;
+        color: #1a1a1a;
+        letter-spacing: -0.02em;
+    }
+
+    .minimal-menu-btn {
+        background: transparent;
+        border: none;
+        padding: 8px;
+        cursor: pointer;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+        width: 44px;
+        height: 44px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 4px;
+        touch-action: manipulation;
+    }
+
+    .minimal-menu-btn:hover {
+        background: rgba(0, 0, 0, 0.05);
+    }
+
+    .minimal-menu-btn .hamburger-line {
+        display: block;
+        width: 20px;
+        height: 2px;
+        background: #1a1a1a;
+        border-radius: 1px;
+        transition: all 0.3s ease;
+    }
+
+    /* Анимация гамбургера в X для минималистичной версии */
+    .minimal-menu-btn.active .hamburger-line:nth-child(1) {
+        transform: translateY(6px) rotate(45deg);
+    }
+
+    .minimal-menu-btn.active .hamburger-line:nth-child(2) {
+        opacity: 0;
+        transform: translateX(-10px);
+    }
+
+    .minimal-menu-btn.active .hamburger-line:nth-child(3) {
+        transform: translateY(-6px) rotate(-45deg);
+    }
+
     /* Мобильное навигационное меню */
     .mobile-nav {
         display: block !important;
@@ -2084,6 +2078,44 @@ body {
     .light-theme .header__mobile {
         background: transparent;
         border-bottom: none;
+    }
+
+    /* Темы для минималистичного хедера */
+    .light-theme .minimal-mobile-header {
+        background: rgba(255, 255, 255, 0.95);
+        border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+        border-radius: 20px;
+    }
+
+    .light-theme .minimal-brand-text {
+        color: #1a1a1a;
+    }
+
+    .light-theme .minimal-menu-btn .hamburger-line {
+        background: #1a1a1a;
+    }
+
+    .light-theme .minimal-menu-btn:hover {
+        background: rgba(0, 0, 0, 0.05);
+    }
+
+    /* Темная тема для минималистичного хедера */
+    .minimal-mobile-header {
+        background: rgba(26, 26, 26, 0.95);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 20px;
+    }
+
+    .minimal-brand-text {
+        color: #ffffff;
+    }
+
+    .minimal-menu-btn .hamburger-line {
+        background: #ffffff;
+    }
+
+    .minimal-menu-btn:hover {
+        background: rgba(255, 255, 255, 0.1);
     }
 
     /* Тоглы в светлой теме - наследуют стили десктопной версии */

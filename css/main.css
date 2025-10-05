@@ -1847,14 +1847,14 @@ body {
     .minimal-brand {
         display: flex;
         align-items: center;
-        gap: 12px;
+        gap: 0px;
         text-decoration: none;
         flex-shrink: 0;
     }
 
     .minimal-logo {
-        width: 40px;
-        height: 40px;
+        width: 100px;
+        height: 100px;
         transition: transform 0.3s ease;
     }
 
@@ -1868,6 +1868,7 @@ body {
         font-weight: 600;
         color: #1a1a1a;
         letter-spacing: -0.02em;
+        margin-left: -16px;
     }
 
     .minimal-menu-btn {

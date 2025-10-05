@@ -1856,6 +1856,7 @@ body {
         width: 100px;
         height: 100px;
         transition: transform 0.3s ease;
+        filter: brightness(0) saturate(100%) invert(86%) sepia(3%) saturate(1029%) hue-rotate(202deg) brightness(94%) contrast(93%);
     }
 
     .minimal-logo:hover {
@@ -2090,6 +2091,10 @@ body {
 
     .light-theme .minimal-brand-text {
         color: #1a1a1a;
+    }
+
+    .light-theme .minimal-logo {
+        filter: brightness(0) saturate(100%) invert(10%) sepia(16%) saturate(354%) hue-rotate(202deg) brightness(95%) contrast(89%);
     }
 
     .light-theme .minimal-menu-btn .hamburger-line {

@@ -56,10 +56,21 @@ function updateAllThemeIcons(theme) {
     const themeIcons = document.querySelectorAll('.theme-icon');
     
     themeIcons.forEach(icon => {
+        // Ожидаем внутри <span class="theme-icon"><img ...></span>
+        let img = icon.querySelector('img');
+        if (!img) {
+            img = document.createElement('img');
+            img.setAttribute('width', '20');
+            img.setAttribute('height', '20');
+            icon.innerHTML = '';
+            icon.appendChild(img);
+        }
         if (theme === 'light') {
-            icon.textContent = '🌞'; // Солнце для светлой темы
+            img.src = 'icons/sun_1_-icon.svg';
+            img.alt = 'Светлая тема';
         } else {
-            icon.textContent = '🌙'; // Луна для темной темы
+            img.src = 'icons/moons-icon.svg';
+            img.alt = 'Тёмная тема';
         }
     });
     

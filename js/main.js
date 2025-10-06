@@ -490,7 +490,6 @@ function initMobileHeader() {
     const mobileNav = document.querySelector('.mobile-nav');
     const mobileNavLinks = document.querySelectorAll('.mobile-nav__link');
     const mobileProfileButton = document.querySelector('.mobile-nav__profile');
-        // const mobileNavOverlay = document.createElement('div');
 
     if (!hamburgerToggle || !mobileNav) {
         console.log('Мобильный заголовок не найден');
@@ -513,8 +512,7 @@ function initMobileHeader() {
         if (isOpen) {
             hamburgerToggle.classList.add('active');
             mobileNav.classList.add('active');
-            mobileNavOverlay.style.opacity = '1';
-            mobileNavOverlay.style.visibility = 'visible';
+            // Overlay удалён — фон не затемняется.
             document.body.style.overflow = 'hidden'; // Блокируем прокрутку
             hamburgerToggle.setAttribute('aria-expanded', 'true');
             mobileNav.setAttribute('aria-hidden', 'false');
@@ -526,8 +524,7 @@ function initMobileHeader() {
         } else {
             hamburgerToggle.classList.remove('active');
             mobileNav.classList.remove('active');
-            mobileNavOverlay.style.opacity = '0';
-            mobileNavOverlay.style.visibility = 'hidden';
+            // Overlay отсутствует — ничего не скрываем.
             document.body.style.overflow = ''; // Разблокируем прокрутку
             hamburgerToggle.setAttribute('aria-expanded', 'false');
             mobileNav.setAttribute('aria-hidden', 'true');
@@ -550,9 +547,7 @@ function initMobileHeader() {
         }
     });
 
-    // mobileNavOverlay.addEventListener('click', () => {
-    //     toggleMobileNav(false);
-    // });
+    // Overlay удалён — клик по внешней области не перехватывается.
 
     // Делегирование: закрываем меню только если реально переходим в другую секцию
     // Конфигурация поведения закрытия (глобальная для возможности изменения динамически)

@@ -65,6 +65,10 @@ function updateAllThemeIcons(theme) {
             icon.innerHTML = '';
             icon.appendChild(img);
         }
+
+        // Перезапуск анимации: убрать класс, форсировать reflow, снова добавить
+        img.classList.remove('theme-icon-animating');
+
         if (theme === 'light') {
             img.src = 'icons/sun_1_-icon.svg';
             img.alt = 'Светлая тема';
@@ -72,6 +76,10 @@ function updateAllThemeIcons(theme) {
             img.src = 'icons/moons-icon.svg';
             img.alt = 'Тёмная тема';
         }
+
+        // Лёгкий reflow для гарантии рестарта анимации
+        void img.offsetWidth; // eslint-disable-line no-unused-expressions
+        img.classList.add('theme-icon-animating');
     });
     
     // Также обновляем ARIA-метки для кнопок переключения тем

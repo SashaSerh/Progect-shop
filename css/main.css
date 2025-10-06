@@ -72,6 +72,18 @@ body {
     background: var(--background-color);
 }
 
+/* Анимация смены иконки темы */
+@keyframes theme-icon-swap {
+    0% { opacity: 0; transform: rotate(-90deg) scale(.6); }
+    50% { opacity: .5; }
+    100% { opacity: 1; transform: rotate(0deg) scale(1); }
+}
+
+.theme-icon img.theme-icon-animating {
+    animation: theme-icon-swap 320ms cubic-bezier(.4,0,.2,1);
+    will-change: transform, opacity;
+}
+
 .container {
     max-width: var(--container-width);
     margin: 0 auto;

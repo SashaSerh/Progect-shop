@@ -121,6 +121,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     initTheme();
     switchLanguage(savedLanguage);
     renderProducts(savedLanguage, translations);
+    if (typeof initLanguageSwitchers === 'function') {
+        initLanguageSwitchers();
+    }
     updateCartUI(translations, savedLanguage);
     initNavigation();
     
@@ -155,20 +158,22 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const categorySelect = document.getElementById('category');
     const priceSelect = document.getElementById('price');
-    if (categorySelect) categorySelect.addEventListener('change', () => filterProducts(savedLanguage, translations));
-    if (priceSelect) priceSelect.addEventListener('change', () => filterProducts(savedLanguage, translations));
-
-    document.querySelectorAll('.language-switcher').forEach(button => {
-        button.addEventListener('click', () => {
-            const lang = button.dataset.lang;
-            if (!['ru', 'uk'].includes(lang)) return;
-            switchLanguage(lang);
-            savedLanguage = lang;
-            renderProducts(lang, translations);
-            updateCartUI(translations, lang);
-            updateProfileButton(translations, lang);
-        });
+    if (categorySelect) categorySelect.addEventListener('change', () => {
+        if (typeof filterProductsWithSkeleton === 'function') {
+            filterProductsWithSkeleton(savedLanguage, translations);
+        } else {
+            filterProducts(savedLanguage, translations);
+        }
     });
+    if (priceSelect) priceSelect.addEventListener('change', () => {
+        if (typeof filterProductsWithSkeleton === 'function') {
+            filterProductsWithSkeleton(savedLanguage, translations);
+        } else {
+            filterProducts(savedLanguage, translations);
+        }
+    });
+
+    // Языковые переключатели теперь инициализируются централизованно через initLanguageSwitchers()
 
     const cartDropdownToggle = document.querySelector('#cartDropdownToggle');
     const cartDropdown = document.querySelector('#cartDropdown');
@@ -485,7 +490,7 @@ function initMobileHeader() {
     const mobileNav = document.querySelector('.mobile-nav');
     const mobileNavLinks = document.querySelectorAll('.mobile-nav__link');
     const mobileProfileButton = document.querySelector('.mobile-nav__profile');
-    const mobileNavOverlay = document.createElement('div');
+        // const mobileNavOverlay = document.createElement('div');
 
     if (!hamburgerToggle || !mobileNav) {
         console.log('Мобильный заголовок не найден');
@@ -498,21 +503,7 @@ function initMobileHeader() {
         el.setAttribute('tabindex', '-1');
     });
 
-    // Создаем overlay для закрытия меню при клике вне его
-    mobileNavOverlay.className = 'mobile-nav-overlay';
-    mobileNavOverlay.style.cssText = `
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: transparent;
-        z-index: 998;
-        opacity: 0;
-        visibility: hidden;
-        transition: all 0.3s ease;
-    `;
-    document.body.appendChild(mobileNavOverlay);
+    // Overlay удалён — клики вне меню больше не перехватываются искусственно.
 
     // Функция открытия/закрытия мобильного меню
     function toggleMobileNav(open = null) {
@@ -559,22 +550,65 @@ function initMobileHeader() {
         }
     });
 
-    // Закрытие меню при клике по overlay
-    mobileNavOverlay.addEventListener('click', () => {
-        toggleMobileNav(false);
-    });
+    // mobileNavOverlay.addEventListener('click', () => {
+    //     toggleMobileNav(false);
+    // });
 
-    // Закрытие меню при клике по ссылкам навигации
-    mobileNavLinks.forEach(link => {
-        link.addEventListener('click', () => {
+    // Делегирование: закрываем меню только если реально переходим в другую секцию
+    // Конфигурация поведения закрытия (глобальная для возможности изменения динамически)
+    if (!window.mobileNavCloseConfig) {
+        window.mobileNavCloseConfig = {
+            sameSectionThreshold: 60,   // px: если секция уже почти в зоне — не закрывать
+            delay: 0,                   // ms: задержка закрытия (для плавного скролла)
+            closeOnSameSection: false,  // закрывать ли если уже на месте
+            ignoreSelectors: ['.mobile-settings'], // области, в пределах которых не закрывать
+            attributeKeepOpen: 'data-keep-open',
+            classKeepOpen: 'keep-open'
+        };
+    }
+
+    if (!window.setMobileNavCloseConfig) {
+        window.setMobileNavCloseConfig = (partial) => {
+            window.mobileNavCloseConfig = { ...window.mobileNavCloseConfig, ...partial };
+        };
+    }
+
+    mobileNav.addEventListener('click', (e) => {
+        const cfg = window.mobileNavCloseConfig;
+        const link = e.target.closest('.mobile-nav__link');
+        if (!link) return;
+
+        // 1. Атрибут или класс удержания
+        if (link.hasAttribute(cfg.attributeKeepOpen) || link.classList.contains(cfg.classKeepOpen)) return;
+        // 2. Нахождение внутри игнорируемой области
+        if (cfg.ignoreSelectors.some(sel => link.closest(sel))) return;
+
+        let shouldClose = true;
+        const href = link.getAttribute('href') || '';
+        if (href.startsWith('#') && href.length > 1) {
+            const target = document.querySelector(href);
+            if (target) {
+                const rect = target.getBoundingClientRect();
+                const nearTop = Math.abs(rect.top) < cfg.sameSectionThreshold;
+                if (nearTop && !cfg.closeOnSameSection) {
+                    shouldClose = false;
+                }
+            }
+        }
+
+        if (!shouldClose) return;
+
+        const performClose = () => {
             toggleMobileNav(false);
-            
-            // Добавляем анимацию клика
             link.style.transform = 'scale(0.95)';
-            setTimeout(() => {
-                link.style.transform = '';
-            }, 150);
-        });
+            setTimeout(() => { link.style.transform = ''; }, 150);
+        };
+
+        if (cfg.delay > 0) {
+            setTimeout(performClose, cfg.delay);
+        } else {
+            performClose();
+        }
     });
 
     // Обработчик мобильного профиля
@@ -648,44 +682,73 @@ function initMobileHeader() {
 
 // Функция инициализации мобильных тоглов
 function initMobileToggles() {
-    const mobileThemeToggle = document.querySelector('.mobile-theme-toggle');
-    const mobileLanguageSwitchers = document.querySelectorAll('.mobile-language-switcher .language-switcher');
+    const compactThemeToggle = document.getElementById('mobileThemeToggle');
+    const compactCartButton = document.getElementById('mobileCartButton');
+    const compactLangChips = document.querySelectorAll('.mobile-settings__lang .lang-chip');
+    const savedLang = localStorage.getItem('language') || 'ru';
 
-    // Инициализация тогла темы
-    if (mobileThemeToggle) {
-        mobileThemeToggle.addEventListener('click', (e) => {
+    // Тема
+    if (compactThemeToggle) {
+        compactThemeToggle.addEventListener('click', (e) => {
             e.stopPropagation();
-            if (typeof toggleTheme === 'function') {
-                toggleTheme();
-            }
-            
-            // Обратная связь
-            if (navigator.vibrate) {
-                navigator.vibrate(30);
-            }
+            if (typeof toggleTheme === 'function') toggleTheme();
+            if (navigator.vibrate) navigator.vibrate(30);
+        });
+        // Установка первоначальных aria
+        const isLight = document.body.classList.contains('light-theme');
+        compactThemeToggle.setAttribute('aria-label', isLight ? 'Переключить на темную тему' : 'Переключить на светлую тему');
+        compactThemeToggle.setAttribute('aria-pressed', isLight);
+    }
+
+    // Языковые чипы
+    if (compactLangChips.length) {
+        compactLangChips.forEach(chip => {
+            const lang = chip.getAttribute('data-lang');
+            chip.classList.toggle('active', lang === savedLang);
+            chip.setAttribute('aria-pressed', lang === savedLang);
+            chip.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const targetLang = chip.getAttribute('data-lang');
+                if (typeof switchLanguage === 'function') switchLanguage(targetLang);
+                compactLangChips.forEach(c => {
+                    const isActive = c === chip;
+                    c.classList.toggle('active', isActive);
+                    c.setAttribute('aria-pressed', isActive);
+                });
+                if (navigator.vibrate) navigator.vibrate(25);
+            });
         });
     }
 
-    // Инициализация переключателей языка
-    mobileLanguageSwitchers.forEach(switcher => {
-        switcher.addEventListener('click', (e) => {
+    // Корзина
+    if (compactCartButton) {
+        compactCartButton.addEventListener('click', (e) => {
             e.stopPropagation();
-            const lang = switcher.getAttribute('data-lang');
-            
-            // Переключаем язык (убираем добавление/удаление активного класса)
-            if (typeof switchLanguage === 'function') {
-                switchLanguage(lang);
-            }
-            
-            // Обратная связь
-            if (navigator.vibrate) {
-                navigator.vibrate(30);
-            }
+            if (typeof openCartModal === 'function') openCartModal(e);
+            if (navigator.vibrate) navigator.vibrate(20);
+        });
+    }
+
+    // Слушатели глобальных событий
+    window.addEventListener('themechange', (e) => {
+        const theme = e.detail?.theme || (document.body.classList.contains('light-theme') ? 'light' : 'dark');
+        if (compactThemeToggle) {
+            const label = theme === 'light' ? 'Переключить на темную тему' : 'Переключить на светлую тему';
+            compactThemeToggle.setAttribute('aria-label', label);
+            compactThemeToggle.setAttribute('aria-pressed', theme === 'light');
+        }
+    });
+
+    window.addEventListener('languagechange', (e) => {
+        const lang = e.detail?.lang || localStorage.getItem('language') || 'ru';
+        compactLangChips.forEach(chip => {
+            const isActive = chip.getAttribute('data-lang') === lang;
+            chip.classList.toggle('active', isActive);
+            chip.setAttribute('aria-pressed', isActive);
         });
     });
 
-    // Убираем установку начального состояния языка
-    console.log('Мобильные тоглы инициализированы');
+    console.log('Мобильные тоглы инициализированы (compact mode)');
 }
 
 // Экспорт функций

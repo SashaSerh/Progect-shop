@@ -19,6 +19,25 @@
         <!-- Мобильное выпадающее меню -->
         <nav class="mobile-nav" role="navigation" aria-hidden="true">
             <ul class="mobile-nav__list">
+                <!-- Компактные настройки (перемещено вверх) -->
+                <li class="mobile-nav__item mobile-settings">
+                    <div class="mobile-settings__row" role="group" aria-label="Быстрые настройки">
+                        <button class="mobile-settings__btn mobile-settings__cart" id="mobileCartButton" aria-label="Открыть корзину" type="button">
+                            <span class="mobile-settings__icon" aria-hidden="true">🛒</span>
+                            <span class="cart-count" id="mobileCartCount" aria-live="polite">0</span>
+                        </button>
+                        <button class="mobile-settings__btn mobile-settings__theme theme-toggle mobile-theme-toggle" id="mobileThemeToggle" aria-label="Переключить тему" type="button" aria-pressed="false">
+                            <span class="theme-icon" aria-hidden="true">🌙</span>
+                        </button>
+                        <div class="mobile-settings__lang" aria-label="Выбор языка" role="group">
+                            <button class="lang-chip active" data-lang="ru" aria-label="Русский" aria-pressed="true" type="button">RU</button>
+                            <button class="lang-chip" data-lang="uk" aria-label="Українська" aria-pressed="false" type="button">UK</button>
+                        </div>
+                    </div>
+                </li>
+                <li class="mobile-nav__item">
+                    <a href="#home" class="mobile-nav__link" data-i18n="nav-home">Главная</a>
+                </li>
                 <li class="mobile-nav__item">
                     <a href="#services" class="mobile-nav__link" data-i18n="nav-services">Услуги</a>
                 </li>

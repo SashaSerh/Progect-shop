@@ -139,7 +139,64 @@ export function switchLanguage(lang) {
 
     document.title = translations[lang]['site-title'] || 'Климат Контроль';
     localStorage.setItem('language', lang);
+
+    // Отправляем кастомное событие для синхронизации UI
+    try {
+        const event = new CustomEvent('languagechange', { detail: { lang } });
+        window.dispatchEvent(event);
+    } catch (err) {
+        console.warn('Не удалось отправить событие languagechange', err);
+    }
 }
 
 // Экспорт в глобальную область для совместимости
 window.switchLanguage = switchLanguage;
+
+// Унифицированная инициализация всех переключателей языка (десктоп + мобильные чипы)
+export function initLanguageSwitchers() {
+    const current = localStorage.getItem('language') || 'ru';
+    const desktopButtons = document.querySelectorAll('.language-switcher');
+    const chips = document.querySelectorAll('.mobile-settings__lang .lang-chip');
+
+    function updateStates(activeLang) {
+        desktopButtons.forEach(btn => {
+            const isActive = btn.dataset.lang === activeLang;
+            btn.classList.toggle('active', isActive);
+            btn.setAttribute('aria-pressed', isActive);
+        });
+        chips.forEach(chip => {
+            const isActive = chip.getAttribute('data-lang') === activeLang;
+            chip.classList.toggle('active', isActive);
+            chip.setAttribute('aria-pressed', isActive);
+        });
+    }
+
+    updateStates(current);
+
+    function attach(el, getLang) {
+        el.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const lang = getLang(el);
+            if (!['ru','uk'].includes(lang)) return;
+            switchLanguage(lang);
+            updateStates(lang);
+            // Дополнительные обновления, если глобальные функции доступны
+            if (window.translations) {
+                if (typeof renderProducts === 'function') {
+                    renderProducts(lang, window.translations);
+                }
+                if (typeof updateCartUI === 'function') {
+                    updateCartUI(window.translations, lang);
+                }
+                if (typeof updateProfileButton === 'function') {
+                    updateProfileButton(window.translations, lang);
+                }
+            }
+        });
+    }
+
+    desktopButtons.forEach(btn => attach(btn, el => el.dataset.lang));
+    chips.forEach(chip => attach(chip, el => el.getAttribute('data-lang')));
+}
+
+window.initLanguageSwitchers = initLanguageSwitchers;

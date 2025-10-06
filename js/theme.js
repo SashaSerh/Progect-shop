@@ -15,6 +15,8 @@ export function initTheme() {
  * Обрабатывает все кнопки тем одновременно
  */
 export function toggleTheme() {
+    // Добавляем класс для плавного перехода
+    document.body.classList.add('theme-transition');
     document.body.classList.toggle('light-theme');
     const isLightTheme = document.body.classList.contains('light-theme');
     const currentTheme = isLightTheme ? 'light' : 'dark';
@@ -29,6 +31,19 @@ export function toggleTheme() {
     if (navigator.vibrate) {
         navigator.vibrate(30);
     }
+
+    // Кастомное событие для синхронизации UI (мобильные компактные элементы и др.)
+    try {
+        const event = new CustomEvent('themechange', { detail: { theme: currentTheme } });
+        window.dispatchEvent(event);
+    } catch (err) {
+        console.warn('Не удалось отправить событие themechange', err);
+    }
+
+    // Убираем класс после завершения перехода (fallback таймер)
+    setTimeout(() => {
+        document.body.classList.remove('theme-transition');
+    }, 400);
 }
 
 /**
@@ -55,6 +70,10 @@ function updateAllThemeIcons(theme) {
             ? 'Переключить на темную тему' 
             : 'Переключить на светлую тему';
         button.setAttribute('aria-label', newLabel);
+        // Обновляем aria-pressed если это кнопка в компактной мобильной панели
+        if (button.id === 'mobileThemeToggle') {
+            button.setAttribute('aria-pressed', theme === 'light');
+        }
     });
     
     console.log(`Обновлено ${themeIcons.length} иконок тем для темы: ${theme}`);

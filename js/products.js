@@ -64,13 +64,70 @@ export function filterProducts(lang, translations) {
     const price = document.getElementById('price')?.value || 'all';
     let filteredProducts = [...products];
 
-    if (category !== 'all') {
-        filteredProducts = filteredProducts.filter(product => product.category === category);
+    // Кеш ключ (без учета языка, т.к. данные локализуются при рендере)
+    if (!window.__productsFilterCache) {
+        window.__productsFilterCache = new Map();
     }
-
-    if (price !== 'all') {
-        filteredProducts.sort((a, b) => price === 'low' ? a.price - b.price : b.price - a.price);
+    const cacheKey = `${category}|${price}`;
+    if (window.__productsFilterCache.has(cacheKey)) {
+        filteredProducts = window.__productsFilterCache.get(cacheKey);
+    } else {
+        let computed = [...products];
+        if (category !== 'all') {
+            computed = computed.filter(product => product.category === category);
+        }
+        if (price !== 'all') {
+            computed.sort((a, b) => price === 'low' ? a.price - b.price : b.price - a.price);
+        }
+        window.__productsFilterCache.set(cacheKey, computed);
+        filteredProducts = computed;
     }
 
     renderProducts(lang, translations, filteredProducts);
+}
+
+// Автоперерисовка товаров при смене языка (если секция уже на странице)
+window.addEventListener('languagechange', (e) => {
+    const lang = e.detail?.lang || localStorage.getItem('language') || 'ru';
+    // Пытаемся получить глобальные translations, если доступны в window
+    try {
+        const globalTranslations = window.translations || undefined;
+        if (globalTranslations) {
+            // Перечитываем текущие фильтры и перерисовываем
+            filterProducts(lang, globalTranslations);
+        }
+    } catch (err) {
+        console.warn('Не удалось обновить товары при смене языка', err);
+    }
+});
+
+// Skeleton helpers
+export function showProductsSkeleton(count = 6) {
+    const productsGrid = document.querySelector('.products__grid');
+    if (!productsGrid) return;
+    productsGrid.classList.add('loading');
+    productsGrid.innerHTML = '';
+    for (let i = 0; i < count; i++) {
+        const card = document.createElement('div');
+        card.className = 'skeleton-card';
+        card.innerHTML = `
+            <div class="skeleton skeleton-img"></div>
+            <div class="skeleton skeleton-title"></div>
+            <div class="skeleton skeleton-text"></div>
+            <div class="skeleton skeleton-text short"></div>
+            <div class="skeleton skeleton-price"></div>
+            <div class="skeleton skeleton-btn"></div>
+        `;
+        productsGrid.appendChild(card);
+    }
+}
+
+// Обертка для использования скелетона перед фильтрацией (искусственная задержка для UX)
+export function filterProductsWithSkeleton(lang, translations) {
+    showProductsSkeleton();
+    setTimeout(() => {
+        filterProducts(lang, translations);
+        const grid = document.querySelector('.products__grid');
+        if (grid) grid.classList.remove('loading');
+    }, 300); // 300мс имитация загрузки
 }

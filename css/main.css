@@ -1836,10 +1836,10 @@ body {
         align-items: center;
         padding: 16px 20px;
         height: 64px;
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-        border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+        background: var(--mobile-header-bg, var(--glass-bg));
+        backdrop-filter: var(--glass-blur);
+        -webkit-backdrop-filter: var(--glass-blur);
+        border-bottom: 1px solid var(--mobile-header-border, var(--glass-border));
         border-radius: 20px;
         transition: all 0.3s ease;
     }
@@ -1856,7 +1856,7 @@ body {
         width: 100px;
         height: 100px;
         transition: transform 0.3s ease;
-        filter: brightness(0) saturate(100%) invert(86%) sepia(3%) saturate(1029%) hue-rotate(202deg) brightness(94%) contrast(93%);
+        filter: var(--mobile-logo-filter, brightness(0) saturate(100%) invert(86%) sepia(3%) saturate(1029%) hue-rotate(202deg) brightness(94%) contrast(93%));
     }
 
     .minimal-logo:hover {
@@ -1867,7 +1867,7 @@ body {
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
         font-size: 20px;
         font-weight: 600;
-        color: #1a1a1a;
+        color: var(--mobile-header-text, var(--nav-text-color));
         letter-spacing: -0.02em;
         margin-left: -16px;
     }
@@ -1897,7 +1897,7 @@ body {
         display: block;
         width: 20px;
         height: 2px;
-        background: #1a1a1a;
+        background: var(--mobile-hamburger-color, var(--nav-text-color));
         border-radius: 1px;
         transition: all 0.3s ease;
     }
@@ -2083,41 +2083,20 @@ body {
     }
 
     /* Темы для минималистичного хедера */
-    .light-theme .minimal-mobile-header {
-        background: rgba(255, 255, 255, 0.95);
-        border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-        border-radius: 20px;
+    /* Тематические переменные для мобильного хедера */
+    :root {
+        --mobile-header-bg: rgba(26,26,26,0.95);
+        --mobile-header-border: rgba(255,255,255,0.12);
+        --mobile-header-text: #ffffff;
+        --mobile-hamburger-color: #ffffff;
+        --mobile-logo-filter: brightness(0) saturate(100%) invert(86%) sepia(3%) saturate(1029%) hue-rotate(202deg) brightness(94%) contrast(93%);
     }
-
-    .light-theme .minimal-brand-text {
-        color: #1a1a1a;
-    }
-
-    .light-theme .minimal-logo {
-        filter: brightness(0) saturate(100%) invert(10%) sepia(16%) saturate(354%) hue-rotate(202deg) brightness(95%) contrast(89%);
-    }
-
-    .light-theme .minimal-menu-btn .hamburger-line {
-        background: #1a1a1a;
-    }
-
-    .light-theme .minimal-menu-btn:hover {
-        background: rgba(0, 0, 0, 0.05);
-    }
-
-    /* Темная тема для минималистичного хедера */
-    .minimal-mobile-header {
-        background: rgba(26, 26, 26, 0.95);
-        border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-        border-radius: 20px;
-    }
-
-    .minimal-brand-text {
-        color: #ffffff;
-    }
-
-    .minimal-menu-btn .hamburger-line {
-        background: #ffffff;
+    .light-theme {
+        --mobile-header-bg: rgba(255,255,255,0.95);
+        --mobile-header-border: rgba(0,0,0,0.08);
+        --mobile-header-text: #1a1a1a;
+        --mobile-hamburger-color: #1a1a1a;
+        --mobile-logo-filter: brightness(0) saturate(100%) invert(10%) sepia(16%) saturate(354%) hue-rotate(202deg) brightness(95%) contrast(89%);
     }
 
     .minimal-menu-btn:hover {
@@ -2154,3 +2133,44 @@ body {
         display: block !important;
     }
 }
+
+/* ================= MOBILE SETTINGS COMPACT BLOCK ================= */
+@media (max-width: 880px) {
+    .mobile-settings { padding: 4px 6px 10px 6px; }
+    .mobile-settings__row {
+        display: flex; align-items: center; justify-content: space-between; gap: 12px;
+        background: var(--glass-bg); border: 1px solid var(--glass-border); backdrop-filter: var(--glass-blur);
+        border-radius: 18px; padding: 8px 14px; box-shadow: var(--shadow);
+    }
+    .mobile-settings__btn { position: relative; cursor: pointer; border: none; background: var(--button-bg); color: var(--nav-text-color); width: 42px; height: 42px; display:flex; align-items:center; justify-content:center; border-radius:14px; font-size:20px; transition: var(--micro-transition); }
+    .light-theme .mobile-settings__btn { background: rgba(0,0,0,0.06); }
+    .mobile-settings__btn:hover { background: var(--button-bg-hover); }
+    .mobile-settings__btn:active { transform: scale(.92); }
+    .mobile-settings__cart .cart-count { position:absolute; top:-4px; right:-4px; background: var(--cart-red); color:#fff; width:20px; height:20px; font-size:11px; display:flex; align-items:center; justify-content:center; border-radius:50%; font-weight:600; box-shadow:0 0 0 2px rgba(0,0,0,0.25);} 
+    .mobile-settings__lang { display:flex; gap:6px; background: var(--button-bg); padding:4px 6px; border-radius:14px; }
+    .light-theme .mobile-settings__lang { background: rgba(0,0,0,0.06); }
+    .lang-chip { background:none; border:none; color: var(--nav-text-color); font-size:13px; font-weight:600; padding:6px 10px; border-radius:10px; cursor:pointer; transition: var(--micro-transition); }
+    .lang-chip.active, .lang-chip:hover { background: var(--accent-color); color:#fff; }
+    .mobile-settings__theme .theme-icon { font-size:20px; }
+}
+
+/* ============ Skeleton loader для карточек товаров ============ */
+.products__grid.loading { display: grid; grid-template-columns: repeat(auto-fill,minmax(220px,1fr)); gap: 1.25rem; }
+.skeleton-card { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 16px; padding: 1rem; position: relative; overflow: hidden; }
+.skeleton { position: relative; background: linear-gradient(90deg, var(--skeleton-base) 25%, var(--skeleton-highlight) 37%, var(--skeleton-base) 63%); background-size: 400% 100%; animation: shimmer 1.4s ease-in-out infinite; border-radius: 8px; }
+.skeleton-img { width: 100%; height: 120px; border-radius: 12px; margin-bottom: .75rem; }
+.skeleton-title { height: 18px; width: 70%; margin-bottom: .5rem; }
+.skeleton-text { height: 14px; width: 100%; margin-bottom: .4rem; }
+.skeleton-text.short { width: 55%; }
+.skeleton-price { height: 20px; width: 40%; margin: .75rem 0; }
+.skeleton-btn { height: 38px; width: 60%; border-radius: 10px; }
+@keyframes shimmer { 0% { background-position: 0 0; } 100% { background-position: -400% 0; } }
+
+:root { --skeleton-base: rgba(255,255,255,0.08); --skeleton-highlight: rgba(255,255,255,0.18); }
+.light-theme { --skeleton-base: rgba(0,0,0,0.06); --skeleton-highlight: rgba(0,0,0,0.12); }
+
+/* ============ Плавный переход темы ============ */
+body.theme-transition, body.theme-transition * { transition: background-color .35s ease, color .35s ease, border-color .35s ease; }
+
+/* Legacy bottom-nav (удалено из footer) — страховочно скрываем, если кэш или инлайновый HTML остались */
+.bottom-nav { display: none !important; }

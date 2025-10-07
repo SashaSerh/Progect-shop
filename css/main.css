@@ -319,6 +319,12 @@ body {
 
 .theme-toggle {
     padding: 8px;
+    background: var(--button-bg);
+    width: 45px;
+    height: 33px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .theme-icon {
@@ -404,6 +410,11 @@ body {
     font-size: 15px;
     margin-right: 16px;
     font-weight: 300;
+    background: var(--button-bg);
+    border-radius: 14px;
+    width: 200px;
+    height: 50px;
+    padding: 1px 17px;
 }
 
 .header__phones a {
@@ -2150,7 +2161,7 @@ body {
 @media (max-width: 880px) {
     .mobile-settings { padding: 4px 6px 10px 6px; }
     .mobile-settings__row {
-        display: flex; align-items: center; justify-content: space-between; gap: 12px;
+        display: flex; align-items: center; justify-content: space-evenly; gap: 12px;
         background: var(--glass-bg); border: 1px solid var(--glass-border); backdrop-filter: var(--glass-blur);
         border-radius: 18px; padding: 8px 14px; box-shadow: var(--shadow);
     }

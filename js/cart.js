@@ -1,6 +1,17 @@
 import { products } from './products.js';
 
-export let cart = JSON.parse(localStorage.getItem('cart')) || [];
+// Безопасно читаем localStorage (в средах без window/localStorage, например в тестах, fallback к пустому массиву)
+function safeReadInitialCart() {
+    try {
+        if (typeof localStorage !== 'undefined') {
+            const raw = localStorage.getItem('cart');
+            return raw ? JSON.parse(raw) : [];
+        }
+    } catch (_) {/* ignore */}
+    return [];
+}
+
+export let cart = safeReadInitialCart();
 
 export function saveCart() {
     localStorage.setItem('cart', JSON.stringify(cart));

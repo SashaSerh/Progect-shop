@@ -87,19 +87,21 @@ export function filterProducts(lang, translations) {
 }
 
 // Автоперерисовка товаров при смене языка (если секция уже на странице)
-window.addEventListener('languagechange', (e) => {
-    const lang = e.detail?.lang || localStorage.getItem('language') || 'ru';
-    // Пытаемся получить глобальные translations, если доступны в window
-    try {
-        const globalTranslations = window.translations || undefined;
-        if (globalTranslations) {
-            // Перечитываем текущие фильтры и перерисовываем
-            filterProducts(lang, globalTranslations);
+if (typeof window !== 'undefined') {
+    window.addEventListener('languagechange', (e) => {
+        const lang = e.detail?.lang || (typeof localStorage !== 'undefined' && localStorage.getItem('language')) || 'ru';
+        // Пытаемся получить глобальные translations, если доступны в window
+        try {
+            const globalTranslations = window.translations || undefined;
+            if (globalTranslations) {
+                // Перечитываем текущие фильтры и перерисовываем
+                filterProducts(lang, globalTranslations);
+            }
+        } catch (err) {
+            console.warn('Не удалось обновить товары при смене языка', err);
         }
-    } catch (err) {
-        console.warn('Не удалось обновить товары при смене языка', err);
-    }
-});
+    });
+}
 
 // Skeleton helpers
 export function showProductsSkeleton(count = 6) {

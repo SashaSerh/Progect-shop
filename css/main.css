@@ -2036,6 +2036,7 @@ textarea.form-input { resize: vertical; min-height: 120px; }
         transition: transform 0.3s ease;
         z-index: 2000; /* выше overlay и прочих поверхностных слоёв */
         overflow: hidden; /* скролл переносим на список */
+        min-height: 0; /* важно для корректного сжатия flex-колонки и прокрутки дочернего списка */
     }
     .light-theme .mobile-nav {
         background: var(--background-color);
@@ -2095,6 +2096,9 @@ textarea.form-input { resize: vertical; min-height: 120px; }
                                         overflow-y: auto;
                                         -webkit-overflow-scrolling: touch;
                                         max-height: 100%;
+                        min-height: 0; /* позволяет элементу сжиматься внутри flex-родителя */
+                        touch-action: pan-y; /* явно разрешаем вертикальный скролл (особенно на iOS/Android) */
+                        overscroll-behavior: contain; /* не прокидывать скролл на body */
                         }
 
                         /* Учитываем вырезы экрана iOS */

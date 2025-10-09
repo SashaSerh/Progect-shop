@@ -2020,8 +2020,8 @@ textarea.form-input { resize: vertical; min-height: 120px; }
 
     /* Drawer-меню для .mobile-nav (актуальная разметка) */
     .mobile-nav {
-        display: flex; /* делаем колонку: сверху кнопка, ниже список */
-        flex-direction: column;
+        display: grid; /* отдельная строка для кнопки и отдельная — для списка */
+        grid-template-rows: auto 1fr;
         position: fixed;
         top: 0;
         right: 0;
@@ -2048,9 +2048,8 @@ textarea.form-input { resize: vertical; min-height: 120px; }
 
     /* Кнопка закрытия меню */
     .mobile-nav__close {
-        position: absolute;
-        top: 10px;
-        right: 10px;
+        position: relative; /* в своей сеточной строке */
+        margin: 10px 10px 0 auto; /* прижимаем вправо */
         width: 36px;
         height: 36px;
         border-radius: 10px;
@@ -2084,30 +2083,25 @@ textarea.form-input { resize: vertical; min-height: 120px; }
 
     /* Legacy vertical slide .mobile-nav removed; replaced by drawer behavior above. */
 
-                        .mobile-nav__list {
-                                        list-style: none;
-                                        padding: 20px;
-                                        padding-top: 72px; /* запас под кнопку закрытия */
-                                        margin: 0;
-                                        display: flex;
-                                        flex-direction: column;
-                                        gap: 8px;
-                                        flex: 1 1 auto;
-                                        overflow-y: auto;
-                                        -webkit-overflow-scrolling: touch;
-                                        max-height: 100%;
-                        min-height: 0; /* позволяет элементу сжиматься внутри flex-родителя */
-                        touch-action: pan-y; /* явно разрешаем вертикальный скролл (особенно на iOS/Android) */
+                    .mobile-nav__list {
+                        list-style: none;
+                        padding: 20px; /* без принудительного отступа под кнопку */
+                        margin: 0;
+                        display: flex;
+                        flex-direction: column;
+                        gap: 8px;
+                        overflow-y: auto;
+                        -webkit-overflow-scrolling: touch;
+                        max-height: 100%;
+                        min-height: 0; /* позволяет блоку корректно сжиматься и скроллиться */
+                        touch-action: pan-y; /* явно разрешаем вертикальную прокрутку */
                         overscroll-behavior: contain; /* не прокидывать скролл на body */
-                        }
+                    }
 
                         /* Учитываем вырезы экрана iOS */
-                        @supports (padding: max(0px)) {
-                            .mobile-nav__list {
-                                padding-top: calc(72px + env(safe-area-inset-top));
-                                padding-bottom: calc(20px + env(safe-area-inset-bottom));
-                            }
-                        }
+                                    @supports (padding: max(0px)) {
+                                        .mobile-nav__list { padding-bottom: calc(20px + env(safe-area-inset-bottom)); }
+                                    }
 
     .mobile-nav__item {
         border-radius: 12px;

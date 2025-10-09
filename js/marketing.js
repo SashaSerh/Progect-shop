@@ -96,4 +96,53 @@ export function injectLocalBusinessJSONLD() {
 export function initMarketing() {
   injectLocalBusinessJSONLD();
   attachCTAs();
+  attachContactForm();
+}
+
+export function attachContactForm() {
+  const form = document.getElementById('contactForm');
+  if (!form) return;
+  const statusEl = form.querySelector('.form-status');
+  const lang = localStorage.getItem('language') || 'ru';
+  const t = (k) => (window.translations?.[lang]?.[k]) || k;
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const fd = new FormData(form);
+    const name = fd.get('name')?.toString().trim();
+    const email = fd.get('email')?.toString().trim();
+    const message = fd.get('message')?.toString().trim();
+    if (!name || !email || !message) {
+      statusEl.textContent = t('form-error');
+      return;
+    }
+    statusEl.textContent = t('form-sending');
+    try {
+      const { contactForm } = contentConfig;
+      if (contactForm?.provider === 'formspree' && contactForm?.endpoint && contactForm.endpoint.includes('formspree.io')) {
+        const res = await fetch(contactForm.endpoint, {
+          method: 'POST',
+          headers: { 'Accept': 'application/json' },
+          body: fd
+        });
+        if (res.ok) {
+          form.reset();
+          statusEl.textContent = t('form-success');
+        } else {
+          throw new Error('Formspree error');
+        }
+      } else {
+        // Fallback: mailto
+        const to = contactForm?.mailto || contentConfig.contacts.email;
+        const subject = encodeURIComponent('Заявка с сайта');
+        const body = encodeURIComponent(`Имя: ${name}\nEmail: ${email}\nСообщение: ${message}`);
+        const mailto = `mailto:${to}?subject=${subject}&body=${body}`;
+        location.href = mailto;
+        statusEl.textContent = t('form-success');
+      }
+    } catch (err) {
+      console.warn('Contact form error', err);
+      statusEl.textContent = t('form-error');
+    }
+  });
 }

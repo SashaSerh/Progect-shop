@@ -55,7 +55,10 @@ export const translations = {
         "orders-title": "Мои заказы",
         "catalog": "Каталог",
         "search-placeholder": "Поиск по сайту",
-        "portfolio-title": "Наши работы"
+        "portfolio-title": "Наши работы",
+        "form-sending": "Отправляем...",
+        "form-success": "Спасибо! Мы свяжемся с вами.",
+        "form-error": "Ошибка отправки. Попробуйте позже."
     },
     uk: {
         "site-title": "Клімат Контроль",
@@ -113,7 +116,10 @@ export const translations = {
         "orders-title": "Мої замовлення",
         "catalog": "Каталог",
         "search-placeholder": "Пошук по сайту",
-        "portfolio-title": "Наші роботи"
+        "portfolio-title": "Наші роботи",
+        "form-sending": "Відправляємо...",
+        "form-success": "Дякуємо! Ми зв'яжемося з вами.",
+        "form-error": "Помилка відправки. Спробуйте пізніше."
     }
 };
 

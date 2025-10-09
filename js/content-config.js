@@ -15,6 +15,13 @@ export const contentConfig = {
     email: 'info@climat-control.com',
     address: 'ул. Климатическая, 123, Киев'
   },
+  contactForm: {
+    provider: 'formspree',
+    // Замените your_form_id на ваш ID из Formspree, например: https://formspree.io/f/abcdwxyz
+    endpoint: 'https://formspree.io/f/your_form_id',
+    // fallback для почты если endpoint пуст
+    mailto: 'info@climat-control.com'
+  },
   portfolio: [
     // Замените позже своими фото
     { src: 'https://placehold.co/480x320?text=Work+1', alt: 'Монтаж кондиционера — кейс 1' },

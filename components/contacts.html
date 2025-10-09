@@ -13,10 +13,13 @@
                 </div>
             </div>
             <div class="contacts__form">
-                <input type="text" placeholder="Ваше имя" data-i18n-placeholder="form-name">
-                <input type="email" placeholder="Ваш email" data-i18n-placeholder="form-email">
-                <textarea placeholder="Ваше сообщение" data-i18n-placeholder="form-message"></textarea>
-                <button data-i18n="form-submit">Отправить сообщение</button>
+                <form id="contactForm" novalidate>
+                    <input type="text" name="name" placeholder="Ваше имя" data-i18n-placeholder="form-name" required>
+                    <input type="email" name="email" placeholder="Ваш email" data-i18n-placeholder="form-email" required>
+                    <textarea name="message" placeholder="Ваше сообщение" data-i18n-placeholder="form-message" required></textarea>
+                    <button type="submit" class="btn" data-i18n="form-submit">Отправить сообщение</button>
+                    <p class="form-status" aria-live="polite"></p>
+                </form>
             </div>
         </div>
     </div>

@@ -36,6 +36,14 @@
     --thumb-size: 44px;
     --mobile-padding: 20px;
     /* Удалены неиспользуемые --trend-* цвета для упрощения темизации */
+    /* Токены полей ввода (тёмная тема по умолчанию) */
+    --input-bg: rgba(255,255,255,0.04);
+    --input-border: rgba(255,255,255,0.18);
+    --input-border-hover: rgba(255,255,255,0.28);
+    --input-placeholder: rgba(127,127,127,0.9);
+    --input-text: var(--nav-text-color);
+    --input-radius: 12px;
+    --input-focus-shadow: 0 0 0 3px rgba(0,122,255,0.2);
 }
 
 /* Переменные для светлой темы */
@@ -59,6 +67,11 @@
     --glass-bg: rgba(255, 255, 255, 0.8); /* оставляем как тема-специфическое */
     --glass-border: rgba(0, 0, 0, 0.1);
     --glass-blur: blur(15px);
+    /* Токены полей ввода (светлая тема) */
+    --input-bg: rgba(0,0,0,0.02);
+    --input-border: rgba(0,0,0,0.12);
+    --input-border-hover: rgba(0,0,0,0.18);
+    --input-placeholder: rgba(60,60,67,0.5);
 }
 
 /* Сброс базовых стилей */
@@ -98,7 +111,7 @@ body {
     padding: 12px 0;
     position: sticky;
     top: 0;
-    z-index: 100;
+    z-index: 1600; /* выше overlay (1500), но ниже меню (2000) */
     border-bottom: 0.5px solid rgba(255, 255, 255, 0.2);
 }
 
@@ -1272,20 +1285,24 @@ body {
 .form-input {
     width: 100%;
     padding: 12px 14px;
-    border-radius: 12px;
-    border: 1px solid rgba(255,255,255,0.18);
-    background: rgba(255,255,255,0.04);
-    color: var(--nav-text-color);
+    border-radius: var(--input-radius);
+    border: 1px solid var(--input-border);
+    background: var(--input-bg);
+    color: var(--input-text);
     font-size: 15px;
     transition: border-color 180ms ease, box-shadow 180ms ease, background-color 180ms ease;
 }
-.light-theme .form-input { border-color: rgba(0,0,0,0.12); background: rgba(0,0,0,0.02); }
-.form-input::placeholder { color: rgba(127,127,127,0.9); }
-.form-input:focus { outline: none; border-color: var(--accent-color); box-shadow: 0 0 0 3px rgba(0,122,255,0.2); background: rgba(255,255,255,0.06); }
+.form-input::placeholder { color: var(--input-placeholder); }
+.form-input:hover { border-color: var(--input-border-hover); }
+.form-input:focus { outline: none; border-color: var(--accent-color); box-shadow: var(--input-focus-shadow); }
 
 textarea.form-input { resize: vertical; min-height: 120px; }
 
 .form-submit-btn { margin-top: 6px; }
+/* Хелперы и ошибки на уровне поля */
+.form-field .helper { font-size: 12px; color: var(--input-placeholder); }
+.form-field.is-error .form-input { border-color: #ff6b6b; box-shadow: 0 0 0 3px rgba(255,107,107,0.2); }
+.form-field.is-error .helper { color: #ff6b6b; }
 
 /* Унифицированные кнопки (CTA) */
 .btn {
@@ -1314,6 +1331,10 @@ textarea.form-input { resize: vertical; min-height: 120px; }
 
 /* Контейнер кнопок контактов */
 .contacts__cta { display: flex; flex-wrap: wrap; gap: 10px; margin: 10px 0 4px; }
+@media (max-width: 480px) {
+    .contacts__cta .btn { flex: 1 1 100%; }
+    .form-submit-btn { width: 100%; }
+}
 
 /* Статусы формы */
 .form-status { min-height: 1.25em; font-size: 14px; margin-top: 6px; color: var(--nav-text-color); }
@@ -1696,6 +1717,8 @@ textarea.form-input { resize: vertical; min-height: 120px; }
 @media (max-width: 768px) {
     /* Переменные для мобильного дизайна */
     :root {
+    --mobile-header-height: 64px;
+    --mobile-drawer-width: min(88vw, 360px);
         --mobile-glassmorphism: rgba(255, 255, 255, 0.25);
         --mobile-glassmorphism-dark: rgba(0, 0, 0, 0.25);
         --mobile-glass-border: rgba(255, 255, 255, 0.18);
@@ -1923,6 +1946,8 @@ textarea.form-input { resize: vertical; min-height: 120px; }
         align-items: center;
         gap: 4px;
         touch-action: manipulation;
+        position: relative;
+        z-index: 3000; /* выше overlay и контента */
     }
 
     .minimal-menu-btn:hover {
@@ -1952,16 +1977,118 @@ textarea.form-input { resize: vertical; min-height: 120px; }
         transform: translateY(-6px) rotate(-45deg);
     }
 
-    /* Legacy vertical slide .mobile-nav removed; replaced by drawer variant (.mobile-nav--drawer). */
-
-    .mobile-nav__list {
-        list-style: none;
-        padding: 20px;
-        margin: 0;
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
+    /* Overlay для мобильного меню */
+    .mobile-nav-overlay {
+        position: fixed;
+        inset: 0;
+        opacity: 0;
+        pointer-events: none; /* клики выключены по умолчанию */
+        transition: opacity 0.25s ease;
+        z-index: 1500; /* ниже меню, но выше контента и плавающих кнопок */
     }
+    .mobile-nav-overlay::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: rgba(0,0,0,0.35);
+        opacity: 0;
+        transition: opacity 0.25s ease;
+        pointer-events: auto; /* перехватываем клики на затемнённой области */
+    }
+    .mobile-nav-overlay.is-visible { opacity: 1; }
+        .mobile-nav-overlay.is-visible::before {
+            opacity: 1;
+            /* Делаем "окно" для области меню справа (ширина = --mobile-drawer-width) */
+            clip-path: inset(0 var(--mobile-drawer-width) 0 0);
+        }
+
+        /* Дополнительно: оставляем "окно" под областью шапки, чтобы бургер оставался кликабельным,
+             даже если overlay перекроется над шапкой в некоторых браузерах */
+        @media (max-width: 768px) {
+                    .mobile-nav-overlay.is-visible::before {
+                        /* Верхняя выемка под шапку = --mobile-header-height, справа вырез под drawer */
+                        clip-path: polygon(
+                            0 var(--mobile-header-height),
+                            calc(100% - var(--mobile-drawer-width)) var(--mobile-header-height),
+                            calc(100% - var(--mobile-drawer-width)) 0,
+                            100% 0,
+                            100% 100%,
+                            0 100%
+                        );
+                    }
+        }
+
+    /* Drawer-меню для .mobile-nav (актуальная разметка) */
+    .mobile-nav {
+        display: block; /* переопределяем desktop hidden */
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        width: var(--mobile-drawer-width);
+        background: var(--mobile-header-bg, var(--glass-bg));
+        backdrop-filter: var(--glass-blur);
+        -webkit-backdrop-filter: var(--glass-blur);
+        border-left: 1px solid var(--mobile-header-border, var(--glass-border));
+        box-shadow: var(--shadow);
+        transform: translateX(100%);
+        transition: transform 0.3s ease;
+        z-index: 2000; /* выше overlay и прочих поверхностных слоёв */
+    }
+    .light-theme .mobile-nav {
+        background: var(--background-color);
+    }
+    .mobile-nav.active {
+        transform: translateX(0);
+        pointer-events: auto; /* принимаем клики поверх overlay */
+    }
+
+    /* Кнопка закрытия меню */
+    .mobile-nav__close {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        border: none;
+        background: var(--button-bg);
+        color: var(--nav-text-color);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: background-color .2s ease, transform .2s ease, opacity .2s ease;
+        z-index: 1;
+        opacity: 0;
+        transform: scale(0.9) rotate(-90deg);
+    }
+    .mobile-nav__close .icon { width: 20px; height: 20px; display: block; color: var(--nav-text-color); }
+    .mobile-nav__close:hover { background: var(--button-bg-hover); }
+    .mobile-nav__close:active { transform: scale(0.96); }
+
+    /* Появление крестика при открытии меню */
+    .mobile-nav.active .mobile-nav__close {
+        opacity: 1;
+        transform: scale(1) rotate(0deg);
+        transition: background-color .2s ease, transform .25s cubic-bezier(.4,0,.2,1), opacity .25s ease;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .mobile-nav__close { transition: none; transform: none; opacity: 1; }
+        .mobile-nav.active .mobile-nav__close { transition: none; }
+    }
+
+    /* Legacy vertical slide .mobile-nav removed; replaced by drawer behavior above. */
+
+            .mobile-nav__list {
+                    list-style: none;
+                    padding: 20px;
+                    margin: 0;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 8px;
+            }
 
     .mobile-nav__item {
         border-radius: 12px;

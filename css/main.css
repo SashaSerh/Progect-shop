@@ -2020,7 +2020,8 @@ textarea.form-input { resize: vertical; min-height: 120px; }
 
     /* Drawer-меню для .mobile-nav (актуальная разметка) */
     .mobile-nav {
-        display: block; /* переопределяем desktop hidden */
+        display: flex; /* делаем колонку: сверху кнопка, ниже список */
+        flex-direction: column;
         position: fixed;
         top: 0;
         right: 0;
@@ -2034,6 +2035,7 @@ textarea.form-input { resize: vertical; min-height: 120px; }
         transform: translateX(100%);
         transition: transform 0.3s ease;
         z-index: 2000; /* выше overlay и прочих поверхностных слоёв */
+        overflow: hidden; /* скролл переносим на список */
     }
     .light-theme .mobile-nav {
         background: var(--background-color);
@@ -2081,14 +2083,27 @@ textarea.form-input { resize: vertical; min-height: 120px; }
 
     /* Legacy vertical slide .mobile-nav removed; replaced by drawer behavior above. */
 
-            .mobile-nav__list {
-                    list-style: none;
-                    padding: 20px;
-                    margin: 0;
-                    display: flex;
-                    flex-direction: column;
-                    gap: 8px;
-            }
+                        .mobile-nav__list {
+                                        list-style: none;
+                                        padding: 20px;
+                                        padding-top: 72px; /* запас под кнопку закрытия */
+                                        margin: 0;
+                                        display: flex;
+                                        flex-direction: column;
+                                        gap: 8px;
+                                        flex: 1 1 auto;
+                                        overflow-y: auto;
+                                        -webkit-overflow-scrolling: touch;
+                                        max-height: 100%;
+                        }
+
+                        /* Учитываем вырезы экрана iOS */
+                        @supports (padding: max(0px)) {
+                            .mobile-nav__list {
+                                padding-top: calc(72px + env(safe-area-inset-top));
+                                padding-bottom: calc(20px + env(safe-area-inset-bottom));
+                            }
+                        }
 
     .mobile-nav__item {
         border-radius: 12px;

@@ -2,6 +2,8 @@ import { cart, saveCart, updateCartUI, addToCart, removeFromCart, clearCart, tog
 import { toggleTheme, initTheme, bindThemeEvents } from './theme.js';
 import { translations, switchLanguage } from './i18n.js';
 import { products, renderProducts, filterProducts } from './products.js';
+import { contentConfig } from './content-config.js';
+import { initMarketing } from './marketing.js';
 import { initNavigation } from './navigation.js';
 import { updateProfileButton, openModal, closeModal } from './auth.js';
 
@@ -84,6 +86,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         loadComponent('services-container', 'components/services.html'),
         loadComponent('products-container', 'components/products.html'),
         loadComponent('contacts-container', 'components/contacts.html'),
+        loadComponent('portfolio-container', 'components/portfolio.html'),
         loadComponent('footer-container', 'components/footer.html'),
         loadComponent('cart-modal-container', 'components/cart.html')
     ]);
@@ -126,6 +129,21 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     updateCartUI(translations, savedLanguage);
     initNavigation();
+    initMarketing();
+
+    // Рендер портфолио по конфигу
+    const portfolioGrid = document.querySelector('.portfolio__grid');
+    if (portfolioGrid && Array.isArray(contentConfig.portfolio)) {
+        portfolioGrid.innerHTML = '';
+        contentConfig.portfolio.forEach(item => {
+            const fig = document.createElement('figure');
+            fig.className = 'portfolio__item';
+            fig.innerHTML = `
+              <img src="${item.src}" alt="${item.alt}" loading="lazy">
+            `;
+            portfolioGrid.appendChild(fig);
+        });
+    }
     
     // Инициализация мобильного заголовка
     initMobileHeader();

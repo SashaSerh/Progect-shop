@@ -1,0 +1,24 @@
+// Контент и контакты для быстрой правки без участия верстки
+export const contentConfig = {
+  business: {
+    name: 'Климат Контроль',
+    legalName: 'ИП Климат Контроль',
+    description: 'Монтаж и обслуживание систем вентиляции и кондиционирования',
+    areaServed: ['Киев', 'Киевская область'],
+    openingHours: ['Mo-Fr 09:00-18:00', 'Sa 10:00-16:00'],
+  },
+  contacts: {
+    phonePrimary: '+380633353410',
+    phoneSecondary: '+380995543499',
+    whatsapp: '+380633353410',
+    telegram: 'climate_service',
+    email: 'info@climat-control.com',
+    address: 'ул. Климатическая, 123, Киев'
+  },
+  portfolio: [
+    // Замените позже своими фото
+    { src: 'https://placehold.co/480x320?text=Work+1', alt: 'Монтаж кондиционера — кейс 1' },
+    { src: 'https://placehold.co/480x320?text=Work+2', alt: 'Монтаж вентиляции — кейс 2' },
+    { src: 'https://placehold.co/480x320?text=Work+3', alt: 'Обслуживание систем — кейс 3' }
+  ]
+};

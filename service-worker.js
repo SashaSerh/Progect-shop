@@ -1,4 +1,4 @@
-const CACHE_NAME = 'climat-control-v1';
+const CACHE_NAME = 'climat-control-v2';
 const urlsToCache = [
     '/',
     '/index.html',
@@ -6,11 +6,14 @@ const urlsToCache = [
     '/js/main.js',
     '/js/cart.js',
     '/js/products.js',
+    '/js/marketing.js',
+    '/js/content-config.js',
     '/components/header.html',
     '/components/hero.html',
     '/components/services.html',
     '/components/products.html',
     '/components/contacts.html',
+    '/components/portfolio.html',
     '/components/footer.html',
     '/components/cart.html'
 ];

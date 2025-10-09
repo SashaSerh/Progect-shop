@@ -18,7 +18,7 @@ export const contentConfig = {
   contactForm: {
     provider: 'formspree',
     // Замените your_form_id на ваш ID из Formspree, например: https://formspree.io/f/abcdwxyz
-    endpoint: 'https://formspree.io/f/your_form_id',
+    endpoint: 'https://formspree.io/f/mblzzrgr',
     // fallback для почты если endpoint пуст
     mailto: 'info@climat-control.com'
   },

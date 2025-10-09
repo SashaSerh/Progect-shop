@@ -13,13 +13,26 @@
                 </div>
             </div>
             <div class="contacts__form">
-                <form id="contactForm" novalidate>
-                    <input type="text" name="name" placeholder="Ваше имя" data-i18n-placeholder="form-name" required>
-                    <input type="email" name="email" placeholder="Ваш email" data-i18n-placeholder="form-email" required>
-                    <textarea name="message" placeholder="Ваше сообщение" data-i18n-placeholder="form-message" required></textarea>
-                    <button type="submit" class="btn" data-i18n="form-submit">Отправить сообщение</button>
-                    <p class="form-status" aria-live="polite"></p>
-                </form>
+                <div class="form-card">
+                    <form id="contactForm" novalidate>
+                        <div class="form-grid">
+                            <div class="form-field">
+                                <label for="contact-name">Имя</label>
+                                <input id="contact-name" class="form-input" type="text" name="name" placeholder="Ваше имя" data-i18n-placeholder="form-name" required>
+                            </div>
+                            <div class="form-field">
+                                <label for="contact-email">Email</label>
+                                <input id="contact-email" class="form-input" type="email" name="email" placeholder="Ваш email" data-i18n-placeholder="form-email" required>
+                            </div>
+                        </div>
+                        <div class="form-field">
+                            <label for="contact-message">Сообщение</label>
+                            <textarea id="contact-message" class="form-input" name="message" placeholder="Ваше сообщение" data-i18n-placeholder="form-message" required></textarea>
+                        </div>
+                        <button type="submit" class="btn form-submit-btn" data-i18n="form-submit">Отправить сообщение</button>
+                        <p class="form-status" aria-live="polite"></p>
+                    </form>
+                </div>
             </div>
         </div>
     </div>

@@ -116,7 +116,9 @@ export function attachContactForm() {
       statusEl.textContent = t('form-error');
       return;
     }
-    statusEl.textContent = t('form-sending');
+  statusEl.textContent = t('form-sending');
+  statusEl.classList.remove('is-success','is-error');
+  statusEl.classList.add('is-sending');
     try {
       const { contactForm } = contentConfig;
       if (contactForm?.provider === 'formspree' && contactForm?.endpoint && contactForm.endpoint.includes('formspree.io')) {
@@ -128,6 +130,8 @@ export function attachContactForm() {
         if (res.ok) {
           form.reset();
           statusEl.textContent = t('form-success');
+          statusEl.classList.remove('is-sending','is-error');
+          statusEl.classList.add('is-success');
         } else {
           throw new Error('Formspree error');
         }
@@ -139,10 +143,14 @@ export function attachContactForm() {
         const mailto = `mailto:${to}?subject=${subject}&body=${body}`;
         location.href = mailto;
         statusEl.textContent = t('form-success');
+        statusEl.classList.remove('is-sending','is-error');
+        statusEl.classList.add('is-success');
       }
     } catch (err) {
       console.warn('Contact form error', err);
       statusEl.textContent = t('form-error');
+      statusEl.classList.remove('is-sending','is-success');
+      statusEl.classList.add('is-error');
     }
   });
 }

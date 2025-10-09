@@ -11,6 +11,7 @@
     --button-bg-hover: rgba(255, 255, 255, 0.25);
     --font-thin: 400;
     --font-bold: 600;
+    /* TODO(theme-refactor): сократить область применения --transition (all) до конкретных свойств для снижения лишних repaint */
     --transition: all 0.3s ease-in-out;
     --shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     --glow-shadow: 0 0 12px rgba(0, 122, 255, 0.3);
@@ -22,6 +23,9 @@
      --fab-bottom: 20px;
      --fab-right: 20px;
      --fab-gap: 16px; /* Расстояние между кнопками */
+    /* Focus ring token (используется в :focus-visible) */
+    --focus-ring: 2px solid var(--accent-color);
+    --focus-ring-offset: 2px;
     
     /* 2025 Мобильные тренды */
     --glass-bg: rgba(255, 255, 255, 0.1);
@@ -31,30 +35,28 @@
     --micro-transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     --thumb-size: 44px;
     --mobile-padding: 20px;
-    --trend-purple: #B19CD9;
-    --trend-green: #10B981;
-    --trend-orange: #F59E0B;
+    /* Удалены неиспользуемые --trend-* цвета для упрощения темизации */
 }
 
 /* Переменные для светлой темы */
 .light-theme {
     --primary-color: rgba(242, 242, 247, 0.9);
-    --accent-color: #007AFF;
+    /* --accent-color дублировал базовое значение, не переопределяем */
     --secondary-color: #FF9500;
     --nav-text-color: #1C2526;
-    --cart-red: #FF3B30;
+    /* --cart-red совпадает с root, не дублируем */
     --modal-bg: rgba(255, 255, 255, 0.7);
     --button-bg: rgba(0, 0, 0, 0.1);
-    --button-bg-hover: rgba(255, 255, 255, 0.25);
+    /* --button-bg-hover совпадал, не дублируем */
     --background-color: #F2F2F7;
     --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     --glow-shadow: 0 0 12px rgba(0, 122, 255, 0.2);
-    --white-text-color: #FFFFFF;
+    /* --white-text-color совпадал, не дублируем */
     --background-color-secondary: #00A8E8;
     --background-color-secondary-hover: #008CBA;
     
     /* Светлая тема для мобильных трендов */
-    --glass-bg: rgba(255, 255, 255, 0.8);
+    --glass-bg: rgba(255, 255, 255, 0.8); /* оставляем как тема-специфическое */
     --glass-border: rgba(0, 0, 0, 0.1);
     --glass-blur: blur(15px);
 }
@@ -80,7 +82,7 @@ body {
 }
 
 .theme-icon img.theme-icon-animating {
-    animation: theme-icon-swap 320ms cubic-bezier(.4,0,.2,1);
+    animation: theme-icon-swap 320ms cubic-bezier(.4,0,.2,1) both; /* add fill-mode both for stable end state */
     will-change: transform, opacity;
 }
 
@@ -199,24 +201,7 @@ body {
 .light-theme .tech-text {
     color: var(--nav-text-color); /* Синий остается тем же */
 }
-/* ===================================================================== */
-/* Эффекты при наведении на текст */
-/* Более яркий красный при наведении */
 
-/* .header__brand-text:hover .clima-text {
-    color: #FF6B6B; 
-    transition: color 0.3s ease;
-} */
-
-/* ================================================================ */
-/* Более яркий синий при наведении */
-
-/* .header__brand-text:hover .tech-text {
-    color: #4DA6FF; 
-    transition: color 0.3s ease;
-} */
-
-/* =================================================================== */
 
 /* Адаптивность для мобильных устройств */
 @media (max-width: 768px) {
@@ -226,7 +211,7 @@ body {
     }
     
     .header__logo {
-        transform: scale(2.0); /* Меньший масштаб на мобильных */
+        transform: scale(2.0); /*  масштаб логотипа на мобильных */
     }
     
     .header__logo:hover {
@@ -263,6 +248,20 @@ body {
     clip: rect(0, 0, 0, 0);
     white-space: nowrap;
     border: 0;
+}
+
+/* Focus-visible accessibility ring */
+.header__nav-link:focus-visible,
+.mobile-nav__link:focus-visible,
+.mobile-nav__profile:focus-visible,
+.catalog-button:focus-visible,
+.service-card__button:focus-visible,
+.product-card__button:focus-visible,
+.modal__button:focus-visible,
+.cart-dropdown__button:focus-visible,
+.cart-button:focus-visible {
+    outline: var(--focus-ring);
+    outline-offset: var(--focus-ring-offset);
 }
 
 .header__nav {
@@ -1260,48 +1259,74 @@ body {
     gap: 12px;
 }
 
-.contacts__form input,
-.contacts__form textarea {
-    background: var(--button-bg);
+/* Новая современная форма */
+.form-card { background: var(--background-color); border: 1px solid rgba(0,0,0,0.15); border-radius: 16px; box-shadow: var(--shadow); padding: 16px; }
+.light-theme .form-card { border-color: rgba(0,0,0,0.08); }
+
+.form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+@media (max-width: 640px) { .form-grid { grid-template-columns: 1fr; } }
+
+.form-field { display: flex; flex-direction: column; gap: 6px; }
+.form-field label { font-size: 14px; color: var(--nav-text-color); font-weight: 600; }
+
+.form-input {
+    width: 100%;
+    padding: 12px 14px;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.18);
+    background: rgba(255,255,255,0.04);
     color: var(--nav-text-color);
-    padding: 10px;
-    border: none;
-    border-radius: 10px;
     font-size: 15px;
-    backdrop-filter: blur(8px);
-    transition: box-shadow var(--transition);
+    transition: border-color 180ms ease, box-shadow 180ms ease, background-color 180ms ease;
 }
+.light-theme .form-input { border-color: rgba(0,0,0,0.12); background: rgba(0,0,0,0.02); }
+.form-input::placeholder { color: rgba(127,127,127,0.9); }
+.form-input:focus { outline: none; border-color: var(--accent-color); box-shadow: 0 0 0 3px rgba(0,122,255,0.2); background: rgba(255,255,255,0.06); }
 
-.contacts__form input:focus,
-.contacts__form textarea:focus {
-    outline: none;
-    box-shadow: 0 0 5px var(--glow-shadow);
-}
+textarea.form-input { resize: vertical; min-height: 120px; }
 
-.contacts__form input::placeholder,
-.contacts__form textarea::placeholder {
-    color: var(--nav-text-color);
-}
+.form-submit-btn { margin-top: 6px; }
 
-.contacts__form textarea {
-    resize: vertical;
-    min-height: 100px;
-}
-
-.contacts__form button {
-    background: var(--background-color-secondary);
-    color: #FFFFFF;
-    border: none;
-    padding: 12px;
+/* Унифицированные кнопки (CTA) */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 16px;
     border-radius: 14px;
-    font-size: 15px;
+    border: none;
+    background: var(--accent-color);
+    color: #fff;
     font-weight: 600;
-    transition: background var(--transition);
+    font-size: 15px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: transform 120ms ease, opacity 120ms ease, background 200ms ease;
 }
+.btn:hover { opacity: .95; }
+.btn:active { transform: scale(.98); }
+.btn:focus-visible { outline: var(--focus-ring); outline-offset: var(--focus-ring-offset); }
 
-.contacts__form button:hover {
-    background: var(--background-color-secondary-hover);
-}
+/* Варианты CTA для мессенджеров */
+.btn--wa { background: #25D366; color: #fff; }
+.btn--tg { background: #229ED9; color: #fff; }
+
+/* Контейнер кнопок контактов */
+.contacts__cta { display: flex; flex-wrap: wrap; gap: 10px; margin: 10px 0 4px; }
+
+/* Статусы формы */
+.form-status { min-height: 1.25em; font-size: 14px; margin-top: 6px; color: var(--nav-text-color); }
+.form-status.is-sending { opacity: .8; }
+.form-status.is-success { color: var(--accent-color); }
+.form-status.is-error { color: #ff6b6b; }
+
+/* Портфолио: базовая сетка под общий стиль карточек */
+.portfolio { padding: 40px 0; }
+.portfolio__title { font-size: 28px; margin-bottom: 16px; }
+.portfolio__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px,1fr)); gap: 16px; }
+.portfolio__item { border-radius: 16px; overflow: hidden; background: var(--glass-bg); border: 1px solid var(--glass-border); backdrop-filter: var(--glass-blur); }
+.portfolio__item img { display: block; width: 100%; height: auto; object-fit: cover; }
 
 @media (max-width: 768px) {
     .contacts__title {
@@ -1352,7 +1377,7 @@ body {
     border-radius: 50%;
     cursor: pointer;
     display: flex; /* Изменяем на flex для постоянного отображения */
-    transition: all 0.3s ease;
+    transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .scroll-to-top:hover {
@@ -1463,15 +1488,15 @@ body {
 /* Дополнительные стили для кнопок */
 .scroll-to-top {
   /* Стилизуем кнопку "наверх" с адаптивными цветами */
-  width: 56px !important;
-  height: 56px !important;
-  background: #007B9E !important; /* Цвет для темной темы */
+    width: 56px;
+    height: 56px;
+    background: #007B9E; /* Цвет для темной темы */
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow: 0 4px 15px rgba(0, 123, 158, 0.3);
   order: 2; /* Кнопка "наверх" будет снизу */
-  position: relative !important; /* Убираем fixed позиционирование */
+    position: relative; /* Убираем fixed позиционирование */
   font-size: 24px; /* Одинаковый размер иконки */
   border-radius: 50%;
   color: white;
@@ -1479,7 +1504,7 @@ body {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.3s ease;
+    transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
   opacity: 0;
   transform: translateY(20px);
   pointer-events: none;
@@ -1510,15 +1535,15 @@ body {
 
 .fab {
   /* FAB с адаптивными цветами */
-  width: 56px !important;
-  height: 56px !important;
-  background: #007B9E !important; /* Цвет для темной темы */
+    width: 56px;
+    height: 56px;
+    background: #007B9E; /* Цвет для темной темы */
   box-shadow: 0 4px 15px rgba(0, 123, 158, 0.3);
   border: 1px solid rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   order: 1; /* FAB будет сверху */
-  position: relative !important; /* Убираем fixed позиционирование */
+    position: relative; /* Убираем fixed позиционирование */
   font-size: 24px; /* Одинаковый размер иконки */
   border-radius: 50%;
   color: white;
@@ -1526,7 +1551,7 @@ body {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.3s ease;
+    transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
   border: none;
 }
 
@@ -1548,19 +1573,7 @@ body {
 }
 
 /* Glassmorphism эффекты */
-.glass-card {
-    background: var(--glass-bg);
-    backdrop-filter: var(--glass-blur);
-    border: 1px solid var(--glass-border);
-    border-radius: var(--modern-radius);
-    transition: var(--micro-transition);
-}
-
-.glass-card:hover {
-    background: rgba(255, 255, 255, 0.15);
-    transform: translateY(-2px);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-}
+/* Duplicate .glass-card definition removed (consolidated earlier). */
 
 /* Современные кнопки для мобильных */
 .modern-button {
@@ -1901,7 +1914,7 @@ body {
         padding: 8px;
         cursor: pointer;
         border-radius: 8px;
-        transition: all 0.2s ease;
+        transition: background-color 0.2s ease, transform 0.2s ease;
         width: 44px;
         height: 44px;
         display: flex;
@@ -1939,57 +1952,7 @@ body {
         transform: translateY(-6px) rotate(-45deg);
     }
 
-    /* Мобильное навигационное меню */
-    .mobile-nav {
-        display: block !important;
-        position: fixed !important;
-        top: 60px !important;
-        left: 0 !important;
-        right: 0 !important;
-        /* Fallback для браузеров без поддержки backdrop-filter */
-        background: rgba(255, 255, 255, 0.9) !important;
-        background: var(--glass-bg) !important;
-        /* Усиленный стекломорфизм */
-        backdrop-filter: var(--glass-blur) saturate(180%) brightness(1.1) !important;
-        -webkit-backdrop-filter: var(--glass-blur) saturate(180%) brightness(1.1) !important;
-        border: none !important;
-        border-bottom: 1px solid var(--glass-border) !important;
-        border-radius: 0 !important;
-        max-height: calc(100vh - 60px) !important;
-        overflow-y: auto !important;
-        transform: translateY(-100%);
-        opacity: 0;
-        visibility: hidden;
-        transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
-        z-index: 999 !important;
-        /* Дополнительная тень для эффекта глубины */
-        box-shadow: 
-            0 4px 20px rgba(0, 0, 0, 0.1),
-            inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
-    }
-    
-    /* Поддержка backdrop-filter */
-    @supports (backdrop-filter: blur(10px)) {
-        .mobile-nav {
-            background: var(--glass-bg) !important;
-        }
-    }
-    
-    /* Дополнительная специфичность для гарантии применения стилей */
-    @media (max-width: 768px) {
-        .mobile-nav.mobile-nav {
-            background: var(--glass-bg) !important;
-            backdrop-filter: var(--glass-blur) saturate(180%) brightness(1.1) !important;
-            -webkit-backdrop-filter: var(--glass-blur) saturate(180%) brightness(1.1) !important;
-            border-bottom: 1px solid var(--glass-border) !important;
-        }
-    }
-
-    .mobile-nav.active {
-        transform: translateY(0) !important;
-        opacity: 1 !important;
-        visibility: visible !important;
-    }
+    /* Legacy vertical slide .mobile-nav removed; replaced by drawer variant (.mobile-nav--drawer). */
 
     .mobile-nav__list {
         list-style: none;
@@ -2013,7 +1976,7 @@ body {
         color: var(--nav-text-color);
         font-size: 16px;
         font-weight: 500;
-        transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+        transition: background-color 0.3s cubic-bezier(0.4, 0.0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1), color 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
         min-height: 44px;
         border-radius: var(--mobile-modern-radius);
     }
@@ -2045,7 +2008,7 @@ body {
         width: 100%;
         text-align: left;
         border-radius: var(--mobile-modern-radius);
-        transition: all var(--mobile-micro-transition);
+        transition: background-color var(--mobile-micro-transition), transform var(--mobile-micro-transition), color var(--mobile-micro-transition);
         min-height: var(--mobile-thumb-size);
     }
 
@@ -2194,6 +2157,79 @@ body {
 
 /* ============ Плавный переход темы ============ */
 body.theme-transition, body.theme-transition * { transition: background-color .35s ease, color .35s ease, border-color .35s ease; }
+
+/* Respect user motion preferences */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+    .theme-icon img.theme-icon-animating { animation: none !important; }
+    .micro-bounce, .micro-fade-in { animation: none !important; }
+}
+
+/* ================= Drawer Mobile Navigation (new) ================= */
+.mobile-nav--drawer {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: min(82vw, 360px);
+    background: var(--background-color);
+    color: var(--nav-text-color);
+    transform: translateX(100%);
+    opacity: 0;
+    visibility: hidden;
+    display: flex;
+    flex-direction: column;
+    padding: 64px 20px 24px 20px; /* space for header height */
+    box-shadow: -4px 0 16px rgba(0,0,0,0.25);
+    transition: transform .35s cubic-bezier(.4,0,.2,1), opacity .25s ease;
+    will-change: transform;
+    z-index: 999;
+    overscroll-behavior: contain;
+}
+
+/* Theming adjustments inside drawer */
+.light-theme .mobile-nav--drawer { background: var(--background-color); }
+
+.mobile-nav--drawer[hidden] { display: none !important; }
+
+.mobile-nav--drawer.is-open {
+    transform: translateX(0);
+    opacity: 1;
+    visibility: visible;
+}
+
+.mobile-nav--drawer .mobile-nav__list { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:6px; }
+.mobile-nav--drawer .mobile-nav__link { padding:14px 14px; border-radius:12px; display:flex; align-items:center; gap:10px; font-size:15px; font-weight:500; text-decoration:none; color: var(--nav-text-color); transition: background-color .25s ease, color .25s ease, transform .25s ease; }
+.mobile-nav--drawer .mobile-nav__link:hover { background: var(--button-bg); }
+.light-theme .mobile-nav--drawer .mobile-nav__link:hover { background: var(--button-bg); }
+.mobile-nav--drawer .mobile-nav__link:active { transform: translateX(4px); }
+
+.mobile-nav--drawer .mobile-nav__section { margin-top: 20px; }
+.mobile-nav--drawer .mobile-nav__divider { height:1px; background: rgba(255,255,255,0.1); margin:18px 0; }
+.light-theme .mobile-nav--drawer .mobile-nav__divider { background: rgba(0,0,0,0.12); }
+
+/* Utility cluster inside drawer */
+.mobile-nav--drawer .mobile-nav__utilities { margin-top:auto; display:grid; grid-template-columns:repeat(auto-fit,minmax(44px,1fr)); gap:12px; }
+.mobile-nav--drawer .mobile-nav__utilities button { background: var(--button-bg); border:none; border-radius:14px; height:44px; display:flex; align-items:center; justify-content:center; cursor:pointer; color: var(--nav-text-color); transition: background-color .25s ease, transform .25s ease; }
+.mobile-nav--drawer .mobile-nav__utilities button:hover { background: var(--button-bg-hover); }
+
+/* Focus ring reuse */
+.mobile-nav--drawer .mobile-nav__link:focus-visible,
+.mobile-nav--drawer .mobile-nav__utilities button:focus-visible { outline: var(--focus-ring); outline-offset: var(--focus-ring-offset); }
+
+/* TODO(a11y): Проверить, что кнопки без текстовых меток имеют aria-label:
+    - .theme-toggle / .mobile-nav__utilities button (иконки)
+    - .minimal-menu-btn (бургер)
+    - .scroll-to-top / .fab
+    Добавить aria-label или скрытый текст при отсутствии. */
+
+/* Scroll locking helper (JS adds body.nav-open) */
+body.nav-open { overflow:hidden; touch-action:none; }
 
 /* Legacy bottom-nav (удалено из footer) — страховочно скрываем, если кэш или инлайновый HTML остались */
 .bottom-nav { display: none !important; }

@@ -2025,7 +2025,8 @@ textarea.form-input { resize: vertical; min-height: 120px; }
         position: fixed;
         top: 0;
         right: 0;
-        bottom: 0;
+        bottom: auto; /* отключаем привязку к нижнему краю и задаём явную высоту */
+        height: 100dvh; /* корректная высота окна на мобильных, включая iOS */
         width: var(--mobile-drawer-width);
         background: var(--mobile-header-bg, var(--glass-bg));
         backdrop-filter: var(--glass-blur);
@@ -2083,20 +2084,21 @@ textarea.form-input { resize: vertical; min-height: 120px; }
 
     /* Legacy vertical slide .mobile-nav removed; replaced by drawer behavior above. */
 
-                    .mobile-nav__list {
-                        list-style: none;
-                        padding: 20px; /* без принудительного отступа под кнопку */
-                        margin: 0;
-                        display: flex;
-                        flex-direction: column;
-                        gap: 8px;
-                        overflow-y: auto;
-                        -webkit-overflow-scrolling: touch;
-                        max-height: 100%;
-                        min-height: 0; /* позволяет блоку корректно сжиматься и скроллиться */
-                        touch-action: pan-y; /* явно разрешаем вертикальную прокрутку */
-                        overscroll-behavior: contain; /* не прокидывать скролл на body */
-                    }
+                .mobile-nav__list {
+                    list-style: none;
+                    padding: 20px; /* без принудительного отступа под кнопку */
+                    margin: 0;
+                    display: block; /* надёжная блочная раскладка вместо flex для совместимости */
+                    overflow-y: auto;
+                    -webkit-overflow-scrolling: touch;
+                    max-height: 100%;
+                    min-height: 0; /* позволяет блоку корректно сжиматься и скроллиться */
+                    touch-action: pan-y; /* явно разрешаем вертикальную прокрутку */
+                    overscroll-behavior: contain; /* не прокидывать скролл на body */
+                }
+
+                /* Отступы между пунктами меню — безопаснее, чем flex-gap (iOS <14) */
+                .mobile-nav__item + .mobile-nav__item { margin-top: 8px; }
 
                         /* Учитываем вырезы экрана iOS */
                                     @supports (padding: max(0px)) {

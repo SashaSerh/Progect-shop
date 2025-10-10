@@ -52,6 +52,15 @@ export function toggleCartDropdown(e) {
 // Внутренние утилиты для блокировки прокрутки body с сохранением позиции
 let __cartScrollY = 0;
 let __cartEscHandler = null;
+let __cartTrapHandler = null;
+let __cartLastFocus = null;
+
+function getFocusable(container) {
+    if (!container) return [];
+    const selector = 'a[href], area[href], button:not([disabled]), input:not([disabled]):not([type="hidden"]), select:not([disabled]), textarea:not([disabled]), [tabindex]';
+    const nodes = Array.from(container.querySelectorAll(selector));
+    return nodes.filter(el => el.getAttribute('tabindex') !== '-1');
+}
 
 function lockBodyScroll() {
     try {
@@ -82,6 +91,9 @@ export function openCartModal(e) {
     const cartModal = document.querySelector('#cartModal');
     if (!cartModal) return;
 
+    // Сохраняем последний фокусированный элемент для возврата после закрытия
+    __cartLastFocus = document.activeElement;
+
     // Создаём/показываем подложку под модалкой
     let backdrop = document.querySelector('.cart-backdrop');
     if (!backdrop) {
@@ -105,6 +117,24 @@ export function openCartModal(e) {
         }
     };
     document.addEventListener('keydown', __cartEscHandler);
+
+    // Перемещаем фокус внутрь модалки и включаем trap
+    const focusables = getFocusable(cartModal);
+    const first = focusables[0];
+    const last = focusables[focusables.length - 1];
+    if (first && typeof first.focus === 'function') first.focus();
+    __cartTrapHandler = (evt) => {
+        if (evt.key !== 'Tab') return;
+        if (focusables.length === 0) return;
+        if (evt.shiftKey && document.activeElement === first) {
+            evt.preventDefault();
+            last.focus();
+        } else if (!evt.shiftKey && document.activeElement === last) {
+            evt.preventDefault();
+            first.focus();
+        }
+    };
+    cartModal.addEventListener('keydown', __cartTrapHandler);
 }
 
 export function closeCartModal() {
@@ -124,6 +154,15 @@ export function closeCartModal() {
     if (__cartEscHandler) {
         document.removeEventListener('keydown', __cartEscHandler);
         __cartEscHandler = null;
+    }
+    // Снимаем trap и возвращаем фокус
+    if (__cartTrapHandler && cartModal) {
+        cartModal.removeEventListener('keydown', __cartTrapHandler);
+        __cartTrapHandler = null;
+    }
+    if (__cartLastFocus && typeof __cartLastFocus.focus === 'function') {
+        try { __cartLastFocus.focus(); } catch(_) {}
+        __cartLastFocus = null;
     }
 }
 

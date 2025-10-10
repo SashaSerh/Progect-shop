@@ -136,10 +136,11 @@
         </div>
     </div>
 </header>
-<div class="modal" id="profileModal" role="dialog" aria-modal="true" aria-label="Модальное окно профиля">
+<div class="modal" id="profileModal" role="dialog" aria-modal="true" aria-labelledby="profileModalTitle" aria-describedby="modalContent">
     <div class="modal__content">
         <button class="modal__close" aria-label="Закрыть модальное окно">✕</button>
-        <div id="modalContent"></div>
+    <h2 id="profileModalTitle" class="visually-hidden">Профиль пользователя</h2>
+    <div id="modalContent" aria-live="polite" aria-atomic="true"></div>
     </div>
 </div>
 <div class="cart-dropdown" id="cartDropdown" role="region" aria-label="Предпросмотр корзины" aria-hidden="true">

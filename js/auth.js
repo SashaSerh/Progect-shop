@@ -1,3 +1,13 @@
+let __profileTrapHandler = null;
+let __profileLastFocus = null;
+
+function getFocusable(container) {
+    if (!container) return [];
+    const selector = 'a[href], area[href], button:not([disabled]), input:not([disabled]):not([type="hidden"]), select:not([disabled]), textarea:not([disabled]), [tabindex]';
+    const nodes = Array.from(container.querySelectorAll(selector));
+    return nodes.filter(el => el.getAttribute('tabindex') !== '-1');
+}
+
 export function updateProfileButton(translations, lang) {
     const profileButton = document.getElementById('profileButton');
     const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
@@ -13,6 +23,9 @@ export function openModal(translations, lang) {
     const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
 
     if (!modalContent || !profileModal) return;
+
+    // Сохраняем последний фокусированный элемент для возврата после закрытия
+    __profileLastFocus = document.activeElement;
 
     // Scroll-lock и подложка (аналогично корзине)
     let scrollY = 0;
@@ -98,6 +111,24 @@ export function openModal(translations, lang) {
 
     const escHandler = (e) => { if (e.key === 'Escape') closeModal(); };
     document.addEventListener('keydown', escHandler, { once: true });
+
+    // Перемещаем фокус внутрь модалки и включаем Tab-trap
+    const focusables = getFocusable(profileModal);
+    const first = focusables[0];
+    const last = focusables[focusables.length - 1];
+    if (first && typeof first.focus === 'function') first.focus();
+    __profileTrapHandler = (evt) => {
+        if (evt.key !== 'Tab') return;
+        if (focusables.length === 0) return;
+        if (evt.shiftKey && document.activeElement === first) {
+            evt.preventDefault();
+            last && last.focus();
+        } else if (!evt.shiftKey && document.activeElement === last) {
+            evt.preventDefault();
+            first && first.focus();
+        }
+    };
+    profileModal.addEventListener('keydown', __profileTrapHandler);
 }
 
 export function closeModal() {
@@ -122,4 +153,14 @@ export function closeModal() {
         const y = parseInt((top || '0').replace('-', ''), 10) || 0;
         if (y) window.scrollTo(0, y);
     } catch (_) {}
+
+    // Снять trap и вернуть фокус
+    if (__profileTrapHandler && profileModal) {
+        profileModal.removeEventListener('keydown', __profileTrapHandler);
+        __profileTrapHandler = null;
+    }
+    if (__profileLastFocus && typeof __profileLastFocus.focus === 'function') {
+        try { __profileLastFocus.focus(); } catch (_) {}
+        __profileLastFocus = null;
+    }
 }

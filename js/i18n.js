@@ -59,6 +59,11 @@ export const translations = {
         "form-sending": "Отправляем...",
         "form-success": "Спасибо! Мы свяжемся с вами.",
         "form-error": "Ошибка отправки. Попробуйте позже."
+        ,
+        "form-error-name": "Введите имя",
+        "form-error-email": "Укажите email",
+        "form-error-email-format": "Некорректный email",
+        "form-error-message": "Введите сообщение"
     },
     uk: {
         "site-title": "Клімат Контроль",
@@ -119,7 +124,11 @@ export const translations = {
         "portfolio-title": "Наші роботи",
         "form-sending": "Відправляємо...",
         "form-success": "Дякуємо! Ми зв'яжемося з вами.",
-        "form-error": "Помилка відправки. Спробуйте пізніше."
+        "form-error": "Помилка відправки. Спробуйте пізніше.",
+        "form-error-name": "Введіть ім'я",
+        "form-error-email": "Вкажіть email",
+        "form-error-email-format": "Некоректний email",
+        "form-error-message": "Введіть повідомлення"
     }
 };
 

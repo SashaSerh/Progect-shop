@@ -506,8 +506,37 @@ function initMobileHeader() {
     // Поддержка как старого, так и нового хедера
     const hamburgerToggle = document.querySelector('.hamburger-toggle') || document.querySelector('.minimal-menu-btn');
     const mobileNav = document.querySelector('.mobile-nav');
+    // Создаём overlay один раз
+    let overlay = document.querySelector('.mobile-nav-overlay');
+    if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.className = 'mobile-nav-overlay';
+        overlay.setAttribute('aria-hidden', 'true');
+        overlay.setAttribute('role', 'presentation');
+        // Вставляем overlay ПЕРЕД меню, чтобы меню всегда было над ним
+        if (mobileNav && mobileNav.parentNode) {
+            mobileNav.parentNode.insertBefore(overlay, mobileNav);
+        } else {
+            document.body.appendChild(overlay);
+        }
+    }
+
+    // Если .mobile-nav вложено в элемент с transform/filter (собственный stacking context), переносим меню в body
+    if (mobileNav && mobileNav.parentElement !== document.body) {
+        document.body.appendChild(mobileNav);
+    }
+    // Гарантируем, что overlay и меню находятся в body и overlay стоит непосредственно перед меню
+    if (overlay && overlay.parentElement !== document.body) {
+        document.body.appendChild(overlay);
+    }
+    if (mobileNav && mobileNav.parentElement === document.body && overlay && overlay.parentElement === document.body) {
+        if (overlay.nextSibling !== mobileNav) {
+            document.body.insertBefore(overlay, mobileNav);
+        }
+    }
     const mobileNavLinks = document.querySelectorAll('.mobile-nav__link');
     const mobileProfileButton = document.querySelector('.mobile-nav__profile');
+    const mobileNavCloseBtn = document.querySelector('.mobile-nav__close');
 
     if (!hamburgerToggle || !mobileNav) {
         console.log('Мобильный заголовок не найден');
@@ -534,6 +563,8 @@ function initMobileHeader() {
             document.body.style.overflow = 'hidden'; // Блокируем прокрутку
             hamburgerToggle.setAttribute('aria-expanded', 'true');
             mobileNav.setAttribute('aria-hidden', 'false');
+            // Показ overlay
+            overlay.classList.add('is-visible');
             
             // Разрешаем фокус на элементах меню
             focusableElements.forEach(el => {
@@ -546,6 +577,8 @@ function initMobileHeader() {
             document.body.style.overflow = ''; // Разблокируем прокрутку
             hamburgerToggle.setAttribute('aria-expanded', 'false');
             mobileNav.setAttribute('aria-hidden', 'true');
+            // Скрываем overlay
+            overlay.classList.remove('is-visible');
             
             // Запрещаем фокус на элементах меню
             focusableElements.forEach(el => {
@@ -565,18 +598,29 @@ function initMobileHeader() {
         }
     });
 
-    // Overlay удалён — клик по внешней области не перехватывается.
+    // Клик по overlay — закрываем меню
+    overlay.addEventListener('click', () => toggleMobileNav(false));
+
+    // Клик по крестику — закрываем меню
+    if (mobileNavCloseBtn) {
+        mobileNavCloseBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            toggleMobileNav(false);
+        });
+    }
 
     // Делегирование: закрываем меню только если реально переходим в другую секцию
     // Конфигурация поведения закрытия (глобальная для возможности изменения динамически)
     if (!window.mobileNavCloseConfig) {
         window.mobileNavCloseConfig = {
             sameSectionThreshold: 60,   // px: если секция уже почти в зоне — не закрывать
-            delay: 0,                   // ms: задержка закрытия (для плавного скролла)
+            delay: 120,                 // ms: лёгкая задержка закрытия для плавного UX
             closeOnSameSection: false,  // закрывать ли если уже на месте
             ignoreSelectors: ['.mobile-settings'], // области, в пределах которых не закрывать
             attributeKeepOpen: 'data-keep-open',
-            classKeepOpen: 'keep-open'
+            classKeepOpen: 'keep-open',
+            // Подготовка к edge-swipe (позже)
+            enableEdgeSwipe: false
         };
     }
 

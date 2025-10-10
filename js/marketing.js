@@ -105,6 +105,37 @@ export function attachContactForm() {
   const statusEl = form.querySelector('.form-status');
   const lang = localStorage.getItem('language') || 'ru';
   const t = (k) => (window.translations?.[lang]?.[k]) || k;
+  // Утилита: найти .form-field по контролу
+  const fieldOf = (input) => input?.closest?.('.form-field');
+  // Утилита: поставить ошибку на поле
+  function setFieldError(input, msgKey) {
+    const field = fieldOf(input);
+    if (!field) return;
+    field.classList.add('is-error');
+    let helper = field.querySelector('.helper');
+    if (!helper) {
+      helper = document.createElement('span');
+      helper.className = 'helper';
+      field.appendChild(helper);
+    }
+    helper.textContent = t(msgKey);
+  }
+  // Утилита: очистить ошибку поля
+  function clearFieldError(input) {
+    const field = fieldOf(input);
+    if (!field) return;
+    field.classList.remove('is-error');
+    // helper оставляем, но очищаем, чтобы не мигал
+    const helper = field.querySelector('.helper');
+    if (helper && helper.textContent) helper.textContent = '';
+  }
+  // Подписка на ввод: live-очистка ошибок
+  form.addEventListener('input', (e) => {
+    const target = e.target;
+    if (target && target.classList && target.classList.contains('form-input')) {
+      clearFieldError(target);
+    }
+  }, { passive: true });
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -112,28 +143,70 @@ export function attachContactForm() {
     const name = fd.get('name')?.toString().trim();
     const email = fd.get('email')?.toString().trim();
     const message = fd.get('message')?.toString().trim();
-    if (!name || !email || !message) {
-      statusEl.textContent = t('form-error');
+    // Honeypot: если скрытое поле заполнено — прекращаем
+    const gotcha = fd.get('_gotcha');
+    if (gotcha) {
+      // Молча прерываем (или можно выводить общую ошибку)
       return;
     }
-  statusEl.textContent = t('form-sending');
+    // Валидация
+    let hasError = false;
+    // name
+    if (!name) {
+      setFieldError(form.querySelector('#contact-name'), 'form-error-name');
+      hasError = true;
+    }
+    // email
+    if (!email) {
+      setFieldError(form.querySelector('#contact-email'), 'form-error-email');
+      hasError = true;
+    } else {
+      const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+      if (!emailRe.test(email)) {
+        setFieldError(form.querySelector('#contact-email'), 'form-error-email-format');
+        hasError = true;
+      }
+    }
+    // message
+    if (!message) {
+      setFieldError(form.querySelector('#contact-message'), 'form-error-message');
+      hasError = true;
+    }
+    if (hasError) {
+      statusEl.textContent = '';
+      return;
+    }
+  statusEl.textContent = t('form-sending') || 'Отправка...';
   statusEl.classList.remove('is-success','is-error');
   statusEl.classList.add('is-sending');
     try {
       const { contactForm } = contentConfig;
       if (contactForm?.provider === 'formspree' && contactForm?.endpoint && contactForm.endpoint.includes('formspree.io')) {
+        // для Formspree можно добавить специальное honeypot-поле
+        fd.append('_gotcha', '');
+        // укажем адрес для ответа согласно рекомендациям Formspree
+        if (email) fd.set('_replyto', email);
+        // добавим тему письма для удобства в почтовом ящике
+        fd.set('_subject', 'Заявка с сайта: Климат Контроль');
+        // и/или скрытое метаполе, если нужно
         const res = await fetch(contactForm.endpoint, {
           method: 'POST',
           headers: { 'Accept': 'application/json' },
           body: fd
         });
-        if (res.ok) {
+        // Пытаемся прочитать JSON с деталями (Formspree возвращает ok/ errors)
+        let data = null;
+        try { data = await res.json(); } catch (_) { /* ignore parse errors */ }
+        if (res.ok && (!data || data.ok || !data.errors)) {
           form.reset();
-          statusEl.textContent = t('form-success');
+          // Очистим возможные отметки ошибок
+          ['#contact-name','#contact-email','#contact-message'].forEach(sel => clearFieldError(form.querySelector(sel)));
+          statusEl.textContent = t('form-success') || 'Сообщение отправлено!';
           statusEl.classList.remove('is-sending','is-error');
           statusEl.classList.add('is-success');
         } else {
-          throw new Error('Formspree error');
+          const detail = data?.errors?.map?.(e => e.message).join('; ') || (await res.text?.()) || 'Unknown error';
+          throw new Error('Formspree error: ' + detail);
         }
       } else {
         // Fallback: mailto
@@ -142,13 +215,23 @@ export function attachContactForm() {
         const body = encodeURIComponent(`Имя: ${name}\nEmail: ${email}\nСообщение: ${message}`);
         const mailto = `mailto:${to}?subject=${subject}&body=${body}`;
         location.href = mailto;
-        statusEl.textContent = t('form-success');
+  statusEl.textContent = t('form-success') || 'Сообщение отправлено!';
         statusEl.classList.remove('is-sending','is-error');
         statusEl.classList.add('is-success');
       }
     } catch (err) {
       console.warn('Contact form error', err);
-      statusEl.textContent = t('form-error');
+      // Попробуем сделать mailto, если Formspree дал сбой
+      try {
+        const to = contentConfig?.contactForm?.mailto || contentConfig.contacts.email;
+        if (to) {
+          const subject = encodeURIComponent('Заявка с сайта (fallback)');
+          const body = encodeURIComponent(`Имя: ${name}\nEmail: ${email}\nСообщение: ${message}`);
+          const mailto = `mailto:${to}?subject=${subject}&body=${body}`;
+          location.href = mailto;
+        }
+      } catch (_) { /* ignore */ }
+  statusEl.textContent = t('form-error') || 'Не удалось отправить. Попробуйте позже или свяжитесь по телефону/мессенджеру.';
       statusEl.classList.remove('is-sending','is-success');
       statusEl.classList.add('is-error');
     }

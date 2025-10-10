@@ -15,19 +15,27 @@
             <div class="contacts__form">
                 <div class="form-card">
                     <form id="contactForm" novalidate>
+                        <!-- Honeypot field: should stay empty; bots tend to fill it -->
+                        <div style="position:absolute; left:-5000px; top:auto; width:1px; height:1px; overflow:hidden;" aria-hidden="true">
+                            <label for="contact-gotcha">Do not fill</label>
+                            <input id="contact-gotcha" type="text" name="_gotcha" tabindex="-1" autocomplete="off">
+                        </div>
                         <div class="form-grid">
                             <div class="form-field">
                                 <label for="contact-name">Имя</label>
                                 <input id="contact-name" class="form-input" type="text" name="name" placeholder="Ваше имя" data-i18n-placeholder="form-name" required>
+                                <span class="helper" aria-hidden="true">Например: Алексей</span>
                             </div>
                             <div class="form-field">
                                 <label for="contact-email">Email</label>
                                 <input id="contact-email" class="form-input" type="email" name="email" placeholder="Ваш email" data-i18n-placeholder="form-email" required>
+                                <span class="helper" aria-hidden="true">Мы ответим на этот адрес</span>
                             </div>
                         </div>
                         <div class="form-field">
                             <label for="contact-message">Сообщение</label>
                             <textarea id="contact-message" class="form-input" name="message" placeholder="Ваше сообщение" data-i18n-placeholder="form-message" required></textarea>
+                            <span class="helper" aria-hidden="true">Опишите задачу или модель кондиционера</span>
                         </div>
                         <button type="submit" class="btn form-submit-btn" data-i18n="form-submit">Отправить сообщение</button>
                         <p class="form-status" aria-live="polite"></p>

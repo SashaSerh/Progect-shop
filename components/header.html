@@ -4,7 +4,7 @@
         <div class="header__mobile minimal-mobile-header">
             <!-- Логотип и бренд -->
             <a href="#hero" class="minimal-brand">
-                <img src="icons/logo-cond-icon.svg" alt="ClimaTech Logo" class="minimal-logo">
+                <img src="icons/logo-cond-icon.svg" alt="ClimaTech Logo" class="minimal-logo" decoding="async" fetchpriority="high">
                 <span class="minimal-brand-text">ClimaTech</span>
             </a>
             
@@ -17,14 +17,20 @@
         </div>
 
         <!-- Мобильное выпадающее меню -->
-        <nav class="mobile-nav" role="navigation" aria-hidden="true">
+    <nav class="mobile-nav" role="navigation" aria-hidden="true">
+            <button class="mobile-nav__close" type="button" aria-label="Закрыть меню">
+                <svg class="icon" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
+                    <use href="icons/icons-sprite.svg#icon-close"></use>
+                </svg>
+                <span class="visually-hidden">Закрыть</span>
+            </button>
             <ul class="mobile-nav__list">
                 <!-- Компактные настройки (перемещено вверх) -->
                 <li class="mobile-nav__item mobile-settings">
                     <div class="mobile-settings__row" role="group" aria-label="Быстрые настройки">
                         <button class="mobile-settings__btn mobile-settings__cart" id="mobileCartButton" aria-label="Открыть корзину" type="button">
                             <span class="mobile-settings__icon" aria-hidden="true"><img src="icons/cart512x512.svg" alt="корзина" style="width: 24px; height: 24px;"></span>
-                            <span class="cart-count" id="mobileCartCount" aria-live="polite">0</span>
+                            <span class="cart-count" id="mobileCartCount" aria-live="polite" aria-atomic="true">0</span>
                         </button>
                         <button class="mobile-settings__btn mobile-settings__theme theme-toggle mobile-theme-toggle" id="mobileThemeToggle" aria-label="Переключить тему" type="button" aria-pressed="false">
                             <span class="theme-icon" aria-hidden="true"><img src="icons/moons-icon.svg" alt="Тёмная тема" width="24" height="24"></span>
@@ -94,7 +100,7 @@
             </div>
             <div class="header__main-bar">
                         <a href="#hero" class="header__title">
-                <img src="icons/logo-icon.svg" alt="ClimaTech Logo" class="header__logo" aria-hidden="true">
+                <img src="icons/logo-icon.svg" alt="ClimaTech Logo" class="header__logo" aria-hidden="true" decoding="async" fetchpriority="high">
                 <span class="header__brand-text">
                     <span class="clima-text">Clima</span><span class="tech-text">Tech</span>
                 </span>
@@ -117,7 +123,7 @@
             <button class="cart-button" id="openCartModal" aria-label="Открыть корзину" aria-haspopup="dialog">
                 <span class="cart-icon-wrapper">
                     <span class="cart-icon" aria-hidden="true"><img src="icons/cart512x512.svg" alt="Корзина" style="width:28px;height:28px;vertical-align:middle; fill: currentColor;" /></span>
-                    <span class="cart-count" aria-live="polite">0</span>
+                    <span class="cart-count" aria-live="polite" aria-atomic="true">0</span>
                 </span>
                 <span class="cart-text">
                 </span>
@@ -138,7 +144,7 @@
 </div>
 <div class="cart-dropdown" id="cartDropdown" role="region" aria-label="Предпросмотр корзины" aria-hidden="true">
     <ul class="cart-dropdown__items" aria-label="Элементы в корзине"></ul>
-    <div class="cart-dropdown__summary" data-i18n="cart-total" aria-live="polite">Итого: $0.00</div>
+    <div class="cart-dropdown__summary" data-i18n="cart-total" aria-live="polite" aria-atomic="true">Итого: $0.00</div>
     <button class="cart-dropdown__button" id="openCartModal" data-i18n="cart-checkout">Оформить заказ</button>
 </div>
 <div class="catalog-dropdown" id="catalogDropdown" role="menu" aria-label="Меню каталога" aria-hidden="true">

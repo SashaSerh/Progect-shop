@@ -182,13 +182,22 @@ export function attachContactForm() {
     try {
       const { contactForm } = contentConfig;
       if (contactForm?.provider === 'formspree' && contactForm?.endpoint && contactForm.endpoint.includes('formspree.io')) {
-        // для Formspree можно добавить специальное honeypot-поле
-        fd.append('_gotcha', '');
-        // укажем адрес для ответа согласно рекомендациям Formspree
-        if (email) fd.set('_replyto', email);
-        // добавим тему письма для удобства в почтовом ящике
-        fd.set('_subject', 'Заявка с сайта: Климат Контроль');
-        // и/или скрытое метаполе, если нужно
+  // Honeypot (дополнительно, хотя уже есть в разметке)
+  fd.append('_gotcha', '');
+
+  // Reply-To и дополнительные заголовки
+  if (email) fd.set('_replyto', email);
+
+  // Динамический Subject — помогает фильтрам и человеку быстро понимать контекст
+  const host = (location && location.host) ? location.host : 'climat-control.com';
+  const subj = `Заявка с сайта (${host}) — ${name || 'Без имени'}`;
+  fd.set('_subject', subj);
+
+  // Обогащение контента: полезные метаданные помогают разбору и триажу
+  fd.set('site', host);
+  fd.set('page_url', location?.href || '');
+  fd.set('user_agent', navigator?.userAgent || '');
+  if (name) fd.set('from_name', name);
         const res = await fetch(contactForm.endpoint, {
           method: 'POST',
           headers: { 'Accept': 'application/json' },

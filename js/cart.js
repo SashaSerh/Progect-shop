@@ -49,18 +49,81 @@ export function toggleCartDropdown(e) {
     }
 }
 
+// Внутренние утилиты для блокировки прокрутки body с сохранением позиции
+let __cartScrollY = 0;
+let __cartEscHandler = null;
+
+function lockBodyScroll() {
+    try {
+        __cartScrollY = window.scrollY || document.documentElement.scrollTop || 0;
+        document.body.style.position = 'fixed';
+        document.body.style.top = `-${__cartScrollY}px`;
+        document.body.style.left = '0';
+        document.body.style.right = '0';
+        document.body.style.width = '100%';
+        document.body.style.overflow = 'hidden';
+    } catch (_) { /* ignore */ }
+}
+
+function unlockBodyScroll() {
+    try {
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.left = '';
+        document.body.style.right = '';
+        document.body.style.width = '';
+        document.body.style.overflow = '';
+        window.scrollTo(0, __cartScrollY || 0);
+    } catch (_) { /* ignore */ }
+}
+
 export function openCartModal(e) {
-    e.stopPropagation();
+    if (e && typeof e.stopPropagation === 'function') e.stopPropagation();
     const cartModal = document.querySelector('#cartModal');
-    if (cartModal) {
-        cartModal.style.display = 'block';
+    if (!cartModal) return;
+
+    // Создаём/показываем подложку под модалкой
+    let backdrop = document.querySelector('.cart-backdrop');
+    if (!backdrop) {
+        backdrop = document.createElement('div');
+        backdrop.className = 'cart-backdrop';
+        document.body.appendChild(backdrop);
     }
+    backdrop.classList.add('is-visible');
+    backdrop.addEventListener('click', closeCartModal, { once: true });
+
+    // Показываем модалку
+    cartModal.style.display = 'block';
+
+    // Блокируем прокрутку фона
+    lockBodyScroll();
+
+    // Закрытие по Esc
+    __cartEscHandler = (evt) => {
+        if (evt.key === 'Escape') {
+            closeCartModal();
+        }
+    };
+    document.addEventListener('keydown', __cartEscHandler);
 }
 
 export function closeCartModal() {
     const cartModal = document.querySelector('#cartModal');
+    const backdrop = document.querySelector('.cart-backdrop');
     if (cartModal) {
         cartModal.style.display = 'none';
+    }
+    if (backdrop) {
+        backdrop.classList.remove('is-visible');
+        // удаляем элемент после анимации (если будет)
+        backdrop.parentElement && backdrop.parentElement.removeChild(backdrop);
+    }
+    // Возвращаем прокрутку
+    unlockBodyScroll();
+    // Снимаем обработчик Esc
+    if (__cartEscHandler) {
+        document.removeEventListener('keydown', __cartEscHandler);
+        __cartEscHandler = null;
     }
 }
 

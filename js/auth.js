@@ -14,6 +14,40 @@ export function openModal(translations, lang) {
 
     if (!modalContent || !profileModal) return;
 
+    // Scroll-lock и подложка (аналогично корзине)
+    let scrollY = 0;
+    const lock = () => {
+        try {
+            scrollY = window.scrollY || document.documentElement.scrollTop || 0;
+            document.body.style.position = 'fixed';
+            document.body.style.top = `-${scrollY}px`;
+            document.body.style.left = '0';
+            document.body.style.right = '0';
+            document.body.style.width = '100%';
+            document.body.style.overflow = 'hidden';
+        } catch (_) {}
+    };
+    const unlock = () => {
+        try {
+            document.body.style.position = '';
+            document.body.style.top = '';
+            document.body.style.left = '';
+            document.body.style.right = '';
+            document.body.style.width = '';
+            document.body.style.overflow = '';
+            window.scrollTo(0, scrollY || 0);
+        } catch (_) {}
+    };
+
+    let backdrop = document.querySelector('.profile-backdrop');
+    if (!backdrop) {
+        backdrop = document.createElement('div');
+        backdrop.className = 'profile-backdrop';
+        document.body.appendChild(backdrop);
+    }
+    backdrop.classList.add('is-visible');
+    backdrop.addEventListener('click', () => closeModal(), { once: true });
+
     if (isLoggedIn) {
         modalContent.innerHTML = `
             <h2 data-i18n="profile-title">${translations[lang]['profile-title']}</h2>
@@ -60,11 +94,32 @@ export function openModal(translations, lang) {
     }
 
     profileModal.style.display = 'flex';
+    lock();
+
+    const escHandler = (e) => { if (e.key === 'Escape') closeModal(); };
+    document.addEventListener('keydown', escHandler, { once: true });
 }
 
 export function closeModal() {
     const profileModal = document.getElementById('profileModal');
+    const backdrop = document.querySelector('.profile-backdrop');
     if (profileModal) {
         profileModal.style.display = 'none';
     }
+    if (backdrop) {
+        backdrop.classList.remove('is-visible');
+        backdrop.parentElement && backdrop.parentElement.removeChild(backdrop);
+    }
+    // снять scroll-lock
+    try {
+        document.body.style.position = '';
+        const top = document.body.style.top;
+        document.body.style.top = '';
+        document.body.style.left = '';
+        document.body.style.right = '';
+        document.body.style.width = '';
+        document.body.style.overflow = '';
+        const y = parseInt((top || '0').replace('-', ''), 10) || 0;
+        if (y) window.scrollTo(0, y);
+    } catch (_) {}
 }

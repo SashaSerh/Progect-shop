@@ -531,7 +531,7 @@ body {
     height: 100%;
     background: var(--modal-bg);
     backdrop-filter: blur(5px);
-    z-index: 200;
+    z-index: 3002; /* выше хедера (1600), бургера (3000) и подложки корзины (3000), выше самой модалки корзины (3001) */
     align-items: center;
     justify-content: center;
 }
@@ -607,6 +607,18 @@ body {
 .modal__button:hover {
     background: #005BB5;
 }
+
+/* Подложка под модалку профиля */
+.profile-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    opacity: 0;
+    transition: opacity .2s ease;
+    z-index: 3001; /* под .modal (3002), но над контентом */
+    pointer-events: none;
+}
+.profile-backdrop.is-visible { opacity: 1; pointer-events: auto; }
 
 .modal__button--logout {
     background: var(--cart-red);
@@ -1126,7 +1138,20 @@ body {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
+    z-index: 3001; /* выше бургера (3000) и хедера (1600) */
 }
+
+/* Подложка под модалкой корзины */
+.cart-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    opacity: 0;
+    transition: opacity .2s ease;
+    z-index: 3000; /* ниже модалки, выше остального */
+    pointer-events: none;
+}
+.cart-backdrop.is-visible { opacity: 1; pointer-events: auto; }
 
 .light-theme .cart-modal {
     background: rgba(242, 242, 247, 0.9);

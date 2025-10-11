@@ -131,6 +131,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     initNavigation();
     initMarketing();
 
+    // Desktop: сворачиваем верхнюю полосу, оставляя .header__main-bar
+    initDesktopHeaderCondense();
+
     // Рендер портфолио по конфигу
     const portfolioGrid = document.querySelector('.portfolio__grid');
     if (portfolioGrid && Array.isArray(contentConfig.portfolio)) {
@@ -812,3 +815,65 @@ function initMobileToggles() {
 window.initModernMobileEffects = initModernMobileEffects;
 window.initMobileHeader = initMobileHeader;
 window.initMobileToggles = initMobileToggles;
+
+// Десктопный хедер: прячем верхнюю полосу при прокрутке
+function initDesktopHeaderCondense() {
+    const header = document.querySelector('.header');
+    if (!header) return;
+    let ticking = false;
+    let fixedApplied = false;
+    let spacer = null;
+
+    // Проверка/починка sticky: если родитель создаёт контекст (overflow/transform), включаем фиксированный режим
+    const ensureStickyOrFixed = () => {
+        const isDesktop = window.innerWidth >= 769;
+        if (!isDesktop) {
+            if (fixedApplied) {
+                header.classList.remove('header--fixed');
+                if (spacer && spacer.parentNode) spacer.parentNode.removeChild(spacer);
+                spacer = null;
+                fixedApplied = false;
+            }
+            return;
+        }
+        // Гарантируем фиксацию на десктопе (в т.ч. для Safari/сложных контейнеров): включаем fixed-режим
+        let breaksSticky = true;
+        if (breaksSticky && !fixedApplied) {
+            // Добавляем spacer, равный текущей высоте header, чтобы не прыгал контент
+            spacer = document.createElement('div');
+            spacer.className = 'header-spacer';
+            spacer.style.height = header.offsetHeight + 'px';
+            header.classList.add('header--fixed');
+            header.parentNode.insertBefore(spacer, header.nextSibling);
+            fixedApplied = true;
+        } else if (!breaksSticky && fixedApplied) {
+            header.classList.remove('header--fixed');
+            if (spacer && spacer.parentNode) spacer.parentNode.removeChild(spacer);
+            spacer = null;
+            fixedApplied = false;
+        } else if (fixedApplied && spacer) {
+            // обновляем высоту спейсера при ресайзе
+            spacer.style.height = header.offsetHeight + 'px';
+        }
+    };
+    const onScroll = () => {
+        if (ticking) return;
+        ticking = true;
+        requestAnimationFrame(() => {
+            const isDesktop = window.innerWidth >= 769;
+            if (!isDesktop) {
+                header.classList.remove('header--condensed');
+                ticking = false;
+                return;
+            }
+            const y = window.pageYOffset || document.documentElement.scrollTop || 0;
+            if (y > 10) header.classList.add('header--condensed');
+            else header.classList.remove('header--condensed');
+            ticking = false;
+        });
+    };
+    window.addEventListener('scroll', () => { ensureStickyOrFixed(); onScroll(); }, { passive: true });
+    window.addEventListener('resize', () => { ensureStickyOrFixed(); onScroll(); }, { passive: true });
+    ensureStickyOrFixed();
+    onScroll();
+}

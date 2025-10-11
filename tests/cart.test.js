@@ -135,3 +135,88 @@ describe('updateCartUI DOM rendering', () => {
     expect(cartItems.length).toBe(2);
   });
 });
+
+describe('Cart modal Delete/Undo a11y flow', () => {
+  beforeEach(async () => {
+    // Минимальная DOM-разметка модалки, тост-контейнера и футера для фокуса
+    document.body.innerHTML = `
+      <div id="toast-container"></div>
+      <div id="cartModal" style="display:block">
+        <ul class="cart-items"></ul>
+        <div class="cart-summary" data-i18n="cart-total">Итого: $0.00</div>
+        <div class="cart-modal__footer">
+          <button class="cart-button--clear">Очистить корзину</button>
+          <button class="cart-button--checkout">Оформить заказ</button>
+        </div>
+        <button class="cart-modal__close">×</button>
+      </div>
+    `;
+
+    // Сброс состояния корзины и localStorage
+    cartModule.cart.length = 0;
+    const store = {};
+    global.localStorage = {
+      getItem: (k) => store[k] || null,
+      setItem: (k, v) => { store[k] = v; },
+      removeItem: (k) => { delete store[k]; }
+    };
+    localStorage.setItem('language', 'ru');
+
+    // Добавим два товара и отрисуем UI
+    cartModule.addToCart(1, products);
+    cartModule.addToCart(2, products);
+    cartModule.updateCartUI(translations, 'ru');
+  });
+
+  it('Delete удаляет выделенный элемент и переводит фокус на следующий/кнопки', async () => {
+    const list = document.querySelector('.cart-items');
+    const itemsBefore = list.querySelectorAll('li');
+    expect(itemsBefore.length).toBe(2);
+
+    // Фокусируем первый элемент списка
+    itemsBefore[0].focus();
+    expect(document.activeElement).toBe(itemsBefore[0]);
+
+    // Инициируем Delete
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Delete' }));
+
+    // Дождаться микроочереди обновления фокуса
+    await new Promise(r => setTimeout(r, 0));
+
+    const itemsAfter = list.querySelectorAll('li');
+    expect(itemsAfter.length).toBe(1);
+    // Фокус должен быть либо на оставшемся элементе, либо на кнопке в футере
+    const focused = document.activeElement;
+    const isListItem = focused && focused.tagName === 'LI';
+    const isFooterBtn = focused && (focused.classList.contains('cart-button--checkout') || focused.classList.contains('cart-modal__close'));
+    expect(isListItem || isFooterBtn).toBe(true);
+  });
+
+  it('Undo восстанавливает удалённый элемент и возвращает фокус', async () => {
+    const list = document.querySelector('.cart-items');
+    const firstLi = list.querySelector('li');
+    // Узнаем id удаляемого элемента через кнопку удаления
+    const removedId = firstLi.querySelector('.cart-item-remove')?.getAttribute('data-id');
+    firstLi.focus();
+
+    // Удаляем по Delete
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Delete' }));
+    await new Promise(r => setTimeout(r, 0));
+    expect(list.querySelectorAll('li').length).toBe(1);
+
+    // Нажимаем Undo в тосте
+    const toastUndo = document.querySelector('#toast-container button');
+    expect(toastUndo).toBeTruthy();
+    toastUndo.click();
+
+    await new Promise(r => setTimeout(r, 0));
+    // Количество элементов восстановлено
+    expect(list.querySelectorAll('li').length).toBe(2);
+
+    // Фокус должен быть на восстановленном элементе или его кнопке удаления
+    const focused = document.activeElement;
+    const restoredBtn = document.querySelector(`.cart-items .cart-item-remove[data-id="${removedId}"]`);
+    const restoredLi = restoredBtn?.closest('li');
+    expect(focused === restoredLi || focused === restoredBtn).toBe(true);
+  });
+});

@@ -1,4 +1,5 @@
 import { products } from './products.js';
+import { translations } from './i18n.js';
 
 // Безопасно читаем localStorage (в средах без window/localStorage, например в тестах, fallback к пустому массиву)
 function safeReadInitialCart() {
@@ -54,6 +55,13 @@ let __cartScrollY = 0;
 let __cartEscHandler = null;
 let __cartTrapHandler = null;
 let __cartLastFocus = null;
+
+function getCurrentLang() {
+    try {
+        const lang = localStorage.getItem('language');
+        return (lang && (lang === 'ru' || lang === 'uk')) ? lang : 'ru';
+    } catch (_) { return 'ru'; }
+}
 
 function getFocusable(container) {
     if (!container) return [];
@@ -119,19 +127,21 @@ export function openCartModal(e) {
     document.addEventListener('keydown', __cartEscHandler);
 
     // Перемещаем фокус внутрь модалки и включаем trap
-    const focusables = getFocusable(cartModal);
+    let focusables = getFocusable(cartModal);
     const first = focusables[0];
     const last = focusables[focusables.length - 1];
     if (first && typeof first.focus === 'function') first.focus();
     __cartTrapHandler = (evt) => {
         if (evt.key !== 'Tab') return;
+        // Пересчитываем фокусабельные элементы динамически, т.к. содержимое может меняться
+        focusables = getFocusable(cartModal);
         if (focusables.length === 0) return;
         if (evt.shiftKey && document.activeElement === first) {
             evt.preventDefault();
-            last.focus();
+            (focusables[focusables.length - 1] || last)?.focus?.();
         } else if (!evt.shiftKey && document.activeElement === last) {
             evt.preventDefault();
-            first.focus();
+            (focusables[0] || first)?.focus?.();
         }
     };
     cartModal.addEventListener('keydown', __cartTrapHandler);
@@ -209,8 +219,9 @@ export function updateCartUI(translations, lang) {
                             <span class="cart-dropdown__item-name">${product.name[lang]}</span>
                             <span class="cart-dropdown__item-price">${(product.price * item.quantity).toLocaleString('uk-UA', { minimumFractionDigits: 2 })} грн (x${item.quantity})</span>
                         </div>
-                        <button class="cart-dropdown__item-remove" data-id="${item.id}" aria-label="Удалить ${product.name[lang]}">✕</button>
+                        <button class="cart-dropdown__item-remove" data-id="${item.id}" aria-label="Удалить ${product.name[lang]} из корзины" title="Удалить">✕</button>
                     `;
+                    li.setAttribute('tabindex', '0');
                     cartDropdownItems.appendChild(li);
                 }
             });
@@ -233,11 +244,100 @@ export function updateCartUI(translations, lang) {
                             <span class="cart-item-name">${product.name[lang]}</span>
                             <span class="cart-item-price">${(product.price * item.quantity).toLocaleString('uk-UA', { minimumFractionDigits: 2 })} грн (x${item.quantity})</span>
                         </div>
-                        <button class="cart-item-remove" data-id="${item.id}" aria-label="Удалить ${product.name[lang]}">✕</button>
+                        <button class="cart-item-remove" data-id="${item.id}" aria-label="Удалить ${product.name[lang]} из корзины" title="Удалить">✕</button>
                     `;
+                    li.setAttribute('tabindex', '0');
                     cartItems.appendChild(li);
                 }
             });
         }
     }
+}
+
+// UX: клавиша Delete удаляет активный элемент корзины (модалка)
+document.addEventListener('keydown', (e) => {
+    const cartModal = document.querySelector('#cartModal');
+    if (!cartModal || cartModal.style.display !== 'block') return;
+    if (e.key !== 'Delete') return;
+    const focused = document.activeElement;
+    const focusedLi = focused?.closest('li');
+    const removeBtn = focusedLi?.querySelector('.cart-item-remove');
+    if (removeBtn) {
+        const id = removeBtn.getAttribute('data-id');
+        if (!id) return;
+        // Сохраняем копию для Undo
+        const snapshot = [...cart];
+        // Индекс текущего элемента для фокус-навигции после удаления
+        const list = document.querySelector('.cart-items');
+        const items = list ? Array.from(list.querySelectorAll('li')) : [];
+        const currentIndex = focusedLi ? items.indexOf(focusedLi) : -1;
+        removeFromCart(id);
+        // Обновляем UI и управляем фокусом внутри модалки
+        const lang = getCurrentLang();
+        updateCartUI(translations, lang);
+        // Фокус: на тот же индекс, либо предыдущий, либо на кнопки футера, если пусто
+        queueMicrotask(() => {
+            const newList = document.querySelector('.cart-items');
+            const newItems = newList ? Array.from(newList.querySelectorAll('li')) : [];
+            if (newItems.length > 0) {
+                const targetIndex = currentIndex >= 0 && currentIndex < newItems.length
+                    ? currentIndex
+                    : Math.min(currentIndex, newItems.length - 1);
+                const target = newItems[Math.max(0, targetIndex)];
+                target?.focus?.();
+            } else {
+                const fallback = document.querySelector('.cart-button--checkout') || document.querySelector('.cart-modal__close');
+                fallback?.focus?.();
+            }
+        });
+        showUndoToast('Товар удалён', () => {
+            cart = snapshot;
+            saveCart();
+            const lang2 = getCurrentLang();
+            updateCartUI(translations, lang2);
+            // Возвращаем фокус к восстановленному элементу, если возможно
+            queueMicrotask(() => {
+                const btn = document.querySelector(`.cart-items .cart-item-remove[data-id="${id}"]`);
+                const li = btn?.closest('li');
+                (li || btn || document.querySelector('.cart-button--checkout') || document.querySelector('.cart-modal__close'))?.focus?.();
+            });
+        });
+    }
+});
+
+// Простой toast с Undo
+function showUndoToast(message, onUndo) {
+    const host = document.getElementById('toast-container');
+    if (!host) return;
+    // Очищаем предыдущий
+    host.innerHTML = '';
+    const toast = document.createElement('div');
+    toast.setAttribute('role', 'status');
+    toast.style.background = 'rgba(0,0,0,0.8)';
+    toast.style.color = '#fff';
+    toast.style.padding = '10px 14px';
+    toast.style.borderRadius = '12px';
+    toast.style.display = 'inline-flex';
+    toast.style.gap = '12px';
+    toast.style.alignItems = 'center';
+    toast.textContent = message;
+    const undo = document.createElement('button');
+    undo.type = 'button';
+    undo.textContent = 'Отменить';
+    undo.style.marginLeft = '8px';
+    undo.style.background = 'transparent';
+    undo.style.border = '1px solid rgba(255,255,255,0.6)';
+    undo.style.color = '#fff';
+    undo.style.borderRadius = '8px';
+    undo.style.padding = '6px 10px';
+    undo.addEventListener('click', () => {
+        onUndo?.();
+        host.innerHTML = '';
+    });
+    toast.appendChild(undo);
+    host.appendChild(toast);
+    // Авто-скрытие через 4 сек
+    setTimeout(() => {
+        if (host.contains(toast)) host.removeChild(toast);
+    }, 4000);
 }

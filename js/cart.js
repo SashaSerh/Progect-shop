@@ -1,14 +1,9 @@
 import { products } from './products.js';
 import { translations } from './i18n.js';
+import { gesturesConfig as defaultGesturesConfig } from './gestures-config.js';
 
 // Глобальная настройка жестов (общая с меню)
-const G = (window.gesturesConfig = window.gesturesConfig || {
-    angleMax: 30,
-    startThreshold: 8,
-    closeThresholdRatio: 0.2,
-    openThresholdRatio: 0.2,
-    springBackDuration: 180
-});
+const G = (window.gesturesConfig = { ...defaultGesturesConfig, ...(window.gesturesConfig || {}) });
 
 // Безопасно читаем localStorage (в средах без window/localStorage, например в тестах, fallback к пустому массиву)
 function safeReadInitialCart() {

@@ -6,6 +6,7 @@ import { contentConfig } from './content-config.js';
 import { initMarketing } from './marketing.js';
 import { initNavigation } from './navigation.js';
 import { updateProfileButton, openModal, closeModal } from './auth.js';
+import { gesturesConfig as defaultGesturesConfig } from './gestures-config.js';
 
 async function loadComponent(containerId, componentPath) {
     try {
@@ -751,15 +752,7 @@ function initMobileHeader() {
 
     // ——— helpers: жесты свайп‑to‑close для меню ———
     // Глобальный конфиг жестов (настраиваемый)
-    const G = (window.gesturesConfig = window.gesturesConfig || {
-        angleMax: 30,
-        startThreshold: 8,
-        closeThresholdRatio: 0.2,
-        openThresholdRatio: 0.2,
-        springBackDuration: 180, // ms
-        flingVelocity: 0.7,       // px/ms для авто‑закрытия
-        flingWindowMs: 120        // ms окно для измерения
-    });
+    const G = (window.gesturesConfig = { ...defaultGesturesConfig, ...(window.gesturesConfig || {}) });
 
     function attachMobileNavGestures() {
         if (__navDrag) return;
@@ -876,6 +869,20 @@ function initMobileHeader() {
     function getPoint(evt) {
         if (evt.touches && evt.touches[0]) return { x: evt.touches[0].clientX, y: evt.touches[0].clientY };
         return { x: evt.clientX, y: evt.clientY };
+    }
+
+    function extractTranslateX(el) {
+        try {
+            const st = window.getComputedStyle(el);
+            const tr = st.transform || st.webkitTransform || 'none';
+            if (tr === 'none') return 0;
+            const m = tr.match(/matrix\(([^)]+)\)/) || tr.match(/matrix\d?\(([^)]+)\)/);
+            if (m && m[1]) {
+                const parts = m[1].split(',').map(parseFloat);
+                return parts[4] || 0; // tx
+            }
+        } catch (_) { /* ignore */ }
+        return 0;
     }
 
     // Edge‑swipe open для мобильного меню (правый край, верхняя половина экрана)

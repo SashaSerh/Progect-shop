@@ -9,6 +9,9 @@ if (typeof window !== 'undefined') {
   if (typeof window.PointerEvent !== 'function') {
     class PolyPointerEvent extends Event {
       constructor(type, init = {}) {
+        // ensure bubbling/cancelable by default so window listeners receive events
+        if (init.bubbles === undefined) init.bubbles = true;
+        if (init.cancelable === undefined) init.cancelable = true;
         super(type, init);
         this.clientX = init.clientX ?? 0;
         this.clientY = init.clientY ?? 0;

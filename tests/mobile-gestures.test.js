@@ -61,4 +61,49 @@ describe('Mobile gestures: edge-swipe', () => {
     expect(menu.classList.contains('active')).toBe(true);
     expect(overlay.classList.contains('is-visible')).toBe(true);
   });
+
+  it('Fling close (menu): быстрый флик вправо закрывает даже при малом пути', async () => {
+    const overlay = document.querySelector('.mobile-nav-overlay');
+    const menu = document.querySelector('.mobile-nav');
+    // Откроем меню программно
+    if (typeof window.initMobileHeader === 'function') {
+      const btn = document.querySelector('.hamburger-toggle');
+      btn.click();
+      await new Promise(r => setTimeout(r, 10));
+    }
+    expect(menu.classList.contains('active')).toBe(true);
+
+    // Начинаем жест на самом меню (свайп‑to‑close)
+    menu.dispatchEvent(new PointerEvent('pointerdown', { clientX: 10, clientY: 60 }));
+    // Быстрая серия move с резким ростом dx
+    const t0 = Date.now();
+    menu.dispatchEvent(new PointerEvent('pointermove', { clientX: 20, clientY: 60 }));
+    menu.dispatchEvent(new PointerEvent('pointermove', { clientX: 60, clientY: 60 })); // быстрый прирост
+    // Завершение жеста
+    menu.dispatchEvent(new PointerEvent('pointerup', { clientX: 60, clientY: 60 }));
+
+    // Дадим обработчикам чуть времени
+  await new Promise(r => setTimeout(r, 120));
+    expect(menu.classList.contains('active')).toBe(false);
+    expect(overlay.classList.contains('is-visible')).toBe(false);
+  });
+
+  it('Fling close (cart): быстрый флик вправо закрывает даже при малом пути', async () => {
+    // Создадим минимальную разметку модалки корзины
+    const cartModal = document.createElement('div');
+    cartModal.id = 'cartModal';
+    document.body.appendChild(cartModal);
+    // Откроем через публичную функцию, чтобы навесились жесты
+    const { openCartModal, closeCartModal } = await import('../js/cart.js');
+    openCartModal();
+    expect(cartModal.style.display).toBe('block');
+    // Жест закрытия: быстрый dx
+    cartModal.dispatchEvent(new PointerEvent('pointerdown', { clientX: 10, clientY: 520 }));
+    cartModal.dispatchEvent(new PointerEvent('pointermove', { clientX: 30, clientY: 520 }));
+    cartModal.dispatchEvent(new PointerEvent('pointermove', { clientX: 85, clientY: 520 })); // быстрый прирост
+    cartModal.dispatchEvent(new PointerEvent('pointerup', { clientX: 85, clientY: 520 }));
+  // Дать время на анимацию и отложенное скрытие (closeCartModal скрывает через ~250ms)
+  await new Promise(r => setTimeout(r, 320));
+    expect(cartModal.style.display).toBe('none');
+  });
 });

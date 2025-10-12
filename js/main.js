@@ -555,6 +555,8 @@ function initMobileHeader() {
     // Overlay удалён — клики вне меню больше не перехватываются искусственно.
 
     // Функция открытия/закрытия мобильного меню
+    let __navDrag = null;
+
     function toggleMobileNav(open = null) {
         const isOpen = open !== null ? open : !mobileNav.classList.contains('active');
         const focusableElements = mobileNav.querySelectorAll('a, button, input, textarea, select, [tabindex]:not([tabindex="-1"])');
@@ -573,6 +575,9 @@ function initMobileHeader() {
             focusableElements.forEach(el => {
                 el.removeAttribute('tabindex');
             });
+
+            // Жест свайпа для закрытия мобильного меню
+            attachMobileNavGestures();
         } else {
             hamburgerToggle.classList.remove('active');
             mobileNav.classList.remove('active');
@@ -587,6 +592,10 @@ function initMobileHeader() {
             focusableElements.forEach(el => {
                 el.setAttribute('tabindex', '-1');
             });
+
+            // Снимаем жесты и сбрасываем возможный transform
+            detachMobileNavGestures();
+            mobileNav.style.transform = '';
         }
     }
 
@@ -738,6 +747,104 @@ function initMobileHeader() {
     }
 
     console.log('Мобильный заголовок инициализирован');
+
+    // ——— helpers: жесты свайп‑to‑close для меню ———
+    function attachMobileNavGestures() {
+        if (__navDrag) return;
+        const state = {
+            active: false,
+            startX: 0,
+            startY: 0,
+            dx: 0,
+            dy: 0,
+            moved: false,
+            allow: false,
+        };
+        const maxAngle = 30; // градусы
+        const threshold = 8; // px
+        const closeThreshold = Math.max(80, Math.floor((window.innerWidth || 360) * 0.2));
+
+        const onStart = (evt) => {
+            if (!mobileNav.classList.contains('active')) return;
+            const p = getPoint(evt);
+            state.startX = p.x; state.startY = p.y;
+            state.dx = 0; state.dy = 0; state.moved = false; state.allow = false; state.active = true;
+            mobileNav.style.transition = 'none';
+        };
+        const onMove = (evt) => {
+            if (!state.active) return;
+            const p = getPoint(evt);
+            state.dx = p.x - state.startX;
+            state.dy = p.y - state.startY;
+            if (!state.moved) {
+                const absDx = Math.abs(state.dx);
+                const absDy = Math.abs(state.dy);
+                if (absDx < threshold && absDy < threshold) return;
+                const angle = Math.atan2(absDy, absDx) * 180 / Math.PI;
+                if (angle > maxAngle) { // вертикально — не перехватываем
+                    cancel();
+                    return;
+                }
+                // Закрываем жестом вправо (dx > 0)
+                if (state.dx <= 0) { // двигается влево — игнорируем
+                    cancel();
+                    return;
+                }
+                state.allow = true;
+                state.moved = true;
+            }
+            if (!state.allow) return;
+            const translate = Math.max(0, state.dx);
+            mobileNav.style.transform = `translateX(${translate}px)`;
+            evt.preventDefault();
+        };
+        const onEnd = () => {
+            if (!state.active) return;
+            state.active = false;
+            mobileNav.style.transition = '';
+            const applied = extractTranslateX(mobileNav);
+            if (applied >= closeThreshold) {
+                mobileNav.style.transform = '';
+                toggleMobileNav(false);
+                try { navigator.vibrate && navigator.vibrate(10); } catch(_) {}
+            } else {
+                mobileNav.style.transform = '';
+            }
+        };
+        const cancel = () => {
+            state.active = false;
+            mobileNav.style.transition = '';
+            mobileNav.style.transform = '';
+        };
+
+        const bound = { start: onStart, move: onMove, end: onEnd };
+        mobileNav.addEventListener('touchstart', bound.start, { passive: true });
+        mobileNav.addEventListener('touchmove', bound.move, { passive: false });
+        mobileNav.addEventListener('touchend', bound.end, { passive: true });
+        mobileNav.addEventListener('pointerdown', bound.start, { passive: true });
+        window.addEventListener('pointermove', bound.move, { passive: false });
+        window.addEventListener('pointerup', bound.end, { passive: true });
+        __navDrag = { bound };
+    }
+
+    function detachMobileNavGestures() {
+        if (!__navDrag) return;
+        const { bound } = __navDrag;
+        try {
+            mobileNav.removeEventListener('touchstart', bound.start);
+            mobileNav.removeEventListener('touchmove', bound.move);
+            mobileNav.removeEventListener('touchend', bound.end);
+            mobileNav.removeEventListener('pointerdown', bound.start);
+            window.removeEventListener('pointermove', bound.move);
+            window.removeEventListener('pointerup', bound.end);
+        } catch(_) {}
+        __navDrag = null;
+    }
+
+    function getPoint(evt) {
+        if (evt.touches && evt.touches[0]) return { x: evt.touches[0].clientX, y: evt.touches[0].clientY };
+        return { x: evt.clientX, y: evt.clientY };
+    }
 }
 
 // Функция инициализации мобильных тоглов

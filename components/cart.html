@@ -1,7 +1,12 @@
 <div class="modal cart-modal" id="cartModal" role="dialog" aria-modal="true" aria-labelledby="cartModalTitle" aria-describedby="cartModalDesc">
     <div class="cart-modal__header">
         <h2 id="cartModalTitle" data-i18n="cart-modal-title">Ваша корзина</h2>
-        <button class="cart-modal__close" aria-label="Закрыть модальное окно">✕</button>
+        <button class="cart-modal__close" aria-label="Закрыть модальное окно" type="button">
+            <svg class="icon" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
+                <use href="icons/icons-sprite.svg#icon-close"></use>
+            </svg>
+            <span class="visually-hidden">Закрыть</span>
+        </button>
     </div>
     <ul class="cart-items" id="cartModalDesc" aria-label="Товары в корзине"></ul>
     <div class="cart-summary" data-i18n="cart-total" aria-live="polite" aria-atomic="true">Итого: $0.00</div>

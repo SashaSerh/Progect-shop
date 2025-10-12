@@ -1334,6 +1334,24 @@ body {
     }
     .cart-modal__header { padding: 4px 2px 8px; }
     .cart-modal__footer { padding-top: 8px; }
+    .cart-modal__close {
+        position: relative;
+        margin: 6px 0 0 auto;
+        background: var(--button-bg);
+        color: var(--nav-text-color);
+        border: none;
+        border-radius: 12px;
+        width: 36px;
+        height: 36px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: background-color .2s ease, transform .2s ease, opacity .2s ease;
+    }
+    .cart-modal__close .icon { width: 20px; height: 20px; display: block; color: var(--nav-text-color); }
+    .cart-modal__close:hover { background: var(--button-bg-hover); }
+    .cart-modal__close:active { transform: scale(0.96); }
 
     /* Фиксируем нижнюю панель CTA в мобильной корзине */
     .cart-modal__footer {

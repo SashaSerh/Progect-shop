@@ -2108,6 +2108,11 @@ textarea.form-input { resize: vertical; min-height: 120px; }
             clip-path: inset(0 var(--mobile-drawer-width) 0 0);
         }
 
+        /* Режим полной заливки для корзины: затемняем весь экран без окна под drawer */
+        .mobile-nav-overlay.overlay--full.is-visible::before {
+            clip-path: inset(0 0 0 0);
+        }
+
         /* Дополнительно: оставляем "окно" под областью шапки, чтобы бургер оставался кликабельным,
              даже если overlay перекроется над шапкой в некоторых браузерах */
         @media (max-width: 768px) {

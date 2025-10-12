@@ -55,6 +55,8 @@ let __cartScrollY = 0;
 let __cartEscHandler = null;
 let __cartTrapHandler = null;
 let __cartLastFocus = null;
+let __cartDrag = null; // жест закрытия на мобильных
+let __cartEdgeOpen = null; // edge-swipe открытие на мобильных
 
 function getCurrentLang() {
     try {
@@ -113,6 +115,7 @@ export function openCartModal(e) {
             document.body.appendChild(backdrop);
         }
         backdrop.classList.add('is-visible');
+        backdrop.classList.add('overlay--full'); // на время корзины затемняем весь экран
         // В мобильном варианте клики по overlay закрывают корзину
         const overlayClose = () => closeCartModal();
         backdrop.addEventListener('click', overlayClose, { once: true });
@@ -134,6 +137,10 @@ export function openCartModal(e) {
     cartModal.style.display = 'block';
     if (isMobile) {
         cartModal.classList.add('cart-modal--active');
+        // Haptic (если доступно)
+        try { navigator.vibrate && navigator.vibrate(20); } catch(_) {}
+        // Навешиваем жест свайпа для закрытия
+        attachCartDrawerGestures(cartModal);
     }
 
     // Блокируем прокрутку фона
@@ -174,15 +181,19 @@ export function closeCartModal() {
     const backdrop = isMobile ? document.querySelector('.mobile-nav-overlay') : document.querySelector('.cart-backdrop');
     if (cartModal) {
         if (isMobile) {
+            // снимаем жесты
+            detachCartDrawerGestures(cartModal);
             cartModal.classList.remove('cart-modal--active');
             // Дадим анимации закончиться перед скрытием
             setTimeout(() => { cartModal.style.display = 'none'; }, 250);
+            try { navigator.vibrate && navigator.vibrate(10); } catch(_) {}
         } else {
             cartModal.style.display = 'none';
         }
     }
     if (backdrop) {
         backdrop.classList.remove('is-visible');
+        backdrop.classList.remove('overlay--full');
         // Для мобильного overlay не удаляем — его использует и меню
         if (!isMobile) {
             backdrop.parentElement && backdrop.parentElement.removeChild(backdrop);
@@ -208,6 +219,284 @@ export function closeCartModal() {
         __cartLastFocus = null;
     }
 }
+
+// Жест свайпа для закрытия мобильной корзины (drawer)
+function attachCartDrawerGestures(panel) {
+    if (!panel) return;
+    if (__cartDrag && __cartDrag.bound) return; // уже навешано
+    const state = {
+        startX: 0,
+        startY: 0,
+        dx: 0,
+        dy: 0,
+        active: false,
+        moved: false,
+        angleLocked: false,
+        allow: false
+    };
+    const maxAngle = 30; // градусы, фильтрация диагонали
+    const threshold = 8; // px до начала трека
+    const closeThreshold = Math.max(80, Math.floor((window.innerWidth || 360) * 0.2));
+
+    const onStart = (evt) => {
+        const t = getPoint(evt);
+        state.startX = t.x;
+        state.startY = t.y;
+        state.dx = 0;
+        state.dy = 0;
+        state.active = true;
+        state.moved = false;
+        state.angleLocked = false;
+        state.allow = false;
+        // убираем transition на время перетаскивания
+        panel.style.transition = 'none';
+    };
+    const onMove = (evt) => {
+        if (!state.active) return;
+        const p = getPoint(evt);
+        state.dx = p.x - state.startX;
+        state.dy = p.y - state.startY;
+        if (!state.moved) {
+            const absDx = Math.abs(state.dx);
+            const absDy = Math.abs(state.dy);
+            if (absDx < threshold && absDy < threshold) return; // ещё не двигаем
+            // угол
+            const angle = Math.atan2(absDy, absDx) * 180 / Math.PI;
+            if (angle > maxAngle) {
+                // вертикальный жест — не перехватываем
+                state.active = false;
+                // восстановим transition если прервали
+                panel.style.transition = '';
+                return;
+            }
+            state.angleLocked = true;
+            state.allow = true; // горизонтально
+            state.moved = true;
+        }
+        if (!state.allow) return;
+        // Разрешаем сдвиг только вправо (закрытие)
+        const translate = Math.max(0, state.dx);
+        panel.style.transform = `translateX(${translate}px)`;
+        evt.preventDefault();
+    };
+    const onEnd = () => {
+        if (!state.active) return;
+        state.active = false;
+        // вернём transition
+        panel.style.transition = '';
+        const translateApplied = extractTranslateX(panel);
+        if (translateApplied >= closeThreshold) {
+            // закрываем
+            panel.style.transform = ''; // пусть класс анимации обработает закрытие
+            closeCartModal();
+        } else {
+            // откатываем назад
+            panel.style.transform = '';
+        }
+    };
+
+    const bound = {
+        start: onStart,
+        move: onMove,
+        end: onEnd
+    };
+    panel.addEventListener('touchstart', bound.start, { passive: true });
+    panel.addEventListener('touchmove', bound.move, { passive: false });
+    panel.addEventListener('touchend', bound.end, { passive: true });
+    panel.addEventListener('pointerdown', bound.start, { passive: true });
+    window.addEventListener('pointermove', bound.move, { passive: false });
+    window.addEventListener('pointerup', bound.end, { passive: true });
+    __cartDrag = { bound, panel };
+}
+
+function detachCartDrawerGestures(panel) {
+    if (!__cartDrag) return;
+    const { bound } = __cartDrag;
+    try {
+        panel.removeEventListener('touchstart', bound.start);
+        panel.removeEventListener('touchmove', bound.move);
+        panel.removeEventListener('touchend', bound.end);
+        panel.removeEventListener('pointerdown', bound.start);
+        window.removeEventListener('pointermove', bound.move);
+        window.removeEventListener('pointerup', bound.end);
+    } catch(_) {}
+    __cartDrag = null;
+}
+
+function getPoint(evt) {
+    if (evt.touches && evt.touches[0]) {
+        return { x: evt.touches[0].clientX, y: evt.touches[0].clientY };
+    }
+    return { x: evt.clientX, y: evt.clientY };
+}
+
+function extractTranslateX(el) {
+    const st = window.getComputedStyle(el);
+    const tr = st.transform || st.webkitTransform || 'none';
+    if (tr === 'none') return 0;
+    const m = tr.match(/matrix\(([^)]+)\)/) || tr.match(/matrix\d?\(([^)]+)\)/);
+    if (m && m[1]) {
+        const parts = m[1].split(',').map(parseFloat);
+        // matrix(a,b,c,d,tx,ty)
+        const tx = parts[4] || 0;
+        return tx;
+    }
+    return 0;
+}
+
+// Edge-swipe open (правый край) для мобильной корзины
+function enableCartEdgeSwipeOpen() {
+    if (typeof window === 'undefined') return;
+    if (__cartEdgeOpen) return; // уже включено
+    const state = {
+        active: false,
+        startX: 0,
+        startY: 0,
+        dx: 0,
+        dy: 0,
+        moved: false,
+        angleLocked: false,
+        allow: false,
+        panel: null,
+    };
+    const EDGE = 18; // px от правого края
+    const threshold = 10;
+    const maxAngle = 30;
+    const openFraction = 0.2; // 20% ширины
+
+    const onDown = (evt) => {
+        // игнорируем если уже открыта корзина
+        const cartModal = document.querySelector('#cartModal');
+        if (!cartModal || cartModal.classList.contains('cart-modal--active') || cartModal.style.display === 'block') return;
+        const pt = getPoint(evt);
+        const vw = window.innerWidth || 360;
+        const distRight = vw - pt.x;
+        if (distRight > EDGE) return;
+        state.active = true;
+        state.startX = pt.x;
+        state.startY = pt.y;
+        state.dx = 0; state.dy = 0;
+        state.moved = false; state.angleLocked = false; state.allow = false;
+        state.panel = cartModal;
+        // подготовка панели и overlay
+        const overlay = document.querySelector('.mobile-nav-overlay') || (() => {
+            const el = document.createElement('div'); el.className = 'mobile-nav-overlay'; document.body.appendChild(el); return el;
+        })();
+        overlay.classList.add('is-visible');
+        overlay.classList.add('overlay--full');
+        cartModal.style.display = 'block';
+        cartModal.style.transition = 'none';
+        // начальное положение за экраном (ширина = 100vw)
+        cartModal.style.transform = `translateX(${vw}px)`;
+    };
+
+    const onMove = (evt) => {
+        if (!state.active || !state.panel) return;
+        const p = getPoint(evt);
+        state.dx = p.x - state.startX;
+        state.dy = p.y - state.startY;
+        if (!state.moved) {
+            const absDx = Math.abs(state.dx);
+            const absDy = Math.abs(state.dy);
+            if (absDx < threshold && absDy < threshold) return;
+            const angle = Math.atan2(absDy, absDx) * 180 / Math.PI;
+            if (angle > maxAngle) { // вертикально — отменяем
+                cancelInteractive();
+                return;
+            }
+            // Для открытия нужен жест влево (dx < 0) от правого края
+            if (state.dx >= 0) { // двигается вправо — не открываем
+                cancelInteractive();
+                return;
+            }
+            state.allow = true;
+            state.moved = true;
+        }
+        if (!state.allow) return;
+        const vw = window.innerWidth || 360;
+        const progress = Math.min(vw, Math.max(0, -state.dx));
+        state.panel.style.transform = `translateX(${vw - progress}px)`;
+        evt.preventDefault();
+    };
+
+    const onUp = () => {
+        if (!state.active || !state.panel) return;
+        const vw = window.innerWidth || 360;
+        const progress = Math.min(vw, Math.max(0, -state.dx));
+        const needOpen = progress >= vw * openFraction;
+        // очистка inline-transition
+        state.panel.style.transition = '';
+        if (needOpen) {
+            // Убираем временный transform и используем нормальное открытие (фокус/esc/trap)
+            state.panel.style.transform = '';
+            openCartModal();
+        } else {
+            // Откат назад
+            state.panel.style.transform = '';
+            state.panel.style.display = 'none';
+            const overlay = document.querySelector('.mobile-nav-overlay');
+            if (overlay) {
+                overlay.classList.remove('is-visible');
+                overlay.classList.remove('overlay--full');
+            }
+        }
+        state.active = false;
+        state.panel = null;
+    };
+
+    const cancelInteractive = () => {
+        if (!state.active || !state.panel) return;
+        state.panel.style.transition = '';
+        state.panel.style.transform = '';
+        state.panel.style.display = 'none';
+        const overlay = document.querySelector('.mobile-nav-overlay');
+        overlay && overlay.classList.remove('is-visible');
+        overlay && overlay.classList.remove('overlay--full');
+        state.active = false;
+        state.panel = null;
+    };
+
+    const bound = {
+        down: onDown,
+        move: onMove,
+        up: onUp,
+        cancel: cancelInteractive
+    };
+    window.addEventListener('touchstart', bound.down, { passive: true });
+    window.addEventListener('touchmove', bound.move, { passive: false });
+    window.addEventListener('touchend', bound.up, { passive: true });
+    window.addEventListener('pointerdown', bound.down, { passive: true });
+    window.addEventListener('pointermove', bound.move, { passive: false });
+    window.addEventListener('pointerup', bound.up, { passive: true });
+    __cartEdgeOpen = { bound };
+}
+
+function disableCartEdgeSwipeOpen() {
+    if (!__cartEdgeOpen) return;
+    const { bound } = __cartEdgeOpen;
+    window.removeEventListener('touchstart', bound.down);
+    window.removeEventListener('touchmove', bound.move);
+    window.removeEventListener('touchend', bound.up);
+    window.removeEventListener('pointerdown', bound.down);
+    window.removeEventListener('pointermove', bound.move);
+    window.removeEventListener('pointerup', bound.up);
+    __cartEdgeOpen = null;
+}
+
+// Авто-инициализация edge-swipe в мобильном режиме
+(() => {
+    if (typeof window === 'undefined') return;
+    const apply = () => {
+        if (window.innerWidth <= 768) enableCartEdgeSwipeOpen();
+        else disableCartEdgeSwipeOpen();
+    };
+    apply();
+    window.addEventListener('resize', () => {
+        // debounce лёгкий
+        clearTimeout(apply.__t);
+        apply.__t = setTimeout(apply, 150);
+    }, { passive: true });
+})();
 
 export function updateCartUI(translations, lang) {
     // Обновляем ВСЕ счетчики корзины (мобильный и десктопный)

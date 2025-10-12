@@ -27,4 +27,38 @@ describe('Mobile gestures: edge-swipe', () => {
     // вызов ресайза не должен кидать ошибок
     window.dispatchEvent(new Event('resize'));
   });
+
+  it('Edge-swipe open: недотянутый жест не открывает меню (spring-back)', async () => {
+    const overlay = document.querySelector('.mobile-nav-overlay');
+    const menu = document.querySelector('.mobile-nav');
+    expect(menu.classList.contains('active')).toBe(false);
+
+    // Эмулируем down у правого края в верхней половине
+    window.dispatchEvent(new PointerEvent('pointerdown', { clientX: 355, clientY: 40 }));
+    // Недостаточное движение (меньше порога открытия 20% * 360 = 72px)
+    window.dispatchEvent(new PointerEvent('pointermove', { clientX: 330, clientY: 45 }));
+    window.dispatchEvent(new PointerEvent('pointerup', { clientX: 330, clientY: 45 }));
+
+    // Не должно открыться
+    expect(menu.classList.contains('active')).toBe(false);
+    // overlay может быть показан на время интерактива, но должен сниматься
+    // Дадим таймеру spring-back отработать
+    await new Promise(r => setTimeout(r, 220));
+    expect(overlay.classList.contains('is-visible')).toBe(false);
+  });
+
+  it('Edge-swipe open: достаточный жест открывает меню', () => {
+    const overlay = document.querySelector('.mobile-nav-overlay');
+    const menu = document.querySelector('.mobile-nav');
+    expect(menu.classList.contains('active')).toBe(false);
+
+    // Down у правого края, верхняя половина
+    window.dispatchEvent(new PointerEvent('pointerdown', { clientX: 359, clientY: 60 }));
+    // Движение влево > 72px
+    window.dispatchEvent(new PointerEvent('pointermove', { clientX: 270, clientY: 62 }));
+    window.dispatchEvent(new PointerEvent('pointerup', { clientX: 270, clientY: 62 }));
+
+    expect(menu.classList.contains('active')).toBe(true);
+    expect(overlay.classList.contains('is-visible')).toBe(true);
+  });
 });

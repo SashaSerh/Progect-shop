@@ -750,6 +750,17 @@ function initMobileHeader() {
     console.log('Мобильный заголовок инициализирован');
 
     // ——— helpers: жесты свайп‑to‑close для меню ———
+    // Глобальный конфиг жестов (настраиваемый)
+    const G = (window.gesturesConfig = window.gesturesConfig || {
+        angleMax: 30,
+        startThreshold: 8,
+        closeThresholdRatio: 0.2,
+        openThresholdRatio: 0.2,
+        springBackDuration: 180, // ms
+        flingVelocity: 0.7,       // px/ms для авто‑закрытия
+        flingWindowMs: 120        // ms окно для измерения
+    });
+
     function attachMobileNavGestures() {
         if (__navDrag) return;
         const state = {
@@ -760,16 +771,18 @@ function initMobileHeader() {
             dy: 0,
             moved: false,
             allow: false,
+            samples: [] // {t, dx}
         };
-        const maxAngle = 30; // градусы
-        const threshold = 8; // px
-        const closeThreshold = Math.max(80, Math.floor((window.innerWidth || 360) * 0.2));
+    const maxAngle = G.angleMax; // градусы
+    const threshold = G.startThreshold; // px
+    const closeThreshold = Math.max(80, Math.floor((window.innerWidth || 360) * G.closeThresholdRatio));
 
         const onStart = (evt) => {
             if (!mobileNav.classList.contains('active')) return;
             const p = getPoint(evt);
             state.startX = p.x; state.startY = p.y;
             state.dx = 0; state.dy = 0; state.moved = false; state.allow = false; state.active = true;
+            state.samples = [];
             mobileNav.style.transition = 'none';
         };
         const onMove = (evt) => {
@@ -797,18 +810,36 @@ function initMobileHeader() {
             if (!state.allow) return;
             const translate = Math.max(0, state.dx);
             mobileNav.style.transform = `translateX(${translate}px)`;
+            // пишем сэмпл для вычисления скорости
+            const now = Date.now();
+            state.samples.push({ t: now, dx: state.dx });
+            // чистим старые
+            const cutoff = now - G.flingWindowMs;
+            while (state.samples.length && state.samples[0].t < cutoff) state.samples.shift();
             evt.preventDefault();
         };
         const onEnd = () => {
             if (!state.active) return;
             state.active = false;
             mobileNav.style.transition = '';
+            // скорость за последнее окно
+            const sLen = state.samples.length;
+            let fast = false;
+            if (sLen >= 2) {
+                const first = state.samples[0];
+                const last = state.samples[sLen - 1];
+                const dt = Math.max(1, last.t - first.t);
+                const v = (last.dx - first.dx) / dt; // px/ms (dx растёт вправо)
+                fast = v > G.flingVelocity; // быстрый флик вправо
+            }
             const applied = extractTranslateX(mobileNav);
-            if (applied >= closeThreshold) {
+            if (applied >= closeThreshold || fast) {
                 mobileNav.style.transform = '';
                 toggleMobileNav(false);
                 try { navigator.vibrate && navigator.vibrate(10); } catch(_) {}
             } else {
+                // spring-back
+                mobileNav.style.transition = `transform ${G.springBackDuration}ms ease-out`;
                 mobileNav.style.transform = '';
             }
         };
@@ -859,10 +890,10 @@ function initMobileHeader() {
             moved: false,
             allow: false,
         };
-        const EDGE = 18; // px от правого края
-        const threshold = 10; // до начала трека
-        const maxAngle = 30; // градусы (фильтрация вертикали)
-        const openFraction = 0.2; // 20% ширины
+    const EDGE = 18; // px от правого края
+    const threshold = Math.max(6, G.startThreshold + 2); // немного выше, чем у закрытия
+    const maxAngle = G.angleMax; // градусы (фильтрация вертикали)
+    const openFraction = G.openThresholdRatio; // доля ширины
 
         const onDown = (evt) => {
             // Только мобильный, меню закрыто, верхняя половина экрана
@@ -923,8 +954,10 @@ function initMobileHeader() {
                 toggleMobileNav(true);
                 try { navigator.vibrate && navigator.vibrate(10); } catch(_) {}
             } else {
-                // Откат интерактива
-                overlay.classList.remove('is-visible');
+                // Spring-back при недотянутом жесте
+                mobileNav.style.transition = `transform ${G.springBackDuration}ms ease-out`;
+                mobileNav.style.transform = '';
+                setTimeout(() => overlay.classList.remove('is-visible'), G.springBackDuration);
             }
         };
 

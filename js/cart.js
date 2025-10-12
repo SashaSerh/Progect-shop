@@ -1,6 +1,15 @@
 import { products } from './products.js';
 import { translations } from './i18n.js';
 
+// Глобальная настройка жестов (общая с меню)
+const G = (window.gesturesConfig = window.gesturesConfig || {
+    angleMax: 30,
+    startThreshold: 8,
+    closeThresholdRatio: 0.2,
+    openThresholdRatio: 0.2,
+    springBackDuration: 180
+});
+
 // Безопасно читаем localStorage (в средах без window/localStorage, например в тестах, fallback к пустому массиву)
 function safeReadInitialCart() {
     try {
@@ -232,11 +241,12 @@ function attachCartDrawerGestures(panel) {
         active: false,
         moved: false,
         angleLocked: false,
-        allow: false
+        allow: false,
+        samples: [] // {t, dx}
     };
-    const maxAngle = 30; // градусы, фильтрация диагонали
-    const threshold = 8; // px до начала трека
-    const closeThreshold = Math.max(80, Math.floor((window.innerWidth || 360) * 0.2));
+    const maxAngle = G.angleMax; // градусы, фильтрация диагонали
+    const threshold = G.startThreshold; // px до начала трека
+    const closeThreshold = Math.max(80, Math.floor((window.innerWidth || 360) * G.closeThresholdRatio));
 
     const onStart = (evt) => {
         const t = getPoint(evt);
@@ -248,6 +258,7 @@ function attachCartDrawerGestures(panel) {
         state.moved = false;
         state.angleLocked = false;
         state.allow = false;
+        state.samples = [];
         // убираем transition на время перетаскивания
         panel.style.transition = 'none';
     };
@@ -277,6 +288,11 @@ function attachCartDrawerGestures(panel) {
         // Разрешаем сдвиг только вправо (закрытие)
         const translate = Math.max(0, state.dx);
         panel.style.transform = `translateX(${translate}px)`;
+        // сэмпл для скорости (dx вправо положительный)
+        const now = Date.now();
+        state.samples.push({ t: now, dx: state.dx });
+        const cutoff = now - G.flingWindowMs;
+        while (state.samples.length && state.samples[0].t < cutoff) state.samples.shift();
         evt.preventDefault();
     };
     const onEnd = () => {
@@ -284,13 +300,24 @@ function attachCartDrawerGestures(panel) {
         state.active = false;
         // вернём transition
         panel.style.transition = '';
+        // вычислим скорость жеста
+        const sLen = state.samples.length;
+        let fast = false;
+        if (sLen >= 2) {
+            const first = state.samples[0];
+            const last = state.samples[sLen - 1];
+            const dt = Math.max(1, last.t - first.t);
+            const v = (last.dx - first.dx) / dt; // px/ms (вправо положительно)
+            fast = v > G.flingVelocity;
+        }
         const translateApplied = extractTranslateX(panel);
-        if (translateApplied >= closeThreshold) {
+        if (translateApplied >= closeThreshold || fast) {
             // закрываем
             panel.style.transform = ''; // пусть класс анимации обработает закрытие
             closeCartModal();
         } else {
-            // откатываем назад
+            // откатываем назад со spring-back
+            panel.style.transition = `transform ${G.springBackDuration}ms ease-out`;
             panel.style.transform = '';
         }
     };
@@ -360,9 +387,9 @@ function enableCartEdgeSwipeOpen() {
         panel: null,
     };
     const EDGE = 18; // px от правого края
-    const threshold = 10;
-    const maxAngle = 30;
-    const openFraction = 0.2; // 20% ширины
+    const threshold = Math.max(6, G.startThreshold + 2);
+    const maxAngle = G.angleMax;
+    const openFraction = G.openThresholdRatio; // доля ширины
 
     const onDown = (evt) => {
         // игнорируем если уже открыта корзина
@@ -434,7 +461,8 @@ function enableCartEdgeSwipeOpen() {
             state.panel.style.transform = '';
             openCartModal();
         } else {
-            // Откат назад
+            // Откат назад с spring-back
+            state.panel.style.transition = `transform ${G.springBackDuration}ms ease-out`;
             state.panel.style.transform = '';
             state.panel.style.display = 'none';
             const overlay = document.querySelector('.mobile-nav-overlay');

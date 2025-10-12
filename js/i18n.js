@@ -64,6 +64,9 @@ export const translations = {
         "form-error-email": "Укажите email",
         "form-error-email-format": "Некорректный email",
         "form-error-message": "Введите сообщение"
+        ,
+        "toast-item-removed": "Товар удалён",
+        "toast-undo": "Отменить"
     },
     uk: {
         "site-title": "Клімат Контроль",
@@ -129,6 +132,9 @@ export const translations = {
         "form-error-email": "Вкажіть email",
         "form-error-email-format": "Некоректний email",
         "form-error-message": "Введіть повідомлення"
+        ,
+        "toast-item-removed": "Товар видалено",
+        "toast-undo": "Скасувати"
     }
 };
 

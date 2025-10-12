@@ -1335,6 +1335,20 @@ body {
     .cart-modal__header { padding: 4px 2px 8px; }
     .cart-modal__footer { padding-top: 8px; }
 
+    /* Фиксируем нижнюю панель CTA в мобильной корзине */
+    .cart-modal__footer {
+        position: sticky;
+        bottom: 0;
+        padding: 12px 8px calc(12px + env(safe-area-inset-bottom));
+        margin-left: -8px; /* компенсируем внутренние отступы контейнера */
+        margin-right: -8px;
+        background: var(--mobile-header-bg, var(--glass-bg));
+        backdrop-filter: var(--glass-blur);
+        -webkit-backdrop-filter: var(--glass-blur);
+        border-top: 1px solid var(--mobile-header-border, var(--glass-border));
+        z-index: 1;
+    }
+
     .cart-text {
         display: none;
     }

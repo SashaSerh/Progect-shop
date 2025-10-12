@@ -612,7 +612,8 @@ document.addEventListener('keydown', (e) => {
                 fallback?.focus?.();
             }
         });
-        showUndoToast('Товар удалён', () => {
+        const msg = translations[getCurrentLang()]?.['toast-item-removed'] || 'Товар удалён';
+        showUndoToast(msg, () => {
             cart = snapshot;
             saveCart();
             const lang2 = getCurrentLang();
@@ -645,7 +646,8 @@ function showUndoToast(message, onUndo) {
     toast.textContent = message;
     const undo = document.createElement('button');
     undo.type = 'button';
-    undo.textContent = 'Отменить';
+    const lang = getCurrentLang();
+    undo.textContent = translations[lang]?.['toast-undo'] || 'Отменить';
     undo.style.marginLeft = '8px';
     undo.style.background = 'transparent';
     undo.style.border = '1px solid rgba(255,255,255,0.6)';

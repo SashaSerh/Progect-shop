@@ -370,8 +370,11 @@ function enableCartEdgeSwipeOpen() {
         if (!cartModal || cartModal.classList.contains('cart-modal--active') || cartModal.style.display === 'block') return;
         const pt = getPoint(evt);
         const vw = window.innerWidth || 360;
+        const vh = window.innerHeight || 640;
         const distRight = vw - pt.x;
         if (distRight > EDGE) return;
+        // Нижняя половина экрана — зона жеста корзины (верхняя — для меню)
+        if (pt.y < vh * 0.5) return;
         state.active = true;
         state.startX = pt.x;
         state.startY = pt.y;

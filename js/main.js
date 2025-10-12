@@ -556,6 +556,7 @@ function initMobileHeader() {
 
     // Функция открытия/закрытия мобильного меню
     let __navDrag = null;
+    let __navEdgeOpen = null; // edge-swipe open (правый край, верхняя половина)
 
     function toggleMobileNav(open = null) {
         const isOpen = open !== null ? open : !mobileNav.classList.contains('active');
@@ -845,6 +846,128 @@ function initMobileHeader() {
         if (evt.touches && evt.touches[0]) return { x: evt.touches[0].clientX, y: evt.touches[0].clientY };
         return { x: evt.clientX, y: evt.clientY };
     }
+
+    // Edge‑swipe open для мобильного меню (правый край, верхняя половина экрана)
+    function enableMobileNavEdgeSwipeOpen() {
+        if (__navEdgeOpen) return;
+        const state = {
+            active: false,
+            startX: 0,
+            startY: 0,
+            dx: 0,
+            dy: 0,
+            moved: false,
+            allow: false,
+        };
+        const EDGE = 18; // px от правого края
+        const threshold = 10; // до начала трека
+        const maxAngle = 30; // градусы (фильтрация вертикали)
+        const openFraction = 0.2; // 20% ширины
+
+        const onDown = (evt) => {
+            // Только мобильный, меню закрыто, верхняя половина экрана
+            if (window.innerWidth > 768) return;
+            if (mobileNav.classList.contains('active')) return;
+            const p = getPoint(evt);
+            const vw = window.innerWidth || 360;
+            const vh = window.innerHeight || 640;
+            const distRight = vw - p.x;
+            if (distRight > EDGE) return;
+            if (p.y > vh * 0.5) return; // нижняя половина отдана под корзину
+            state.active = true;
+            state.startX = p.x; state.startY = p.y;
+            state.dx = 0; state.dy = 0; state.moved = false; state.allow = false;
+            // подготовка панели и overlay
+            overlay.classList.add('is-visible');
+            // интерактивное появление меню справа
+            mobileNav.style.transition = 'none';
+            mobileNav.style.transform = `translateX(${vw}px)`;
+        };
+
+        const onMove = (evt) => {
+            if (!state.active) return;
+            const p = getPoint(evt);
+            state.dx = p.x - state.startX;
+            state.dy = p.y - state.startY;
+            if (!state.moved) {
+                const absDx = Math.abs(state.dx), absDy = Math.abs(state.dy);
+                if (absDx < threshold && absDy < threshold) return;
+                const angle = Math.atan2(absDy, absDx) * 180 / Math.PI;
+                if (angle > maxAngle) { // вертикальный жест — отмена
+                    return cancelInteractive();
+                }
+                // Для открытия — движение влево (dx < 0)
+                if (state.dx >= 0) {
+                    return cancelInteractive();
+                }
+                state.allow = true;
+                state.moved = true;
+            }
+            if (!state.allow) return;
+            const vw = window.innerWidth || 360;
+            const progress = Math.min(vw, Math.max(0, -state.dx));
+            mobileNav.style.transform = `translateX(${vw - progress}px)`;
+            evt.preventDefault();
+        };
+
+        const onUp = () => {
+            if (!state.active) return;
+            const vw = window.innerWidth || 360;
+            const progress = Math.min(vw, Math.max(0, -state.dx));
+            mobileNav.style.transition = '';
+            mobileNav.style.transform = '';
+            const needOpen = progress >= vw * openFraction;
+            state.active = false;
+            if (needOpen) {
+                // Доверим открытие штатной функции (фокус/aria/lock)
+                toggleMobileNav(true);
+                try { navigator.vibrate && navigator.vibrate(10); } catch(_) {}
+            } else {
+                // Откат интерактива
+                overlay.classList.remove('is-visible');
+            }
+        };
+
+        const cancelInteractive = () => {
+            if (!state.active) return;
+            state.active = false;
+            mobileNav.style.transition = '';
+            mobileNav.style.transform = '';
+            overlay.classList.remove('is-visible');
+        };
+
+        const bound = { down: onDown, move: onMove, up: onUp, cancel: cancelInteractive };
+        window.addEventListener('touchstart', bound.down, { passive: true });
+        window.addEventListener('touchmove', bound.move, { passive: false });
+        window.addEventListener('touchend', bound.up, { passive: true });
+        window.addEventListener('pointerdown', bound.down, { passive: true });
+        window.addEventListener('pointermove', bound.move, { passive: false });
+        window.addEventListener('pointerup', bound.up, { passive: true });
+        __navEdgeOpen = { bound };
+    }
+
+    function disableMobileNavEdgeSwipeOpen() {
+        if (!__navEdgeOpen) return;
+        const { bound } = __navEdgeOpen;
+        window.removeEventListener('touchstart', bound.down);
+        window.removeEventListener('touchmove', bound.move);
+        window.removeEventListener('touchend', bound.up);
+        window.removeEventListener('pointerdown', bound.down);
+        window.removeEventListener('pointermove', bound.move);
+        window.removeEventListener('pointerup', bound.up);
+        __navEdgeOpen = null;
+    }
+
+    // Автовключение edge‑swipe в мобильном режиме
+    const applyEdgeSwipe = () => {
+        if (window.innerWidth <= 768) enableMobileNavEdgeSwipeOpen();
+        else disableMobileNavEdgeSwipeOpen();
+    };
+    applyEdgeSwipe();
+    window.addEventListener('resize', () => {
+        clearTimeout(applyEdgeSwipe.__t);
+        applyEdgeSwipe.__t = setTimeout(applyEdgeSwipe, 150);
+    }, { passive: true });
 }
 
 // Функция инициализации мобильных тоглов

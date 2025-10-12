@@ -939,7 +939,7 @@ body {
 
 .products__grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 16px;
 }
 
@@ -1013,6 +1013,33 @@ body {
 
     .filter-group select {
         width: 100%;
+    }
+}
+/* Мобильная сетка: по две карточки в ряд (как на планшете) */
+@media (max-width: 640px) {
+    .services__grid,
+    .products__grid,
+    .portfolio__grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    /* Индивидуальные отступы для секций на мобильном */
+    .services__grid { gap: 12px; }
+    .products__grid { gap: 14px; }
+    .portfolio__grid { gap: 10px; }
+}
+
+/* Промежуточный брейкпоинт: 641–768px */
+@media (min-width: 641px) and (max-width: 768px) {
+    /* Для услуг и портфолио делаем 3 колонки */
+    .services__grid,
+    .portfolio__grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 16px;
+    }
+    /* Для продуктов оставляем 2, чтобы карточки были крупнее и названия не ломали переносы */
+    .products__grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px;
     }
 }
 

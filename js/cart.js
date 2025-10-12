@@ -102,18 +102,39 @@ export function openCartModal(e) {
     // Сохраняем последний фокусированный элемент для возврата после закрытия
     __cartLastFocus = document.activeElement;
 
-    // Создаём/показываем подложку под модалкой
-    let backdrop = document.querySelector('.cart-backdrop');
-    if (!backdrop) {
-        backdrop = document.createElement('div');
-        backdrop.className = 'cart-backdrop';
-        document.body.appendChild(backdrop);
+    // Мобильный режим: используем overlay мобильного меню для единого фона
+    const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
+    let backdrop;
+    if (isMobile) {
+        backdrop = document.querySelector('.mobile-nav-overlay');
+        if (!backdrop) {
+            backdrop = document.createElement('div');
+            backdrop.className = 'mobile-nav-overlay';
+            document.body.appendChild(backdrop);
+        }
+        backdrop.classList.add('is-visible');
+        // В мобильном варианте клики по overlay закрывают корзину
+        const overlayClose = () => closeCartModal();
+        backdrop.addEventListener('click', overlayClose, { once: true });
+        // Сохраняем на элементе, чтобы снять позже (вдруг понадобится)
+        backdrop.__cartOverlayClose = overlayClose;
+    } else {
+        // Десктопный режим: собственная подложка
+        backdrop = document.querySelector('.cart-backdrop');
+        if (!backdrop) {
+            backdrop = document.createElement('div');
+            backdrop.className = 'cart-backdrop';
+            document.body.appendChild(backdrop);
+        }
+        backdrop.classList.add('is-visible');
+        backdrop.addEventListener('click', closeCartModal, { once: true });
     }
-    backdrop.classList.add('is-visible');
-    backdrop.addEventListener('click', closeCartModal, { once: true });
 
     // Показываем модалку
     cartModal.style.display = 'block';
+    if (isMobile) {
+        cartModal.classList.add('cart-modal--active');
+    }
 
     // Блокируем прокрутку фона
     lockBodyScroll();
@@ -149,14 +170,26 @@ export function openCartModal(e) {
 
 export function closeCartModal() {
     const cartModal = document.querySelector('#cartModal');
-    const backdrop = document.querySelector('.cart-backdrop');
+    const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
+    const backdrop = isMobile ? document.querySelector('.mobile-nav-overlay') : document.querySelector('.cart-backdrop');
     if (cartModal) {
-        cartModal.style.display = 'none';
+        if (isMobile) {
+            cartModal.classList.remove('cart-modal--active');
+            // Дадим анимации закончиться перед скрытием
+            setTimeout(() => { cartModal.style.display = 'none'; }, 250);
+        } else {
+            cartModal.style.display = 'none';
+        }
     }
     if (backdrop) {
         backdrop.classList.remove('is-visible');
-        // удаляем элемент после анимации (если будет)
-        backdrop.parentElement && backdrop.parentElement.removeChild(backdrop);
+        // Для мобильного overlay не удаляем — его использует и меню
+        if (!isMobile) {
+            backdrop.parentElement && backdrop.parentElement.removeChild(backdrop);
+        } else if (backdrop.__cartOverlayClose) {
+            backdrop.removeEventListener('click', backdrop.__cartOverlayClose);
+            delete backdrop.__cartOverlayClose;
+        }
     }
     // Возвращаем прокрутку
     unlockBodyScroll();

@@ -1296,9 +1296,44 @@ body {
         max-height: 300px;
     }
 
+    /* Мобильная корзина: фуллскрин drawer слайдом справа с тем же фоном, что и меню */
     .cart-modal {
+        /* layout */
+        display: block; /* показывается через JS: style.display = 'block' */
+        position: fixed;
+        top: 0;
+        right: 0;
+        left: auto;
+        bottom: 0;
+        width: 100vw;
+        height: 100dvh; /* корректная высота на iOS */
+        border-radius: 0;
         padding: 16px;
+        /* фон как у мобильного меню */
+        background: var(--mobile-header-bg, var(--glass-bg));
+        backdrop-filter: var(--glass-blur);
+        -webkit-backdrop-filter: var(--glass-blur);
+        border-left: 1px solid var(--mobile-header-border, var(--glass-border));
+        box-shadow: var(--shadow);
+        /* slide-in */
+        transform: translateX(100%);
+        transition: transform 0.3s ease;
+        z-index: 2001; /* на уровне мобильного меню */
+        /* внутренняя сетка */
+        display: grid;
+        grid-template-rows: auto 1fr auto auto; /* header, items, summary, footer */
+        overflow: hidden; /* скролл внутри списка */
     }
+    .cart-modal.cart-modal--active {
+        transform: translateX(0);
+    }
+    /* список товаров скроллируется в пределах модалки */
+    .cart-modal .cart-items {
+        overflow: auto;
+        min-height: 0; /* нужно для корректной прокрутки в grid */
+    }
+    .cart-modal__header { padding: 4px 2px 8px; }
+    .cart-modal__footer { padding-top: 8px; }
 
     .cart-text {
         display: none;

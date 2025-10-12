@@ -970,6 +970,14 @@ body {
     font-weight: 600;
     margin: 12px 0;
     color: var(--nav-text-color);
+    /* Двухстрочное обрезание длинных заголовков с многоточием */
+    display: -webkit-box;
+    line-clamp: 2; /* стандартное свойство для совместимости */
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    overflow-wrap: anywhere; /* предотвращаем выход длинных слов за пределы */
 }
 
 .product-card__description {

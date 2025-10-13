@@ -838,7 +838,7 @@ body {
     background: var(--primary-color);
     backdrop-filter: blur(10px);
     border-radius: 14px;
-    padding: 16px;
+    padding: 6px;
     text-align: center;
     box-shadow: var(--shadow);
     border: none;
@@ -963,7 +963,7 @@ body {
     background: var(--primary-color);
     backdrop-filter: blur(10px);
     border-radius: 14px;
-    padding: 16px;
+    padding: 6px;
     text-align: center;
     box-shadow: var(--shadow);
     border: none;
@@ -1544,6 +1544,32 @@ textarea.form-input { resize: vertical; min-height: 120px; }
 .portfolio__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px,1fr)); gap: 16px; }
 .portfolio__item { border-radius: 16px; overflow: hidden; background: var(--glass-bg); border: 1px solid var(--glass-border); backdrop-filter: var(--glass-blur); }
 .portfolio__item img { display: block; width: 100%; height: auto; object-fit: cover; }
+/* Опциональные элементы подписи в портфолио */
+.portfolio__item-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 8px 12px 4px;
+    color: var(--nav-text-color);
+    display: -webkit-box;
+    line-clamp: 2;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    overflow-wrap: anywhere;
+}
+.portfolio__item-description {
+    font-size: 14px;
+    margin: 0 12px 12px;
+    color: var(--nav-text-color);
+    display: -webkit-box;
+    line-clamp: 3;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    overflow-wrap: anywhere;
+}
 
 @media (max-width: 768px) {
     .contacts__title {

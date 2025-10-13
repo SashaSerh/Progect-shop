@@ -496,6 +496,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             // DEBUG: console.warn('SW registration failed', e);
         }
     }
+
+    // Обновляем базовый JSON-LD WebSite/Organization (url + SearchAction) после загрузки
+    try { updateBaseJsonLd(); } catch {}
 });
 
 // Функция для изменения цветовой схемы логотипа
@@ -655,6 +658,17 @@ function renderProductDetail(productId) {
     }
     // Set document title
     try { document.title = `${product.name?.[lang] || ''} — ${translations?.[lang]?.['site-title'] || ''}`; } catch {}
+    // Update meta/OG/Twitter for product page
+    try {
+        const title = document.title;
+        const desc = product.description?.[lang] || product.description?.ru || 'Климатическое оборудование и услуги';
+        const url = location.href;
+        const image = images[0] || '/icons/icon-icon512x512.png';
+        setOgTitle(title); setTwitterTitle(title);
+        setOgDescription(desc); setTwitterDescription(desc);
+        setOgUrl(url);
+        setOgImage(image); setTwitterImage(image);
+    } catch {}
 
     // JSON-LD structured data (Product/Service)
         try {
@@ -772,6 +786,8 @@ function setupHashRouting(initialLang) {
             // Restore title via i18n
             const lang = getLangSafe();
             if (typeof switchLanguage === 'function') switchLanguage(lang);
+            // Восстанавливаем дефолтные мета/OG
+            restoreDefaultMetaOg();
         }
     }
     window.addEventListener('hashchange', handleRoute);
@@ -779,7 +795,12 @@ function setupHashRouting(initialLang) {
     window.addEventListener('languagechange', () => {
         const hash = location.hash || '';
         const m = hash.match(/^#product-(.+)$/);
-        if (m) renderProductDetail(m[1]);
+        if (m) {
+            renderProductDetail(m[1]);
+        } else {
+            // обновим OG title под текущий заголовок сайта
+            try { setOgTitle(document.title); setTwitterTitle(document.title); } catch {}
+        }
     });
     // initial route
     handleRoute();
@@ -826,6 +847,55 @@ function showUpdateToast() {
     toast.appendChild(btn);
     toast.appendChild(close);
     host.appendChild(toast);
+}
+
+// ====== SEO/OG/Twitter helpers ======
+function upsertMeta(attr, name, content) {
+    let el = document.head.querySelector(`meta[${attr}="${name}"]`);
+    if (!el) { el = document.createElement('meta'); el.setAttribute(attr, name); document.head.appendChild(el); }
+    el.setAttribute('content', content);
+}
+function setOgTitle(v){ upsertMeta('property','og:title', v); }
+function setOgDescription(v){ upsertMeta('property','og:description', v); }
+function setOgUrl(v){ upsertMeta('property','og:url', v); }
+function setOgImage(v){ upsertMeta('property','og:image', v); }
+function setTwitterTitle(v){ upsertMeta('name','twitter:title', v); }
+function setTwitterDescription(v){ upsertMeta('name','twitter:description', v); }
+function setTwitterImage(v){ upsertMeta('name','twitter:image', v); }
+function restoreDefaultMetaOg(){
+    const lang = getLangSafe();
+    const title = translations?.[lang]?.['site-title'] || 'ClimaTech';
+    const desc = 'Продажа, монтаж и обслуживание климатической техники: кондиционеры, вентиляция, рекуператоры. Консультации и быстрый монтаж.';
+    setOgTitle(title); setTwitterTitle(title);
+    setOgDescription(desc); setTwitterDescription(desc);
+    setOgUrl(location.origin + location.pathname);
+}
+
+// ====== Base JSON-LD (Organization/WebSite) enrichment ======
+function updateBaseJsonLd(){
+    const url = location.origin + '/';
+    const org = document.getElementById('org-jsonld');
+    if (org) {
+        try {
+            const data = JSON.parse(org.textContent || '{}');
+            data.url = url;
+            data.logo = '/icons/icon-icon512x512.png';
+            org.textContent = JSON.stringify(data);
+        } catch {}
+    }
+    const site = document.getElementById('website-jsonld');
+    if (site) {
+        try {
+            const data = JSON.parse(site.textContent || '{}');
+            data.url = url;
+            data.potentialAction = {
+                '@type': 'SearchAction',
+                target: `${url}?q={search_term_string}`,
+                'query-input': 'required name=search_term_string'
+            };
+            site.textContent = JSON.stringify(data);
+        } catch {}
+    }
 }
 
 // Helpers: image preloader for product-detail

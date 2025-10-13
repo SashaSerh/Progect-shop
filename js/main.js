@@ -138,6 +138,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     const portfolioBehavior = portfolioSection?.getAttribute('data-portfolio-behavior') || 'lightbox';
     if (portfolioGrid && Array.isArray(contentConfig.portfolio)) {
         portfolioGrid.innerHTML = '';
+        // helper to build responsive srcset from placehold.co style URLs like 480x320
+        const buildSrcset = (src) => {
+            try {
+                // Expect pattern .../<w>x<h>
+                const m = src.match(/(\d+)x(\d+)/);
+                if (!m) return '';
+                const w = parseInt(m[1], 10), h = parseInt(m[2], 10);
+                const ratio = h / w;
+                const widths = [320, 480, 640, 960];
+                return widths.map(W => `${src.replace(/(\d+)x(\d+)/, `${W}x${Math.round(W*ratio)}`)} ${W}w`).join(', ');
+            } catch { return ''; }
+        };
+        const defaultSizes = '(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 320px';
+
         contentConfig.portfolio.forEach(item => {
             const fig = document.createElement('figure');
             fig.className = 'portfolio__item';
@@ -146,6 +160,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             img.src = item.src;
             img.alt = item.alt || '';
             img.loading = 'lazy';
+            img.decoding = 'async';
+            img.sizes = defaultSizes;
+            const srcset = buildSrcset(item.src);
+            if (srcset) img.srcset = srcset;
             if (portfolioBehavior === 'link' && item.url) {
                 const a = document.createElement('a');
                 a.href = item.url;

@@ -135,7 +135,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Desktop: сворачиваем верхнюю полосу, оставляя .header__main-bar
     initDesktopHeaderCondense();
 
-    // Рендер портфолио по конфигу (поддержка заголовков/описаний)
+    // Рендер портфолио по конфигу (поддержка заголовков/описаний, локализация ru/uk)
     const portfolioGrid = document.querySelector('.portfolio__grid');
     if (portfolioGrid && Array.isArray(contentConfig.portfolio)) {
         portfolioGrid.innerHTML = '';
@@ -149,18 +149,26 @@ document.addEventListener('DOMContentLoaded', async () => {
             img.loading = 'lazy';
             fig.appendChild(img);
             // Подписи при наличии
-            if (item.title || item.description) {
+            const pickLocalized = (val) => {
+                if (!val) return '';
+                if (typeof val === 'string') return val; // backward compat
+                // пытаемся взять по текущему языку, потом ru, затем первый доступный
+                return val[savedLanguage] || val['ru'] || Object.values(val).find(Boolean) || '';
+            };
+            const titleText = pickLocalized(item.title);
+            const descText = pickLocalized(item.description);
+            if (titleText || descText) {
                 const fc = document.createElement('figcaption');
-                if (item.title) {
+                if (titleText) {
                     const t = document.createElement('div');
                     t.className = 'portfolio__item-title';
-                    t.textContent = item.title;
+                    t.textContent = titleText;
                     fc.appendChild(t);
                 }
-                if (item.description) {
+                if (descText) {
                     const d = document.createElement('div');
                     d.className = 'portfolio__item-description';
-                    d.textContent = item.description;
+                    d.textContent = descText;
                     fc.appendChild(d);
                 }
                 fig.appendChild(fc);

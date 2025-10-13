@@ -112,15 +112,18 @@ export function renderProducts(lang, translations, filteredProducts = products) 
     const productsGrid = document.querySelector('.products__grid');
     if (!productsGrid) return;
     productsGrid.innerHTML = '';
-    filteredProducts.forEach(product => {
+    filteredProducts.forEach((product, idx) => {
         const productCard = document.createElement('div');
         productCard.classList.add('product-card');
         productCard.dataset.id = String(product.id);
+        const isPrimary = idx === 0; // приблизительно LCP-изображение
+        const loadingAttr = isPrimary ? 'eager' : 'lazy';
+        const fetchPrio = isPrimary ? 'high' : 'low';
         productCard.innerHTML = `
             <img src="${product.image}"
                  alt="${product.name[lang]}"
-                 class="product-card__image"
-                 loading="lazy" decoding="async" fetchpriority="low"
+                 class="product-card__image lqip"
+                 loading="${loadingAttr}" decoding="async" fetchpriority="${fetchPrio}"
                  srcset="${product.image.replace('600','320')} 320w, ${product.image.replace('600','480')} 480w, ${product.image} 600w, ${product.images?.[0] || product.image} 1200w"
                  sizes="(max-width: 480px) 45vw, (max-width: 768px) 30vw, 240px"
                  onerror="this.src='https://placehold.co/150x150/blue/white?text=Image+Not+Found'">
@@ -131,6 +134,15 @@ export function renderProducts(lang, translations, filteredProducts = products) 
             <a class="product-card__more" href="#product-${product.id}" data-i18n="details">${translations[lang]['details'] || 'Подробнее'}</a>
         `;
         productsGrid.appendChild(productCard);
+        // LQIP: снимаем блюр после загрузки
+        const imgEl = productCard.querySelector('img.product-card__image');
+        if (imgEl) {
+            const markLoaded = () => imgEl.classList.add('lqip--loaded');
+            imgEl.addEventListener('load', markLoaded, { once: true });
+            if (imgEl.complete && imgEl.naturalWidth > 0) {
+                markLoaded();
+            }
+        }
     });
 }
 

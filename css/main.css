@@ -1001,6 +1001,16 @@ body {
     height: auto;
     border-radius: 10px;
 }
+    /* LQIP blur for product images */
+    .product-card__image.lqip {
+        filter: blur(12px);
+        transform: scale(1.02);
+        transition: filter .35s ease, transform .35s ease;
+    }
+    .product-card__image.lqip.lqip--loaded {
+        filter: blur(0);
+        transform: none;
+    }
 
 .product-card__title {
     font-size: 17px;

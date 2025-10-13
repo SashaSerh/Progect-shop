@@ -1,6 +1,6 @@
 {
-    "name": "Климат Контроль",
-    "short_name": "Climat",
+    "name": "ClimaTech",
+    "short_name": "ClimaTech",
     "description": "Монтаж и продажа кондиционеров и рекуператоров",
     "start_url": "/",
     "display": "standalone",

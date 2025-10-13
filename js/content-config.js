@@ -1,8 +1,8 @@
 // Контент и контакты для быстрой правки без участия верстки
 export const contentConfig = {
   business: {
-    name: 'Климат Контроль',
-    legalName: 'ИП Климат Контроль',
+    name: 'ClimaTech',
+    legalName: 'ИП ClimaTech',
     description: 'Монтаж и обслуживание систем вентиляции и кондиционирования',
     areaServed: ['Киев', 'Киевская область'],
     openingHours: ['Mo-Fr 09:00-18:00', 'Sa 10:00-16:00'],

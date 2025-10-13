@@ -1,7 +1,7 @@
 export const translations = {
     ru: {
-        "site-title": "Климат Контроль",
-        "header-title": "Климат Контроль",
+        "site-title": "ClimaTech",
+        "header-title": "ClimaTech",
         "nav-home": "Главная",
         "nav-services": "Услуги",
         "nav-products": "Товары",
@@ -33,8 +33,8 @@ export const translations = {
         "form-email": "Ваш email",
         "form-message": "Ваше сообщение",
         "form-submit": "Отправить сообщение",
-        "footer-title": "Климат Контроль",
-        "footer-copyright": "© 2025 Климат Контроль. Все права защищены.",
+    "footer-title": "ClimaTech",
+    "footer-copyright": "© 2025 ClimaTech. Все права защищены.",
         "cart-items": "0 товаров",
         "cart-total": "Итого: $0.00",
         "cart-clear": "Очистить корзину",
@@ -91,16 +91,19 @@ export const translations = {
         "details": "Подробнее"
     },
     uk: {
-        "site-title": "Клімат Контроль",
-        "header-title": "Клімат Контроль",
-        "nav-home": "Головна",
-        "nav-services": "Послуги",
+        "site-title": "ClimaTech",
+        "header-title": "ClimaTech",
+        "site-title": "ClimaTech",
+        "header-title": "ClimaTech",
+        "footer-title": "ClimaTech",
         "nav-products": "Товари",
         "nav-contacts": "Контакти",
         "hero-title": "Комфортний клімат у вашому домі",
         "hero-subtitle": "Професійний монтаж та продаж кондиціонерів і рекуператорів.",
         "hero-cta": "Переглянути товари",
-        "services-title": "Наші послуги",
+        "site-title": "ClimaTech",
+        "header-title": "ClimaTech",
+        "footer-title": "ClimaTech",
         "service-ac-install-title": "Монтаж кондиціонерів",
         "service-ac-install-desc": "Професійна установка будь-якої складності.",
         "service-recuperator-install-title": "Монтаж рекуператорів",
@@ -119,13 +122,13 @@ export const translations = {
         "contacts-title": "Зв’яжіться з нами",
         "contacts-email": "Email: info@climat-control.com",
         "contacts-phone": "Телефон: +380-800-555-1234",
-        "contacts-address": "Адреса: вул. Кліматична, 123, Київ",
+    "contacts-address": "Адреса: вул. Кліматична, 123, Київ",
         "form-name": "Ваше ім’я",
         "form-email": "Ваш email",
         "form-message": "Ваше повідомлення",
         "form-submit": "Надіслати повідомлення",
-        "footer-title": "Клімат Контроль",
-        "footer-copyright": "© 2025 Клімат Контроль. Усі права захищені.",
+    "footer-title": "ClimaTech",
+    "footer-copyright": "© 2025 ClimaTech. Усі права захищені.",
         "cart-items": "0 товарів",
         "cart-total": "Разом: $0.00",
         "cart-clear": "Очистити кошик",
@@ -204,7 +207,7 @@ export function switchLanguage(lang) {
         }
     });
 
-    document.title = translations[lang]['site-title'] || 'Климат Контроль';
+    document.title = translations[lang]['site-title'] || 'ClimaTech';
     localStorage.setItem('language', lang);
 
     // Отправляем кастомное событие для синхронизации UI

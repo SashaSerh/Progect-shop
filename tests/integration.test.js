@@ -138,14 +138,14 @@ describe('Integration: bootstrap и ключевые флоу', () => {
     // Проверим, что header вставлен и переключатели на месте
     expect(document.querySelector('.theme-toggle')).toBeTruthy();
     // Язык по умолчанию ru — должен выставиться заголовок
-    expect(document.title).toBe('Климат Контроль');
+  expect(document.title).toBe('ClimaTech');
   });
 
   it('Переключение языка на uk обновляет тексты', async () => {
     const ukBtn = document.querySelector('.language-switcher[data-lang="uk"]');
     ukBtn.click();
     await new Promise(r => setTimeout(r, 10));
-    expect(document.title).toBe('Клімат Контроль');
+  expect(document.title).toBe('ClimaTech');
     // placeholder поиска должен обновиться
     const search = document.getElementById('site-search');
     expect(search.getAttribute('placeholder')).toBe('Пошук по сайту');

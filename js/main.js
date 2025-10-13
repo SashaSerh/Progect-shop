@@ -680,6 +680,7 @@ function renderProductDetail(productId) {
         setOgDescription(desc); setTwitterDescription(desc);
         setOgUrl(url);
         setOgImage(image); setTwitterImage(image);
+        setMetaDescription(desc);
     } catch {}
 
     // JSON-LD structured data (Product/Service)
@@ -874,6 +875,7 @@ function setOgImage(v){ upsertMeta('property','og:image', v); }
 function setTwitterTitle(v){ upsertMeta('name','twitter:title', v); }
 function setTwitterDescription(v){ upsertMeta('name','twitter:description', v); }
 function setTwitterImage(v){ upsertMeta('name','twitter:image', v); }
+function setMetaDescription(v){ upsertMeta('name','description', v); }
 function restoreDefaultMetaOg(){
     const lang = getLangSafe();
     const title = translations?.[lang]?.['site-title'] || 'ClimaTech';
@@ -881,6 +883,7 @@ function restoreDefaultMetaOg(){
     setOgTitle(title); setTwitterTitle(title);
     setOgDescription(desc); setTwitterDescription(desc);
     setOgUrl(location.origin + location.pathname);
+    setMetaDescription(desc);
 }
 
 // ====== Base JSON-LD (Organization/WebSite) enrichment ======

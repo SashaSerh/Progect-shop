@@ -254,6 +254,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     // Инициализация мобильного заголовка
     initMobileHeader();
+    // Инициализация десктопного поведения хедера (sticky + сжатие верхней полосы)
+    initDesktopHeaderCondense();
     
     // Привязываем обработчики тем ПОСЛЕ инициализации мобильного хедера
     bindThemeEvents();
@@ -400,6 +402,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const productId = e.target.dataset.id;
                 addToCart(productId, products);
                 updateCartUI(translations, savedLanguage);
+            } else if (e.target.classList.contains('service-card__title')) {
+                const card = e.target.closest('.service-card');
+                const btn = card?.querySelector('.service-card__button');
+                const id = btn?.dataset.id;
+                if (id) {
+                    location.hash = `#product-${id}`;
+                }
             }
         });
     }
@@ -530,17 +539,29 @@ function renderProductDetail(productId) {
             }
             if (bcCategory) {
                 const cat = product.category || 'all';
-                const categoryLabel = (cat === 'ac') ? (translations?.[lang]?.['filter-ac'] || 'Кондиционеры') : (cat === 'recuperator' ? (translations?.[lang]?.['filter-recuperator'] || 'Рекуператоры') : (translations?.[lang]?.['filter-all'] || 'Все'));
-                bcCategory.textContent = categoryLabel;
-                bcCategory.setAttribute('href', '#products');
-                bcCategory.onclick = (e) => {
-                    e.preventDefault();
-                    location.hash = '';
-                    const sel = document.getElementById('category');
-                    if (sel) { sel.value = (cat === 'service') ? 'all' : cat; }
-                    if (typeof filterProducts === 'function') filterProducts(lang, translations);
-                    const el = document.getElementById('products'); if (el) window.scrollTo({ top: el.offsetTop - 60, behavior: 'smooth' });
-                };
+                if (cat === 'service') {
+                    const label = translations?.[lang]?.['services-title'] || 'Наши услуги';
+                    bcCategory.textContent = label;
+                    bcCategory.setAttribute('href', '#services');
+                    bcCategory.onclick = (e) => {
+                        e.preventDefault();
+                        location.hash = '';
+                        const el = document.getElementById('services');
+                        if (el) window.scrollTo({ top: el.offsetTop - 60, behavior: 'smooth' });
+                    };
+                } else {
+                    const categoryLabel = (cat === 'ac') ? (translations?.[lang]?.['filter-ac'] || 'Кондиционеры') : (cat === 'recuperator' ? (translations?.[lang]?.['filter-recuperator'] || 'Рекуператоры') : (translations?.[lang]?.['filter-all'] || 'Все'));
+                    bcCategory.textContent = categoryLabel;
+                    bcCategory.setAttribute('href', '#products');
+                    bcCategory.onclick = (e) => {
+                        e.preventDefault();
+                        location.hash = '';
+                        const sel = document.getElementById('category');
+                        if (sel) { sel.value = cat; }
+                        if (typeof filterProducts === 'function') filterProducts(lang, translations);
+                        const el = document.getElementById('products'); if (el) window.scrollTo({ top: el.offsetTop - 60, behavior: 'smooth' });
+                    };
+                }
             }
             if (bcCurrent) {
                 bcCurrent.textContent = product.name?.[lang] || product.name?.ru || '';
@@ -621,12 +642,26 @@ function renderProductDetail(productId) {
     // Set document title
     try { document.title = `${product.name?.[lang] || ''} — ${translations?.[lang]?.['site-title'] || ''}`; } catch {}
 
-        // JSON-LD structured data (Product)
+    // JSON-LD structured data (Product/Service)
         try {
             const scriptId = 'product-jsonld';
             const old = document.getElementById(scriptId);
             if (old) old.remove();
-            const ld = {
+            const isService = (product.category === 'service');
+            const ld = isService ? {
+                '@context': 'https://schema.org',
+                '@type': 'Service',
+                name: product.name?.[lang] || product.name?.ru || '',
+                brand: product.brand ? { '@type': 'Brand', name: product.brand } : undefined,
+                description: product.description?.[lang] || product.description?.ru || '',
+                image: images,
+                offers: {
+                    '@type': 'Offer',
+                    priceCurrency: 'UAH',
+                    price: String(product.price),
+                    availability: product.inStock ? 'https://schema.org/InStock' : 'https://schema.org/PreOrder'
+                }
+            } : {
                 '@context': 'https://schema.org',
                 '@type': 'Product',
                 name: product.name?.[lang] || product.name?.ru || '',
@@ -1460,9 +1495,13 @@ window.initMobileToggles = initMobileToggles;
 function initDesktopHeaderCondense() {
     const header = document.querySelector('.header');
     if (!header) return;
+    const topBar = header.querySelector('.header__top-bar');
+    const container = header.querySelector('.header__container');
     let ticking = false;
     let fixedApplied = false;
     let spacer = null;
+    let condensed = false;
+    let lastSpacerHeight = 0;
 
     // Проверка/починка sticky: если родитель создаёт контекст (overflow/transform), включаем фиксированный режим
     const ensureStickyOrFixed = () => {
@@ -1476,44 +1515,100 @@ function initDesktopHeaderCondense() {
             }
             return;
         }
-        // Гарантируем фиксацию на десктопе (в т.ч. для Safari/сложных контейнеров): включаем fixed-режим
-        let breaksSticky = true;
-        if (breaksSticky && !fixedApplied) {
+        // Определяем, не ломается ли sticky из-за трансформаций/фильтров/контекста у предков
+        const breaksSticky = (() => {
+            let node = header.parentElement;
+            while (node && node !== document.body) {
+                const cs = getComputedStyle(node);
+                const hasTransform = cs.transform !== 'none' || cs.perspective !== 'none';
+                const hasFilter = (cs.filter && cs.filter !== 'none') || (cs.backdropFilter && cs.backdropFilter !== 'none');
+                // Некоторые браузеры ломают sticky при contain: paint/layout
+                const hasContain = cs.contain && cs.contain.includes('paint');
+                if (hasTransform || hasFilter || hasContain) return true;
+                node = node.parentElement;
+            }
+            return false;
+        })();
+        // Дополнительная проверка: работает ли sticky фактически при скролле
+        let stickyIneffective = false;
+        try {
+            const y = window.pageYOffset || document.documentElement.scrollTop || 0;
+            if (y > 10) {
+                const top = header.getBoundingClientRect().top;
+                // Если sticky работает — top ≈ 0, иначе элемент «уезжает» вверх (< 0)
+                stickyIneffective = Math.abs(top) > 1; 
+            }
+        } catch {}
+
+        const needFixed = breaksSticky || stickyIneffective;
+
+        if (needFixed && !fixedApplied) {
             // Добавляем spacer, равный текущей высоте header, чтобы не прыгал контент
             spacer = document.createElement('div');
             spacer.className = 'header-spacer';
-            spacer.style.height = header.offsetHeight + 'px';
+            lastSpacerHeight = header.offsetHeight;
+            spacer.style.height = lastSpacerHeight + 'px';
             header.classList.add('header--fixed');
             header.parentNode.insertBefore(spacer, header.nextSibling);
             fixedApplied = true;
-        } else if (!breaksSticky && fixedApplied) {
+        } else if (!needFixed && fixedApplied) {
             header.classList.remove('header--fixed');
             if (spacer && spacer.parentNode) spacer.parentNode.removeChild(spacer);
             spacer = null;
             fixedApplied = false;
         } else if (fixedApplied && spacer) {
             // обновляем высоту спейсера при ресайзе
-            spacer.style.height = header.offsetHeight + 'px';
+            lastSpacerHeight = header.offsetHeight;
+            spacer.style.height = lastSpacerHeight + 'px';
         }
     };
+    // Применяем/снимаем fixed‑fallback один раз при старте и при ресайзе (не на каждом скролле, чтобы избежать миганий)
+    const applyFixedDecision = () => {
+        if (ticking) return;
+        ticking = true;
+        requestAnimationFrame(() => { ensureStickyOrFixed(); ticking = false; });
+    };
+    // Устанавливаем css-переменную высоты верхней полосы для анимации padding-top контейнера
+    const updateTopBarHeightVar = () => {
+        if (!topBar || !container) return;
+        const h = topBar.offsetHeight || 0;
+        container.style.setProperty('--topbar-h', h + 'px');
+    };
+    // Гладкое скрытие верхней полосы с гистерезисом (чтобы не дёргалось на границе)
+    const ADD_AT = 48;   // добавить header--condensed при скролле ниже этой высоты
+    const REMOVE_AT = 24; // снять при прокрутке вверх выше этой высоты
     const onScroll = () => {
         if (ticking) return;
         ticking = true;
         requestAnimationFrame(() => {
             const isDesktop = window.innerWidth >= 769;
-            if (!isDesktop) {
-                header.classList.remove('header--condensed');
-                ticking = false;
-                return;
-            }
+            if (!isDesktop) { header.classList.remove('header--condensed'); condensed = false; ticking = false; return; }
             const y = window.pageYOffset || document.documentElement.scrollTop || 0;
-            if (y > 10) header.classList.add('header--condensed');
-            else header.classList.remove('header--condensed');
+            if (!condensed && y > ADD_AT) { header.classList.add('header--condensed'); condensed = true; }
+            else if (condensed && y < REMOVE_AT) { header.classList.remove('header--condensed'); condensed = false; }
+
+            // Однократная проверка: если sticky не удерживает header (top заметно уходит от 0), включаем fixed‑fallback
+            if (!fixedApplied && y > ADD_AT) {
+                const topNow = header.getBoundingClientRect().top;
+                if (Math.abs(topNow) > 1) {
+                    ensureStickyOrFixed(); // применит fixed при необходимости
+                }
+            }
+
+            // Если включён fixed‑fallback, поддерживаем актуальную высоту спейсера при смене высоты хедера
+            if (fixedApplied && spacer) {
+                const h = header.offsetHeight;
+                if (h !== lastSpacerHeight) {
+                    lastSpacerHeight = h;
+                    spacer.style.height = h + 'px';
+                }
+            }
             ticking = false;
         });
     };
-    window.addEventListener('scroll', () => { ensureStickyOrFixed(); onScroll(); }, { passive: true });
-    window.addEventListener('resize', () => { ensureStickyOrFixed(); onScroll(); }, { passive: true });
-    ensureStickyOrFixed();
+    window.addEventListener('scroll', () => { updateTopBarHeightVar(); onScroll(); }, { passive: true });
+    window.addEventListener('resize', () => { updateTopBarHeightVar(); applyFixedDecision(); }, { passive: true });
+    updateTopBarHeightVar();
+    applyFixedDecision();
     onScroll();
 }

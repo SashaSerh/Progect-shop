@@ -122,6 +122,7 @@ export function renderProducts(lang, translations, filteredProducts = products) 
             <p class="product-card__description">${product.description[lang]}</p>
             <p class="product-card__price">${product.price.toLocaleString('uk-UA', { minimumFractionDigits: 2 })} грн</p>
             <button class="product-card__button" data-id="${product.id}" data-i18n="service-order">${translations[lang]['service-order']}</button>
+            <a class="product-card__more" href="#product-${product.id}" data-i18n="details">${translations[lang]['details'] || 'Подробнее'}</a>
         `;
         productsGrid.appendChild(productCard);
     });

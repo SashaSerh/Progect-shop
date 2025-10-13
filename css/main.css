@@ -113,6 +113,15 @@ body {
     top: 0;
     z-index: 1600; /* выше overlay (1500), но ниже меню (2000) */
     border-bottom: 0.5px solid rgba(255, 255, 255, 0.2);
+    position: sticky;
+    top: 0;
+}
+
+/* Нужен контекст позиционирования для абсолютной верхней полосы в condensed */
+.header__container {
+    position: relative;
+    transition: padding-top 200ms ease;
+    will-change: padding-top;
 }
 
 .header__container {
@@ -236,28 +245,25 @@ body {
 @media (min-width: 769px) {
     /* Делаем липким весь header, чтобы основная панель всегда была в зоне видимости */
     .header { position: sticky; top: 0; }
+    /* Всегда абсолютная верхняя полоса внутри контейнера */
     .header__top-bar { 
-        transition: transform 200ms ease, opacity 200ms ease, height 200ms ease, margin 200ms ease;
-        will-change: transform; 
+        position: absolute; top: 0; left: 0; right: 0; 
+        margin: 0; 
+        will-change: transform, opacity; 
+        transition: transform 220ms ease, opacity 220ms ease; 
+        transform: translateY(0); opacity: 1; pointer-events: auto;
     }
-    .header--condensed .header__top-bar { 
-        height: 0;
-        margin-bottom: 0;
-        overflow: hidden;
-        transform: translateY(-100%);
-        opacity: 0;
-        pointer-events: none;
-    }
-    /* Без тени и без фона у основной панели в светлой теме при закреплении */
-    .light-theme .header--condensed .header__main-bar {
-        box-shadow: none;
-        background: transparent;
-    }
+    .header--condensed .header__top-bar { transform: translateY(-100%); opacity: 0; pointer-events: none; }
 
-    .header__main-bar {
-        position: static; /* основная панель внутри липкого header */
-        width: 100%;
-    }
+    /* Контейнер поднимает/опускает нижнюю полосу за счёт padding-top = высоте верхней */
+    .header:not(.header--condensed) .header__container { padding-top: var(--topbar-h, 0px); }
+    .header--condensed .header__container { padding-top: 0; }
+    /* Убираем верхний внутренний отступ у шапки, чтобы нижняя полоса прилипала к самому верху */
+    .header--condensed { padding-top: 0; padding-bottom: 12px; }
+    /* Поднимаем основную полосу над абсолютной верхней, исключая перекрытия */
+    .header--condensed .header__main-bar { position: relative; z-index: 1; }
+
+    .header__main-bar { position: static; width: 100%; }
 
     /* Фиксированный fallback, если sticky не срабатывает в окружении */
     .header--fixed {
@@ -894,6 +900,21 @@ body {
 .service-card__button:hover {
     background: var(--background-color-secondary-hover);
 }
+
+.service-card__more,
+.product-card__more {
+    display: inline-block;
+    margin-top: 8px;
+    color: var(--accent-color);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 14px;
+    padding: 6px 8px;
+    border-radius: 10px;
+    transition: background-color .2s ease, color .2s ease;
+}
+.service-card__more:hover,
+.product-card__more:hover { background: var(--button-bg); }
 
 @media (max-width: 768px) {
     .services__title {

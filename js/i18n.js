@@ -87,6 +87,8 @@ export const translations = {
         "spec-noise": "Уровень шума",
         "spec-energy": "Энергоэффективность",
         "spec-dimensions": "Габариты"
+        ,
+        "details": "Подробнее"
     },
     uk: {
         "site-title": "Клімат Контроль",
@@ -175,6 +177,8 @@ export const translations = {
         "spec-noise": "Рівень шуму",
         "spec-energy": "Енергоефективність",
         "spec-dimensions": "Габарити"
+        ,
+        "details": "Докладніше"
     }
 };
 

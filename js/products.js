@@ -112,13 +112,15 @@ export function renderProducts(lang, translations, filteredProducts = products) 
     const productsGrid = document.querySelector('.products__grid');
     if (!productsGrid) return;
     productsGrid.innerHTML = '';
+    const elevated = { set: false };
+    const imgs = [];
     filteredProducts.forEach((product, idx) => {
         const productCard = document.createElement('div');
         productCard.classList.add('product-card');
         productCard.dataset.id = String(product.id);
-        const isPrimary = idx === 0; // приблизительно LCP-изображение
-        const loadingAttr = isPrimary ? 'eager' : 'lazy';
-        const fetchPrio = isPrimary ? 'high' : 'low';
+    const isPrimary = idx === 0; // fallback: первый элемент
+    const loadingAttr = isPrimary ? 'eager' : 'lazy';
+    const fetchPrio = isPrimary ? 'high' : 'low';
         productCard.innerHTML = `
             <img src="${product.image}"
                  alt="${product.name[lang]}"
@@ -142,8 +144,30 @@ export function renderProducts(lang, translations, filteredProducts = products) 
             if (imgEl.complete && imgEl.naturalWidth > 0) {
                 markLoaded();
             }
+            imgs.push(imgEl);
         }
     });
+
+    // Elevate the first actually visible product image via IntersectionObserver
+    try {
+        if ('IntersectionObserver' in window) {
+            const io = new IntersectionObserver((entries, obs) => {
+                for (const entry of entries) {
+                    if (entry.isIntersecting && !elevated.set) {
+                        const el = entry.target;
+                        el.setAttribute('fetchpriority','high');
+                        // Attempt to hint eager; may be ignored if already fetching
+                        el.setAttribute('loading','eager');
+                        elevated.set = true;
+                        // We can stop observing once selected
+                        imgs.forEach(img => io.unobserve(img));
+                        break;
+                    }
+                }
+            }, { root: null, rootMargin: '0px', threshold: 0.25 });
+            imgs.forEach(img => io.observe(img));
+        }
+    } catch {}
 }
 
 export function filterProducts(lang, translations) {

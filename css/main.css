@@ -1011,6 +1011,16 @@ body {
         filter: blur(0);
         transform: none;
     }
+    /* LQIP for product-detail main image */
+    .product-detail__image.lqip {
+        filter: blur(14px);
+        transform: scale(1.015);
+        transition: filter .35s ease, transform .35s ease;
+    }
+    .product-detail__image.lqip.lqip--loaded {
+        filter: blur(0);
+        transform: none;
+    }
 
 .product-card__title {
     font-size: 17px;

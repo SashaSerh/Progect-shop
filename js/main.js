@@ -609,9 +609,10 @@ function renderProductDetail(productId) {
     // Main image and thumbs
     const imgEl = section.querySelector('.product-detail__image');
     if (imgEl) {
-        imgEl.setAttribute('loading','lazy');
+        imgEl.classList.add('lqip');
+        imgEl.setAttribute('loading','eager');
         imgEl.setAttribute('decoding','async');
-        imgEl.setAttribute('fetchpriority','low');
+        imgEl.setAttribute('fetchpriority','high');
         // sizes hint: image container roughly half of content area on desktop, full width on mobile
         imgEl.setAttribute('sizes','(max-width: 640px) 90vw, (max-width: 1024px) 50vw, 600px');
     }
@@ -968,6 +969,7 @@ function loadLargeImage(imgEl, src, alt) {
                 imgEl.style.transition = 'opacity .25s ease';
                 imgEl.style.opacity = '1';
                 if (spinner) spinner.style.display = 'none';
+                imgEl.classList.add('lqip--loaded');
             });
         });
     };

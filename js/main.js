@@ -517,6 +517,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Обновляем базовый JSON-LD WebSite/Organization (url + SearchAction) после загрузки
     try { updateBaseJsonLd(); } catch {}
+
+    // Hero LQIP handling
+    const heroImg = document.querySelector('.hero__image.lqip');
+    if (heroImg) {
+        const mark = () => heroImg.classList.add('lqip--loaded');
+        heroImg.addEventListener('load', mark, { once: true });
+        if (heroImg.complete && heroImg.naturalWidth > 0) mark();
+    }
 });
 
 // Функция для изменения цветовой схемы логотипа

@@ -86,6 +86,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         loadComponent('hero-container', 'components/hero.html'),
         loadComponent('services-container', 'components/services.html'),
         loadComponent('products-container', 'components/products.html'),
+        // product-detail загружается по маршруту, но подключаем шаблон заранее (скрыт)
+        loadComponent('product-detail-container', 'components/product-detail.html').catch(() => {}),
         loadComponent('contacts-container', 'components/contacts.html'),
         loadComponent('portfolio-container', 'components/portfolio.html'),
         loadComponent('footer-container', 'components/footer.html'),
@@ -107,7 +109,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (closeModalButton) {
         closeModalButton.addEventListener('click', closeCartModal);
     }
-
     if (cartModal) {
         cartModal.addEventListener('click', (e) => {
             if (e.target === cartModal) {
@@ -116,47 +117,54 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
+    // Инициализация языка и первичный рендер
     let savedLanguage = localStorage.getItem('language') || 'ru';
-    if (!['ru', 'uk'].includes(savedLanguage)) {
+    if (!['ru','uk'].includes(savedLanguage)) {
         savedLanguage = 'ru';
         localStorage.setItem('language', savedLanguage);
     }
-
-    initTheme();
-    switchLanguage(savedLanguage);
-    renderProducts(savedLanguage, translations);
-    if (typeof initLanguageSwitchers === 'function') {
-        initLanguageSwitchers();
+    // Применяем переводы (обновит document.title и плейсхолдеры)
+    if (typeof switchLanguage === 'function') {
+        switchLanguage(savedLanguage);
     }
-    updateCartUI(translations, savedLanguage);
-    initNavigation();
-    initMarketing();
-
-    // Desktop: сворачиваем верхнюю полосу, оставляя .header__main-bar
-    initDesktopHeaderCondense();
+    // Рендерим товары сразу (в тестовой среде важна синхронность появления карточек)
+    renderProducts(savedLanguage, translations);
+    // После первичного рендера привяжем переход на страницу товара
+    bindProductCardNavigation();
 
     // Рендер портфолио по конфигу (поддержка заголовков/описаний, локализация ru/uk)
     const portfolioGrid = document.querySelector('.portfolio__grid');
+    const portfolioSection = document.querySelector('#portfolio');
+    const portfolioBehavior = portfolioSection?.getAttribute('data-portfolio-behavior') || 'lightbox';
     if (portfolioGrid && Array.isArray(contentConfig.portfolio)) {
         portfolioGrid.innerHTML = '';
         contentConfig.portfolio.forEach(item => {
             const fig = document.createElement('figure');
             fig.className = 'portfolio__item';
-            // Картинка
+            // Картинка (возможно в ссылке, если режим link)
             const img = document.createElement('img');
             img.src = item.src;
             img.alt = item.alt || '';
             img.loading = 'lazy';
-            fig.appendChild(img);
-            // Подписи при наличии
-            const pickLocalized = (val) => {
-                if (!val) return '';
-                if (typeof val === 'string') return val; // backward compat
-                // пытаемся взять по текущему языку, потом ru, затем первый доступный
-                return val[savedLanguage] || val['ru'] || Object.values(val).find(Boolean) || '';
+            if (portfolioBehavior === 'link' && item.url) {
+                const a = document.createElement('a');
+                a.href = item.url;
+                a.className = 'portfolio__item-link';
+                a.appendChild(img);
+                fig.appendChild(a);
+            } else {
+                fig.appendChild(img);
+            }
+            // Подписи из i18n по ключам (fallback: текущий язык -> ru -> '')
+            const getI18n = (key) => {
+                if (!key) return '';
+                const lang = savedLanguage;
+                return (translations[lang] && translations[lang][key])
+                    || (translations['ru'] && translations['ru'][key])
+                    || '';
             };
-            const titleText = pickLocalized(item.title);
-            const descText = pickLocalized(item.description);
+            const titleText = getI18n(item.titleKey);
+            const descText = getI18n(item.descriptionKey);
             if (titleText || descText) {
                 const fc = document.createElement('figcaption');
                 if (titleText) {
@@ -176,6 +184,73 @@ document.addEventListener('DOMContentLoaded', async () => {
             portfolioGrid.appendChild(fig);
         });
     }
+
+    // После загрузки компонентов и первичной инициализации языка активируем переключатели языка
+    if (typeof initLanguageSwitchers === 'function') {
+        initLanguageSwitchers();
+    }
+
+    // Простой лайтбокс для портфолио: клик по изображению — открытие полноразмерного превью
+    (function initPortfolioLightbox(){
+        const grid = document.querySelector('.portfolio__grid');
+        if (!grid) return;
+        if (portfolioBehavior !== 'lightbox') return; // в режиме ссылок лайтбокс не включаем
+        let overlay, img;
+        let trapHandler = null;
+        function close() {
+            if (!overlay) return;
+            overlay.classList.remove('is-visible');
+            setTimeout(() => overlay.remove(), 200);
+            document.removeEventListener('keydown', onKey);
+            overlay?.removeEventListener('keydown', trapHandler);
+            if (lastActive) lastActive.focus();
+        }
+        function onKey(e){ if (e.key === 'Escape') close(); }
+        let lastActive = null;
+        grid.addEventListener('click', (e) => {
+            const target = e.target;
+            if (!(target instanceof HTMLElement)) return;
+            if (target.tagName.toLowerCase() !== 'img') return;
+            lastActive = document.activeElement;
+            overlay = document.createElement('div');
+            overlay.className = 'lightbox-overlay';
+            overlay.tabIndex = -1;
+            overlay.setAttribute('role','dialog');
+            overlay.setAttribute('aria-modal','true');
+            const wrapper = document.createElement('div');
+            wrapper.className = 'lightbox-wrapper';
+            img = document.createElement('img');
+            img.src = target.getAttribute('src');
+            img.alt = target.getAttribute('alt') || '';
+            wrapper.appendChild(img);
+            const btn = document.createElement('button');
+            btn.className = 'lightbox-close';
+            btn.setAttribute('aria-label','Закрыть');
+            btn.textContent = '×';
+            btn.addEventListener('click', close);
+            overlay.addEventListener('click', (ev) => { if (ev.target === overlay) close(); });
+            document.addEventListener('keydown', onKey, { passive: true });
+            overlay.appendChild(wrapper);
+            overlay.appendChild(btn);
+            document.body.appendChild(overlay);
+            // Trap focus внутри оверлея
+            trapHandler = (ev) => {
+                if (ev.key !== 'Tab') return;
+                const focusables = overlay.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+                if (!focusables.length) return;
+                const first = focusables[0];
+                const last = focusables[focusables.length - 1];
+                if (ev.shiftKey && document.activeElement === first) { ev.preventDefault(); last.focus(); }
+                else if (!ev.shiftKey && document.activeElement === last) { ev.preventDefault(); first.focus(); }
+            };
+            overlay.addEventListener('keydown', trapHandler);
+            requestAnimationFrame(() => overlay.classList.add('is-visible'));
+            btn.focus();
+        });
+    })();
+
+    // Хеш-маршрутизация: #product-<id>
+    setupHashRouting(savedLanguage);
     
     // Инициализация мобильного заголовка
     initMobileHeader();
@@ -307,6 +382,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const productId = e.target.dataset.id;
                 addToCart(productId, products);
                 updateCartUI(translations, savedLanguage);
+            } else if (e.target.classList.contains('product-card__image') || e.target.classList.contains('product-card__title')) {
+                // переход на страницу детали товара
+                const card = e.target.closest('.product-card');
+                const id = card?.dataset.id;
+                if (id) {
+                    location.hash = `#product-${id}`;
+                }
             }
         });
     }
@@ -417,6 +499,266 @@ function initLogoColorScheme() {
 }
 
 // Экспорт функций для использования в других файлах
+
+// ====== Product detail: rendering and routing ======
+function getLangSafe() {
+    const l = (typeof localStorage !== 'undefined' && localStorage.getItem('language')) || 'ru';
+    return ['ru','uk'].includes(l) ? l : 'ru';
+}
+
+function renderProductDetail(productId) {
+    const lang = getLangSafe();
+    const container = document.getElementById('product-detail-container');
+    if (!container) return;
+    // Ensure template is present; if not loaded yet, bail.
+    const section = container.querySelector('.product-detail');
+    if (!section) return;
+    const product = Array.isArray(products) ? products.find(p => String(p.id) === String(productId)) : null;
+    if (!product) {
+        container.innerHTML = `<section class="product-detail"><div class="container"><button class="product-detail__back" type="button">← ${translations?.[lang]?.['nav-products'] || 'Товары'}</button><p style="margin-top:8px">Товар не найден</p></div></section>`;
+        bindProductDetailEvents();
+        return;
+    }
+        // Fill breadcrumbs
+        try {
+            const bcCatalog = section.querySelector('[data-crumb="catalog"]');
+            const bcCategory = section.querySelector('[data-crumb="category"]');
+            const bcCurrent = section.querySelector('[data-crumb="current"]');
+            if (bcCatalog) {
+                bcCatalog.setAttribute('href', '#products');
+                bcCatalog.onclick = (e) => { e.preventDefault(); location.hash = ''; const el = document.getElementById('products'); if (el) window.scrollTo({ top: el.offsetTop - 60, behavior: 'smooth' }); };
+            }
+            if (bcCategory) {
+                const cat = product.category || 'all';
+                const categoryLabel = (cat === 'ac') ? (translations?.[lang]?.['filter-ac'] || 'Кондиционеры') : (cat === 'recuperator' ? (translations?.[lang]?.['filter-recuperator'] || 'Рекуператоры') : (translations?.[lang]?.['filter-all'] || 'Все'));
+                bcCategory.textContent = categoryLabel;
+                bcCategory.setAttribute('href', '#products');
+                bcCategory.onclick = (e) => {
+                    e.preventDefault();
+                    location.hash = '';
+                    const sel = document.getElementById('category');
+                    if (sel) { sel.value = (cat === 'service') ? 'all' : cat; }
+                    if (typeof filterProducts === 'function') filterProducts(lang, translations);
+                    const el = document.getElementById('products'); if (el) window.scrollTo({ top: el.offsetTop - 60, behavior: 'smooth' });
+                };
+            }
+            if (bcCurrent) {
+                bcCurrent.textContent = product.name?.[lang] || product.name?.ru || '';
+            }
+        } catch {}
+
+        // Fill basic fields
+    section.querySelector('.product-detail__title').textContent = product.name?.[lang] || product.name?.ru || '';
+    section.querySelector('.product-detail__price').textContent = `${Number(product.price).toLocaleString('uk-UA', { minimumFractionDigits: 2 })} грн`;
+    // Main image and thumbs
+    const imgEl = section.querySelector('.product-detail__image');
+    const images = (Array.isArray(product.images) && product.images.length ? product.images : [product.image]).filter(Boolean);
+    let currentImgIdx = 0;
+        if (imgEl) {
+            // lazy + preloader
+            ensureImagePreloader(section);
+            loadLargeImage(imgEl, images[0] || '', product.name?.[lang] || '');
+        }
+    const thumbs = section.querySelector('.product-detail__thumbs');
+    if (thumbs) {
+        thumbs.innerHTML = '';
+        images.forEach((src, i) => {
+            const t = document.createElement('img');
+            t.src = src; t.alt = product.name?.[lang] || '';
+            if (i === 0) t.classList.add('is-active');
+            t.addEventListener('click', () => {
+                currentImgIdx = i;
+                    if (imgEl) { loadLargeImage(imgEl, src, product.name?.[lang] || ''); }
+                thumbs.querySelectorAll('img').forEach(el => el.classList.remove('is-active'));
+                t.classList.add('is-active');
+            });
+            thumbs.appendChild(t);
+        });
+    }
+    // Meta badges
+    const meta = section.querySelector('.product-detail__meta');
+    if (meta) {
+        meta.innerHTML = '';
+        const stock = document.createElement('span');
+        stock.className = 'badge ' + (product.inStock ? 'badge--ok' : 'badge--warn');
+        stock.textContent = product.inStock ? (translations?.[lang]?.['in-stock'] || 'В наличии') : (translations?.[lang]?.['on-order'] || 'Под заказ');
+        meta.appendChild(stock);
+        if (product.warrantyMonths != null) {
+            const w = document.createElement('span');
+            w.className = 'badge';
+            w.textContent = `${translations?.[lang]?.['warranty'] || 'Гарантия'}: ${product.warrantyMonths} мес.`;
+            meta.appendChild(w);
+        }
+        if (product.brand) {
+            const b = document.createElement('span'); b.className = 'badge';
+            b.textContent = `${translations?.[lang]?.['brand'] || 'Бренд'}: ${product.brand}`;
+            meta.appendChild(b);
+        }
+        if (product.sku) {
+            const s = document.createElement('span'); s.className = 'badge';
+            s.textContent = `${translations?.[lang]?.['sku'] || 'Артикул'}: ${product.sku}`;
+            meta.appendChild(s);
+        }
+    }
+    // Specs
+    const specsList = section.querySelector('.product-detail__specs-list');
+    if (specsList) {
+        specsList.innerHTML = '';
+        const specs = Array.isArray(product.specs) ? product.specs : [];
+        specs.forEach(spec => {
+            const li = document.createElement('li');
+            const keyLabel = translations?.[lang]?.[`spec-${spec.key}`] || spec.key;
+            const valueText = (spec.value && (spec.value[lang] || spec.value['ru'] || '')) || '';
+            li.textContent = `${keyLabel}: ${valueText}`;
+            specsList.appendChild(li);
+        });
+    }
+    // Actions
+    const btn = section.querySelector('.product-detail__addtocart');
+    if (btn) {
+        btn.onclick = () => { addToCart(product.id, products); updateCartUI(translations, lang); };
+    }
+    // Set document title
+    try { document.title = `${product.name?.[lang] || ''} — ${translations?.[lang]?.['site-title'] || ''}`; } catch {}
+
+        // JSON-LD structured data (Product)
+        try {
+            const scriptId = 'product-jsonld';
+            const old = document.getElementById(scriptId);
+            if (old) old.remove();
+            const ld = {
+                '@context': 'https://schema.org',
+                '@type': 'Product',
+                name: product.name?.[lang] || product.name?.ru || '',
+                sku: product.sku || undefined,
+                brand: product.brand ? { '@type': 'Brand', name: product.brand } : undefined,
+                image: images,
+                description: product.description?.[lang] || product.description?.ru || '',
+                offers: {
+                    '@type': 'Offer',
+                    priceCurrency: 'UAH',
+                    price: String(product.price),
+                    availability: product.inStock ? 'https://schema.org/InStock' : 'https://schema.org/PreOrder'
+                }
+            };
+            const s = document.createElement('script');
+            s.type = 'application/ld+json';
+            s.id = scriptId;
+            s.textContent = JSON.stringify(ld);
+            document.head.appendChild(s);
+        } catch {}
+}
+
+function bindProductDetailEvents() {
+    const container = document.getElementById('product-detail-container');
+    if (!container) return;
+    const back = container.querySelector('.product-detail__back');
+    if (back) back.onclick = () => { history.back(); };
+}
+
+function ensureProductDetailLoaded() {
+    const container = document.getElementById('product-detail-container');
+    if (!container) return Promise.resolve(false);
+    if (container.querySelector('.product-detail')) return Promise.resolve(true);
+    // attempt to fetch if not present
+    return fetch('components/product-detail.html')
+        .then(r => r.text())
+        .then(html => { container.innerHTML = html; return true; })
+        .catch(() => false);
+}
+
+function showSection(id, show) {
+    const el = document.getElementById(id);
+    if (el) el.style.display = show ? '' : 'none';
+}
+
+function setupHashRouting(initialLang) {
+    function handleRoute() {
+        const hash = location.hash || '';
+        const m = hash.match(/^#product-(.+)$/);
+        if (m) {
+            const pid = m[1];
+            ensureProductDetailLoaded().then(ok => {
+                if (!ok) return;
+                // toggle visibility
+                showSection('hero-container', false);
+                showSection('services-container', false);
+                showSection('products-container', false);
+                showSection('portfolio-container', false);
+                showSection('contacts-container', false);
+                showSection('product-detail-container', true);
+                renderProductDetail(pid);
+                bindProductDetailEvents();
+            });
+        } else {
+            // Show main sections
+            showSection('hero-container', true);
+            showSection('services-container', true);
+            showSection('products-container', true);
+            showSection('portfolio-container', true);
+            showSection('contacts-container', true);
+            showSection('product-detail-container', false);
+            // Restore title via i18n
+            const lang = getLangSafe();
+            if (typeof switchLanguage === 'function') switchLanguage(lang);
+        }
+    }
+    window.addEventListener('hashchange', handleRoute);
+    // language change should refresh detail contents
+    window.addEventListener('languagechange', () => {
+        const hash = location.hash || '';
+        const m = hash.match(/^#product-(.+)$/);
+        if (m) renderProductDetail(m[1]);
+    });
+    // initial route
+    handleRoute();
+}
+
+function bindProductCardNavigation() {
+    const grid = document.querySelector('.products__grid');
+    if (!grid) return;
+    // Already delegated in DOMContentLoaded, but rebind for safety after re-renders
+    // No-op here: kept for potential future enhancements
+}
+
+// Helpers: image preloader for product-detail
+function ensureImagePreloader(section) {
+    let wrap = section.querySelector('.product-detail__image-wrap');
+    if (!wrap) return;
+    let spinner = wrap.querySelector('.image-spinner');
+    if (!spinner) {
+        spinner = document.createElement('div');
+        spinner.className = 'image-spinner';
+        spinner.setAttribute('aria-hidden','true');
+        wrap.appendChild(spinner);
+    }
+}
+
+function loadLargeImage(imgEl, src, alt) {
+    const wrap = imgEl.closest('.product-detail__image-wrap');
+    const spinner = wrap && wrap.querySelector('.image-spinner');
+    if (spinner) spinner.style.display = 'block';
+    imgEl.style.opacity = '0';
+    const pre = new Image();
+    pre.onload = () => {
+        imgEl.src = src;
+        imgEl.alt = alt || '';
+        imgEl.decode?.().catch(()=>{}).finally(() => {
+            requestAnimationFrame(() => {
+                imgEl.style.transition = 'opacity .25s ease';
+                imgEl.style.opacity = '1';
+                if (spinner) spinner.style.display = 'none';
+            });
+        });
+    };
+    pre.onerror = () => {
+        imgEl.src = src; // fallback to broken src (onerror in global may replace)
+        imgEl.alt = alt || '';
+        if (spinner) spinner.style.display = 'none';
+        imgEl.style.opacity = '1';
+    };
+    pre.src = src;
+}
 window.changeLogoColorScheme = changeLogoColorScheme;
 window.initLogoColorScheme = initLogoColorScheme;
 

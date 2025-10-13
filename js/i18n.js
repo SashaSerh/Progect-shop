@@ -56,6 +56,12 @@ export const translations = {
         "catalog": "Каталог",
         "search-placeholder": "Поиск по сайту",
         "portfolio-title": "Наши работы",
+    "portfolio-item-1-title": "Монтаж сплит-системы в квартире",
+    "portfolio-item-1-description": "Установили инверторную сплит-систему с трассой 7м и скрытой прокладкой. Срок — 1 день.",
+    "portfolio-item-2-title": "Вентиляция в частном доме",
+    "portfolio-item-2-description": "Проектирование и монтаж приточно-вытяжной системы с рекуперацией тепла. Срок — 3 дня.",
+    "portfolio-item-3-title": "Сезонное обслуживание",
+    "portfolio-item-3-description": "Очистка теплообменника, проверка хладагента, диагностика узлов. Гарантия — 6 месяцев.",
         "form-sending": "Отправляем...",
         "form-success": "Спасибо! Мы свяжемся с вами.",
         "form-error": "Ошибка отправки. Попробуйте позже."
@@ -65,8 +71,22 @@ export const translations = {
         "form-error-email-format": "Некорректный email",
         "form-error-message": "Введите сообщение"
         ,
-        "toast-item-removed": "Товар удалён",
-        "toast-undo": "Отменить"
+    "toast-item-removed": "Товар удалён",
+    "toast-undo": "Отменить",
+        "in-stock": "В наличии",
+        "on-order": "Под заказ",
+        "warranty": "Гарантия",
+        "brand": "Бренд",
+        "sku": "Артикул",
+        "add-to-cart": "Добавить в корзину",
+        "specs": "Характеристики",
+        "show-more-specs": "Показать все характеристики",
+        "hide-specs": "Скрыть характеристики",
+        "spec-power": "Мощность",
+        "spec-area": "Площадь",
+        "spec-noise": "Уровень шума",
+        "spec-energy": "Энергоэффективность",
+        "spec-dimensions": "Габариты"
     },
     uk: {
         "site-title": "Клімат Контроль",
@@ -125,6 +145,12 @@ export const translations = {
         "catalog": "Каталог",
         "search-placeholder": "Пошук по сайту",
         "portfolio-title": "Наші роботи",
+    "portfolio-item-1-title": "Монтаж спліт-системи в квартирі",
+    "portfolio-item-1-description": "Встановили інверторну спліт-систему з трасою 7 м і прихованою прокладкою. Термін — 1 день.",
+    "portfolio-item-2-title": "Вентиляція в приватному будинку",
+    "portfolio-item-2-description": "Проєктування та монтаж припливно-витяжної системи з рекуперацією тепла. Термін — 3 дні.",
+    "portfolio-item-3-title": "Сезонне обслуговування",
+    "portfolio-item-3-description": "Очищення теплообмінника, перевірка холодоагенту, діагностика вузлів. Гарантія — 6 місяців.",
         "form-sending": "Відправляємо...",
         "form-success": "Дякуємо! Ми зв'яжемося з вами.",
         "form-error": "Помилка відправки. Спробуйте пізніше.",
@@ -134,7 +160,21 @@ export const translations = {
         "form-error-message": "Введіть повідомлення"
         ,
         "toast-item-removed": "Товар видалено",
-        "toast-undo": "Скасувати"
+        "toast-undo": "Скасувати",
+        "in-stock": "В наявності",
+        "on-order": "Під замовлення",
+        "warranty": "Гарантія",
+        "brand": "Бренд",
+        "sku": "Артикул",
+        "add-to-cart": "Додати до кошика",
+        "specs": "Характеристики",
+        "show-more-specs": "Показати всі характеристики",
+        "hide-specs": "Сховати характеристики",
+        "spec-power": "Потужність",
+        "spec-area": "Площа",
+        "spec-noise": "Рівень шуму",
+        "spec-energy": "Енергоефективність",
+        "spec-dimensions": "Габарити"
     }
 };
 

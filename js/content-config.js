@@ -27,38 +27,23 @@ export const contentConfig = {
     {
       src: 'https://placehold.co/480x320?text=Work+1',
       alt: 'Монтаж кондиционера — кейс 1',
-      title: {
-        ru: 'Монтаж сплит-системы в квартире',
-        uk: 'Монтаж спліт-системи в квартирі'
-      },
-      description: {
-        ru: 'Установили инверторную сплит-систему с трассой 7м и скрытой прокладкой. Срок — 1 день.',
-        uk: 'Встановили інверторну спліт-систему з трасою 7 м і прихованою прокладкою. Термін — 1 день.'
-      }
+      titleKey: 'portfolio-item-1-title',
+      descriptionKey: 'portfolio-item-1-description',
+      url: '#case-1'
     },
     {
       src: 'https://placehold.co/480x320?text=Work+2',
       alt: 'Монтаж вентиляции — кейс 2',
-      title: {
-        ru: 'Вентиляция в частном доме',
-        uk: 'Вентиляція в приватному будинку'
-      },
-      description: {
-        ru: 'Проектирование и монтаж приточно-вытяжной системы с рекуперацией тепла. Срок — 3 дня.',
-        uk: 'Проєктування та монтаж припливно-витяжної системи з рекуперацією тепла. Термін — 3 дні.'
-      }
+      titleKey: 'portfolio-item-2-title',
+      descriptionKey: 'portfolio-item-2-description',
+      url: '#case-2'
     },
     {
       src: 'https://placehold.co/480x320?text=Work+3',
       alt: 'Обслуживание систем — кейс 3',
-      title: {
-        ru: 'Сезонное обслуживание',
-        uk: 'Сезонне обслуговування'
-      },
-      description: {
-        ru: 'Очистка теплообменника, проверка хладагента, диагностика узлов. Гарантия — 6 месяцев.',
-        uk: 'Очищення теплообмінника, перевірка холодоагенту, діагностика вузлів. Гарантія — 6 місяців.'
-      }
+      titleKey: 'portfolio-item-3-title',
+      descriptionKey: 'portfolio-item-3-description',
+      url: '#case-3'
     }
   ]
 };

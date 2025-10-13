@@ -482,6 +482,20 @@ document.addEventListener('DOMContentLoaded', async () => {
             e.target.src = 'https://placehold.co/150x150/red/white?text=Image+Error';
         }
     }, true);
+
+    // Регистрация Service Worker + уведомление об обновлении
+    if ('serviceWorker' in navigator) {
+        try {
+            const reg = await navigator.serviceWorker.register('/service-worker.js');
+            navigator.serviceWorker.addEventListener('message', (event) => {
+                if (event.data && event.data.type === 'SW_ACTIVATED') {
+                    showUpdateToast();
+                }
+            });
+        } catch (e) {
+            // DEBUG: console.warn('SW registration failed', e);
+        }
+    }
 });
 
 // Функция для изменения цветовой схемы логотипа
@@ -681,6 +695,28 @@ function renderProductDetail(productId) {
             s.id = scriptId;
             s.textContent = JSON.stringify(ld);
             document.head.appendChild(s);
+            // BreadcrumbList JSON-LD based on visible breadcrumbs
+            const bcId = 'breadcrumbs-jsonld';
+            document.getElementById(bcId)?.remove();
+            const crumbs = [];
+            const bcNav = section.querySelector('.breadcrumbs');
+            if (bcNav) {
+                const links = bcNav.querySelectorAll('.breadcrumbs__link, .breadcrumbs__current');
+                let pos = 1;
+                links.forEach(el => {
+                    const name = el.textContent?.trim() || '';
+                    if (!name) return;
+                    const item = (el instanceof HTMLAnchorElement && el.getAttribute('href')) ? el.href : location.href;
+                    crumbs.push({ '@type': 'ListItem', position: pos++, name, item });
+                });
+            }
+            if (crumbs.length >= 2) {
+                const bcs = document.createElement('script');
+                bcs.type = 'application/ld+json';
+                bcs.id = bcId;
+                bcs.textContent = JSON.stringify({ '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: crumbs });
+                document.head.appendChild(bcs);
+            }
         } catch {}
 }
 
@@ -754,6 +790,42 @@ function bindProductCardNavigation() {
     if (!grid) return;
     // Already delegated in DOMContentLoaded, but rebind for safety after re-renders
     // No-op here: kept for potential future enhancements
+}
+
+// Toast helper to prompt user to refresh when SW updates
+function showUpdateToast() {
+    const host = document.getElementById('toast-container');
+    if (!host) return;
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.style.maxWidth = '520px';
+    toast.style.margin = '8px auto';
+    toast.style.background = 'var(--surface, #222)';
+    toast.style.color = 'var(--on-surface, #fff)';
+    toast.style.padding = '12px 16px';
+    toast.style.borderRadius = '12px';
+    toast.style.boxShadow = '0 6px 16px rgba(0,0,0,.25)';
+    toast.style.display = 'flex';
+    toast.style.alignItems = 'center';
+    toast.style.gap = '12px';
+    toast.style.zIndex = '5000';
+    const text = document.createElement('div');
+    text.textContent = 'Доступно обновление. Обновить страницу?';
+    const btn = document.createElement('button');
+    btn.className = 'btn';
+    btn.textContent = 'Обновить';
+    btn.addEventListener('click', () => {
+        // Reload to pick latest assets
+        location.reload();
+    });
+    const close = document.createElement('button');
+    close.className = 'btn btn--ghost';
+    close.textContent = 'Позже';
+    close.addEventListener('click', () => toast.remove());
+    toast.appendChild(text);
+    toast.appendChild(btn);
+    toast.appendChild(close);
+    host.appendChild(toast);
 }
 
 // Helpers: image preloader for product-detail

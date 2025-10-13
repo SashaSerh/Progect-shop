@@ -1,4 +1,4 @@
-const CACHE_NAME = 'climat-control-v26';
+const CACHE_NAME = 'climat-control-v27';
 const urlsToCache = [
     '/',
     '/index.html',
@@ -8,6 +8,8 @@ const urlsToCache = [
     '/js/products.js',
     '/js/marketing.js',
     '/js/content-config.js',
+    '/js/i18n.js',
+    '/js/theme.js',
     '/components/header.html',
     '/components/hero.html',
     '/components/services.html',
@@ -16,7 +18,8 @@ const urlsToCache = [
     '/components/contacts.html',
     '/components/portfolio.html',
     '/components/footer.html',
-    '/components/cart.html'
+    '/components/cart.html',
+    '/offline.html'
 ];
 
 self.addEventListener('install', event => {
@@ -27,6 +30,7 @@ self.addEventListener('install', event => {
     );
 });
 
+// Notify clients when a new SW takes control and clean old caches
 self.addEventListener('activate', event => {
     event.waitUntil(
         caches.keys().then(cacheNames => {
@@ -34,13 +38,43 @@ self.addEventListener('activate', event => {
                 cacheNames.filter(name => name !== CACHE_NAME)
                     .map(name => caches.delete(name))
             );
-        }).then(() => self.clients.claim())
+        }).then(async () => {
+            const clientsList = await self.clients.matchAll({ includeUncontrolled: true });
+            clientsList.forEach(client => client.postMessage({ type: 'SW_ACTIVATED' }));
+            return self.clients.claim();
+        })
     );
 });
 
+// Network-first for navigations; cache-first for static assets
 self.addEventListener('fetch', event => {
+    const req = event.request;
+    // HTML navigation requests
+    if (req.mode === 'navigate') {
+        event.respondWith(
+            fetch(req)
+                .then(res => {
+                    const resClone = res.clone();
+                    caches.open(CACHE_NAME).then(cache => cache.put(req, resClone)).catch(() => {});
+                    return res;
+                })
+                .catch(async () => {
+                    const cache = await caches.open(CACHE_NAME);
+                    const cached = await cache.match(req);
+                    return cached || cache.match('/offline.html');
+                })
+        );
+        return;
+    }
+    // For other requests: try cache, then network
     event.respondWith(
-        caches.match(event.request)
-            .then(response => response || fetch(event.request))
+        caches.match(req).then(cached => cached || fetch(req).then(res => {
+            // Put a copy in cache for future
+            const resClone = res.clone();
+            caches.open(CACHE_NAME).then(cache => cache.put(req, resClone)).catch(() => {});
+            return res;
+        }).catch(() => cached))
     );
 });
+
+// (single activate listener above)

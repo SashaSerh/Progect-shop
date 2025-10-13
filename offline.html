@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Вы офлайн — Климат Контроль</title>
+  <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+  <main class="container" style="padding: 24px; text-align: center;">
+    <h1>Похоже, нет подключения к сети</h1>
+    <p>Некоторые функции и данные недоступны. Попробуйте обновить страницу, когда соединение восстановится.</p>
+    <p>
+      <a class="btn" href="/">На главную</a>
+    </p>
+  </main>
+  <script>
+    // Позволяем быстро вернуться онлайн
+    window.addEventListener('online', () => location.replace('/'));
+  </script>
+</body>
+</html>

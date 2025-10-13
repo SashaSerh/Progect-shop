@@ -36,6 +36,17 @@
 			],
 			"isBackground": false,
 			"group": "test"
+		},
+		{
+			"label": "Run tests",
+			"type": "shell",
+			"command": "npm",
+			"args": [
+				"test",
+				"--silent"
+			],
+			"isBackground": false,
+			"group": "test"
 		}
 	]
 }

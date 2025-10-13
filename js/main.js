@@ -590,6 +590,13 @@ function renderProductDetail(productId) {
     section.querySelector('.product-detail__price').textContent = `${Number(product.price).toLocaleString('uk-UA', { minimumFractionDigits: 2 })} грн`;
     // Main image and thumbs
     const imgEl = section.querySelector('.product-detail__image');
+    if (imgEl) {
+        imgEl.setAttribute('loading','lazy');
+        imgEl.setAttribute('decoding','async');
+        imgEl.setAttribute('fetchpriority','low');
+        // sizes hint: image container roughly half of content area on desktop, full width on mobile
+        imgEl.setAttribute('sizes','(max-width: 640px) 90vw, (max-width: 1024px) 50vw, 600px');
+    }
     const images = (Array.isArray(product.images) && product.images.length ? product.images : [product.image]).filter(Boolean);
     let currentImgIdx = 0;
         if (imgEl) {
@@ -602,7 +609,12 @@ function renderProductDetail(productId) {
         thumbs.innerHTML = '';
         images.forEach((src, i) => {
             const t = document.createElement('img');
-            t.src = src; t.alt = product.name?.[lang] || '';
+            t.src = src;
+            t.alt = product.name?.[lang] || '';
+            t.loading = 'lazy';
+            t.decoding = 'async';
+            t.sizes = '(max-width: 640px) 20vw, 96px';
+            t.srcset = `${src} 1x, ${src} 2x`;
             if (i === 0) t.classList.add('is-active');
             t.addEventListener('click', () => {
                 currentImgIdx = i;
@@ -919,6 +931,16 @@ function loadLargeImage(imgEl, src, alt) {
     const pre = new Image();
     pre.onload = () => {
         imgEl.src = src;
+        // Responsive hints
+        try {
+            const url = new URL(src, location.href);
+            // crude alternative sizes from known picsum pattern
+            const alt1200 = src;
+            const alt800 = src.replace('/1200/800','/800/533');
+            const alt600 = src.replace('/1200/800','/600/400');
+            imgEl.srcset = `${alt600} 600w, ${alt800} 800w, ${alt1200} 1200w`;
+            imgEl.sizes = '(max-width: 640px) 90vw, (max-width: 1024px) 60vw, 800px';
+        } catch {}
         imgEl.alt = alt || '';
         imgEl.decode?.().catch(()=>{}).finally(() => {
             requestAnimationFrame(() => {

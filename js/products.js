@@ -117,7 +117,13 @@ export function renderProducts(lang, translations, filteredProducts = products) 
         productCard.classList.add('product-card');
         productCard.dataset.id = String(product.id);
         productCard.innerHTML = `
-            <img src="${product.image}" alt="${product.name[lang]}" class="product-card__image" loading="lazy" onerror="this.src='https://placehold.co/150x150/blue/white?text=Image+Not+Found'">
+            <img src="${product.image}"
+                 alt="${product.name[lang]}"
+                 class="product-card__image"
+                 loading="lazy" decoding="async" fetchpriority="low"
+                 srcset="${product.image.replace('600','320')} 320w, ${product.image.replace('600','480')} 480w, ${product.image} 600w, ${product.images?.[0] || product.image} 1200w"
+                 sizes="(max-width: 480px) 45vw, (max-width: 768px) 30vw, 240px"
+                 onerror="this.src='https://placehold.co/150x150/blue/white?text=Image+Not+Found'">
             <h3 class="product-card__title">${product.name[lang]}</h3>
             <p class="product-card__description">${product.description[lang]}</p>
             <p class="product-card__price">${product.price.toLocaleString('uk-UA', { minimumFractionDigits: 2 })} грн</p>

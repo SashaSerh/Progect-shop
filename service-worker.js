@@ -1,4 +1,4 @@
-const CACHE_NAME = 'climat-control-v28';
+const CACHE_NAME = 'climat-control-v29';
 const urlsToCache = [
     '/',
     '/index.html',
@@ -20,7 +20,8 @@ const urlsToCache = [
     '/components/footer.html',
     '/components/cart.html',
     '/offline.html',
-    '/robots.txt'
+    '/robots.txt',
+    '/sitemap.xml'
 ];
 
 self.addEventListener('install', event => {

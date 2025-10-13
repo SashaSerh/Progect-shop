@@ -21,11 +21,24 @@
       <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&display=swap">
     <link rel="stylesheet" href="css/main.css">
         <!-- Organization & WebSite JSON-LD -->
-        <script type="application/ld+json" id="org-jsonld">{
-            "@context": "https://schema.org",
-            "@type": "Organization",
-            "name": "ClimaTech"
-        }</script>
+            <script type="application/ld+json" id="org-jsonld">{
+                "@context": "https://schema.org",
+                "@type": "Organization",
+                "name": "ClimaTech",
+                "telephone": "+380-800-555-1234",
+                "email": "info@climat-control.com",
+                "sameAs": [
+                    "https://facebook.com/",
+                    "https://t.me/",
+                    "https://instagram.com/"
+                ],
+                "address": {
+                    "@type": "PostalAddress",
+                    "streetAddress": "ул. Климатическая, 123",
+                    "addressLocality": "Киев",
+                    "addressCountry": "UA"
+                }
+            }</script>
         <script type="application/ld+json" id="website-jsonld">{
             "@context": "https://schema.org",
             "@type": "WebSite",

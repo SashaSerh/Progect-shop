@@ -89,6 +89,11 @@ export const translations = {
         "spec-dimensions": "Габариты"
         ,
         "details": "Подробнее"
+        ,
+        "welcome-greeting": "Добро пожаловать на ClimaTech",
+        "welcome-choose-language": "Выберите язык интерфейса",
+        "welcome-current-language": "Текущий язык",
+        "welcome-continue": "Продолжить"
     },
     uk: {
         "site-title": "ClimaTech",
@@ -186,6 +191,11 @@ export const translations = {
         "spec-dimensions": "Габарити"
         ,
         "details": "Докладніше"
+        ,
+        "welcome-greeting": "Ласкаво просимо до ClimaTech",
+        "welcome-choose-language": "Оберіть мову інтерфейсу",
+        "welcome-current-language": "Поточна мова",
+        "welcome-continue": "Продовжити"
     }
 };
 

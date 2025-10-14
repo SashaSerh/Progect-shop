@@ -99,6 +99,21 @@ body {
     background: var(--background-color);
 }
 
+/* Welcome overlay (языковой выбор при первом визите) */
+.welcome-overlay { position: fixed; inset:0; background:rgba(0,0,0,.55); display:none; z-index:6000; padding:24px; display:flex; align-items:center; justify-content:center; }
+.welcome-overlay.is-visible { display:flex; }
+.welcome-overlay__panel { background: var(--primary-color); color: var(--nav-text-color); max-width:480px; width:100%; border-radius:18px; padding:28px 32px; box-shadow:0 12px 40px rgba(0,0,0,.35); display:flex; flex-direction:column; gap:20px; backdrop-filter: var(--glass-blur); border:1px solid var(--glass-border); }
+.welcome-overlay__panel h2 { font-size:1.4rem; font-weight:700; }
+.welcome-overlay__langs { display:flex; gap:12px; flex-wrap:wrap; }
+.welcome-lang-btn { background:var(--accent-color); color:#fff; border:none; padding:10px 16px; border-radius:10px; font-weight:600; cursor:pointer; transition:.25s; box-shadow:0 2px 6px rgba(0,0,0,.25); }
+.welcome-lang-btn.is-active { background:var(--secondary-color); }
+.welcome-lang-btn:focus-visible { outline: var(--focus-ring); outline-offset: var(--focus-ring-offset); }
+.welcome-lang-btn:hover { filter:brightness(1.08); }
+.welcome-overlay__continue { align-self:flex-end; background:var(--secondary-color); color:#fff; border:none; padding:12px 20px; border-radius:12px; font-weight:700; cursor:pointer; box-shadow:0 4px 14px rgba(0,0,0,.3); transition:.25s; }
+.welcome-overlay__continue:hover { filter:brightness(1.1); }
+.welcome-overlay__continue:focus-visible { outline: var(--focus-ring); outline-offset: var(--focus-ring-offset); }
+.welcome-overlay__current { font-size:0.85rem; opacity:.85; }
+
 /* Анимация смены иконки темы */
 @keyframes theme-icon-swap {
     0% { opacity: 0; transform: rotate(-90deg) scale(.6); }

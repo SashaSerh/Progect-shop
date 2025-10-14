@@ -1,0 +1,14 @@
+<div class="welcome-overlay" id="welcomeOverlay" role="dialog" aria-modal="true" aria-labelledby="welcomeTitle" aria-describedby="welcomeDescription">
+  <div class="welcome-overlay__panel">
+    <h2 id="welcomeTitle" data-i18n="welcome-greeting">Добро пожаловать на ClimaTech</h2>
+    <p id="welcomeDescription" data-i18n="welcome-choose-language">Выберите язык интерфейса</p>
+    <div class="welcome-overlay__langs" role="group" aria-label="Язык">
+      <button type="button" class="welcome-lang-btn" data-lang="uk" aria-pressed="false">UA</button>
+      <button type="button" class="welcome-lang-btn" data-lang="ru" aria-pressed="false">RU</button>
+    </div>
+    <div class="welcome-overlay__current">
+      <span data-i18n="welcome-current-language">Текущий язык</span>: <strong id="welcomeLangValue">UA</strong>
+    </div>
+    <button type="button" id="welcomeContinue" class="welcome-overlay__continue" data-i18n="welcome-continue">Продолжить</button>
+  </div>
+</div>

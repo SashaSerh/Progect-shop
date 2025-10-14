@@ -118,10 +118,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // Инициализация языка и первичный рендер
-    let savedLanguage = localStorage.getItem('language') || 'ru';
+    // Язык по умолчанию теперь Ukrainian (uk). Показываем приветственный выбор, если язык ещё не установлен.
+    let firstVisit = false;
+    let savedLanguage = localStorage.getItem('language');
     if (!['ru','uk'].includes(savedLanguage)) {
-        savedLanguage = 'ru';
+        savedLanguage = 'uk';
         localStorage.setItem('language', savedLanguage);
+        firstVisit = true;
     }
     // Применяем переводы (обновит document.title и плейсхолдеры)
     if (typeof switchLanguage === 'function') {
@@ -129,6 +132,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     // Рендерим товары сразу (в тестовой среде важна синхронность появления карточек)
     renderProducts(savedLanguage, translations);
+
+    // Загружаем компонент приветствия (лениво) и отображаем, если первый визит
+    if (firstVisit) {
+        try {
+            await loadComponent('welcome-container', 'components/welcome.html');
+            initWelcomeOverlay(savedLanguage);
+        } catch (e) { /* ignore */ }
+    }
     // После первичного рендера привяжем переход на страницу товара
     bindProductCardNavigation();
 
@@ -529,6 +540,53 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (heroImg.complete && heroImg.naturalWidth > 0) mark();
     }
 });
+
+function initWelcomeOverlay(currentLang) {
+    const overlay = document.getElementById('welcomeOverlay');
+    if (!overlay) return;
+    const langButtons = overlay.querySelectorAll('.welcome-lang-btn');
+    const continueBtn = overlay.querySelector('#welcomeContinue');
+    const langValue = overlay.querySelector('#welcomeLangValue');
+    let activeLang = currentLang || 'uk';
+
+    const applyLang = (lang) => {
+        activeLang = lang;
+        localStorage.setItem('language', lang);
+        switchLanguage(lang);
+        langValue.textContent = lang.toUpperCase();
+        langButtons.forEach(btn => {
+            const isActive = btn.dataset.lang === lang;
+            btn.classList.toggle('is-active', isActive);
+            btn.setAttribute('aria-pressed', isActive);
+        });
+    };
+
+    // Инициализация текущего состояния
+    applyLang(activeLang);
+    overlay.classList.add('is-visible');
+    document.body.style.overflow = 'hidden';
+
+    langButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const lang = btn.dataset.lang;
+            if (['ru','uk'].includes(lang)) applyLang(lang);
+        });
+    });
+
+    continueBtn.addEventListener('click', () => {
+        overlay.classList.remove('is-visible');
+        overlay.setAttribute('aria-hidden','true');
+        document.body.style.overflow = '';
+    });
+
+    // Закрытие по Escape
+    overlay.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            overlay.classList.remove('is-visible');
+            document.body.style.overflow = '';
+        }
+    });
+}
 
 // Функция для изменения цветовой схемы логотипа
 function changeLogoColorScheme(scheme) {

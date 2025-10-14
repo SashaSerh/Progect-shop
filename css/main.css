@@ -1685,6 +1685,11 @@ textarea.form-input { resize: vertical; min-height: 120px; }
     color: var(--nav-text-color);
 }
 
+/* Footer social icons */
+.footer__social { display: flex; gap: 12px; align-items: center; margin-top: 12px; }
+.footer__social-link { color: var(--nav-text-color); line-height: 0; display: inline-flex; }
+.footer__social-link svg { width: 24px; height: 24px; display: block; }
+
 .scroll-to-top {
     /* Базовые стили - переопределяются в floating-buttons */
     border: none;

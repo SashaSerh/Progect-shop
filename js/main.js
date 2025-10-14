@@ -1,6 +1,7 @@
 import { cart, saveCart, updateCartUI, addToCart, removeFromCart, clearCart, toggleCartDropdown, openCartModal, closeCartModal } from './cart.js';
 import { toggleTheme, initTheme, bindThemeEvents } from './theme.js';
 import { translations, switchLanguage } from './i18n.js';
+import { initWelcomeOverlay, needsWelcomeOverlay } from './welcome.js';
 import { products, renderProducts, filterProducts } from './products.js';
 import { contentConfig } from './content-config.js';
 import { initMarketing } from './marketing.js';
@@ -120,23 +121,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Инициализация языка и первичный рендер
     // Язык по умолчанию теперь Ukrainian (uk). Показываем приветственный выбор, если язык ещё не установлен.
     // Cookie helpers for language selection expiry
-    function setCookie(name, value, days) {
-        try {
-            const d = new Date();
-            d.setTime(d.getTime() + (days*24*60*60*1000));
-            document.cookie = `${name}=${value};expires=${d.toUTCString()};path=/`;
-        } catch {}
-    }
-    function getCookie(name) {
-        try {
-            const match = document.cookie.match(new RegExp('(^|;)\\s*' + name + '=([^;]+)'));
-            return match ? match[2] : null;
-        } catch { return null; }
-    }
-    const LANGUAGE_COOKIE = 'language_selected';
     let savedLanguage = localStorage.getItem('language');
-    const cookieVal = getCookie(LANGUAGE_COOKIE);
-    const cookieMissing = !cookieVal;
+    const cookieMissing = needsWelcomeOverlay(); // now always true (overlay each visit)
     if (!['ru','uk'].includes(savedLanguage)) {
         savedLanguage = 'uk';
         localStorage.setItem('language', savedLanguage);
@@ -150,12 +136,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Загружаем компонент приветствия (лениво) и отображаем, если первый визит
     // Show overlay if cookie missing (first visit or expired manual clear scenario)
-    if (cookieMissing) {
-        try {
-            await loadComponent('welcome-container', 'components/welcome.html');
-            initWelcomeOverlay(savedLanguage, { onContinue: () => setCookie(LANGUAGE_COOKIE, '1', 180) });
-        } catch (e) { /* ignore */ }
-    }
+    try {
+        await loadComponent('welcome-container', 'components/welcome.html');
+        initWelcomeOverlay(savedLanguage);
+    } catch (e) { /* ignore */ }
     // После первичного рендера привяжем переход на страницу товара
     bindProductCardNavigation();
 
@@ -557,98 +541,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 });
 
-function initWelcomeOverlay(currentLang) {
-    const overlay = document.getElementById('welcomeOverlay');
-    if (!overlay) return;
-    const langButtons = overlay.querySelectorAll('.welcome-lang-btn');
-    const continueBtn = overlay.querySelector('#welcomeContinue');
-    const langValue = overlay.querySelector('#welcomeLangValue');
-    let activeLang = currentLang || 'uk';
-    let invokeBtn = null;
-
-    const focusableSelector = 'button,[href],input,select,textarea,[tabindex]:not([tabindex="-1"])';
-    let focusableNodes = [];
-    let firstNode, lastNode;
-
-    const setupFocusTrap = () => {
-        focusableNodes = Array.from(overlay.querySelectorAll(focusableSelector)).filter(n => !n.disabled);
-        firstNode = focusableNodes[0];
-        lastNode = focusableNodes[focusableNodes.length - 1];
-        if (firstNode) firstNode.focus();
-        overlay.addEventListener('keydown', trapHandler);
-    };
-    const trapHandler = (e) => {
-        if (e.key === 'Tab') {
-            if (focusableNodes.length === 0) return;
-            if (e.shiftKey && document.activeElement === firstNode) {
-                e.preventDefault();
-                lastNode.focus();
-            } else if (!e.shiftKey && document.activeElement === lastNode) {
-                e.preventDefault();
-                firstNode.focus();
-            }
-        }
-    };
-
-    const applyLang = (lang) => {
-        activeLang = lang;
-        localStorage.setItem('language', lang);
-        switchLanguage(lang);
-        if (langValue) langValue.textContent = lang.toUpperCase();
-        langButtons.forEach(btn => {
-            const isActive = btn.dataset.lang === lang;
-            btn.classList.toggle('is-active', isActive);
-            btn.setAttribute('aria-pressed', isActive);
-        });
-    };
-
-    const open = (invoker = null) => {
-        invokeBtn = invoker;
-        overlay.classList.add('is-visible');
-        overlay.removeAttribute('aria-hidden');
-        document.body.style.overflow = 'hidden';
-        setupFocusTrap();
-        applyLang(activeLang);
-    };
-    const close = () => {
-        overlay.classList.remove('is-visible');
-        overlay.setAttribute('aria-hidden','true');
-        document.body.style.overflow = '';
-        overlay.removeEventListener('keydown', trapHandler);
-        if (invokeBtn) {
-            try { invokeBtn.focus(); } catch {}
-        }
-    };
-
-    langButtons.forEach(btn => {
-        btn.addEventListener('click', () => {
-            const lang = btn.dataset.lang;
-            if (['ru','uk'].includes(lang)) applyLang(lang);
-        });
-    });
-
-    continueBtn?.addEventListener('click', () => {
-        close();
-        // Callback after continue (e.g., set cookie)
-        if (typeof arguments[1] === 'object' && arguments[1].onContinue) {
-            try { arguments[1].onContinue(); } catch {}
-        }
-    });
-
-    // Закрытие по Escape
-    overlay.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') {
-            close();
-        }
-    });
-
-    // Авто-открытие при первой загрузке / вызове
-    open();
-
-    // Публичные функции на window для повторного использования
-    window.showWelcomeOverlay = (invoker) => open(invoker);
-    window.hideWelcomeOverlay = () => close();
-}
 
 // Функция для изменения цветовой схемы логотипа
 function changeLogoColorScheme(scheme) {

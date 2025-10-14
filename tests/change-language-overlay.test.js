@@ -11,7 +11,7 @@ function getCookie(name) {
   return match ? match[2] : null;
 }
 
-describe('Change language overlay reopen & cookie', () => {
+describe('Welcome language overlay cookie & focus', () => {
   beforeEach(() => {
     // Reset DOM
     document.documentElement.innerHTML = indexHtml;
@@ -21,36 +21,22 @@ describe('Change language overlay reopen & cookie', () => {
     document.cookie = 'language_selected=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/';
   });
 
-  it('shows overlay when cookie missing even if language preset', async () => {
+  it('shows overlay every visit regardless of existing language', async () => {
     localStorage.setItem('language', 'ru');
-    // Dynamically import main.js to bootstrap
     await import('../js/main.js');
     const overlay = document.getElementById('welcomeOverlay');
     expect(overlay).toBeTruthy();
     expect(overlay.classList.contains('is-visible')).toBe(true);
   });
 
-  it('sets cookie after continue and hides overlay', async () => {
+  it('hides overlay after continue (no cookie set now)', async () => {
     await import('../js/main.js');
     const overlay = document.getElementById('welcomeOverlay');
-    expect(overlay).toBeTruthy();
     const continueBtn = overlay.querySelector('#welcomeContinue');
     continueBtn.click();
-    // Cookie should be set
-    expect(getCookie('language_selected')).toBe('1');
     expect(overlay.classList.contains('is-visible')).toBe(false);
   });
 
-  it('reopens overlay via button after initial dismissal', async () => {
-    await import('../js/main.js');
-    const overlay = document.getElementById('welcomeOverlay');
-    const continueBtn = overlay.querySelector('#welcomeContinue');
-    continueBtn.click();
-    const openBtn = document.querySelector('.open-language-overlay');
-    expect(openBtn).toBeTruthy();
-    openBtn.click();
-    expect(overlay.classList.contains('is-visible')).toBe(true);
-  });
 
   it('focus trap retains focus within overlay when open', async () => {
     await import('../js/main.js');

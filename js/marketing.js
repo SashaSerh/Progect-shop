@@ -19,10 +19,11 @@ export function buildWhatsAppLink(text = '') {
 }
 
 export function buildTelegramLink(text = '') {
-  const user = contentConfig.contacts.telegram;
+  // Поддерживаем как username, так и номер телефона: если начинается с '+', направим в t.me/+380..., иначе в t.me/<username>
+  const user = (contentConfig.contacts.telegram || '').trim();
   const query = new URLSearchParams({ text }).toString();
-  // tg://resolve?domain=... не работает в браузере стабильно — используем t.me
-  return `https://t.me/${user}?${query}`;
+  const path = user.startsWith('+') ? encodeURIComponent(user) : user;
+  return `https://t.me/${path}?${query}`;
 }
 
 export function buildPhoneLink(phone = contentConfig.contacts.phonePrimary) {
@@ -30,42 +31,78 @@ export function buildPhoneLink(phone = contentConfig.contacts.phonePrimary) {
 }
 
 export function attachCTAs() {
-  // Кнопки кастомных CTA (не трогаем стандартные кнопки товара/услуг, чтобы не мешать корзине)
-  document.body.addEventListener('click', (e) => {
-    const btn = e.target.closest('.cta--order');
-    if (!btn) return;
-    const id = btn.dataset.id || 'general';
-    const name = btn.dataset.name || btn.getAttribute('aria-label') || 'консультация';
-    const lang = localStorage.getItem('language') || 'ru';
-    const message = lang === 'uk'
-      ? `Доброго дня! Хочу замовити: ${name} (ID: ${id}).`
-      : `Здравствуйте! Хочу заказать: ${name} (ID: ${id}).`;
-    const link = buildWhatsAppLink(message + ' #utm_source=site&utm_medium=cta&utm_campaign=whatsapp');
-    safeOpen(link);
+  // Обновляем tel-ссылки при любом вызове
+  document.querySelectorAll('[data-cta="call"]').forEach(btn => btn.setAttribute('href', buildPhoneLink()));
+
+  // Проставим базовые href для кнопок WA/TG, чтобы сработало даже без JS-предзаполнения текста
+  document.querySelectorAll('.btn--wa').forEach(a => {
+    a.setAttribute('href', buildWhatsAppLink(''));
+    a.setAttribute('target','_blank');
+    a.setAttribute('rel','noopener');
+  });
+  document.querySelectorAll('.btn--tg').forEach(a => {
+    const raw = (contentConfig.contacts.telegram || '').trim();
+    const digits = raw.replace(/\D/g, '');
+    const href = (raw.startsWith('+') || /^\d+$/.test(raw))
+      ? `tg://resolve?phone=${digits}`
+      : `https://t.me/${raw}`;
+    a.setAttribute('href', href);
   });
 
-  // Быстрые контакты
-  const callBtns = document.querySelectorAll('[data-cta="call"]');
-  callBtns.forEach(btn => btn.setAttribute('href', buildPhoneLink()));
+  // Делегирование кликов для CTA-кнопок, чтобы не зависеть от порядка вставки DOM
+  document.addEventListener('click', (e) => {
+    const target = e.target;
+    if (!(target instanceof Element)) return;
 
-  // Кнопки WhatsApp/Telegram в контактах
-  const waBtns = document.querySelectorAll('.btn--wa');
-  waBtns.forEach(btn => {
-    btn.addEventListener('click', (e) => {
+    // Кнопки заказа через WhatsApp из карточек/баннеров
+    const orderBtn = target.closest('.cta--order');
+    if (orderBtn) {
+      e.preventDefault();
+      const id = orderBtn.dataset.id || 'general';
+      const name = orderBtn.dataset.name || orderBtn.getAttribute('aria-label') || 'консультация';
+      const lang = localStorage.getItem('language') || 'ru';
+      const message = lang === 'uk'
+        ? `Доброго дня! Хочу замовити: ${name} (ID: ${id}).`
+        : `Здравствуйте! Хочу заказать: ${name} (ID: ${id}).`;
+      safeOpen(buildWhatsAppLink(message + ' #utm_source=site&utm_medium=cta&utm_campaign=whatsapp'));
+      return;
+    }
+
+    // Кнопка WhatsApp в контактах
+    const waBtn = target.closest('.btn--wa');
+    if (waBtn) {
       e.preventDefault();
       const lang = localStorage.getItem('language') || 'ru';
       const msg = lang === 'uk' ? 'Доброго дня! Потрібна консультація.' : 'Здравствуйте! Нужна консультация.';
       safeOpen(buildWhatsAppLink(msg + ' #utm_source=site&utm_medium=cta&utm_campaign=whatsapp'));
-    });
-  });
-  const tgBtns = document.querySelectorAll('.btn--tg');
-  tgBtns.forEach(btn => {
-    btn.addEventListener('click', (e) => {
+      return;
+    }
+
+    // Кнопка Telegram в контактах
+    const tgBtn = target.closest('.btn--tg');
+    if (tgBtn) {
       e.preventDefault();
       const lang = localStorage.getItem('language') || 'ru';
       const msg = lang === 'uk' ? 'Доброго дня! Потрібна консультація.' : 'Здравствуйте! Нужна консультация.';
       safeOpen(buildTelegramLink(msg + ' #utm_source=site&utm_medium=cta&utm_campaign=telegram'));
-    });
+      return;
+    }
+
+    // Социальные: Instagram и Facebook
+    const igBtn = target.closest('.btn--ig');
+    if (igBtn) {
+      e.preventDefault();
+      const url = contentConfig.social?.instagram;
+      if (url) safeOpen(url);
+      return;
+    }
+    const fbBtn = target.closest('.btn--fb');
+    if (fbBtn) {
+      e.preventDefault();
+      const url = contentConfig.social?.facebook;
+      if (url) safeOpen(url);
+      return;
+    }
   });
 }
 

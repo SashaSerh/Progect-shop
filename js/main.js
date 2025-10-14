@@ -132,6 +132,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     // После первичного рендера привяжем переход на страницу товара
     bindProductCardNavigation();
 
+    // Инициализируем маркетинговые CTA и форму контактов (кнопки позвонить/WhatsApp/Telegram)
+    try { initMarketing(); } catch (e) { /* no-op */ }
+
     // Рендер портфолио по конфигу (поддержка заголовков/описаний, локализация ru/uk)
     const portfolioGrid = document.querySelector('.portfolio__grid');
     const portfolioSection = document.querySelector('#portfolio');
@@ -830,7 +833,7 @@ function setupHashRouting(initialLang) {
             restoreDefaultMetaOg();
         }
     }
-    window.addEventListener('hashchange', handleRoute);
+    window.addEventListener('hashchange', () => { handleRoute(); try { initMarketing(); } catch {} });
     // language change should refresh detail contents
     window.addEventListener('languagechange', () => {
         const hash = location.hash || '';
@@ -841,6 +844,7 @@ function setupHashRouting(initialLang) {
             // обновим OG title под текущий заголовок сайта
             try { setOgTitle(document.title); setTwitterTitle(document.title); } catch {}
         }
+        try { initMarketing(); } catch {}
     });
     // initial route
     handleRoute();

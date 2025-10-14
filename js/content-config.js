@@ -10,17 +10,21 @@ export const contentConfig = {
   contacts: {
     phonePrimary: '+380633353410',
     phoneSecondary: '+380995543499',
-    whatsapp: '+380633353410',
-    telegram: 'climate_service',
-    email: 'info@climat-control.com',
+  whatsapp: '+380633353410',
+  telegram: 'Alexandrsergien',
+  email: 'climatechprovent@gmail.com',
     address: 'ул. Климатическая, 123, Киев'
+  },
+  social: {
+    instagram: 'https://www.instagram.com/konditsionery_.obukhov/?__pwa=1',
+    facebook: 'https://www.facebook.com/profile.php?id=61550678776624'
   },
   contactForm: {
     provider: 'formspree',
     // Замените your_form_id на ваш ID из Formspree, например: https://formspree.io/f/abcdwxyz
     endpoint: 'https://formspree.io/f/mblzzrgr',
     // fallback для почты если endpoint пуст
-    mailto: 'info@climat-control.com'
+  mailto: 'climatechprovent@gmail.com'
   },
   portfolio: [
     // Замените позже своими фото и текстами

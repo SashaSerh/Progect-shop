@@ -1,3 +1,15 @@
+/* Visually hidden but accessible text */
+.sr-only {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+}
 /* Переменные для тёмной темы */
 :root {
     --font-family: 'Montserrat', sans-serif;
@@ -168,6 +180,8 @@ body {
     transition: transform var(--transition), filter var(--transition);
     transform: scale(3.0); /* Увеличивает иконку в 3 раза */
 }
+.btn--ig { background: #E4405F; color: #fff; }
+.btn--fb { background: #1877F2; color: #fff; }
 
 .header__logo:hover {
     transform: scale(3.0) rotate(-360deg); /* Поворот против часовой стрелки */
@@ -1574,6 +1588,9 @@ textarea.form-input { resize: vertical; min-height: 120px; }
 
 /* Контейнер кнопок контактов */
 .contacts__cta { display: flex; flex-wrap: wrap; gap: 10px; margin: 10px 0 4px; }
+/* Единый размер SVG иконок в соц-кнопках */
+.contacts__cta .btn svg { width: 22px; height: 22px; display: inline-block; }
+.contacts__cta .btn { align-items: center; gap: 8px; }
 @media (max-width: 480px) {
     .contacts__cta .btn { flex: 1 1 100%; }
     .form-submit-btn { width: 100%; }

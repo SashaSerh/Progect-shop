@@ -94,6 +94,8 @@ export const translations = {
         "welcome-choose-language": "Выберите язык интерфейса",
         "welcome-current-language": "Текущий язык",
         "welcome-continue": "Продолжить"
+        ,
+        "change-language": "Сменить язык"
     },
     uk: {
         "site-title": "ClimaTech",
@@ -196,6 +198,8 @@ export const translations = {
         "welcome-choose-language": "Оберіть мову інтерфейсу",
         "welcome-current-language": "Поточна мова",
         "welcome-continue": "Продовжити"
+        ,
+        "change-language": "Змінити мову"
     }
 };
 

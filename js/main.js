@@ -119,12 +119,27 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Инициализация языка и первичный рендер
     // Язык по умолчанию теперь Ukrainian (uk). Показываем приветственный выбор, если язык ещё не установлен.
-    let firstVisit = false;
+    // Cookie helpers for language selection expiry
+    function setCookie(name, value, days) {
+        try {
+            const d = new Date();
+            d.setTime(d.getTime() + (days*24*60*60*1000));
+            document.cookie = `${name}=${value};expires=${d.toUTCString()};path=/`;
+        } catch {}
+    }
+    function getCookie(name) {
+        try {
+            const match = document.cookie.match(new RegExp('(^|;)\\s*' + name + '=([^;]+)'));
+            return match ? match[2] : null;
+        } catch { return null; }
+    }
+    const LANGUAGE_COOKIE = 'language_selected';
     let savedLanguage = localStorage.getItem('language');
+    const cookieVal = getCookie(LANGUAGE_COOKIE);
+    const cookieMissing = !cookieVal;
     if (!['ru','uk'].includes(savedLanguage)) {
         savedLanguage = 'uk';
         localStorage.setItem('language', savedLanguage);
-        firstVisit = true;
     }
     // Применяем переводы (обновит document.title и плейсхолдеры)
     if (typeof switchLanguage === 'function') {
@@ -134,10 +149,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     renderProducts(savedLanguage, translations);
 
     // Загружаем компонент приветствия (лениво) и отображаем, если первый визит
-    if (firstVisit) {
+    // Show overlay if cookie missing (first visit or expired manual clear scenario)
+    if (cookieMissing) {
         try {
             await loadComponent('welcome-container', 'components/welcome.html');
-            initWelcomeOverlay(savedLanguage);
+            initWelcomeOverlay(savedLanguage, { onContinue: () => setCookie(LANGUAGE_COOKIE, '1', 180) });
         } catch (e) { /* ignore */ }
     }
     // После первичного рендера привяжем переход на страницу товара
@@ -548,12 +564,37 @@ function initWelcomeOverlay(currentLang) {
     const continueBtn = overlay.querySelector('#welcomeContinue');
     const langValue = overlay.querySelector('#welcomeLangValue');
     let activeLang = currentLang || 'uk';
+    let invokeBtn = null;
+
+    const focusableSelector = 'button,[href],input,select,textarea,[tabindex]:not([tabindex="-1"])';
+    let focusableNodes = [];
+    let firstNode, lastNode;
+
+    const setupFocusTrap = () => {
+        focusableNodes = Array.from(overlay.querySelectorAll(focusableSelector)).filter(n => !n.disabled);
+        firstNode = focusableNodes[0];
+        lastNode = focusableNodes[focusableNodes.length - 1];
+        if (firstNode) firstNode.focus();
+        overlay.addEventListener('keydown', trapHandler);
+    };
+    const trapHandler = (e) => {
+        if (e.key === 'Tab') {
+            if (focusableNodes.length === 0) return;
+            if (e.shiftKey && document.activeElement === firstNode) {
+                e.preventDefault();
+                lastNode.focus();
+            } else if (!e.shiftKey && document.activeElement === lastNode) {
+                e.preventDefault();
+                firstNode.focus();
+            }
+        }
+    };
 
     const applyLang = (lang) => {
         activeLang = lang;
         localStorage.setItem('language', lang);
         switchLanguage(lang);
-        langValue.textContent = lang.toUpperCase();
+        if (langValue) langValue.textContent = lang.toUpperCase();
         langButtons.forEach(btn => {
             const isActive = btn.dataset.lang === lang;
             btn.classList.toggle('is-active', isActive);
@@ -561,10 +602,23 @@ function initWelcomeOverlay(currentLang) {
         });
     };
 
-    // Инициализация текущего состояния
-    applyLang(activeLang);
-    overlay.classList.add('is-visible');
-    document.body.style.overflow = 'hidden';
+    const open = (invoker = null) => {
+        invokeBtn = invoker;
+        overlay.classList.add('is-visible');
+        overlay.removeAttribute('aria-hidden');
+        document.body.style.overflow = 'hidden';
+        setupFocusTrap();
+        applyLang(activeLang);
+    };
+    const close = () => {
+        overlay.classList.remove('is-visible');
+        overlay.setAttribute('aria-hidden','true');
+        document.body.style.overflow = '';
+        overlay.removeEventListener('keydown', trapHandler);
+        if (invokeBtn) {
+            try { invokeBtn.focus(); } catch {}
+        }
+    };
 
     langButtons.forEach(btn => {
         btn.addEventListener('click', () => {
@@ -573,19 +627,27 @@ function initWelcomeOverlay(currentLang) {
         });
     });
 
-    continueBtn.addEventListener('click', () => {
-        overlay.classList.remove('is-visible');
-        overlay.setAttribute('aria-hidden','true');
-        document.body.style.overflow = '';
+    continueBtn?.addEventListener('click', () => {
+        close();
+        // Callback after continue (e.g., set cookie)
+        if (typeof arguments[1] === 'object' && arguments[1].onContinue) {
+            try { arguments[1].onContinue(); } catch {}
+        }
     });
 
     // Закрытие по Escape
     overlay.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
-            overlay.classList.remove('is-visible');
-            document.body.style.overflow = '';
+            close();
         }
     });
+
+    // Авто-открытие при первой загрузке / вызове
+    open();
+
+    // Публичные функции на window для повторного использования
+    window.showWelcomeOverlay = (invoker) => open(invoker);
+    window.hideWelcomeOverlay = () => close();
 }
 
 // Функция для изменения цветовой схемы логотипа
@@ -610,6 +672,23 @@ function initLogoColorScheme() {
     const savedScheme = localStorage.getItem('logoColorScheme') || 'default';
     changeLogoColorScheme(savedScheme);
 }
+
+// Wire manual reopen buttons (desktop + mobile) after components loaded (delegation safe)
+document.addEventListener('click', (e) => {
+    const target = e.target;
+    if (!(target instanceof HTMLElement)) return;
+    if (target.classList.contains('open-language-overlay')) {
+        if (typeof window.showWelcomeOverlay === 'function') {
+            window.showWelcomeOverlay(target);
+        } else {
+            // Lazy load if not present yet
+            loadComponent('welcome-container', 'components/welcome.html').then(() => {
+                initWelcomeOverlay(localStorage.getItem('language') || 'uk');
+                if (typeof window.showWelcomeOverlay === 'function') window.showWelcomeOverlay(target);
+            }).catch(()=>{});
+        }
+    }
+});
 
 // Экспорт функций для использования в других файлах
 

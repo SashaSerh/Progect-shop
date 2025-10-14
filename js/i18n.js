@@ -96,6 +96,9 @@ export const translations = {
         "site-title": "ClimaTech",
         "header-title": "ClimaTech",
         "footer-title": "ClimaTech",
+        // Добавлены недостающие ключи навигации для украинского
+        "nav-home": "Головна",
+        "nav-services": "Послуги",
         "nav-products": "Товари",
         "nav-contacts": "Контакти",
         "hero-title": "Комфортний клімат у вашому домі",
@@ -186,33 +189,32 @@ export const translations = {
 };
 
 export function switchLanguage(lang) {
+    // Безопасный язык + fallback на ru
+    const safeLang = ['ru','uk'].includes(lang) ? lang : 'ru';
     document.querySelectorAll('[data-i18n]').forEach(element => {
         const key = element.getAttribute('data-i18n');
-        if (translations[lang][key]) {
-            element.textContent = translations[lang][key];
-        }
+        const value = translations[safeLang][key] || translations.ru[key];
+        if (value) element.textContent = value;
     });
 
     document.querySelectorAll('[data-i18n-placeholder]').forEach(element => {
         const key = element.getAttribute('data-i18n-placeholder');
-        if (translations[lang][key]) {
-            element.placeholder = translations[lang][key];
-        }
+        const value = translations[safeLang][key] || translations.ru[key];
+        if (value) element.placeholder = value;
     });
 
     document.querySelectorAll('option[data-i18n]').forEach(option => {
         const key = option.getAttribute('data-i18n');
-        if (translations[lang][key]) {
-            option.textContent = translations[lang][key];
-        }
+        const value = translations[safeLang][key] || translations.ru[key];
+        if (value) option.textContent = value;
     });
 
-    document.title = translations[lang]['site-title'] || 'ClimaTech';
-    localStorage.setItem('language', lang);
+    document.title = translations[safeLang]['site-title'] || 'ClimaTech';
+    localStorage.setItem('language', safeLang);
 
     // Отправляем кастомное событие для синхронизации UI
     try {
-        const event = new CustomEvent('languagechange', { detail: { lang } });
+        const event = new CustomEvent('languagechange', { detail: { lang: safeLang } });
         window.dispatchEvent(event);
     } catch (err) {
         console.warn('Не удалось отправить событие languagechange', err);
@@ -221,6 +223,8 @@ export function switchLanguage(lang) {
 
 // Экспорт в глобальную область для совместимости
 window.switchLanguage = switchLanguage;
+// Экспортируем словари в window для использования в других модулях
+window.translations = translations;
 
 // Унифицированная инициализация всех переключателей языка (десктоп + мобильные чипы)
 export function initLanguageSwitchers() {

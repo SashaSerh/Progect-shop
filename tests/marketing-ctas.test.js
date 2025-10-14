@@ -35,7 +35,9 @@ describe('marketing CTAs', () => {
 
     // base href set
     expect(wa.getAttribute('href')).toMatch(/^https:\/\/wa\.me\//);
-    expect(['https://t.me/', 'tg://']).toContain(tg.getAttribute('href').slice(0,8));
+  const tgHref = tg.getAttribute('href');
+  // Поддерживаем два возможных формата: t.me/<username> или tg://resolve?phone=<digits>
+  expect(/^(https:\/\/t\.me\/|tg:\/\/resolve\?phone=)/.test(tgHref)).toBe(true);
 
     // click triggers open with expected prefix
     wa.click();

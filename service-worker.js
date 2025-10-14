@@ -1,4 +1,4 @@
-const CACHE_NAME = 'climat-control-v38';
+const CACHE_NAME = 'climat-control-v39';
 const urlsToCache = [
     '/',
     '/index.html',
@@ -21,7 +21,11 @@ const urlsToCache = [
     '/components/cart.html',
     '/offline.html',
     '/robots.txt',
-    '/sitemap.xml'
+    '/sitemap.xml',
+    // Social icons used in footer
+    '/icons/facebook-icon_1.svg',
+    '/icons/telegram-logo-icon_1.svg',
+    '/icons/instagram-icon_1.svg'
 ];
 
 self.addEventListener('install', event => {

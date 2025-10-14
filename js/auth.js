@@ -129,6 +129,16 @@ export function openModal(translations, lang) {
         }
     };
     profileModal.addEventListener('keydown', __profileTrapHandler);
+
+    // Слушатель смены языка: если модалка открыта — переинициализируем её контент.
+    const langHandler = (e) => {
+        if (profileModal.style.display === 'flex') {
+            const newLang = e.detail?.lang || localStorage.getItem('language') || 'ru';
+            // Перерисуем исходя из текущего статуса (логин/профиль)
+            openModal(window.translations || translations, newLang);
+        }
+    };
+    window.addEventListener('languagechange', langHandler, { once: true });
 }
 
 export function closeModal() {

@@ -101,6 +101,7 @@ export const translations = {
         "nav-services": "Послуги",
         "nav-products": "Товари",
         "nav-contacts": "Контакти",
+        "services-title": "Наші послуги",
         "hero-title": "Комфортний клімат у вашому домі",
         "hero-subtitle": "Професійний монтаж та продаж кондиціонерів і рекуператорів.",
         "hero-cta": "Переглянути товари",

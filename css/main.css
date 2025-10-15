@@ -1,3 +1,50 @@
+/* Кнопка переключения языка (общий стиль) */
+.language-switcher {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5em;
+    padding: 0.45em 1.2em;
+    border-radius: 2em;
+    background: var(--color-bg-secondary, #f3f3f7);
+    color: var(--color-text, #222);
+    border: none;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+.language-switcher:hover,
+.language-switcher:focus {
+    background: var(--color-accent, #e0eaff);
+    color: var(--color-primary, #0057b8);
+    outline: none;
+    box-shadow: 0 2px 8px rgba(0,87,184,0.08);
+}
+/* Кнопка "Сменить язык" в header */
+.open-language-overlay {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5em;
+    padding: 0.45em 1.2em;
+    border-radius: 14px;
+    background: none;
+    color: var(--nav-text-color);
+    border: none;
+    font-size: 1rem;
+    font-weight: 500;
+    font-family: var(--font-family);
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+.open-language-overlay:hover,
+.open-language-overlay:focus {
+    background: var(--button-bg);
+    color: var(--nav-text-color);
+    outline: none;
+    box-shadow: 0 2px 8px rgba(0,87,184,0.08);
+}
 /* Visually hidden but accessible text */
 .sr-only {
     position: absolute !important;
@@ -404,7 +451,7 @@ body {
     border-radius: 14px;
     padding: 8px 12px;
     font-size: 15px;
-    font-weight: 600;
+    font-family: var(--font-family);
     cursor: pointer;
     transition: background var(--transition);
     display: flex;

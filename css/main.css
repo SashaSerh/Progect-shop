@@ -262,7 +262,7 @@ body {
 }
 
 .header__main-bar {
-    padding: 0px;
+    padding: 8px 8px 0 0;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -270,7 +270,7 @@ body {
 }
 
 .header__title {
-    font-size: clamp(15px, 4vw, 17px);
+    font-size: clamp(13px, 3vw, 15px);
     font-weight: 600;
     letter-spacing: 0.2px;
     color: var(--nav-text-color);
@@ -278,7 +278,9 @@ body {
     transition: color var(--transition);
     margin-right: 16px;
     display: flex;
-    align-items: center;
+    align-items: flex-end;
+    min-height: 48px;
+    height: 48px;
     overflow: visible; /* Позволяет иконке выходить за границы */
 }
 
@@ -1031,14 +1033,16 @@ body {
 
 .service-card__more,
 .product-card__more {
+    border: none;
     display: inline-block;
     margin-top: 8px;
-    color: var(--accent-color);
+    color: var(--nav-text-color);
+    background: var(--button-bg);
     text-decoration: none;
     font-weight: 600;
     font-size: 14px;
-    padding: 6px 8px;
-    border-radius: 10px;
+    padding: 9px;
+    border-radius: 14px;
     transition: background-color .2s ease, color .2s ease;
 }
 .service-card__more:hover,

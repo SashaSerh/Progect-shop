@@ -122,18 +122,18 @@ export function renderProducts(lang, translations, filteredProducts = products) 
     const loadingAttr = isPrimary ? 'eager' : 'lazy';
     const fetchPrio = isPrimary ? 'high' : 'low';
         productCard.innerHTML = `
-            <img src="${product.image}"
-                 alt="${product.name[lang]}"
-                 class="product-card__image lqip"
-                 loading="${loadingAttr}" decoding="async" fetchpriority="${fetchPrio}"
-                 srcset="${product.image.replace('600','320')} 320w, ${product.image.replace('600','480')} 480w, ${product.image} 600w, ${product.images?.[0] || product.image} 1200w"
-                 sizes="(max-width: 480px) 45vw, (max-width: 768px) 30vw, 240px"
-                 onerror="this.src='https://placehold.co/150x150/blue/white?text=Image+Not+Found'">
-            <h3 class="product-card__title">${product.name[lang]}</h3>
-            <p class="product-card__description">${product.description[lang]}</p>
-            <p class="product-card__price">${product.price.toLocaleString('uk-UA', { minimumFractionDigits: 2 })} грн</p>
-            <button class="product-card__button" data-id="${product.id}" data-i18n="service-order">${translations[lang]['service-order']}</button>
-            <a class="product-card__more" href="#product-${product.id}" data-i18n="details">${translations[lang]['details'] || 'Подробнее'}</a>
+          <img src="${product.image}"
+              alt="${product.name[lang]}"
+              class="product-card__image lqip"
+              loading="${loadingAttr}" decoding="async" fetchpriority="${fetchPrio}"
+              srcset="${product.image.replace('600','320')} 320w, ${product.image.replace('600','480')} 480w, ${product.image} 600w, ${product.images?.[0] || product.image} 1200w"
+              sizes="(max-width: 480px) 45vw, (max-width: 768px) 30vw, 240px"
+              onerror="this.src='https://placehold.co/150x150/blue/white?text=Image+Not+Found'">
+          <h3 class="product-card__title">${product.name[lang]}</h3>
+          <p class="product-card__description">${product.description[lang]}</p>
+          <p class="product-card__price">${Math.round(product.price).toLocaleString('uk-UA', { maximumFractionDigits: 0 })} грн</p>
+          <button class="product-card__button" data-id="${product.id}" data-i18n="service-order">${translations[lang]['service-order']}</button>
+          <a class="product-card__more" href="#product-${product.id}" data-i18n="details">${translations[lang]['details'] || 'Подробнее'}</a>
         `;
         productsGrid.appendChild(productCard);
         // LQIP: снимаем блюр после загрузки

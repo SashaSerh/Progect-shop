@@ -1,3 +1,15 @@
+.portfolio__item:hover,
+.portfolio__item:focus {
+    box-shadow: 0 8px 32px rgba(0,87,184,0.12);
+    transform: translateY(0) scale(1.03);
+    filter: brightness(1.04) saturate(1.1);
+    z-index: 2;
+}
+@keyframes portfolioCardFadeIn {
+    0% { opacity: 0; transform: translateY(24px) scale(0.98); }
+    60% { opacity: 1; transform: translateY(-4px) scale(1.01); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+}
 /* Логотип 100px, не влияет на layout */
 .header__title {
     position: relative;
@@ -284,9 +296,6 @@ body {
     overflow: visible; /* Позволяет иконке выходить за границы */
 }
 
-/* .header__title:hover {
-    color: var(--accent-color);
-} */
 
 .header__logo {
     width: 100px;
@@ -1718,7 +1727,42 @@ textarea.form-input { resize: vertical; min-height: 120px; }
 .portfolio { padding: 40px 0; }
 .portfolio__title { font-size: 28px; margin-bottom: 16px; }
 .portfolio__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px,1fr)); gap: 16px; }
-.portfolio__item { border-radius: 16px; overflow: hidden; background: var(--glass-bg); border: 1px solid var(--glass-border); backdrop-filter: var(--glass-blur); }
+.portfolio__item { border-radius: 16px; 
+    overflow: hidden; 
+    background: var(--glass-bg); 
+    border: 1px solid var(--glass-border); 
+    backdrop-filter: var(--glass-blur); 
+     transition: box-shadow 0.25s cubic-bezier(.4,0,.2,1),
+                            transform 0.25s cubic-bezier(.4,0,.2,1),
+                            filter 0.25s cubic-bezier(.4,0,.2,1),
+                            opacity 0.25s cubic-bezier(.4,0,.2,1);
+ 
+}
+   
+.portfolio__item:hover,
+.portfolio__item:focus {
+    box-shadow: 0 8px 32px rgba(0,87,184,0.12);
+    transform: translateY(0) scale(1.03);
+    filter: brightness(1.04) saturate(1.1);
+    z-index: 2;
+}
+@keyframes portfolioCardFadeIn {
+    0% { opacity: 0; transform: translateY(24px) scale(0.98); }
+    60% { opacity: 1; transform: translateY(-4px) scale(1.01); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+.portfolio__item:hover,
+.portfolio__item:focus {
+    box-shadow: 0 8px 32px rgba(0,87,184,0.12);
+    transform: translateY(0) scale(1.03);
+    filter: brightness(1.04) saturate(1.1);
+    z-index: 2;
+}
+@keyframes portfolioCardFadeIn {
+    0% { opacity: 0; transform: translateY(24px) scale(0.98); }
+    60% { opacity: 1; transform: translateY(-4px) scale(1.01); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+}
 .portfolio__item img { display: block; width: 100%; height: auto; object-fit: cover; }
 /* Лайтбокс для портфолио */
 .lightbox-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.6); opacity: 0; transition: opacity .2s ease; z-index: 3100; display: flex; align-items: center; justify-content: center; }

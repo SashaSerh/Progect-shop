@@ -1,3 +1,26 @@
+/* Логотип 100px, не влияет на layout */
+.header__title {
+    position: relative;
+    display: flex;
+    align-items: center;
+    min-height: 100px;
+}
+.header__logo {
+    position: absolute;
+    left: -24px;
+    top: 50%;
+    width: 100px;
+    height: 100px;
+    object-fit: contain;
+    transform: translateY(-50%);
+    z-index: 1;
+    pointer-events: none;
+}
+.header__brand-text {
+    margin-left: 110px;
+    position: relative;
+    z-index: 2;
+}
 /* Мобильная кнопка "Сменить язык" — стиль как на десктопе */
 .open-language-overlay {
     display: inline-flex;
@@ -239,6 +262,7 @@ body {
 }
 
 .header__main-bar {
+    padding: 0px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -263,19 +287,14 @@ body {
 } */
 
 .header__logo {
-    width: 40px;
-    height: 40px;
-    object-fit: contain; /* Для правильного масштабирования изображения */
-    transition: transform var(--transition), filter var(--transition);
-    transform: scale(3.0); /* Увеличивает иконку в 3 раза */
+    width: 100px;
+    height: 100px;
+    object-fit: contain;
+    /* Без анимаций и масштабирования */
 }
 .btn--ig { background: #E4405F; color: #fff; }
 .btn--fb { background: #1877F2; color: #fff; }
 
-.header__logo:hover {
-    transform: scale(3.0) rotate(-360deg); /* Поворот против часовой стрелки */
-    transition: transform 0.8s ease-in-out;
-}
 
 /* Изменение цвета логотипа для разных тем */
 .light-theme .header__logo {
@@ -1163,7 +1182,7 @@ body {
 .product-card__price {
     font-size: 15px;
     font-weight: 600;
-    color: var(--accent-color);
+    color: var(--nav-text-color);
     margin-bottom: 12px;
 }
 

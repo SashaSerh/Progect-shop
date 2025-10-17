@@ -525,7 +525,9 @@ body {
     align-items: center;
     justify-content: center;
 }
-
+.theme-toggle:hover {
+    background: var(--button-bg-hover);
+}
 .theme-icon {
     font-size: 20px;
     line-height: 1;
@@ -1033,9 +1035,8 @@ body {
     background: var(--background-color-secondary);
     color: #FFFFFF;
     border: none;
-    padding: 12px;
     border-radius: 14px;
-    font-size: 15px;
+    /* размеры стандартизированы ниже для всех карточечных кнопок */
     font-weight: 600;
     transition: background var(--transition);
     cursor: pointer;
@@ -1054,10 +1055,9 @@ body {
     background: var(--button-bg);
     text-decoration: none;
     font-weight: 600;
-    font-size: 14px;
-    padding: 9px;
     border-radius: 14px;
     transition: background-color .2s ease, color .2s ease;
+    /* размеры стандартизированы ниже для всех карточечных кнопок */
 }
 .service-card__more:hover,
 .product-card__more:hover { background: var(--button-bg); }
@@ -1208,9 +1208,7 @@ body {
     background: var(--background-color-secondary);
     color: #FFFFFF;
     border: none;
-    padding: 12px;
     border-radius: 14px;
-    font-size: 15px;
     font-weight: 600;
     transition: background var(--transition);
     cursor: pointer;
@@ -1218,6 +1216,36 @@ body {
 
 .product-card__button:hover {
     background: var(--background-color-secondary-hover);
+}
+
+/* Стандартизированные размеры для всех кнопок/ссылок в карточках */
+.card-actions-size {
+    padding: 10px 14px;
+    font-size: 15px;
+    min-width: 120px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Компактный вариант (для мелких ссылок) */
+.card-actions-size--compact {
+    padding: 8px 10px;
+    font-size: 14px;
+    min-width: 80px;
+}
+
+/* Применяем размеры */
+.product-card__button,
+.service-card__button,
+.service-card__more,
+.product-card__more {
+    padding: 10px 14px;
+    font-size: 15px;
+    min-width: 120px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 @media (max-width: 768px) {

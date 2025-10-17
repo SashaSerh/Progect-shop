@@ -133,7 +133,7 @@ export function renderProducts(lang, translations, filteredProducts = products) 
           <p class="product-card__description">${product.description[lang]}</p>
           <p class="product-card__price">${Math.round(product.price).toLocaleString('uk-UA', { maximumFractionDigits: 0 })} грн</p>
           <button class="product-card__button" data-id="${product.id}" data-i18n="service-order">${translations[lang]['service-order']}</button>
-          <a class="product-card__more" href="#product-${product.id}" data-i18n="details">${translations[lang]['details'] || 'Подробнее'}</a>
+                    <button class="product-card__more card-actions-size--compact" data-id="${product.id}" data-i18n="details">${translations[lang]['details'] || 'Подробнее'}</button>
         `;
         productsGrid.appendChild(productCard);
         // LQIP: снимаем блюр после загрузки
@@ -144,6 +144,13 @@ export function renderProducts(lang, translations, filteredProducts = products) 
             if (imgEl.complete && imgEl.naturalWidth > 0) {
                 markLoaded();
             }
+        // Навигация по клику на кнопку 'Подробнее'
+        const moreBtn = productCard.querySelector('.product-card__more');
+        if (moreBtn) {
+            moreBtn.addEventListener('click', () => {
+                window.location.hash = `product-${product.id}`;
+            });
+        }
             imgs.push(imgEl);
         }
     });

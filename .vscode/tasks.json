@@ -113,6 +113,17 @@
 			],
 			"isBackground": false,
 			"group": "test"
+		},
+		{
+			"label": "Run tests once",
+			"type": "shell",
+			"command": "npm",
+			"args": [
+				"test",
+				"--silent"
+			],
+			"isBackground": false,
+			"group": "test"
 		}
 	]
 }

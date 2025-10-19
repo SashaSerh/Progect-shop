@@ -1,4 +1,4 @@
-import { renderProducts } from './products.js';
+import { renderProducts, getMergedProducts, setProducts } from './products.js';
 
 const STORAGE_KEY = 'products_local_v1';
 
@@ -13,7 +13,29 @@ export function getLocalProducts() {
 }
 
 export function saveLocalProducts(list) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+  // Защита от переполнения localStorage, особенно из-за base64 изображений
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+  } catch (e) {
+    // Если превышена квота — пробуем обрезать изображения и сохранить заново
+    try {
+      const shrunk = (list || []).map(p => ({
+        ...p,
+        // если data URL слишком длинный, уменьшаем до заглушки
+        image: (p.image && typeof p.image === 'string' && p.image.length > 200000) ? '' : p.image,
+        images: Array.isArray(p.images) ? p.images.map(src => (src && src.length > 200000 ? '' : src)) : []
+      }));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(shrunk));
+    } catch (_) {
+      // Последний шанс — удалить самый старый элемент и попробовать снова
+      try {
+        const cur = Array.isArray(list) ? [...list] : [];
+        cur.sort((a,b) => new Date(a.createdAt||0) - new Date(b.createdAt||0));
+        cur.shift();
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(cur));
+      } catch (_) { /* give up */ }
+    }
+  }
 }
 
 export function upsertLocalProduct(product) {
@@ -99,11 +121,9 @@ export function initAdminProducts(translations, lang = 'ru') {
   showToast('Товар сохранён');
     // Re-render products with localStorage + bundled products
     try {
-      // merge local products (local have precedence)
-      const existing = window.__initialProducts || [];
-      const locals = getLocalProducts();
-      const merged = [...existing.filter(e => !locals.some(l => l.id === e.id)), ...locals];
-      // Temporarily assign to window.products used by products.js renderer
+      const merged = getMergedProducts();
+      // обновляем модульное состояние и глобальную переменную для вспомогательных модулей
+      setProducts(merged);
       window.products = merged;
       renderProducts(lang, translations, merged);
     } catch (err) { console.error('render error', err); }
@@ -155,9 +175,10 @@ export function initAdminProducts(translations, lang = 'ru') {
       const list = getLocalProducts().filter(p => String(p.id) !== String(id));
       saveLocalProducts(list);
       // re-render
-      const merged = [...(window.__initialProducts || []).filter(e => !list.some(l => l.id === e.id)), ...list];
-      window.products = merged;
-      renderProducts(lang, translations, merged);
+  const merged = getMergedProducts();
+  setProducts(merged);
+  window.products = merged;
+  renderProducts(lang, translations, merged);
       showToast('Товар удалён');
     }
   });

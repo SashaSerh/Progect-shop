@@ -2,7 +2,7 @@ import { cart, saveCart, updateCartUI, addToCart, removeFromCart, clearCart, tog
 import { toggleTheme, initTheme, bindThemeEvents } from './theme.js';
 import { translations, switchLanguage } from './i18n.js';
 import { initWelcomeOverlay, needsWelcomeOverlay } from './welcome.js';
-import { products, renderProducts, filterProducts, getMergedProducts } from './products.js';
+import { products, renderProducts, filterProducts, getMergedProducts, setProducts } from './products.js';
 import { contentConfig } from './content-config.js';
 import { initMarketing } from './marketing.js';
 import { initNavigation } from './navigation.js';
@@ -134,7 +134,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Рендерим товары сразу (в тестовой среде важна синхронность появления карточек)
     try {
         const merged = getMergedProducts();
-        // expose to window for other modules/tests
+        // синхронизируем модульную переменную products для всей логики (поиск, фильтры, корзина)
+        setProducts(merged);
+        // expose для тестов/утилит
         window.products = merged;
         renderProducts(savedLanguage, translations, merged);
     } catch (err) {

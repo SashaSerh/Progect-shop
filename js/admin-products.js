@@ -1,0 +1,169 @@
+import { renderProducts } from './products.js';
+
+const STORAGE_KEY = 'products_local_v1';
+
+function uid(prefix = 'p') {
+  return `${prefix}_${Math.random().toString(36).slice(2,9)}`;
+}
+
+export function getLocalProducts() {
+  try {
+    return JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null') || [];
+  } catch { return []; }
+}
+
+export function saveLocalProducts(list) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+}
+
+export function upsertLocalProduct(product) {
+  const list = getLocalProducts();
+  const idx = list.findIndex(p => p.id === product.id);
+  const now = new Date().toISOString();
+  product.updatedAt = now;
+  if (idx >= 0) list[idx] = product; else { product.createdAt = now; list.push(product); }
+  saveLocalProducts(list);
+  return product;
+}
+
+export function initAdminProducts(translations, lang = 'ru') {
+  const modal = document.getElementById('adminProductModal');
+  const form = document.getElementById('adminProductForm');
+  // small toast helper
+  const toastHost = document.getElementById('toast-container') || (() => {
+    const el = document.createElement('div'); el.id = 'toast-container'; document.body.appendChild(el); return el;
+  })();
+  const openBtn = document.createElement('button');
+  openBtn.textContent = 'Добавить товар';
+  openBtn.className = 'btn btn--primary header-add-product';
+  openBtn.type = 'button';
+  // Добавляем в header controls если есть
+  const headerControls = document.querySelector('.header__controls');
+  if (headerControls) headerControls.insertBefore(openBtn, headerControls.firstChild);
+
+  const closeBtn = document.getElementById('adminProductModalClose');
+  const cancelBtn = document.getElementById('adminProductCancel');
+  const fileInput = form.querySelector('input[name="image"]');
+  const preview = document.getElementById('adminImagePreview');
+
+  function openModal() {
+    form.reset();
+    const hid = form.querySelector('input[name="_image_data"]'); if (hid) hid.remove();
+    modal.style.display = 'flex';
+    const first = form.querySelector('input[name="title_ru"]');
+    first?.focus();
+  }
+  function closeModal() {
+    modal.style.display = 'none';
+    form.reset();
+    preview.innerHTML = '';
+  }
+
+  openBtn.addEventListener('click', openModal);
+  closeBtn?.addEventListener('click', closeModal);
+  cancelBtn?.addEventListener('click', closeModal);
+
+  // preview image
+  fileInput?.addEventListener('change', (e) => {
+    const f = e.target.files && e.target.files[0];
+    if (!f) return;
+    const reader = new FileReader();
+    reader.onload = function(ev) {
+      preview.innerHTML = `<img src="${ev.target.result}" alt="preview" style="max-width:200px;max-height:120px;"/>`;
+      // set hidden input value to base64 image for localStorage
+      const hidden = form.querySelector('input[name="_image_data"]');
+      if (!hidden) {
+        const inp = document.createElement('input'); inp.type = 'hidden'; inp.name = '_image_data'; inp.value = ev.target.result; form.appendChild(inp);
+      } else hidden.value = ev.target.result;
+    };
+    reader.readAsDataURL(f);
+  });
+
+  form.addEventListener('submit', (evt) => {
+    evt.preventDefault();
+    const data = new FormData(form);
+    const product = {
+      id: data.get('id') || uid('p'),
+      name: { ru: data.get('title_ru') || '', uk: data.get('title_uk') || '' },
+      description: { ru: data.get('description_ru') || '', uk: data.get('description_uk') || '' },
+      price: Number(data.get('price') || 0),
+      sku: data.get('sku') || '',
+      category: data.get('category') || 'service',
+      image: data.get('_image_data') || '',
+      images: data.get('_image_data') ? [data.get('_image_data')] : [],
+      inStock: data.get('inStock') === 'true',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    upsertLocalProduct(product);
+  showToast('Товар сохранён');
+    // Re-render products with localStorage + bundled products
+    try {
+      // merge local products (local have precedence)
+      const existing = window.__initialProducts || [];
+      const locals = getLocalProducts();
+      const merged = [...existing.filter(e => !locals.some(l => l.id === e.id)), ...locals];
+      // Temporarily assign to window.products used by products.js renderer
+      window.products = merged;
+      renderProducts(lang, translations, merged);
+    } catch (err) { console.error('render error', err); }
+    closeModal();
+  });
+
+  function showToast(text, ms = 2500) {
+    const t = document.createElement('div');
+    t.className = 'toast toast--info';
+    t.textContent = text;
+    toastHost.appendChild(t);
+    setTimeout(() => t.remove(), ms);
+  }
+
+  function fillFormWithProduct(product) {
+    if (!product) return;
+    form.querySelector('input[name="id"]').value = product.id || '';
+    form.querySelector('input[name="title_ru"]').value = product.name?.ru || '';
+    form.querySelector('input[name="title_uk"]').value = product.name?.uk || '';
+    form.querySelector('textarea[name="description_ru"]').value = product.description?.ru || '';
+    form.querySelector('textarea[name="description_uk"]').value = product.description?.uk || '';
+    form.querySelector('input[name="price"]').value = product.price || 0;
+    form.querySelector('input[name="sku"]').value = product.sku || '';
+    form.querySelector('input[name="category"]').value = product.category || '';
+    form.querySelector('select[name="inStock"]').value = product.inStock ? 'true' : 'false';
+    const preview = document.getElementById('adminImagePreview');
+    preview.innerHTML = '';
+    if (product.image) preview.innerHTML = `<img src="${product.image}" style="max-width:200px;max-height:120px;"/>`;
+  }
+
+  // Delegate edit/delete actions from product cards
+  document.addEventListener('click', (e) => {
+    const el = e.target;
+    if (!(el instanceof HTMLElement)) return;
+    // edit button: .product-card__button with data-edit
+    if (el.matches('.product-card__button[data-edit]')) {
+      const id = el.getAttribute('data-id');
+      const locals = getLocalProducts();
+      const prod = locals.find(p => String(p.id) === String(id));
+      if (prod) {
+        fillFormWithProduct(prod);
+        modal.style.display = 'flex';
+      }
+    }
+    // delete button: .product-card__button with data-delete
+    if (el.matches('.product-card__button[data-delete]')) {
+      const id = el.getAttribute('data-id');
+      if (!confirm('Удалить товар?')) return;
+      const list = getLocalProducts().filter(p => String(p.id) !== String(id));
+      saveLocalProducts(list);
+      // re-render
+      const merged = [...(window.__initialProducts || []).filter(e => !list.some(l => l.id === e.id)), ...list];
+      window.products = merged;
+      renderProducts(lang, translations, merged);
+      showToast('Товар удалён');
+    }
+  });
+
+  // On init: cache initial products available on window (from products.js)
+  try { window.__initialProducts = window.products || []; } catch {}
+}
+
+export default { initAdminProducts };

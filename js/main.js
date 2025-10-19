@@ -2,7 +2,7 @@ import { cart, saveCart, updateCartUI, addToCart, removeFromCart, clearCart, tog
 import { toggleTheme, initTheme, bindThemeEvents } from './theme.js';
 import { translations, switchLanguage } from './i18n.js';
 import { initWelcomeOverlay, needsWelcomeOverlay } from './welcome.js';
-import { products, renderProducts, filterProducts } from './products.js';
+import { products, renderProducts, filterProducts, getMergedProducts } from './products.js';
 import { contentConfig } from './content-config.js';
 import { initMarketing } from './marketing.js';
 import { initNavigation } from './navigation.js';
@@ -132,7 +132,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         switchLanguage(savedLanguage);
     }
     // Рендерим товары сразу (в тестовой среде важна синхронность появления карточек)
-    renderProducts(savedLanguage, translations);
+    try {
+        const merged = getMergedProducts();
+        // expose to window for other modules/tests
+        window.products = merged;
+        renderProducts(savedLanguage, translations, merged);
+    } catch (err) {
+        renderProducts(savedLanguage, translations);
+    }
 
     // Загружаем компонент приветствия (лениво) и отображаем, если первый визит
     // Show overlay if cookie missing (first visit or expired manual clear scenario)
@@ -142,6 +149,27 @@ document.addEventListener('DOMContentLoaded', async () => {
     } catch (e) { /* ignore */ }
     // После первичного рендера привяжем переход на страницу товара
     bindProductCardNavigation();
+
+    // Загрузим админ-форму для добавления товаров и инициализируем модуль
+    try {
+        // Попробуем получить HTML компонента и вставить в body (если не был загружен автоматически)
+        const resp = await fetch('components/admin-product-form.html');
+        if (resp.ok) {
+            const html = await resp.text();
+            // Вставим в конец body только если модал ещё не присутствует
+            if (!document.getElementById('adminProductModal')) {
+                const wrapper = document.createElement('div');
+                wrapper.innerHTML = html;
+                document.body.appendChild(wrapper.firstElementChild);
+            }
+        }
+    } catch (err) { /* ignore fetch errors */ }
+    try {
+        const admin = await import('./admin-products.js');
+        if (admin && typeof admin.initAdminProducts === 'function') {
+            admin.initAdminProducts(translations, savedLanguage);
+        }
+    } catch (err) { /* ignore */ }
 
     // Инициализируем маркетинговые CTA и форму контактов (кнопки позвонить/WhatsApp/Telegram)
     try { initMarketing(); } catch (e) { /* no-op */ }

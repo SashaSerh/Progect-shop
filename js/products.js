@@ -1,4 +1,4 @@
-export const products = [
+export let products = [
     {
         id: 1,
         name: { ru: "Кондиционер EcoCool", uk: "Кондиціонер EcoCool" },
@@ -121,20 +121,31 @@ export function renderProducts(lang, translations, filteredProducts = products) 
     const isPrimary = idx === 0; // fallback: первый элемент
     const loadingAttr = isPrimary ? 'eager' : 'lazy';
     const fetchPrio = isPrimary ? 'high' : 'low';
-        productCard.innerHTML = `
-          <img src="${product.image}"
-              alt="${product.name[lang]}"
-              class="product-card__image lqip"
-              loading="${loadingAttr}" decoding="async" fetchpriority="${fetchPrio}"
-              srcset="${product.image.replace('600','320')} 320w, ${product.image.replace('600','480')} 480w, ${product.image} 600w, ${product.images?.[0] || product.image} 1200w"
-              sizes="(max-width: 480px) 45vw, (max-width: 768px) 30vw, 240px"
-              onerror="this.src='https://placehold.co/150x150/blue/white?text=Image+Not+Found'">
-          <h3 class="product-card__title">${product.name[lang]}</h3>
-          <p class="product-card__description">${product.description[lang]}</p>
-          <p class="product-card__price">${Math.round(product.price).toLocaleString('uk-UA', { maximumFractionDigits: 0 })} грн</p>
-          <button class="product-card__button" data-id="${product.id}" data-i18n="service-order">${translations[lang]['service-order']}</button>
-                    <button class="product-card__more card-actions-size--compact" data-id="${product.id}" data-i18n="details">${translations[lang]['details'] || 'Подробнее'}</button>
-        `;
+                // compute admin action buttons if this product exists in localStorage or has local id
+                let adminHtml = '';
+                try {
+                        const locals = JSON.parse(localStorage.getItem('products_local_v1') || '[]');
+                        const isLocal = String(product.id).startsWith('p_') || (Array.isArray(locals) && locals.some(lp => String(lp.id) === String(product.id)));
+                        if (isLocal) {
+                                adminHtml = `<div class="product-card__admin-actions"><button class="product-card__button" data-edit data-id="${product.id}">Редактировать</button><button class="product-card__button" data-delete data-id="${product.id}">Удалить</button></div>`;
+                        }
+                } catch (err) { adminHtml = ''; }
+
+                productCard.innerHTML = `
+                    <img src="${product.image}"
+                            alt="${product.name[lang]}"
+                            class="product-card__image lqip"
+                            loading="${loadingAttr}" decoding="async" fetchpriority="${fetchPrio}"
+                            srcset="${product.image.replace('600','320')} 320w, ${product.image.replace('600','480')} 480w, ${product.image} 600w, ${product.images?.[0] || product.image} 1200w"
+                            sizes="(max-width: 480px) 45vw, (max-width: 768px) 30vw, 240px"
+                            onerror="this.src='https://placehold.co/150x150/blue/white?text=Image+Not+Found'">
+                    <h3 class="product-card__title">${product.name[lang]}</h3>
+                    <p class="product-card__description">${product.description[lang]}</p>
+                    <p class="product-card__price">${Math.round(product.price).toLocaleString('uk-UA', { maximumFractionDigits: 0 })} грн</p>
+                    <button class="product-card__button" data-id="${product.id}" data-i18n="service-order">${translations[lang]['service-order']}</button>
+                                        <button class="product-card__more card-actions-size--compact" data-id="${product.id}" data-i18n="details">${translations[lang]['details'] || 'Подробнее'}</button>
+                    ${adminHtml}
+                `;
         productsGrid.appendChild(productCard);
         // LQIP: снимаем блюр после загрузки
         const imgEl = productCard.querySelector('img.product-card__image');
@@ -240,6 +251,27 @@ export function showProductsSkeleton(count = 6) {
         `;
         productsGrid.appendChild(card);
     }
+}
+
+// Возвращает объединённый список: сначала встроенные products, затем локальные (localStorage) с приоритетом локальных
+export function getMergedProducts() {
+    try {
+        const locals = JSON.parse(localStorage.getItem('products_local_v1') || '[]');
+        if (!Array.isArray(locals) || locals.length === 0) return products;
+        // локальные переопределяют встроенные по id
+        const merged = [...products.filter(p => !locals.some(l => String(l.id) === String(p.id))), ...locals];
+        return merged;
+    } catch (err) {
+        return products;
+    }
+}
+
+export function setProducts(list) {
+    try {
+        if (Array.isArray(list)) {
+            products = list;
+        }
+    } catch {}
 }
 
 // Обертка для использования скелетона перед фильтрацией (искусственная задержка для UX)

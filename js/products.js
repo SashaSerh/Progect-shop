@@ -131,14 +131,37 @@ export function renderProducts(lang, translations, filteredProducts = products) 
                         }
                 } catch (err) { adminHtml = ''; }
 
+                // Build safe src and srcset (avoid empty URLs that cause '320w' requests)
+                const placeholder = 'https://placehold.co/600x400?text=No+Image';
+                const baseSrc = (product.image && String(product.image).trim().length) ? product.image : placeholder;
+                let srcsetAttr = '';
+                try {
+                    const isPicsum600 = /^https?:\/\/picsum\.photos\/600/i.test(baseSrc);
+                    if (isPicsum600) {
+                        const s320 = baseSrc.replace('600','320');
+                        const s480 = baseSrc.replace('600','480');
+                        const s600 = baseSrc;
+                        const s1200 = (product.images?.[0] && product.images[0].startsWith('http')) ? product.images[0] : s600;
+                        srcsetAttr = `${s320} 320w, ${s480} 480w, ${s600} 600w, ${s1200} 1200w`;
+                    } else if (baseSrc.startsWith('http')) {
+                        // Keep single candidate to avoid bad URLs
+                        srcsetAttr = `${baseSrc} 600w`;
+                    } else if (baseSrc.startsWith('data:')) {
+                        // data URL: don't add srcset to avoid duplicate heavy requests
+                        srcsetAttr = '';
+                    }
+                } catch {}
+
+                const srcsetLine = srcsetAttr ? `srcset="${srcsetAttr}"` : '';
+
                 productCard.innerHTML = `
-                    <img src="${product.image}"
-                            alt="${product.name[lang]}"
-                            class="product-card__image lqip"
-                            loading="${loadingAttr}" decoding="async" fetchpriority="${fetchPrio}"
-                            srcset="${product.image.replace('600','320')} 320w, ${product.image.replace('600','480')} 480w, ${product.image} 600w, ${product.images?.[0] || product.image} 1200w"
-                            sizes="(max-width: 480px) 45vw, (max-width: 768px) 30vw, 240px"
-                            onerror="this.src='https://placehold.co/150x150/blue/white?text=Image+Not+Found'">
+                  <img src="${baseSrc}"
+                      alt="${product.name[lang]}"
+                      class="product-card__image lqip"
+                      loading="${loadingAttr}" decoding="async" fetchpriority="${fetchPrio}"
+                      ${srcsetLine}
+                      sizes="(max-width: 480px) 45vw, (max-width: 768px) 30vw, 240px"
+                      onerror="this.src='https://placehold.co/150x150/blue/white?text=Image+Not+Found'">
                     <h3 class="product-card__title">${product.name[lang]}</h3>
                     <p class="product-card__description">${product.description[lang]}</p>
                     <p class="product-card__price">${Math.round(product.price).toLocaleString('uk-UA', { maximumFractionDigits: 0 })} грн</p>

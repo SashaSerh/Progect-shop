@@ -22,14 +22,16 @@ export function saveCart() {
     localStorage.setItem('cart', JSON.stringify(cart));
 }
 
-export function addToCart(productId, products) {
-    const product = products.find(p => p.id == productId);
+export function addToCart(productId, productsList, quantity = 1) {
+    const catalog = Array.isArray(productsList) && productsList.length ? productsList : products;
+    const product = catalog.find(p => p.id == productId);
     if (!product) return;
     const cartItem = cart.find(item => item.id == productId);
+    const safeQuantity = Math.max(1, Math.min(99, Number(quantity) || 1));
     if (cartItem) {
-        cartItem.quantity += 1;
+        cartItem.quantity += safeQuantity;
     } else {
-        cart.push({ id: productId, quantity: 1 });
+        cart.push({ id: productId, quantity: safeQuantity });
     }
     saveCart();
 }

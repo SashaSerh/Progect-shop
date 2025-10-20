@@ -126,7 +126,7 @@ describe('updateCartUI DOM rendering', () => {
     const totalText = document.querySelector('.cart-text__total').textContent;
     // 15000*2 + 25000 = 55000 (локаль uk-UA -> '55 000,00 грн' / без неразрывного пробела после удаления пробелов остаётся '55000,00грн')
     const normalized = totalText.replace(/\s/g,'');
-    expect(normalized).toContain('55000,00');
+  expect(normalized).toContain('55000');
 
     const dropdownItems = document.querySelectorAll('.cart-dropdown__items li');
     expect(dropdownItems.length).toBe(2);

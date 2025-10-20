@@ -693,7 +693,7 @@ function renderProductDetail(productId) {
 
         // Fill basic fields
     section.querySelector('.product-detail__title').textContent = product.name?.[lang] || product.name?.ru || '';
-    section.querySelector('.product-detail__price').textContent = `${Number(product.price).toLocaleString('uk-UA', { minimumFractionDigits: 2 })} грн`;
+    section.querySelector('.product-detail__price').textContent = `${Math.round(Number(product.price)).toLocaleString('uk-UA', { maximumFractionDigits: 0 })} грн`;
     // Main image and thumbs
     const imgEl = section.querySelector('.product-detail__image');
     if (imgEl) {

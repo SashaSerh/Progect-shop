@@ -221,10 +221,10 @@ export function renderProducts(lang, translations, filteredProducts = products) 
                 const srcsetLine = srcsetAttr ? `srcset="${srcsetAttr}"` : '';
 
                                 // Price block with optional old price
-                                const formatUA = (v) => Math.round(v).toLocaleString('uk-UA', { maximumFractionDigits: 0 });
-                                let priceHtml = `${formatUA(product.price)} грн ${localBadge}`;
+                const formatPriceInt = (v) => Math.round(v).toLocaleString('uk-UA', { maximumFractionDigits: 0 });
+                let priceHtml = `${formatPriceInt(product.price)} грн ${localBadge}`;
                                 if (typeof product.oldPrice === 'number' && product.oldPrice > product.price) {
-                                        priceHtml = `<span class="product-card__price-current">${formatUA(product.price)} грн</span> <s class="product-card__price-old" aria-label="Старая цена">${formatUA(product.oldPrice)} грн</s> ${localBadge}`;
+                    priceHtml = `<span class="product-card__price-current">${formatPriceInt(product.price)} грн</span> <s class="product-card__price-old" aria-label="Старая цена">${formatPriceInt(product.oldPrice)} грн</s> ${localBadge}`;
                                 }
 
                                 productCard.innerHTML = `

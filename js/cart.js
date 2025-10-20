@@ -546,7 +546,7 @@ export function updateCartUI(translations, lang) {
     });
     
     if (cartItemsText) cartItemsText.textContent = translations[lang]['cart-items'].replace('0', totalItems);
-    const fmt = (v) => Number(v).toLocaleString('uk-UA', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const fmt = (v) => Math.round(Number(v)).toLocaleString('uk-UA', { maximumFractionDigits: 0 });
     if (cartTotalText) cartTotalText.textContent = `${fmt(totalPrice)} грн`;
     if (cartDropdownSummary) cartDropdownSummary.textContent = translations[lang]['cart-total'].replace('$0.00', `${fmt(totalPrice)} грн`);
     if (cartSummary) cartSummary.textContent = translations[lang]['cart-total'].replace('$0.00', `${fmt(totalPrice)} грн`);

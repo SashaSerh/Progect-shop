@@ -1,4 +1,4 @@
-export let products = [
+const baseProducts = [
     {
         id: 1,
         name: { ru: "Кондиционер EcoCool", uk: "Кондиціонер EcoCool" },
@@ -110,6 +110,150 @@ export let products = [
     }
 ];
 
+export let products = [...baseProducts];
+
+export function setProducts(list) {
+    products = Array.isArray(list) ? [...list] : [...baseProducts];
+    if (typeof window !== 'undefined') {
+        window.products = products;
+    }
+}
+
+export function getProducts() {
+    return products;
+}
+
+export function getMergedProducts() {
+    try {
+        const localRaw = typeof localStorage !== 'undefined' ? localStorage.getItem('products_local_v1') : null;
+        const localProducts = localRaw ? JSON.parse(localRaw) : [];
+        if (Array.isArray(localProducts) && localProducts.length) {
+            return [...baseProducts, ...localProducts];
+        }
+    } catch (_) { /* ignore malformed local storage */ }
+    return [...baseProducts];
+}
+
+const FAVORITES_STORAGE_KEY = 'products_favorites_v1';
+const COMPARE_STORAGE_KEY = 'products_compare_v1';
+
+function loadStoredIds(key) {
+    if (typeof localStorage === 'undefined') return new Set();
+    try {
+        const raw = localStorage.getItem(key);
+        if (!raw) return new Set();
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) {
+            return new Set(parsed.map((value) => String(value)));
+        }
+    } catch (_) { /* ignore broken payload */ }
+    return new Set();
+}
+
+let favoriteIds = loadStoredIds(FAVORITES_STORAGE_KEY);
+let compareIds = loadStoredIds(COMPARE_STORAGE_KEY);
+
+function persistIds(key, idsSet) {
+    if (typeof localStorage === 'undefined') return;
+    try {
+        localStorage.setItem(key, JSON.stringify(Array.from(idsSet)));
+    } catch (_) { /* ignore storage quota */ }
+}
+
+function hydrateCollectionsFromStorage() {
+    if (typeof localStorage === 'undefined') return;
+    favoriteIds = loadStoredIds(FAVORITES_STORAGE_KEY);
+    compareIds = loadStoredIds(COMPARE_STORAGE_KEY);
+}
+
+function dispatchCollectionEvent(name, ids) {
+    if (typeof window === 'undefined') return;
+    try {
+        window.dispatchEvent(new CustomEvent(name, { detail: { ids } }));
+    } catch (_) { /* ignore event issues */ }
+}
+
+export function getFavoriteIds() {
+    return Array.from(favoriteIds);
+}
+
+export function getCompareIds() {
+    return Array.from(compareIds);
+}
+
+export function isFavorite(id) {
+    return favoriteIds.has(String(id));
+}
+
+export function isCompared(id) {
+    return compareIds.has(String(id));
+}
+
+export function toggleFavorite(id) {
+    const key = String(id);
+    let isActive;
+    if (favoriteIds.has(key)) {
+        favoriteIds.delete(key);
+        isActive = false;
+    } else {
+        favoriteIds.add(key);
+        isActive = true;
+    }
+    persistIds(FAVORITES_STORAGE_KEY, favoriteIds);
+    if (typeof window !== 'undefined') {
+        window.productsFavorites = getFavoriteIds();
+    }
+    dispatchCollectionEvent('favorites:change', getFavoriteIds());
+    return isActive;
+}
+
+export function toggleCompare(id) {
+    const key = String(id);
+    let isActive;
+    if (compareIds.has(key)) {
+        compareIds.delete(key);
+        isActive = false;
+    } else {
+        compareIds.add(key);
+        isActive = true;
+    }
+    persistIds(COMPARE_STORAGE_KEY, compareIds);
+    if (typeof window !== 'undefined') {
+        window.productsCompare = getCompareIds();
+    }
+    dispatchCollectionEvent('compare:change', getCompareIds());
+    return isActive;
+}
+
+export function clearCompare() {
+    if (!compareIds.size) {
+        return [];
+    }
+    compareIds.clear();
+    persistIds(COMPARE_STORAGE_KEY, compareIds);
+    if (typeof window !== 'undefined') {
+        window.productsCompare = [];
+    }
+    dispatchCollectionEvent('compare:change', []);
+    return [];
+}
+
+// При загрузке модуля публикуем актуальную коллекцию в window (если доступен)
+if (typeof window !== 'undefined') {
+    window.products = products;
+    window.productsFavorites = getFavoriteIds();
+    window.productsCompare = getCompareIds();
+    window.addEventListener('storage', (event) => {
+        if (event.key === FAVORITES_STORAGE_KEY || event.key === COMPARE_STORAGE_KEY) {
+            hydrateCollectionsFromStorage();
+            window.productsFavorites = getFavoriteIds();
+            window.productsCompare = getCompareIds();
+            dispatchCollectionEvent('favorites:change', getFavoriteIds());
+            dispatchCollectionEvent('compare:change', getCompareIds());
+        }
+    });
+}
+
 // Convert a string to a deterministic hue (0..360) using a small hash.
 function hashCodeToHue(str) {
     if (!str) return 210; // default blue
@@ -128,6 +272,18 @@ export function renderProducts(lang, translations, filteredProducts = products) 
     productsGrid.innerHTML = '';
     const elevated = { set: false };
     const imgs = [];
+    const langDict = (translations && translations[lang]) || (translations && translations['ru']) || {};
+    const fallbackDict = (translations && translations['ru']) || {};
+    const quantityLabel = langDict['quantity-label'] || fallbackDict['quantity-label'] || 'Количество';
+    const quantityDecreaseLabel = langDict['quantity-decrease'] || fallbackDict['quantity-decrease'] || 'Уменьшить количество';
+    const quantityIncreaseLabel = langDict['quantity-increase'] || fallbackDict['quantity-increase'] || 'Увеличить количество';
+    hydrateCollectionsFromStorage();
+    const quickActionsLabel = langDict['quick-actions'] || fallbackDict['quick-actions'] || 'Quick actions';
+    const favoriteAddLabel = langDict['favorite-add'] || fallbackDict['favorite-add'] || 'Add to favorites';
+    const favoriteRemoveLabel = langDict['favorite-remove'] || fallbackDict['favorite-remove'] || 'Remove from favorites';
+    const compareAddLabel = langDict['compare-add'] || fallbackDict['compare-add'] || 'Add to compare';
+    const compareRemoveLabel = langDict['compare-remove'] || fallbackDict['compare-remove'] || 'Remove from compare';
+    const orderLabel = langDict['service-order'] || fallbackDict['service-order'] || 'Заказать';
     filteredProducts.forEach((product, idx) => {
         const productCard = document.createElement('div');
         productCard.classList.add('product-card');
@@ -173,12 +329,13 @@ export function renderProducts(lang, translations, filteredProducts = products) 
                 } catch(_) { /* ignore badge errors */ }
 
                     // Flag badges (из i18n.flags) stacked vertically at top-left over the image
-                    let flagBadgesHtml = '';
-                    try {
+                        let flagBadgesHtml = '';
+                        let colorMap = null;
+                        try {
                         const flags = Array.isArray(product.flags) ? product.flags : [];
                         if (flags.length) {
                             const dict = (translations && translations[lang] && translations[lang].flags) || {};
-                                    const colorMap = {};
+                                        colorMap = {};
                                     const items = flags.map(f => {
                                                 const key = typeof f === 'string' ? f : (f?.key || '');
                                                 const text = dict[key] || (typeof f === 'string' ? f : (f?.label || ''));
@@ -226,6 +383,10 @@ export function renderProducts(lang, translations, filteredProducts = products) 
                                 if (typeof product.oldPrice === 'number' && product.oldPrice > product.price) {
                     priceHtml = `<span class="product-card__price-current">${formatPriceInt(product.price)} грн</span> <s class="product-card__price-old" aria-label="Старая цена">${formatPriceInt(product.oldPrice)} грн</s> ${localBadge}`;
                                 }
+                const favoriteActive = isFavorite(product.id);
+                const compareActive = isCompared(product.id);
+                const favoriteLabel = favoriteActive ? favoriteRemoveLabel : favoriteAddLabel;
+                const compareLabel = compareActive ? compareRemoveLabel : compareAddLabel;
 
                                 productCard.innerHTML = `
                                  ${flagBadgesHtml}
@@ -240,14 +401,36 @@ export function renderProducts(lang, translations, filteredProducts = products) 
                     <h3 class="product-card__title">${product.name[lang]}</h3>
                     <p class="product-card__description">${product.description[lang]}</p>
                                         <p class="product-card__price">${priceHtml}</p>
-                    <button class="product-card__button" data-id="${product.id}" data-i18n="service-order">${(translations && translations[lang] && translations[lang]['service-order']) || 'Заказать'}</button>
+                    <div class="product-card__quick-actions" role="group" aria-label="${quickActionsLabel}">
+                        <button type="button" class="product-card__quick-btn${favoriteActive ? ' is-active' : ''}" data-action="favorite" data-id="${product.id}" aria-label="${favoriteLabel}" aria-pressed="${favoriteActive}" title="${favoriteLabel}">
+                            <svg class="product-card__quick-icon" aria-hidden="true" focusable="false">
+                                <use href="icons/icons-sprite.svg#icon-heart"></use>
+                            </svg>
+                        </button>
+                        <button type="button" class="product-card__quick-btn${compareActive ? ' is-active' : ''}" data-action="compare" data-id="${product.id}" aria-label="${compareLabel}" aria-pressed="${compareActive}" title="${compareLabel}">
+                            <svg class="product-card__quick-icon" aria-hidden="true" focusable="false">
+                                <use href="icons/icons-sprite.svg#icon-compare"></use>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="product-card__purchase">
+                        <div class="quantity-stepper quantity-stepper--vertical" role="group" aria-label="${quantityLabel}">
+                            <button type="button" class="quantity-stepper__btn quantity-stepper__btn--increment" data-action="increment" data-id="${product.id}" aria-label="${quantityIncreaseLabel}" aria-controls="qty-${product.id}">▲</button>
+                            <input type="number" id="qty-${product.id}" class="quantity-stepper__input" value="1" min="1" max="99" data-id="${product.id}" inputmode="numeric" pattern="\\d*" aria-label="${quantityLabel}">
+                            <button type="button" class="quantity-stepper__btn quantity-stepper__btn--decrement" data-action="decrement" data-id="${product.id}" aria-label="${quantityDecreaseLabel}" aria-controls="qty-${product.id}">▼</button>
+                        </div>
+                        <button class="product-card__button product-card__button--icon" data-id="${product.id}" data-i18n="service-order">
+                            <span class="sr-only">${orderLabel}</span>
+                            <img src="icons/shopping-bag-icon.svg" alt="" aria-hidden="true" class="product-card__button-icon">
+                        </button>
+                    </div>
                     <button class="product-card__more card-actions-size--compact" data-id="${product.id}" data-i18n="details">${(translations && translations[lang] && translations[lang]['details']) || 'Подробнее'}</button>
                     ${adminHtml}
                 `;
         productsGrid.appendChild(productCard);
         // Apply CSS variables for flag colors on the product card and add local style rules to use them
         try {
-            if (typeof colorMap !== 'undefined' && colorMap && Object.keys(colorMap).length) {
+            if (colorMap && Object.keys(colorMap).length) {
                 Object.entries(colorMap).forEach(([k, v]) => {
                     productCard.style.setProperty(`--flag-${k}-bg`, v);
                     productCard.style.setProperty(`--flag-${k}-color`, '#fff');
@@ -365,27 +548,6 @@ export function showProductsSkeleton(count = 6) {
         `;
         productsGrid.appendChild(card);
     }
-}
-
-// Возвращает объединённый список: сначала встроенные products, затем локальные (localStorage) с приоритетом локальных
-export function getMergedProducts() {
-    try {
-        const locals = JSON.parse(localStorage.getItem('products_local_v1') || '[]');
-        if (!Array.isArray(locals) || locals.length === 0) return products;
-        // локальные переопределяют встроенные по id
-        const merged = [...products.filter(p => !locals.some(l => String(l.id) === String(p.id))), ...locals];
-        return merged;
-    } catch (err) {
-        return products;
-    }
-}
-
-export function setProducts(list) {
-    try {
-        if (Array.isArray(list)) {
-            products = list;
-        }
-    } catch {}
 }
 
 // Обертка для использования скелетона перед фильтрацией (искусственная задержка для UX)

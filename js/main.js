@@ -1,8 +1,9 @@
 import { cart, saveCart, updateCartUI, addToCart, removeFromCart, clearCart, toggleCartDropdown, openCartModal, closeCartModal } from './cart.js';
-import { toggleTheme, initTheme, bindThemeEvents } from './theme.js';
+import { toggleTheme, initTheme } from './theme.js';
 import { translations, switchLanguage } from './i18n.js';
 import { initWelcomeOverlay, needsWelcomeOverlay } from './welcome.js';
-import { products, renderProducts, filterProducts, getMergedProducts, setProducts } from './products.js';
+import { products, renderProducts, filterProducts, toggleFavorite, toggleCompare } from './products.js';
+import { initCompareBar } from './compare-bar.js';
 import { contentConfig } from './content-config.js';
 import { initMarketing } from './marketing.js';
 import { initNavigation } from './navigation.js';
@@ -81,7 +82,50 @@ function showSearchSuggestions(query, lang) {
     searchDropdown.classList.add('search-dropdown--open');
 }
 
-document.addEventListener('DOMContentLoaded', async () => {
+// Saved language is used across listeners; keep at module scope so tests and other modules can read it
+let savedLanguage;
+let mobileHeaderInitialized = false;
+
+if (typeof window !== 'undefined') {
+    window.addEventListener('languagechange', (event) => {
+        const lang = event?.detail?.lang;
+        if (typeof lang === 'string' && ['ru', 'uk'].includes(lang)) {
+            savedLanguage = lang;
+        }
+    });
+}
+
+function getCartAddedMessage(lang) {
+    const storedLang = (() => {
+        try { return localStorage.getItem('language'); } catch (_) { return null; }
+    })();
+    const fallback = ['ru', 'uk'].includes(lang) ? lang : (['ru', 'uk'].includes(storedLang) ? storedLang : 'ru');
+    return (translations?.[fallback]?.['cart-added']) || (translations?.ru?.['cart-added']) || 'Добавлено в корзину';
+}
+
+function showCartToast(message) {
+    const host = document.getElementById('toast-container');
+    if (!host) return;
+    while (host.children.length >= 3) {
+        host.removeChild(host.firstElementChild);
+    }
+    const toast = document.createElement('div');
+    toast.className = 'toast toast--success';
+    toast.setAttribute('role', 'status');
+    toast.textContent = message;
+    host.appendChild(toast);
+    const reveal = () => toast.classList.add('is-visible');
+    if (typeof requestAnimationFrame === 'function') requestAnimationFrame(reveal);
+    else setTimeout(reveal, 16);
+    setTimeout(() => {
+        toast.classList.remove('is-visible');
+        const removeToast = () => toast.remove();
+        toast.addEventListener('transitionend', removeToast, { once: true });
+        setTimeout(removeToast, 300); // fallback
+    }, 2400);
+}
+
+async function initApp() {
     await Promise.all([
         loadComponent('header-container', 'components/header.html'),
         loadComponent('hero-container', 'components/hero.html'),
@@ -89,6 +133,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         loadComponent('products-container', 'components/products.html'),
         // product-detail загружается по маршруту, но подключаем шаблон заранее (скрыт)
         loadComponent('product-detail-container', 'components/product-detail.html').catch(() => {}),
+        loadComponent('comparison-container', 'components/compare-bar.html'),
         loadComponent('contacts-container', 'components/contacts.html'),
         loadComponent('portfolio-container', 'components/portfolio.html'),
         loadComponent('footer-container', 'components/footer.html'),
@@ -121,7 +166,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Инициализация языка и первичный рендер
     // Язык по умолчанию теперь Ukrainian (uk). Показываем приветственный выбор, если язык ещё не установлен.
     // Cookie helpers for language selection expiry
-    let savedLanguage = localStorage.getItem('language');
+    savedLanguage = localStorage.getItem('language');
     const cookieMissing = needsWelcomeOverlay(); // now always true (overlay each visit)
     if (!['ru','uk'].includes(savedLanguage)) {
         savedLanguage = 'uk';
@@ -132,16 +177,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         switchLanguage(savedLanguage);
     }
     // Рендерим товары сразу (в тестовой среде важна синхронность появления карточек)
-    try {
-        const merged = getMergedProducts();
-        // синхронизируем модульную переменную products для всей логики (поиск, фильтры, корзина)
-        setProducts(merged);
-        // expose для тестов/утилит
-        window.products = merged;
-        renderProducts(savedLanguage, translations, merged);
-    } catch (err) {
-        renderProducts(savedLanguage, translations);
-    }
+    renderProducts(savedLanguage, translations);
+    initCompareBar(savedLanguage);
 
     // Загружаем компонент приветствия (лениво) и отображаем, если первый визит
     // Show overlay if cookie missing (first visit or expired manual clear scenario)
@@ -338,7 +375,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     initDesktopHeaderCondense();
     
     // Привязываем обработчики тем ПОСЛЕ инициализации мобильного хедера
-    bindThemeEvents();
+    // Делегирование клика по .theme-toggle обеспечивает единый источник обработчика
+    document.addEventListener('click', (e) => {
+        const t = e.target;
+        if (!(t instanceof HTMLElement)) return;
+        const btn = t.closest('.theme-toggle');
+        if (btn) {
+            try { toggleTheme(); } catch(_) {}
+        }
+    });
 
     const profileButton = document.getElementById('profileButton');
     const profileModal = document.getElementById('profileModal');
@@ -446,7 +491,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // Старый обработчик удален - теперь bindThemeEvents() обрабатывает все кнопки тем
+    // Обработчики темы подключаются через делегирование ниже
 
     const checkoutButton = document.querySelector('.cart-button--checkout');
     if (checkoutButton) checkoutButton.addEventListener('click', openCartModal);
@@ -457,21 +502,82 @@ document.addEventListener('DOMContentLoaded', async () => {
         updateCartUI(translations, savedLanguage);
     });
 
+    const clampQuantity = (value) => {
+        const numeric = Math.floor(Number(value));
+        if (!Number.isFinite(numeric) || numeric < 1) return 1;
+        return numeric > 99 ? 99 : numeric;
+    };
+
     const productsGrid = document.querySelector('.products__grid');
     if (productsGrid) {
         productsGrid.addEventListener('click', (e) => {
-            if (e.target.classList.contains('product-card__button')) {
-                const productId = e.target.dataset.id;
-                addToCart(productId, products);
+            const target = e.target;
+            if (!(target instanceof Element)) return;
+            const quickBtn = target.closest('.product-card__quick-btn');
+            if (quickBtn) {
+                const action = quickBtn.dataset.action;
+                const productId = quickBtn.dataset.id;
+                if (!action || !productId) return;
+                let isActive = false;
+                if (action === 'favorite') {
+                    isActive = toggleFavorite(productId);
+                    const labelKey = isActive ? 'favorite-remove' : 'favorite-add';
+                    const label = (translations[savedLanguage] && translations[savedLanguage][labelKey]) || translations.ru[labelKey] || '';
+                    if (label) {
+                        quickBtn.setAttribute('aria-label', label);
+                        quickBtn.setAttribute('title', label);
+                    }
+                } else if (action === 'compare') {
+                    isActive = toggleCompare(productId);
+                    const labelKey = isActive ? 'compare-remove' : 'compare-add';
+                    const label = (translations[savedLanguage] && translations[savedLanguage][labelKey]) || translations.ru[labelKey] || '';
+                    if (label) {
+                        quickBtn.setAttribute('aria-label', label);
+                        quickBtn.setAttribute('title', label);
+                    }
+                } else {
+                    return;
+                }
+                quickBtn.classList.toggle('is-active', isActive);
+                quickBtn.setAttribute('aria-pressed', String(isActive));
+                return;
+            }
+            const quantityBtn = target.closest('.quantity-stepper__btn');
+            if (quantityBtn) {
+                const card = quantityBtn.closest('.product-card');
+                const input = card?.querySelector('.quantity-stepper__input');
+                if (!input) return;
+                const delta = quantityBtn.dataset.action === 'increment' ? 1 : -1;
+                const next = clampQuantity(Number(input.value) + delta);
+                input.value = String(next);
+                return;
+            }
+            if (target.classList.contains('product-card__button') && !target.hasAttribute('data-edit') && !target.hasAttribute('data-delete')) {
+                const productId = target.dataset.id;
+                if (!productId) return;
+                const card = target.closest('.product-card');
+                const input = card?.querySelector('.quantity-stepper__input');
+                const qty = clampQuantity(input ? Number(input.value) : 1);
+                if (input) input.value = String(qty);
+                addToCart(productId, products, qty);
                 updateCartUI(translations, savedLanguage);
-            } else if (e.target.classList.contains('product-card__image') || e.target.classList.contains('product-card__title')) {
-                // переход на страницу детали товара
-                const card = e.target.closest('.product-card');
+                showCartToast(getCartAddedMessage(savedLanguage));
+                return;
+            }
+            if (target.classList.contains('product-card__image') || target.classList.contains('product-card__title')) {
+                const card = target.closest('.product-card');
                 const id = card?.dataset.id;
                 if (id) {
                     location.hash = `#product-${id}`;
                 }
             }
+        });
+
+        productsGrid.addEventListener('change', (e) => {
+            const input = e.target;
+            if (!(input instanceof HTMLInputElement)) return;
+            if (!input.classList.contains('quantity-stepper__input')) return;
+            input.value = String(clampQuantity(input.value));
         });
     }
 
@@ -482,6 +588,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const productId = e.target.dataset.id;
                 addToCart(productId, products);
                 updateCartUI(translations, savedLanguage);
+                showCartToast(getCartAddedMessage(savedLanguage));
             } else if (e.target.classList.contains('service-card__title')) {
                 const card = e.target.closest('.service-card');
                 const btn = card?.querySelector('.service-card__button');
@@ -587,7 +694,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         heroImg.addEventListener('load', mark, { once: true });
         if (heroImg.complete && heroImg.naturalWidth > 0) mark();
     }
-});
+};
 
 
 // Функция для изменения цветовой схемы логотипа
@@ -605,6 +712,14 @@ function changeLogoColorScheme(scheme) {
     
     // Сохраняем выбор в localStorage
     localStorage.setItem('logoColorScheme', scheme || 'default');
+}
+
+// Run initApp immediately if document already parsed (tests import the module), otherwise wait for DOMContentLoaded
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initApp);
+} else {
+    // fire-and-forget
+    initApp().catch(() => {});
 }
 
 // Инициализация цветовой схемы логотипа при загрузке
@@ -773,7 +888,11 @@ function renderProductDetail(productId) {
     // Actions
     const btn = section.querySelector('.product-detail__addtocart');
     if (btn) {
-        btn.onclick = () => { addToCart(product.id, products); updateCartUI(translations, lang); };
+        btn.onclick = () => {
+            addToCart(product.id, products);
+            updateCartUI(translations, lang);
+            showCartToast(getCartAddedMessage(lang));
+        };
     }
     // Set document title
     try { document.title = `${product.name?.[lang] || ''} — ${translations?.[lang]?.['site-title'] || ''}`; } catch {}
@@ -1188,6 +1307,9 @@ function initModernMobileEffects() {
 
 // Функция инициализации мобильного заголовка
 function initMobileHeader() {
+    if (mobileHeaderInitialized) {
+        return;
+    }
     // Поддержка как старого, так и нового хедера
     const hamburgerToggle = document.querySelector('.hamburger-toggle') || document.querySelector('.minimal-menu-btn');
     const mobileNav = document.querySelector('.mobile-nav');
@@ -1227,6 +1349,8 @@ function initMobileHeader() {
         console.log('Мобильный заголовок не найден');
         return;
     }
+
+    mobileHeaderInitialized = true;
 
     // Инициализация доступности: запрещаем фокус на скрытых элементах
     const focusableElements = mobileNav.querySelectorAll('a, button, input, textarea, select, [tabindex]:not([tabindex="-1"])');

@@ -2,8 +2,9 @@ import { cart, saveCart, updateCartUI, addToCart, removeFromCart, clearCart, tog
 import { toggleTheme, initTheme } from './theme.js';
 import { translations, switchLanguage } from './i18n.js';
 import { initWelcomeOverlay, needsWelcomeOverlay } from './welcome.js';
-import { products, renderProducts, filterProducts, toggleFavorite, toggleCompare } from './products.js';
+import { products, renderProducts, filterProducts, toggleFavorite, toggleCompare, getFavoriteIds, getCompareIds } from './products.js';
 import { initCompareBar } from './compare-bar.js';
+import { initCompareModal } from './compare-modal.js';
 import { contentConfig } from './content-config.js';
 import { initMarketing } from './marketing.js';
 import { initNavigation } from './navigation.js';
@@ -103,26 +104,223 @@ function getCartAddedMessage(lang) {
     return (translations?.[fallback]?.['cart-added']) || (translations?.ru?.['cart-added']) || 'Добавлено в корзину';
 }
 
-function showCartToast(message) {
+const MAX_TOAST_STACK = 3;
+const TOAST_TYPE_CLASS = {
+    cart: 'toast--success',
+    success: 'toast--success',
+    favorite: 'toast--favorite',
+    compare: 'toast--compare'
+};
+
+let suppressFavoriteToast = false;
+let suppressCompareToast = false;
+let collectionBadgesInitialized = false;
+
+const badgeSelectors = {
+    favorite: ['favoriteBadge', 'mobileFavoriteBadge'],
+    compare: ['compareBadge', 'mobileCompareBadge']
+};
+
+const badgeCache = {
+    favorite: [],
+    compare: []
+};
+
+function translateKey(key, lang = savedLanguage) {
+    const fallback = translations?.ru || {};
+    const dict = translations?.[lang] || fallback;
+    return dict?.[key] || fallback?.[key] || '';
+}
+
+function getProductDisplayName(productId, lang = savedLanguage) {
+    const targetId = String(productId);
+    const product = Array.isArray(products) ? products.find((item) => String(item.id) === targetId) : null;
+    return (product?.name?.[lang]) || (product?.name?.ru) || '';
+}
+
+function showActionToast({ message, type = 'success', actions = [], duration = 2600 } = {}) {
+    if (!message) return () => {};
     const host = document.getElementById('toast-container');
-    if (!host) return;
-    while (host.children.length >= 3) {
+    if (!host) return () => {};
+
+    while (host.children.length >= MAX_TOAST_STACK) {
         host.removeChild(host.firstElementChild);
     }
+
     const toast = document.createElement('div');
-    toast.className = 'toast toast--success';
+    const typeClass = TOAST_TYPE_CLASS[type] || TOAST_TYPE_CLASS.success;
+    toast.className = ['toast', typeClass].filter(Boolean).join(' ');
     toast.setAttribute('role', 'status');
-    toast.textContent = message;
+
+    const messageEl = document.createElement('div');
+    messageEl.className = 'toast__message';
+    messageEl.textContent = message;
+    toast.appendChild(messageEl);
+
+    if (Array.isArray(actions) && actions.length) {
+        const actionsWrap = document.createElement('div');
+        actionsWrap.className = 'toast__actions';
+        actions.forEach((action) => {
+            if (!action || !action.label) return;
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'toast__button';
+            btn.textContent = action.label;
+            if (action.ariaLabel) btn.setAttribute('aria-label', action.ariaLabel);
+            btn.addEventListener('click', () => {
+                try { action.handler?.(); } catch (_) { /* noop */ }
+                if (action.autoClose !== false) hideToast();
+            });
+            actionsWrap.appendChild(btn);
+        });
+        if (actionsWrap.childElementCount) {
+            toast.appendChild(actionsWrap);
+        }
+    }
+
     host.appendChild(toast);
+
     const reveal = () => toast.classList.add('is-visible');
     if (typeof requestAnimationFrame === 'function') requestAnimationFrame(reveal);
     else setTimeout(reveal, 16);
-    setTimeout(() => {
+
+    let removed = false;
+    let timerId = null;
+    const hideDelay = (typeof duration === 'number' && Number.isFinite(duration) && duration > 0) ? duration : null;
+    if (hideDelay !== null) {
+        timerId = setTimeout(() => hideToast(), hideDelay);
+    }
+
+    function hideToast() {
+        if (removed) return;
+        removed = true;
+        if (timerId) clearTimeout(timerId);
         toast.classList.remove('is-visible');
-        const removeToast = () => toast.remove();
-        toast.addEventListener('transitionend', removeToast, { once: true });
-        setTimeout(removeToast, 300); // fallback
-    }, 2400);
+        const cleanup = () => toast.remove();
+        toast.addEventListener('transitionend', cleanup, { once: true });
+        setTimeout(cleanup, 320);
+    }
+
+    toast.addEventListener('mouseenter', () => {
+        if (timerId) {
+            clearTimeout(timerId);
+            timerId = null;
+        }
+    });
+
+    toast.addEventListener('mouseleave', () => {
+        if (!removed && hideDelay !== null && !timerId) {
+            timerId = setTimeout(() => hideToast(), 1200);
+        }
+    });
+
+    return hideToast;
+}
+
+function ensureBadgeRefs(type) {
+    const selectors = badgeSelectors[type];
+    if (!selectors) return [];
+    badgeCache[type] = selectors.map((id, index) => {
+        const cached = badgeCache[type][index];
+        if (cached && cached.isConnected) return cached;
+        return document.getElementById(id);
+    }).filter(Boolean);
+    return badgeCache[type];
+}
+
+function updateBadgeGroup(type, ids, lang = savedLanguage) {
+    const elements = ensureBadgeRefs(type);
+    if (!elements.length) return;
+    const list = Array.isArray(ids) ? ids : (type === 'favorite' ? getFavoriteIds() : getCompareIds());
+    const normalized = Array.isArray(list) ? list : [];
+    const count = normalized.length;
+    const labelKey = type === 'favorite' ? 'badge-favorites' : 'badge-compare';
+    const label = translateKey(labelKey, lang);
+    const accessible = label ? `${label}: ${count}` : String(count);
+    elements.forEach((el) => {
+        if (!el) return;
+        el.hidden = count === 0;
+        el.textContent = String(count);
+        if (label) {
+            el.dataset.label = label;
+        }
+        el.setAttribute('aria-label', accessible);
+        el.setAttribute('title', accessible);
+    });
+}
+
+function updateQuickActionButtons(type, ids, lang = savedLanguage) {
+    const action = type === 'favorite' ? 'favorite' : 'compare';
+    const activeSet = new Set((Array.isArray(ids) ? ids : []).map(String));
+    const addKey = action === 'favorite' ? 'favorite-add' : 'compare-add';
+    const removeKey = action === 'favorite' ? 'favorite-remove' : 'compare-remove';
+    const addLabel = translateKey(addKey, lang);
+    const removeLabel = translateKey(removeKey, lang);
+    const selector = '.product-card__quick-btn[data-action=' + action + ']';
+    document.querySelectorAll(selector).forEach((btn) => {
+        const id = btn.dataset.id;
+        const isActive = activeSet.has(String(id));
+        btn.classList.toggle('is-active', isActive);
+        btn.setAttribute('aria-pressed', String(isActive));
+        const label = isActive ? removeLabel : addLabel;
+        if (label) {
+            btn.setAttribute('aria-label', label);
+            btn.setAttribute('title', label);
+        }
+    });
+}
+
+function normalizeIds(list, fallbackGetter) {
+    if (Array.isArray(list)) return list.map(String);
+    if (typeof fallbackGetter === 'function') {
+        const fallback = fallbackGetter();
+        return Array.isArray(fallback) ? fallback.map(String) : [];
+    }
+    return [];
+}
+
+function formatCollectionToastMessage(baseKey, productName, lang = savedLanguage) {
+    const base = translateKey(baseKey, lang);
+    if (productName) {
+        return `${base}: ${productName}`;
+    }
+    return base;
+}
+
+function initCollectionBadges() {
+    if (collectionBadgesInitialized) {
+        updateBadgeGroup('favorite', getFavoriteIds());
+        updateBadgeGroup('compare', getCompareIds());
+        updateQuickActionButtons('favorite', getFavoriteIds(), savedLanguage);
+        updateQuickActionButtons('compare', getCompareIds(), savedLanguage);
+        return;
+    }
+    collectionBadgesInitialized = true;
+
+    updateBadgeGroup('favorite', getFavoriteIds());
+    updateBadgeGroup('compare', getCompareIds());
+    updateQuickActionButtons('favorite', getFavoriteIds(), savedLanguage);
+    updateQuickActionButtons('compare', getCompareIds(), savedLanguage);
+
+    if (typeof window !== 'undefined') {
+        window.addEventListener('favorites:change', (event) => {
+            const ids = normalizeIds(event?.detail?.ids, getFavoriteIds);
+            updateBadgeGroup('favorite', ids);
+            updateQuickActionButtons('favorite', ids, savedLanguage);
+        });
+        window.addEventListener('compare:change', (event) => {
+            const ids = normalizeIds(event?.detail?.ids, getCompareIds);
+            updateBadgeGroup('compare', ids);
+            updateQuickActionButtons('compare', ids, savedLanguage);
+        });
+        window.addEventListener('languagechange', (event) => {
+            const lang = typeof event?.detail?.lang === 'string' ? event.detail.lang : savedLanguage;
+            updateBadgeGroup('favorite', getFavoriteIds(), lang);
+            updateBadgeGroup('compare', getCompareIds(), lang);
+            updateQuickActionButtons('favorite', getFavoriteIds(), lang);
+            updateQuickActionButtons('compare', getCompareIds(), lang);
+        });
+    }
 }
 
 async function initApp() {
@@ -134,6 +332,7 @@ async function initApp() {
         // product-detail загружается по маршруту, но подключаем шаблон заранее (скрыт)
         loadComponent('product-detail-container', 'components/product-detail.html').catch(() => {}),
         loadComponent('comparison-container', 'components/compare-bar.html'),
+    loadComponent('compare-modal-container', 'components/compare-modal.html'),
         loadComponent('contacts-container', 'components/contacts.html'),
         loadComponent('portfolio-container', 'components/portfolio.html'),
         loadComponent('footer-container', 'components/footer.html'),
@@ -179,6 +378,8 @@ async function initApp() {
     // Рендерим товары сразу (в тестовой среде важна синхронность появления карточек)
     renderProducts(savedLanguage, translations);
     initCompareBar(savedLanguage);
+    initCompareModal(savedLanguage);
+    initCollectionBadges();
 
     // Загружаем компонент приветствия (лениво) и отображаем, если первый визит
     // Show overlay if cookie missing (first visit or expired manual clear scenario)
@@ -518,28 +719,83 @@ async function initApp() {
                 const action = quickBtn.dataset.action;
                 const productId = quickBtn.dataset.id;
                 if (!action || !productId) return;
+                const productName = getProductDisplayName(productId, savedLanguage);
                 let isActive = false;
                 if (action === 'favorite') {
+                    const skipToast = suppressFavoriteToast;
+                    if (suppressFavoriteToast) suppressFavoriteToast = false;
                     isActive = toggleFavorite(productId);
                     const labelKey = isActive ? 'favorite-remove' : 'favorite-add';
-                    const label = (translations[savedLanguage] && translations[savedLanguage][labelKey]) || translations.ru[labelKey] || '';
+                    const label = translateKey(labelKey, savedLanguage);
                     if (label) {
                         quickBtn.setAttribute('aria-label', label);
                         quickBtn.setAttribute('title', label);
                     }
+                    quickBtn.classList.toggle('is-active', isActive);
+                    quickBtn.setAttribute('aria-pressed', String(isActive));
+                    updateQuickActionButtons('favorite', getFavoriteIds(), savedLanguage);
+                    if (!skipToast) {
+                        const messageKey = isActive ? 'toast-favorite-added' : 'toast-favorite-removed';
+                        const message = formatCollectionToastMessage(messageKey, productName, savedLanguage);
+                        const undoLabel = translateKey('toast-undo', savedLanguage);
+                        const actions = [];
+                        if (undoLabel) {
+                            actions.push({
+                                label: undoLabel,
+                                handler: () => {
+                                    suppressFavoriteToast = true;
+                                    toggleFavorite(productId);
+                                    updateQuickActionButtons('favorite', getFavoriteIds(), savedLanguage);
+                                }
+                            });
+                        }
+                        showActionToast({ type: 'favorite', message, actions });
+                    }
                 } else if (action === 'compare') {
+                    const skipToast = suppressCompareToast;
+                    if (suppressCompareToast) suppressCompareToast = false;
                     isActive = toggleCompare(productId);
                     const labelKey = isActive ? 'compare-remove' : 'compare-add';
-                    const label = (translations[savedLanguage] && translations[savedLanguage][labelKey]) || translations.ru[labelKey] || '';
+                    const label = translateKey(labelKey, savedLanguage);
                     if (label) {
                         quickBtn.setAttribute('aria-label', label);
                         quickBtn.setAttribute('title', label);
+                    }
+                    quickBtn.classList.toggle('is-active', isActive);
+                    quickBtn.setAttribute('aria-pressed', String(isActive));
+                    updateQuickActionButtons('compare', getCompareIds(), savedLanguage);
+                    if (!skipToast) {
+                        const messageKey = isActive ? 'toast-compare-added' : 'toast-compare-removed';
+                        const message = formatCollectionToastMessage(messageKey, productName, savedLanguage);
+                        const undoLabel = translateKey('toast-undo', savedLanguage);
+                        const openLabel = translateKey('toast-open-compare', savedLanguage);
+                        const actions = [];
+                        if (isActive && openLabel) {
+                            actions.push({
+                                label: openLabel,
+                                handler: () => {
+                                    const ids = getCompareIds();
+                                    if (ids.length && typeof window !== 'undefined') {
+                                        window.dispatchEvent(new CustomEvent('compare:open', { detail: { ids } }));
+                                    }
+                                }
+                            });
+                        }
+                        if (undoLabel) {
+                            actions.push({
+                                label: undoLabel,
+                                handler: () => {
+                                    suppressCompareToast = true;
+                                    toggleCompare(productId);
+                                    updateQuickActionButtons('compare', getCompareIds(), savedLanguage);
+                                }
+                            });
+                        }
+                        showActionToast({ type: 'compare', message, actions });
                     }
                 } else {
                     return;
                 }
-                quickBtn.classList.toggle('is-active', isActive);
-                quickBtn.setAttribute('aria-pressed', String(isActive));
                 return;
             }
             const quantityBtn = target.closest('.quantity-stepper__btn');
@@ -561,7 +817,7 @@ async function initApp() {
                 if (input) input.value = String(qty);
                 addToCart(productId, products, qty);
                 updateCartUI(translations, savedLanguage);
-                showCartToast(getCartAddedMessage(savedLanguage));
+                showActionToast({ type: 'cart', message: getCartAddedMessage(savedLanguage) });
                 return;
             }
             if (target.classList.contains('product-card__image') || target.classList.contains('product-card__title')) {
@@ -588,7 +844,7 @@ async function initApp() {
                 const productId = e.target.dataset.id;
                 addToCart(productId, products);
                 updateCartUI(translations, savedLanguage);
-                showCartToast(getCartAddedMessage(savedLanguage));
+                showActionToast({ type: 'cart', message: getCartAddedMessage(savedLanguage) });
             } else if (e.target.classList.contains('service-card__title')) {
                 const card = e.target.closest('.service-card');
                 const btn = card?.querySelector('.service-card__button');
@@ -891,7 +1147,7 @@ function renderProductDetail(productId) {
         btn.onclick = () => {
             addToCart(product.id, products);
             updateCartUI(translations, lang);
-            showCartToast(getCartAddedMessage(lang));
+            showActionToast({ type: 'cart', message: getCartAddedMessage(lang) });
         };
     }
     // Set document title

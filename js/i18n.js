@@ -96,6 +96,15 @@ export const translations = {
         "welcome-continue": "Продолжить"
         ,
         "change-language": "Сменить язык"
+        ,
+        // Конфигурируемые ярлыки флагов на карточках
+        "flags": {
+            "sale": "Акция",
+            "top": "ТОП",
+            "popular": "Популярный",
+            "hit": "Хит",
+            "new": "Новинка"
+        }
     },
     uk: {
         "site-title": "ClimaTech",
@@ -200,6 +209,15 @@ export const translations = {
         "welcome-continue": "Продовжити"
         ,
         "change-language": "Змінити мову"
+        ,
+        // Конфігуровані позначки-флаги на картках
+        "flags": {
+            "sale": "Акція",
+            "top": "ТОП",
+            "popular": "Популярний",
+            "hit": "Хіт",
+            "new": "Новинка"
+        }
     }
 };
 

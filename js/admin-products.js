@@ -6,6 +6,29 @@ function uid(prefix = 'p') {
   return `${prefix}_${Math.random().toString(36).slice(2,9)}`;
 }
 
+// Deterministic hash -> hue (0..360)
+function hashCodeToHue(str) {
+  if (!str) return 210;
+  let h = 0;
+  for (let i = 0; i < str.length; i++) {
+    h = (h << 5) - h + str.charCodeAt(i);
+    h |= 0;
+  }
+  return Math.abs(h) % 360;
+}
+
+// Convert hsl to hex (#rrggbb)
+function hslToHex(h, s, l) {
+  s /= 100; l /= 100;
+  const k = n => (n + h / 30) % 12;
+  const a = s * Math.min(l, 1 - l);
+  const f = n => {
+    const color = l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)));
+    return Math.round(255 * color).toString(16).padStart(2, '0');
+  };
+  return `${f(0)}${f(8)}${f(4)}`;
+}
+
 export function getLocalProducts() {
   try {
     return JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null') || [];
@@ -59,17 +82,193 @@ export function initAdminProducts(translations, lang = 'ru') {
   openBtn.textContent = 'Добавить товар';
   openBtn.className = 'btn btn--primary header-add-product';
   openBtn.type = 'button';
+  // Кнопка очистки локальных товаров
+  const clearBtn = document.createElement('button');
+  clearBtn.textContent = 'Очистить локальные товары';
+  clearBtn.className = 'btn btn--ghost header-clear-products';
+  clearBtn.type = 'button';
   // Добавляем в header controls если есть
   const headerControls = document.querySelector('.header__controls');
-  if (headerControls) headerControls.insertBefore(openBtn, headerControls.firstChild);
+  if (headerControls) {
+    headerControls.insertBefore(openBtn, headerControls.firstChild);
+    headerControls.insertBefore(clearBtn, openBtn.nextSibling);
+  }
 
   const closeBtn = document.getElementById('adminProductModalClose');
   const cancelBtn = document.getElementById('adminProductCancel');
   const fileInput = form.querySelector('input[name="image"]');
   const preview = document.getElementById('adminImagePreview');
+  const flagSelector = document.getElementById('flagSelector');
+  const availableFlagsContainer = document.getElementById('availableFlags');
+  const selectedFlagsContainer = document.getElementById('selectedFlags');
+  const flagsHiddenInput = form.querySelector('input[name="_flags"]');
+
+  function serializeSelectedFlags() {
+    if (!selectedFlagsContainer || !flagsHiddenInput) return;
+    const items = Array.from(selectedFlagsContainer.querySelectorAll('.selected-flag')).map(el => ({ key: el.getAttribute('data-flag-key'), color: el.getAttribute('data-flag-color') || '' }));
+    flagsHiddenInput.value = JSON.stringify(items);
+  }
+
+  function renderSelectedFlags(list) {
+    if (!selectedFlagsContainer) return;
+    selectedFlagsContainer.innerHTML = '';
+    // list is array of objects { key, color } or strings
+    list.forEach(item => {
+      const key = typeof item === 'string' ? item : (item?.key || '');
+      const color = (typeof item === 'object' && item?.color) ? item.color : (localStorage.getItem('flag_color_defaults') ? (JSON.parse(localStorage.getItem('flag_color_defaults') || '{}')[key] || '') : '');
+      const wrapper = document.createElement('div');
+      wrapper.className = 'selected-flag';
+      wrapper.setAttribute('data-flag-key', key);
+      wrapper.setAttribute('data-flag-color', color || '');
+  wrapper.draggable = true;
+  wrapper.tabIndex = 0; // make focusable for keyboard reordering
+  wrapper.setAttribute('role','listitem');
+      wrapper.innerHTML = `
+        <span class="selected-flag__label">${key}</span>
+        <input type="color" class="selected-flag__color" value="${color || '#007aff'}" title="Цвет флага">
+        <button type="button" class="selected-flag__remove" aria-label="Удалить">✕</button>
+      `;
+      // drag handlers
+      wrapper.addEventListener('dragstart', (e) => {
+        wrapper.classList.add('dragging');
+        try { e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', key); } catch(_){}
+      });
+      wrapper.addEventListener('dragend', () => {
+        wrapper.classList.remove('dragging');
+        serializeSelectedFlags();
+      });
+      // keyboard reorder: ArrowUp/ArrowDown/Home/End
+      wrapper.addEventListener('keydown', (ev) => {
+        const keyName = ev.key;
+        if (['ArrowUp','ArrowDown','Home','End'].includes(keyName)) {
+          ev.preventDefault();
+          if (keyName === 'ArrowUp') {
+            const prev = wrapper.previousElementSibling;
+            if (prev) selectedFlagsContainer.insertBefore(wrapper, prev);
+          } else if (keyName === 'ArrowDown') {
+            const next = wrapper.nextElementSibling;
+            if (next) selectedFlagsContainer.insertBefore(next, wrapper);
+          } else if (keyName === 'Home') {
+            selectedFlagsContainer.insertBefore(wrapper, selectedFlagsContainer.firstChild);
+          } else if (keyName === 'End') {
+            selectedFlagsContainer.appendChild(wrapper);
+          }
+          serializeSelectedFlags();
+          // keep focus on moved item
+          wrapper.focus();
+        }
+      });
+      // remove
+      wrapper.querySelector('.selected-flag__remove').addEventListener('click', () => {
+        wrapper.remove();
+        serializeSelectedFlags();
+      });
+      // color change
+      const colorInput = wrapper.querySelector('.selected-flag__color');
+      if (colorInput) {
+        colorInput.addEventListener('input', (ev) => {
+          const v = ev.target.value;
+          wrapper.setAttribute('data-flag-color', v);
+          serializeSelectedFlags();
+        });
+      }
+      selectedFlagsContainer.appendChild(wrapper);
+    });
+
+    // allow reordering via dragover/drop
+    function getDragAfterElement(container, y) {
+      const draggableElements = [...container.querySelectorAll('.selected-flag:not(.dragging)')];
+      return draggableElements.reduce((closest, child) => {
+        const box = child.getBoundingClientRect();
+        const offset = y - box.top - box.height / 2;
+        if (offset < 0 && offset > (closest.offset || -Infinity)) {
+          return { offset, element: child };
+        } else return closest;
+      }, { offset: -Infinity }).element;
+    }
+
+    selectedFlagsContainer.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      const dragging = selectedFlagsContainer.querySelector('.dragging');
+      if (!dragging) return;
+      const after = getDragAfterElement(selectedFlagsContainer, e.clientY);
+      if (!after) selectedFlagsContainer.appendChild(dragging);
+      else selectedFlagsContainer.insertBefore(dragging, after);
+    });
+
+    serializeSelectedFlags();
+  }
+
+  function initFlagSelector() {
+    if (!availableFlagsContainer || !selectedFlagsContainer) return;
+    availableFlagsContainer.innerHTML = '';
+    const dict = (translations && translations[lang] && translations[lang].flags) || {};
+    const defaults = JSON.parse(localStorage.getItem('flag_color_defaults') || '{}');
+    // populate available flags with color pickers
+    Object.keys(dict).forEach(key => {
+      const wrap = document.createElement('div');
+      wrap.className = 'available-flag-item';
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'flag-chip';
+      btn.setAttribute('data-flag-key', key);
+      btn.textContent = dict[key] || key;
+      const color = defaults[key] || `#${((hashCodeToHue && ((hashCodeToHue(key)%360)|0))||210).toString(16)}`;
+      const colorInput = document.createElement('input');
+      colorInput.type = 'color';
+      colorInput.className = 'flag-default-color';
+      colorInput.value = defaults[key] || `#${hslToHex(hashCodeToHue(key),70,45)}`;
+      // save default color on change
+      colorInput.addEventListener('input', (e) => {
+        const cur = JSON.parse(localStorage.getItem('flag_color_defaults') || '{}');
+        cur[key] = e.target.value;
+        localStorage.setItem('flag_color_defaults', JSON.stringify(cur));
+      });
+      btn.addEventListener('click', () => {
+        // add to selected if not present, include current color
+        const exists = Array.from(selectedFlagsContainer.querySelectorAll('.selected-flag')).some(el => el.getAttribute('data-flag-key') === key);
+        if (exists) return;
+        const cur = Array.from(selectedFlagsContainer.querySelectorAll('.selected-flag')).map(el => ({ key: el.getAttribute('data-flag-key'), color: el.getAttribute('data-flag-color') }));
+        cur.push({ key, color: colorInput.value });
+        renderSelectedFlags(cur);
+      });
+      wrap.appendChild(btn);
+      wrap.appendChild(colorInput);
+      availableFlagsContainer.appendChild(wrap);
+    });
+  }
+
+  function initFlagSelector() {
+    if (!availableFlagsContainer || !selectedFlagsContainer) return;
+    availableFlagsContainer.innerHTML = '';
+    const dict = (translations && translations[lang] && translations[lang].flags) || {};
+    // populate available flags
+    Object.keys(dict).forEach(key => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'flag-chip';
+      btn.setAttribute('data-flag-key', key);
+      btn.textContent = dict[key] || key;
+      btn.addEventListener('click', () => {
+        // add to selected if not present
+        const exists = Array.from(selectedFlagsContainer.querySelectorAll('.selected-flag')).some(el => el.getAttribute('data-flag-key') === key);
+        if (exists) return;
+        const cur = Array.from(selectedFlagsContainer.querySelectorAll('.selected-flag')).map(el => el.getAttribute('data-flag-key'));
+        cur.push(key);
+        renderSelectedFlags(cur);
+      });
+      availableFlagsContainer.appendChild(btn);
+    });
+  }
+
+  // Initialize flag selector UI
+  initFlagSelector();
 
   function openModal() {
     form.reset();
+    // reset flags UI
+    selectedFlagsContainer && (selectedFlagsContainer.innerHTML = '');
+    flagsHiddenInput && (flagsHiddenInput.value = '[]');
     const hid = form.querySelector('input[name="_image_data"]'); if (hid) hid.remove();
     modal.style.display = 'flex';
     const first = form.querySelector('input[name="title_ru"]');
@@ -84,6 +283,19 @@ export function initAdminProducts(translations, lang = 'ru') {
   openBtn.addEventListener('click', openModal);
   closeBtn?.addEventListener('click', closeModal);
   cancelBtn?.addEventListener('click', closeModal);
+
+  // Очистка локальных товаров
+  clearBtn.addEventListener('click', () => {
+    if (!confirm('Очистить все локальные товары? Это действие нельзя отменить.')) return;
+    saveLocalProducts([]);
+    try {
+      const merged = getMergedProducts();
+      setProducts(merged);
+      window.products = merged;
+      renderProducts(lang, translations, merged);
+      showToast('Локальные товары очищены');
+    } catch (err) { console.error('clear error', err); }
+  });
 
   // preview image
   fileInput?.addEventListener('change', (e) => {
@@ -104,6 +316,9 @@ export function initAdminProducts(translations, lang = 'ru') {
   form.addEventListener('submit', (evt) => {
     evt.preventDefault();
     const data = new FormData(form);
+    // parse flags
+    let flags = [];
+    try { flags = JSON.parse(data.get('_flags') || '[]'); } catch(_) { flags = []; }
     const product = {
       id: data.get('id') || uid('p'),
       name: { ru: data.get('title_ru') || '', uk: data.get('title_uk') || '' },
@@ -114,6 +329,7 @@ export function initAdminProducts(translations, lang = 'ru') {
       image: data.get('_image_data') || '',
       images: data.get('_image_data') ? [data.get('_image_data')] : [],
       inStock: data.get('inStock') === 'true',
+      flags,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
@@ -152,6 +368,11 @@ export function initAdminProducts(translations, lang = 'ru') {
     const preview = document.getElementById('adminImagePreview');
     preview.innerHTML = '';
     if (product.image) preview.innerHTML = `<img src="${product.image}" style="max-width:200px;max-height:120px;"/>`;
+    // prefill flags UI
+    try {
+      const f = Array.isArray(product.flags) ? product.flags.map(x => (typeof x === 'string' ? x : x.key || '')) : [];
+      if (f.length) renderSelectedFlags(f);
+    } catch(_){}
   }
 
   // Delegate edit/delete actions from product cards

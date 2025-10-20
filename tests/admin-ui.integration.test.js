@@ -1,9 +1,13 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
-// Мокаем products.js, чтобы отследить вызовы renderProducts
+// Мокаем products.js: перехватываем renderProducts и добавляем заглушки для getMergedProducts/setProducts
 vi.mock('../js/products.js', () => {
   return {
     renderProducts: vi.fn(),
+    getMergedProducts: vi.fn(() => {
+      try { return JSON.parse(localStorage.getItem('products_local_v1') || '[]'); } catch { return []; }
+    }),
+    setProducts: vi.fn(() => {}),
   };
 });
 

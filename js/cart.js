@@ -546,9 +546,10 @@ export function updateCartUI(translations, lang) {
     });
     
     if (cartItemsText) cartItemsText.textContent = translations[lang]['cart-items'].replace('0', totalItems);
-    if (cartTotalText) cartTotalText.textContent = `${Math.round(totalPrice).toLocaleString('uk-UA', { maximumFractionDigits: 0 })} грн`;
-    if (cartDropdownSummary) cartDropdownSummary.textContent = translations[lang]['cart-total'].replace('$0.00', `${Math.round(totalPrice).toLocaleString('uk-UA', { maximumFractionDigits: 0 })} грн`);
-    if (cartSummary) cartSummary.textContent = translations[lang]['cart-total'].replace('$0.00', `${Math.round(totalPrice).toLocaleString('uk-UA', { maximumFractionDigits: 0 })} грн`);
+    const fmt = (v) => Number(v).toLocaleString('uk-UA', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    if (cartTotalText) cartTotalText.textContent = `${fmt(totalPrice)} грн`;
+    if (cartDropdownSummary) cartDropdownSummary.textContent = translations[lang]['cart-total'].replace('$0.00', `${fmt(totalPrice)} грн`);
+    if (cartSummary) cartSummary.textContent = translations[lang]['cart-total'].replace('$0.00', `${fmt(totalPrice)} грн`);
 
     if (cartDropdownItems) {
         cartDropdownItems.innerHTML = '';
@@ -565,7 +566,7 @@ export function updateCartUI(translations, lang) {
                         <img src="${product.image}" alt="${product.name[lang]}" loading="lazy" onerror="this.src='https://placehold.co/150x150/blue/white?text=Image+Not+Found'">
                         <div>
                             <span class="cart-dropdown__item-name">${product.name[lang]}</span>
-                            <span class="cart-dropdown__item-price">${Math.round(product.price * item.quantity).toLocaleString('uk-UA', { maximumFractionDigits: 0 })} грн (x${item.quantity})</span>
+                            <span class="cart-dropdown__item-price">${fmt(product.price * item.quantity)} грн (x${item.quantity})</span>
                         </div>
                         <button class="cart-dropdown__item-remove" data-id="${item.id}" aria-label="Удалить ${product.name[lang]} из корзины" title="Удалить">✕</button>
                     `;
@@ -590,7 +591,7 @@ export function updateCartUI(translations, lang) {
                     li.innerHTML = `
                         <div>
                             <span class="cart-item-name">${product.name[lang]}</span>
-                            <span class="cart-item-price">${Math.round(product.price * item.quantity).toLocaleString('uk-UA', { maximumFractionDigits: 0 })} грн (x${item.quantity})</span>
+                            <span class="cart-item-price">${fmt(product.price * item.quantity)} грн (x${item.quantity})</span>
                         </div>
                         <button class="cart-item-remove" data-id="${item.id}" aria-label="Удалить ${product.name[lang]} из корзины" title="Удалить">✕</button>
                     `;

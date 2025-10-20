@@ -45,6 +45,15 @@
         </label>
         <div id="adminImagePreview" aria-hidden="true"></div>
       </div>
+      <div class="form-row">
+        <label>Флаги
+          <div id="flagSelector" class="flag-selector">
+            <div id="availableFlags" class="available-flags" aria-live="polite"></div>
+            <div id="selectedFlags" class="selected-flags" aria-live="polite"></div>
+            <input type="hidden" name="_flags" value="[]">
+          </div>
+        </label>
+      </div>
       <div class="form-actions">
         <button type="submit" id="adminProductSave">Сохранить</button>
         <button type="button" id="adminProductCancel">Отмена</button>

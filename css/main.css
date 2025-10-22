@@ -2808,8 +2808,10 @@ textarea.form-input { resize: vertical; min-height: 120px; }
     border: none;
     border-radius: 50%;
     cursor: pointer;
-    display: flex; /* Изменяем на flex для постоянного отображения */
-    transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+    display: flex;
+    opacity: 0; /* Скрываем кнопку по умолчанию */
+    pointer-events: none; /* Отключаем взаимодействие по умолчанию */
+    transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease, opacity 0.3s ease;
 }
 
 .scroll-to-top:hover {

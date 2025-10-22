@@ -203,6 +203,13 @@ export function getMergedProducts() {
     return [...baseProducts];
 }
 
+// Check if admin mode is enabled via URL parameter ?admin=1
+export function isAdminMode() {
+    if (typeof window === 'undefined') return false;
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get('admin') === '1';
+}
+
 const FAVORITES_STORAGE_KEY = 'products_favorites_v1';
 const COMPARE_STORAGE_KEY = 'products_compare_v1';
 
@@ -401,8 +408,10 @@ export function renderProducts(lang, translations, filteredProducts = products) 
                         const locals = JSON.parse(localStorage.getItem('products_local_v1') || '[]');
                         const isLocal = String(product.id).startsWith('p_') || (Array.isArray(locals) && locals.some(lp => String(lp.id) === String(product.id)));
                         if (isLocal) {
-                adminHtml = `<div class="product-card__admin-actions"><button class="product-card__button" data-edit data-id="${product.id}">Редактировать</button><button class="product-card__button" data-delete data-id="${product.id}">Удалить</button></div>`;
-                localBadge = `<span class="badge badge--local" title="Локально (localStorage)">Локально</span>`;
+                                if (isAdminMode()) {
+                                        adminHtml = `<div class="product-card__admin-actions"><button class="product-card__button" data-edit data-id="${product.id}">Редактировать</button><button class="product-card__button" data-delete data-id="${product.id}">Удалить</button></div>`;
+                                }
+                                localBadge = `<span class="badge badge--local" title="Сохранено только в вашем браузере">Локально</span>`;
                         }
                 } catch (err) { adminHtml = ''; }
 

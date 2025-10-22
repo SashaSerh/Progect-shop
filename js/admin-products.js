@@ -1,4 +1,4 @@
-import { renderProducts, getMergedProducts, setProducts } from './products.js';
+import { renderProducts, getMergedProducts, setProducts, isAdminMode } from './products.js';
 
 const STORAGE_KEY = 'products_local_v1';
 
@@ -69,6 +69,60 @@ export function upsertLocalProduct(product) {
   if (idx >= 0) list[idx] = product; else { product.createdAt = now; list.push(product); }
   saveLocalProducts(list);
   return product;
+}
+
+// Export local products to JSON file
+export function exportLocalProducts() {
+  const products = getLocalProducts();
+  if (!products.length) {
+    alert('Нет локальных товаров для экспорта');
+    return;
+  }
+  const dataStr = JSON.stringify(products, null, 2);
+  const dataBlob = new Blob([dataStr], { type: 'application/json' });
+  const url = URL.createObjectURL(dataBlob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `local-products-${new Date().toISOString().split('T')[0]}.json`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+}
+
+// Import local products from JSON file
+export function importLocalProducts(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const products = JSON.parse(e.target.result);
+        if (!Array.isArray(products)) {
+          throw new Error('Неверный формат файла');
+        }
+        // Validate products structure
+        const validProducts = products.filter(p => p && typeof p === 'object' && p.id && p.name);
+        if (validProducts.length !== products.length) {
+          alert(`Импортировано ${validProducts.length} из ${products.length} товаров (некоторые были пропущены из-за неверного формата)`);
+        }
+        // Generate new IDs to avoid conflicts
+        const importedWithNewIds = validProducts.map(p => ({
+          ...p,
+          id: uid(),
+          // Keep original ID for reference
+          originalId: p.id
+        }));
+        const existing = getLocalProducts();
+        const merged = [...existing, ...importedWithNewIds];
+        saveLocalProducts(merged);
+        resolve(importedWithNewIds.length);
+      } catch (error) {
+        reject(error);
+      }
+    };
+    reader.onerror = () => reject(new Error('Ошибка чтения файла'));
+    reader.readAsText(file);
+  });
 }
 
 export function initAdminProducts(translations, lang = 'ru') {
@@ -403,6 +457,44 @@ export function initAdminProducts(translations, lang = 'ru') {
       showToast('Товар удалён');
     }
   });
+
+  // Admin controls visibility and handlers
+  const adminControls = document.getElementById('adminControls');
+  if (adminControls) {
+    adminControls.style.display = isAdminMode() ? 'flex' : 'none';
+
+    // Export button
+    const exportBtn = document.getElementById('exportProductsBtn');
+    if (exportBtn) {
+      exportBtn.addEventListener('click', () => {
+        exportLocalProducts();
+        showToast('Экспорт завершён');
+      });
+    }
+
+    // Import input
+    const importInput = document.getElementById('importProductsInput');
+    if (importInput) {
+      importInput.addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        try {
+          const count = await importLocalProducts(file);
+          showToast(`Импортировано ${count} товаров`);
+          // Re-render products
+          const merged = getMergedProducts();
+          setProducts(merged);
+          window.products = merged;
+          renderProducts(lang, translations, merged);
+        } catch (error) {
+          showToast(`Ошибка импорта: ${error.message}`);
+        }
+        // Reset input
+        e.target.value = '';
+      });
+    }
+  }
 
   // On init: cache initial products available on window (from products.js)
   try { window.__initialProducts = window.products || []; } catch {}

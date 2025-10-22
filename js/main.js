@@ -1289,10 +1289,51 @@ function showSection(id, show) {
 }
 
 function setupHashRouting(initialLang) {
+    // Mapping of category parameters to component paths
+    const categoryComponents = {
+        'conditioners': 'components/category-conditioners.html',
+        'commercial-ac': 'components/category-commercial-ac.html',
+        'multi-split': 'components/category-multi-split.html',
+        'indoor-units': 'components/category-indoor-units.html',
+        'outdoor-units': 'components/category-outdoor-units.html',
+        'mobile-ac': 'components/category-mobile-ac.html',
+        'fan-coils': 'components/category-fan-coils.html',
+        'humidifiers': 'components/category-humidifiers.html',
+        'air-purifiers': 'components/category-air-purifiers.html',
+        'dehumidifiers': 'components/category-dehumidifiers.html',
+        'controllers': 'components/category-controllers.html',
+        'heat-pumps': 'components/category-heat-pumps.html',
+        'electric-heaters': 'components/category-electric-heaters.html',
+        'accessories': 'components/category-accessories.html'
+    };
+
     function handleRoute() {
         const hash = location.hash || '';
-        const urlParams = new URLSearchParams(location.search);
-        const categoryParam = urlParams.get('category');
+        
+        // Check for category hash pattern
+        const categoryMatch = hash.match(/^#category-(.+)$/);
+        if (categoryMatch) {
+            const categorySlug = categoryMatch[1];
+            if (categoryComponents[categorySlug]) {
+                const componentPath = categoryComponents[categorySlug];
+                loadComponent('main-container', componentPath).then(() => {
+                    // Hide other sections and show the category page
+                    showSection('hero-container', false);
+                    showSection('services-container', false);
+                    showSection('products-container', false);
+                    showSection('portfolio-container', false);
+                    showSection('contacts-container', false);
+                    showSection('product-detail-container', false);
+                    showSection('main-container', true); // Make sure main-container is visible
+                    
+                    // Scroll to top
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }).catch(error => {
+                    console.error('Error loading category component:', error);
+                });
+                return;
+            }
+        }
         
         const m = hash.match(/^#product-(.+)$/);
         if (m) {
@@ -1309,28 +1350,20 @@ function setupHashRouting(initialLang) {
                 renderProductDetail(pid);
                 bindProductDetailEvents();
             });
-        } else if (hash === '#products' || categoryParam) {
-            // Show products section with potential filtering
+        } else if (hash === '#products') {
+            // Show products section
             showSection('hero-container', true);
             showSection('services-container', true);
             showSection('products-container', true);
             showSection('portfolio-container', true);
             showSection('contacts-container', true);
             showSection('product-detail-container', false);
+            showSection('main-container', false);
             
             // Scroll to products section
             const productsSection = document.querySelector('#products-container');
             if (productsSection) {
                 productsSection.scrollIntoView({ behavior: 'smooth' });
-            }
-            
-            // Apply filters if category parameter is present
-            if (categoryParam) {
-                setTimeout(() => {
-                    if (typeof filterProducts === 'function') {
-                        filterProducts(savedLanguage, translations);
-                    }
-                }, 100);
             }
         } else {
             // Show main sections
@@ -1340,6 +1373,7 @@ function setupHashRouting(initialLang) {
             showSection('portfolio-container', true);
             showSection('contacts-container', true);
             showSection('product-detail-container', false);
+            showSection('main-container', false);
             // Restore title via i18n
             const lang = getLangSafe();
             if (typeof switchLanguage === 'function') switchLanguage(lang);

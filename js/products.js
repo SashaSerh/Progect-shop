@@ -288,6 +288,7 @@ export function renderProducts(lang, translations, filteredProducts = products) 
     const favoriteRemoveLabel = langDict['favorite-remove'] || fallbackDict['favorite-remove'] || 'Remove from favorites';
     const compareAddLabel = langDict['compare-add'] || fallbackDict['compare-add'] || 'Add to compare';
     const compareRemoveLabel = langDict['compare-remove'] || fallbackDict['compare-remove'] || 'Remove from compare';
+    const viewDetailsLabel = langDict['view-details'] || fallbackDict['view-details'] || 'View details';
     const orderLabel = langDict['service-order'] || fallbackDict['service-order'] || 'Заказать';
     const specsLabel = langDict['specs'] || fallbackDict['specs'] || 'Характеристики';
     const brandChipLabel = langDict['chips-brand'] || fallbackDict['chips-brand'] || (lang === 'uk' ? 'Бренд' : 'Бренд');
@@ -420,10 +421,9 @@ export function renderProducts(lang, translations, filteredProducts = products) 
                                 }
                 const favoriteActive = isFavorite(product.id);
                 const compareActive = isCompared(product.id);
-                const favoriteLabel = favoriteActive ? favoriteRemoveLabel : favoriteAddLabel;
-                const compareLabel = compareActive ? compareRemoveLabel : compareAddLabel;
-
-                const brandNameRaw = typeof product.brand === 'string' ? product.brand.trim() : '';
+    const favoriteLabel = favoriteActive ? `${favoriteRemoveLabel} ${product.name[lang]}` : `${favoriteAddLabel} ${product.name[lang]}`;
+    const compareLabel = compareActive ? `${compareRemoveLabel} ${product.name[lang]}` : `${compareAddLabel} ${product.name[lang]}`;
+    const orderButtonLabel = `${orderLabel} ${product.name[lang]}`;                const brandNameRaw = typeof product.brand === 'string' ? product.brand.trim() : '';
                 const categoryKey = `filter-${product.category}`;
                 const categoryNameRaw = (product && product.category)
                     ? (langDict[categoryKey] || fallbackDict[categoryKey] || String(product.category))
@@ -525,12 +525,23 @@ export function renderProducts(lang, translations, filteredProducts = products) 
                       ${srcsetLine}
                       sizes="(max-width: 480px) 45vw, (max-width: 768px) 30vw, 240px"
                       onerror="this.src='https://placehold.co/150x150/blue/white?text=Image+Not+Found'">
-                    <h3 class="product-card__title">${product.name[lang]}</h3>
+                    <h3 class="product-card__title"><a href="#product-${product.id}" class="product-card__title-link" aria-label="${viewDetailsLabel} ${product.name[lang]}">${product.name[lang]}</a></h3>
                     ${metaHtml}
                                         ${ratingHtml}
                     <p class="product-card__description">${product.description[lang]}</p>
                     ${specsHtml}
                                         <p class="product-card__price">${priceHtml}</p>
+                    <div class="product-card__purchase">
+                        <button class="product-card__button product-card__button--icon" data-id="${product.id}" data-i18n="service-order" aria-label="${orderButtonLabel}">
+                            <span class="sr-only">${orderLabel}</span>
+                            <img src="icons/shopping-bag-icon.svg" alt="" aria-hidden="true" class="product-card__button-icon">
+                        </button>
+                        <div class="quantity-stepper quantity-stepper--vertical" role="group" aria-label="${quantityLabel}">
+                            <button type="button" class="quantity-stepper__btn quantity-stepper__btn--increment" data-action="increment" data-id="${product.id}" aria-label="${quantityIncreaseLabel}" aria-controls="qty-${product.id}">▲</button>
+                            <input type="number" id="qty-${product.id}" class="quantity-stepper__input" value="1" min="1" max="99" data-id="${product.id}" inputmode="numeric" pattern="\\d*" aria-label="${quantityLabel}">
+                            <button type="button" class="quantity-stepper__btn quantity-stepper__btn--decrement" data-action="decrement" data-id="${product.id}" aria-label="${quantityDecreaseLabel}" aria-controls="qty-${product.id}">▼</button>
+                        </div>
+                    </div>
                     <div class="product-card__quick-actions" role="group" aria-label="${quickActionsLabel}">
                         <button type="button" class="product-card__quick-btn${favoriteActive ? ' is-active' : ''}" data-action="favorite" data-id="${product.id}" aria-label="${favoriteLabel}" aria-pressed="${favoriteActive}" title="${favoriteLabel}">
                             <svg class="product-card__quick-icon" aria-hidden="true" focusable="false">
@@ -541,17 +552,6 @@ export function renderProducts(lang, translations, filteredProducts = products) 
                             <svg class="product-card__quick-icon" aria-hidden="true" focusable="false">
                                 <use href="icons/icons-sprite.svg#icon-compare"></use>
                             </svg>
-                        </button>
-                    </div>
-                    <div class="product-card__purchase">
-                        <div class="quantity-stepper quantity-stepper--vertical" role="group" aria-label="${quantityLabel}">
-                            <button type="button" class="quantity-stepper__btn quantity-stepper__btn--increment" data-action="increment" data-id="${product.id}" aria-label="${quantityIncreaseLabel}" aria-controls="qty-${product.id}">▲</button>
-                            <input type="number" id="qty-${product.id}" class="quantity-stepper__input" value="1" min="1" max="99" data-id="${product.id}" inputmode="numeric" pattern="\\d*" aria-label="${quantityLabel}">
-                            <button type="button" class="quantity-stepper__btn quantity-stepper__btn--decrement" data-action="decrement" data-id="${product.id}" aria-label="${quantityDecreaseLabel}" aria-controls="qty-${product.id}">▼</button>
-                        </div>
-                        <button class="product-card__button product-card__button--icon" data-id="${product.id}" data-i18n="service-order">
-                            <span class="sr-only">${orderLabel}</span>
-                            <img src="icons/shopping-bag-icon.svg" alt="" aria-hidden="true" class="product-card__button-icon">
                         </button>
                     </div>
                     ${adminHtml}

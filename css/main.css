@@ -61,8 +61,8 @@
 .product-card__quick-btn:active { transform: scale(0.95); }
 .product-card__quick-btn.is-active { background: var(--quick-action-active-bg); color: var(--quick-action-active-color); border-color: var(--quick-action-active-border); }
 .quantity-stepper { display:inline-flex; align-items:center; border-radius:999px; background: var(--quantity-bg); border:1px solid var(--quantity-border); padding:4px; }
-.quantity-stepper--vertical { flex-direction:column; width:52px; padding:6px 4px; border-radius:18px; gap:6px; }
-.quantity-stepper__btn { background:none; border:none; width:32px; height:32px; display:flex; align-items:center; justify-content:center; font-size:18px; color:var(--quantity-text); cursor:pointer; border-radius:50%; transition:background 0.2s ease; }
+.quantity-stepper--vertical { flex-direction:column; width:56px; padding:6px 4px; border-radius:18px; gap:6px; }
+.quantity-stepper__btn { background:none; border:none; width:44px; height:44px; display:flex; align-items:center; justify-content:center; font-size:18px; color:var(--quantity-text); cursor:pointer; border-radius:50%; transition:background 0.2s ease; }
 .quantity-stepper--vertical .quantity-stepper__btn { width:100%; height:28px; border-radius:12px; }
 .quantity-stepper__btn:hover,
 .quantity-stepper__btn:focus { background: var(--quantity-hover-bg); outline:none; }
@@ -1980,6 +1980,26 @@ body {
     overflow: hidden;
     text-overflow: ellipsis;
     overflow-wrap: anywhere; /* предотвращаем выход длинных слов за пределы */
+}
+
+.product-card__title-link {
+    color: inherit;
+    text-decoration: none;
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.product-card__title-link:hover,
+.product-card__title-link:focus {
+    color: var(--accent-color);
+    outline: none;
+    text-decoration: underline;
+}
+
+.product-card__title-link:focus-visible {
+    outline: var(--focus-ring);
+    outline-offset: var(--focus-ring-offset);
 }
 
 .product-card__meta {

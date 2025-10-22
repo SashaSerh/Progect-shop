@@ -112,6 +112,70 @@ const baseProducts = [
             { key: 'energy', value: { ru: '—', uk: '—' } },
             { key: 'dimensions', value: { ru: '—', uk: '—' } }
         ]
+    },
+    // Additional test products for lazy loading demo
+    {
+        id: 3,
+        name: { ru: "Сплит-система ComfortAir", uk: "Спліт-система ComfortAir" },
+        description: { ru: "Тихая и эффективная сплит-система", uk: "Тиха та ефективна спліт-система" },
+        price: 22000,
+        category: "ac",
+        image: "https://picsum.photos/600?random=41",
+        images: ["https://picsum.photos/1200/800?random=41"],
+        sku: "CA-AC-003",
+        brand: "ComfortAir",
+        inStock: true,
+        warrantyMonths: 36,
+        rating: { value: 4.9, count: 203 },
+        specs: [
+            { key: 'power', value: { ru: '3,5 кВт', uk: '3,5 кВт' } },
+            { key: 'area', value: { ru: 'до 35 м²', uk: 'до 35 м²' } },
+            { key: 'noise', value: { ru: '19 дБ', uk: '19 дБ' } },
+            { key: 'energy', value: { ru: 'A+++', uk: 'A+++' } },
+            { key: 'dimensions', value: { ru: '900×320×220 мм', uk: '900×320×220 мм' } }
+        ]
+    },
+    {
+        id: 4,
+        name: { ru: "Мульти-сплит PureZone", uk: "Мульти-спліт PureZone" },
+        description: { ru: "Система для нескольких помещений", uk: "Система для декількох приміщень" },
+        price: 45000,
+        category: "ac",
+        image: "https://picsum.photos/600?random=51",
+        images: ["https://picsum.photos/1200/800?random=51"],
+        sku: "PZ-MS-004",
+        brand: "PureZone",
+        inStock: true,
+        warrantyMonths: 24,
+        rating: { value: 4.7, count: 156 },
+        specs: [
+            { key: 'power', value: { ru: '7 кВт', uk: '7 кВт' } },
+            { key: 'area', value: { ru: 'до 80 м²', uk: 'до 80 м²' } },
+            { key: 'noise', value: { ru: '21 дБ', uk: '21 дБ' } },
+            { key: 'energy', value: { ru: 'A++', uk: 'A++' } },
+            { key: 'dimensions', value: { ru: '1200×400×300 мм', uk: '1200×400×300 мм' } }
+        ]
+    },
+    {
+        id: 5,
+        name: { ru: "Рекуператор EcoVent", uk: "Рекуператор EcoVent" },
+        description: { ru: "Экологичная система вентиляции", uk: "Екологічна система вентиляції" },
+        price: 32000,
+        category: "recuperator",
+        image: "https://picsum.photos/600?random=61",
+        images: ["https://picsum.photos/1200/800?random=61"],
+        sku: "EV-REC-005",
+        brand: "EcoVent",
+        inStock: true,
+        warrantyMonths: 48,
+        rating: { value: 4.8, count: 89 },
+        specs: [
+            { key: 'power', value: { ru: '120 м³/ч', uk: '120 м³/год' } },
+            { key: 'area', value: { ru: 'до 100 м²', uk: 'до 100 м²' } },
+            { key: 'noise', value: { ru: '16 дБ', uk: '16 дБ' } },
+            { key: 'energy', value: { ru: 'A+', uk: 'A+' } },
+            { key: 'dimensions', value: { ru: '600×300×180 мм', uk: '600×300×180 мм' } }
+        ]
     }
 ];
 

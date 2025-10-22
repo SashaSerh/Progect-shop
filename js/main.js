@@ -2,7 +2,7 @@ import { cart, saveCart, updateCartUI, addToCart, removeFromCart, clearCart, tog
 import { toggleTheme, initTheme } from './theme.js';
 import { translations, switchLanguage } from './i18n.js';
 import { initWelcomeOverlay, needsWelcomeOverlay } from './welcome.js';
-import { products, renderProducts, filterProducts, toggleFavorite, toggleCompare, getFavoriteIds, getCompareIds } from './products.js';
+import { products, renderProducts, filterProducts, toggleFavorite, toggleCompare, getFavoriteIds, getCompareIds, getProductsByCategory } from './products.js';
 import { initCompareBar } from './compare-bar.js';
 import { initCompareModal } from './compare-modal.js';
 import { contentConfig } from './content-config.js';
@@ -41,6 +41,52 @@ function toggleCatalogDropdown(e) {
             catalogButton.setAttribute('aria-expanded', catalogDropdown.classList.contains('catalog-dropdown--open'));
         }
     }
+}
+
+function renderCategoryProducts(categorySlug, lang, translations) {
+    const categoryProducts = getProductsByCategory(categorySlug);
+    const grid = document.getElementById('category-products-grid');
+    if (!grid) return;
+
+    // Ограничиваем до 6 товаров для превью
+    const displayProducts = categoryProducts.slice(0, 6);
+    
+    grid.innerHTML = '';
+    
+    if (displayProducts.length === 0) {
+        grid.innerHTML = '<p>Товари цієї категорії тимчасово відсутні</p>';
+        return;
+    }
+
+    const langDict = (translations && translations[lang]) || (translations && translations['ru']) || {};
+    const fallbackDict = (translations && translations['ru']) || {};
+
+    displayProducts.forEach(product => {
+        const productCard = document.createElement('div');
+        productCard.classList.add('product-card', 'product-card--compact');
+        productCard.dataset.id = String(product.id);
+
+        // Простая версия карточки товара для категории
+        const priceFormatted = Math.round(product.price).toLocaleString('uk-UA');
+        
+        productCard.innerHTML = `
+            <img src="${product.image || 'https://placehold.co/300x200/4CAF50/white?text=No+Image'}" 
+                 alt="${product.name[lang]}" 
+                 class="product-card__image"
+                 loading="lazy">
+            <h4 class="product-card__title">
+                <a href="#product-${product.id}" class="product-card__title-link">${product.name[lang]}</a>
+            </h4>
+            <p class="product-card__price">${priceFormatted} ₴</p>
+            <button class="product-card__button product-card__button--primary" 
+                    data-id="${product.id}" 
+                    onclick="addToCart('${product.id}')">
+                Додати в кошик
+            </button>
+        `;
+        
+        grid.appendChild(productCard);
+    });
 }
 
 function performSearch(query, lang) {
@@ -1307,6 +1353,24 @@ function setupHashRouting(initialLang) {
         'accessories': 'components/category-accessories.html'
     };
 
+    // Mapping of category slugs to product categories
+    const categorySlugToProductCategory = {
+        'conditioners': 'ac',
+        'commercial-ac': 'ac',
+        'multi-split': 'ac',
+        'indoor-units': 'ac',
+        'outdoor-units': 'ac',
+        'mobile-ac': 'ac',
+        'fan-coils': 'ac',
+        'humidifiers': 'ac',
+        'air-purifiers': 'ac',
+        'dehumidifiers': 'ac',
+        'controllers': 'ac',
+        'heat-pumps': 'ac',
+        'electric-heaters': 'ac',
+        'accessories': 'accessory'
+    };
+
     function handleRoute() {
         const hash = location.hash || '';
         
@@ -1325,6 +1389,10 @@ function setupHashRouting(initialLang) {
                     showSection('contacts-container', false);
                     showSection('product-detail-container', false);
                     showSection('main-container', true); // Make sure main-container is visible
+                    
+                    // Render category products
+                    const lang = getLangSafe();
+                    renderCategoryProducts(categorySlug, lang, translations);
                     
                     // Scroll to top
                     window.scrollTo({ top: 0, behavior: 'smooth' });

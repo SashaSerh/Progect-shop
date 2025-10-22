@@ -188,8 +188,31 @@ export function setProducts(list) {
     }
 }
 
-export function getProducts() {
-    return products;
+export function getProductsByCategory(categorySlug) {
+    // Map category slug to product category
+    const categoryMapping = {
+        'conditioners': 'ac',
+        'commercial-ac': 'ac',
+        'multi-split': 'ac',
+        'indoor-units': 'ac',
+        'outdoor-units': 'ac',
+        'mobile-ac': 'ac',
+        'fan-coils': 'ac',
+        'humidifiers': 'ac',
+        'air-purifiers': 'ac',
+        'dehumidifiers': 'ac',
+        'controllers': 'ac',
+        'heat-pumps': 'ac',
+        'electric-heaters': 'ac',
+        'accessories': 'accessory'
+    };
+
+    const productCategory = categoryMapping[categorySlug];
+    if (!productCategory) {
+        return [];
+    }
+
+    return products.filter(product => product.category === productCategory);
 }
 
 export function getMergedProducts() {

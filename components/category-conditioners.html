@@ -41,9 +41,36 @@
             </div>
 
             <div class="category-products">
-                <h2>Популярні моделі</h2>
+                <div class="category-products__header">
+                    <h2>Популярні моделі</h2>
+                    <div class="category-products__controls">
+                        <div class="products-filter">
+                            <label for="category-sort">Сортувати:</label>
+                            <select id="category-sort" class="filter-select">
+                                <option value="default">За замовчуванням</option>
+                                <option value="price-low">Ціна: від низької</option>
+                                <option value="price-high">Ціна: від високої</option>
+                                <option value="rating">За рейтингом</option>
+                                <option value="newest">Найновіші</option>
+                            </select>
+                        </div>
+                        <div class="products-filter">
+                            <label for="category-price-filter">Ціна:</label>
+                            <select id="category-price-filter" class="filter-select">
+                                <option value="all">Всі ціни</option>
+                                <option value="0-15000">До 15,000 ₴</option>
+                                <option value="15000-30000">15,000 - 30,000 ₴</option>
+                                <option value="30000-50000">30,000 - 50,000 ₴</option>
+                                <option value="50000+">Понад 50,000 ₴</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
                 <div class="category-products__grid" id="category-products-grid">
                     <!-- Товары будут загружены динамически -->
+                </div>
+                <div class="category-products__pagination" id="category-pagination">
+                    <!-- Пагинация будет добавлена динамически -->
                 </div>
                 <div class="category-products__actions">
                     <a href="#products" class="btn btn--primary">Переглянути всі кондиціонери</a>

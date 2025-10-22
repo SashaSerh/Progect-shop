@@ -43,18 +43,67 @@ function toggleCatalogDropdown(e) {
     }
 }
 
-function renderCategoryProducts(categorySlug, lang, translations) {
-    const categoryProducts = getProductsByCategory(categorySlug);
+function renderCategoryProducts(categorySlug, lang, translations, sortBy = 'default', priceFilter = 'all', page = 1, itemsPerPage = 6) {
+    const allProducts = getProductsByCategory(categorySlug);
     const grid = document.getElementById('category-products-grid');
+    const pagination = document.getElementById('category-pagination');
+    
     if (!grid) return;
 
-    // Ограничиваем до 6 товаров для превью
-    const displayProducts = categoryProducts.slice(0, 6);
-    
+    // Применяем фильтры и сортировку
+    let filteredProducts = [...allProducts];
+
+    // Фильтр по цене
+    if (priceFilter !== 'all') {
+        switch (priceFilter) {
+            case '0-15000':
+                filteredProducts = filteredProducts.filter(p => p.price <= 15000);
+                break;
+            case '15000-30000':
+                filteredProducts = filteredProducts.filter(p => p.price > 15000 && p.price <= 30000);
+                break;
+            case '30000-50000':
+                filteredProducts = filteredProducts.filter(p => p.price > 30000 && p.price <= 50000);
+                break;
+            case '50000+':
+                filteredProducts = filteredProducts.filter(p => p.price > 50000);
+                break;
+        }
+    }
+
+    // Сортировка
+    switch (sortBy) {
+        case 'price-low':
+            filteredProducts.sort((a, b) => a.price - b.price);
+            break;
+        case 'price-high':
+            filteredProducts.sort((a, b) => b.price - a.price);
+            break;
+        case 'rating':
+            filteredProducts.sort((a, b) => (b.rating?.value || 0) - (a.rating?.value || 0));
+            break;
+        case 'newest':
+            // Для демо сортируем по ID (больший ID = новее)
+            filteredProducts.sort((a, b) => String(b.id).localeCompare(String(a.id)));
+            break;
+        default:
+            // По умолчанию оставляем как есть
+            break;
+    }
+
+    // Пагинация
+    const totalItems = filteredProducts.length;
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
+    const startIndex = (page - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const displayProducts = filteredProducts.slice(startIndex, endIndex);
+
+    // Рендерим товары
     grid.innerHTML = '';
     
     if (displayProducts.length === 0) {
-        grid.innerHTML = '<p>Товари цієї категорії тимчасово відсутні</p>';
+        grid.innerHTML = '<p>Товари за вибраними критеріями не знайдені</p>';
+        if (pagination) pagination.innerHTML = '';
         return;
     }
 
@@ -87,6 +136,125 @@ function renderCategoryProducts(categorySlug, lang, translations) {
         
         grid.appendChild(productCard);
     });
+
+    // Рендерим пагинацию
+    renderCategoryPagination(pagination, page, totalPages, totalItems);
+}
+
+function renderCategoryPagination(container, currentPage, totalPages, totalItems) {
+    if (!container || totalPages <= 1) {
+        container.innerHTML = '';
+        return;
+    }
+
+    const paginationHTML = [];
+    
+    // Кнопка "Предыдущая"
+    if (currentPage > 1) {
+        paginationHTML.push(`<button class="pagination__button pagination__button--prev" data-page="${currentPage - 1}">« Попередня</button>`);
+    }
+
+    // Номера страниц
+    const startPage = Math.max(1, currentPage - 2);
+    const endPage = Math.min(totalPages, currentPage + 2);
+
+    if (startPage > 1) {
+        paginationHTML.push(`<button class="pagination__button" data-page="1">1</button>`);
+        if (startPage > 2) {
+            paginationHTML.push('<span class="pagination__dots">...</span>');
+        }
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+        const activeClass = i === currentPage ? ' pagination__button--active' : '';
+        paginationHTML.push(`<button class="pagination__button${activeClass}" data-page="${i}">${i}</button>`);
+    }
+
+    if (endPage < totalPages) {
+        if (endPage < totalPages - 1) {
+            paginationHTML.push('<span class="pagination__dots">...</span>');
+        }
+        paginationHTML.push(`<button class="pagination__button" data-page="${totalPages}">${totalPages}</button>`);
+    }
+
+    // Кнопка "Следующая"
+    if (currentPage < totalPages) {
+        paginationHTML.push(`<button class="pagination__button pagination__button--next" data-page="${currentPage + 1}">Наступна »</button>`);
+    }
+
+    container.innerHTML = `
+        <div class="pagination">
+            <div class="pagination__info">
+                Показано товарів: ${Math.min(currentPage * 6, totalItems)} з ${totalItems}
+            </div>
+            <div class="pagination__controls">
+                ${paginationHTML.join('')}
+            </div>
+        </div>
+    `;
+
+    // Добавляем обработчики событий
+    container.querySelectorAll('.pagination__button').forEach(button => {
+        button.addEventListener('click', (e) => {
+            const page = parseInt(e.target.dataset.page);
+            if (page) {
+                updateCategoryFilters({ page });
+            }
+        });
+    });
+}
+
+function updateCategoryFilters(updates = {}) {
+    const urlParams = new URLSearchParams(window.location.hash.substring(1));
+    const categorySlug = urlParams.get('category');
+    if (!categorySlug) return;
+
+    // Получаем текущие параметры
+    const currentSort = urlParams.get('sort') || 'default';
+    const currentPriceFilter = urlParams.get('price') || 'all';
+    const currentPage = parseInt(urlParams.get('page')) || 1;
+
+    // Обновляем параметры
+    const newSort = updates.sort !== undefined ? updates.sort : currentSort;
+    const newPriceFilter = updates.price !== undefined ? updates.price : currentPriceFilter;
+    const newPage = updates.page !== undefined ? updates.page : (updates.sort || updates.price ? 1 : currentPage);
+
+    // Обновляем URL
+    const newUrl = `#category=${categorySlug}&sort=${newSort}&price=${newPriceFilter}&page=${newPage}`;
+    window.location.hash = newUrl;
+
+    // Перерендериваем товары
+    const lang = localStorage.getItem('selectedLanguage') || 'ru';
+    renderCategoryProducts(categorySlug, lang, translations, newSort, newPriceFilter, newPage);
+}
+
+function initCategoryControls() {
+    // Обработчики для сортировки
+    const sortSelect = document.getElementById('category-sort-select');
+    if (sortSelect) {
+        sortSelect.addEventListener('change', (e) => {
+            updateCategoryFilters({ sort: e.target.value });
+        });
+    }
+
+    // Обработчики для фильтра цены
+    const priceSelect = document.getElementById('category-price-filter');
+    if (priceSelect) {
+        priceSelect.addEventListener('change', (e) => {
+            updateCategoryFilters({ price: e.target.value });
+        });
+    }
+
+    // Обработчики для сброса фильтров
+    const resetButton = document.getElementById('category-reset-filters');
+    if (resetButton) {
+        resetButton.addEventListener('click', () => {
+            updateCategoryFilters({ sort: 'default', price: 'all', page: 1 });
+            // Сбрасываем селекторы
+            if (sortSelect) sortSelect.value = 'default';
+            if (priceSelect) priceSelect.value = 'all';
+        });
+    }
 }
 
 function performSearch(query, lang) {
@@ -1390,9 +1558,25 @@ function setupHashRouting(initialLang) {
                     showSection('product-detail-container', false);
                     showSection('main-container', true); // Make sure main-container is visible
                     
-                    // Render category products
+                    // Render category products with filters from URL
                     const lang = getLangSafe();
-                    renderCategoryProducts(categorySlug, lang, translations);
+                    const urlParams = new URLSearchParams(window.location.hash.substring(1));
+                    const sortBy = urlParams.get('sort') || 'default';
+                    const priceFilter = urlParams.get('price') || 'all';
+                    const page = parseInt(urlParams.get('page')) || 1;
+                    
+                    renderCategoryProducts(categorySlug, lang, translations, sortBy, priceFilter, page);
+                    
+                    // Initialize category controls with delay to ensure DOM is ready
+                    setTimeout(() => {
+                        initCategoryControls();
+                        
+                        // Update filter selectors to match URL params
+                        const sortSelect = document.getElementById('category-sort-select');
+                        const priceSelect = document.getElementById('category-price-filter');
+                        if (sortSelect) sortSelect.value = sortBy;
+                        if (priceSelect) priceSelect.value = priceFilter;
+                    }, 100);
                     
                     // Scroll to top
                     window.scrollTo({ top: 0, behavior: 'smooth' });

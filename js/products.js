@@ -203,11 +203,24 @@ export function getMergedProducts() {
     return [...baseProducts];
 }
 
-// Check if admin mode is enabled via URL parameter ?admin=1
+// Check if admin mode is enabled via sessionStorage
 export function isAdminMode() {
     if (typeof window === 'undefined') return false;
-    const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get('admin') === '1';
+    return sessionStorage.getItem('admin_mode') === 'true';
+}
+
+// Enable admin mode
+export function enableAdminMode() {
+    if (typeof window !== 'undefined') {
+        sessionStorage.setItem('admin_mode', 'true');
+    }
+}
+
+// Disable admin mode
+export function disableAdminMode() {
+    if (typeof window !== 'undefined') {
+        sessionStorage.removeItem('admin_mode');
+    }
 }
 
 const FAVORITES_STORAGE_KEY = 'products_favorites_v1';
@@ -685,7 +698,11 @@ export function renderProducts(lang, translations, filteredProducts = products) 
 }
 
 export function filterProducts(lang, translations) {
-    const category = document.getElementById('category')?.value || 'all';
+    // Check URL parameters first
+    const urlParams = new URLSearchParams(window.location.search);
+    const categoryParam = urlParams.get('category');
+    
+    const category = categoryParam || document.getElementById('category')?.value || 'all';
     const price = document.getElementById('price')?.value || 'all';
     let filteredProducts = [...products];
 
@@ -699,7 +716,43 @@ export function filterProducts(lang, translations) {
     } else {
         let computed = [...products];
         if (category !== 'all') {
-            computed = computed.filter(product => product.category === category);
+            // Map URL category parameters to product categories
+            let productCategory = category;
+            switch (category) {
+                case 'conditioners':
+                case 'commercial-ac':
+                case 'multi-split':
+                case 'indoor-units':
+                case 'outdoor-units':
+                case 'mobile-ac':
+                case 'fan-coils':
+                    productCategory = 'ac';
+                    break;
+                case 'humidifiers':
+                    productCategory = 'humidifier';
+                    break;
+                case 'air-purifiers':
+                    productCategory = 'purifier';
+                    break;
+                case 'dehumidifiers':
+                    productCategory = 'dehumidifier';
+                    break;
+                case 'controllers':
+                    productCategory = 'controller';
+                    break;
+                case 'heat-pumps':
+                    productCategory = 'heat-pump';
+                    break;
+                case 'electric-heaters':
+                    productCategory = 'heater';
+                    break;
+                case 'accessories':
+                    productCategory = 'accessory';
+                    break;
+                default:
+                    productCategory = category;
+            }
+            computed = computed.filter(product => product.category === productCategory);
         }
         if (price !== 'all') {
             computed.sort((a, b) => price === 'low' ? a.price - b.price : b.price - a.price);

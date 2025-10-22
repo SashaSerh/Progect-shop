@@ -1618,6 +1618,152 @@ body {
     color: #000000;
 }
 
+/* Admin Login Modal */
+.modal__content--small {
+    max-width: 400px;
+}
+
+.admin-login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.admin-login-form .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.admin-login-form label {
+    font-weight: 600;
+    color: var(--nav-text-color);
+}
+
+.admin-login-form input[type="password"] {
+    padding: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--nav-text-color);
+    font-size: 16px;
+}
+
+.admin-login-form input[type="password"]:focus {
+    outline: none;
+    border-color: var(--glow-shadow);
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
+}
+
+.admin-login-form .form-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    margin-top: 8px;
+}
+
+.btn {
+    padding: 10px 16px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn--primary {
+    background: var(--accent-color);
+    color: white;
+}
+
+.btn--primary:hover {
+    background: var(--accent-hover);
+}
+
+.btn--secondary {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--nav-text-color);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.btn--secondary:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* Admin Login Button - Removed, using keyboard shortcut instead */
+/* .admin-login-btn {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--nav-text-color);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-left: 8px;
+}
+
+.admin-login-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.4);
+}
+
+.admin-login-btn:focus {
+    outline: none;
+    border-color: var(--glow-shadow);
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
+} */
+
+/* Admin Control Buttons */
+.header-add-product,
+.header-clear-products {
+    margin-right: 8px;
+    font-size: 14px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--nav-text-color);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.header-add-product:hover,
+.header-clear-products:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.4);
+}
+
+.header-add-product:focus,
+.header-clear-products:focus {
+    outline: none;
+    border-color: var(--glow-shadow);
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
+}
+
+.header-add-product {
+    background: var(--accent-color);
+    color: white;
+    border-color: var(--accent-color);
+}
+
+.header-add-product:hover {
+    background: var(--accent-hover);
+    border-color: var(--accent-hover);
+}
+
+.header-clear-products {
+    background: rgba(244, 67, 54, 0.1);
+    color: #ff6b6b;
+    border-color: rgba(244, 67, 54, 0.3);
+}
+
+.header-clear-products:hover {
+    background: rgba(244, 67, 54, 0.2);
+    border-color: rgba(244, 67, 54, 0.5);
+}
+
 @media (max-width: 768px) {
     .header__nav {
         display: none;

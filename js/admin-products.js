@@ -1,4 +1,4 @@
-import { renderProducts, getMergedProducts, setProducts, isAdminMode } from './products.js';
+import { renderProducts, getMergedProducts, setProducts, isAdminMode, enableAdminMode, disableAdminMode } from './products.js';
 
 const STORAGE_KEY = 'products_local_v1';
 
@@ -132,15 +132,159 @@ export function initAdminProducts(translations, lang = 'ru') {
   const toastHost = document.getElementById('toast-container') || (() => {
     const el = document.createElement('div'); el.id = 'toast-container'; document.body.appendChild(el); return el;
   })();
+
+  // Admin login modal
+  const loginModal = document.getElementById('adminLoginModal');
+  const loginForm = document.getElementById('adminLoginForm');
+  const loginCloseBtn = document.getElementById('adminLoginClose');
+  const loginCancelBtn = document.getElementById('adminLoginCancel');
+  const adminLoginBtn = document.getElementById('adminLoginBtn');
+
+  console.log('Admin modal initialization:', {
+    loginModal: !!loginModal,
+    loginForm: !!loginForm,
+    loginCloseBtn: !!loginCloseBtn,
+    loginCancelBtn: !!loginCancelBtn,
+    isAdminMode: isAdminMode()
+  });
+
+  // Show/hide admin login button based on admin mode
+  function updateAdminControlsVisibility() {
+    const addBtn = document.querySelector('.header-add-product');
+    const clearBtn = document.querySelector('.header-clear-products');
+
+    if (addBtn) {
+      addBtn.style.display = isAdminMode() ? 'inline-block' : 'none';
+    }
+    if (clearBtn) {
+      clearBtn.style.display = isAdminMode() ? 'inline-block' : 'none';
+    }
+  }
+
+  // Initialize admin controls visibility
+  updateAdminControlsVisibility();
+
+  // Keyboard shortcut for admin login (Ctrl+Alt+A)
+  document.addEventListener('keydown', (e) => {
+    console.log('Key event:', {
+      key: e.key,
+      code: e.code,
+      ctrlKey: e.ctrlKey,
+      shiftKey: e.shiftKey,
+      altKey: e.altKey,
+      metaKey: e.metaKey
+    });
+
+    // Check for Ctrl+Alt+A or Cmd+Alt+A (case insensitive)
+    const isAdminShortcut = (e.ctrlKey || e.metaKey) && e.altKey && (e.key === 'A' || e.key === 'a');
+    if (isAdminShortcut) {
+      e.preventDefault();
+      console.log('Admin shortcut triggered, isAdminMode:', isAdminMode(), 'loginModal exists:', !!loginModal);
+
+      if (!isAdminMode() && loginModal) {
+        console.log('Opening admin login modal');
+        loginModal.style.display = 'flex';
+        console.log('Modal display style set to flex, computed style:', getComputedStyle(loginModal).display);
+        const passwordInput = document.getElementById('adminPassword');
+        if (passwordInput) {
+          passwordInput.focus();
+          console.log('Focused password input');
+        }
+        showToast('Режим администратора: введите пароль (Ctrl+Alt+A)', 2000);
+      } else if (isAdminMode()) {
+        console.log('Already in admin mode');
+        showToast('Вы уже в режиме администратора (Ctrl+Alt+A для входа)', 2000);
+      } else {
+        console.error('Cannot open admin modal: not in admin mode or modal not found');
+      }
+    }
+  });
+
+  // Admin login button click (removed - using keyboard shortcut)
+  // if (adminLoginBtn) {
+  //   adminLoginBtn.addEventListener('click', () => {
+  //     if (loginModal) {
+  //       loginModal.style.display = 'flex';
+  //       const passwordInput = document.getElementById('adminPassword');
+  //       if (passwordInput) {
+  //         passwordInput.focus();
+  //       }
+  //     }
+  //   });
+  // }
+
+  // Admin login form submit
+  if (loginForm) {
+    loginForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const formData = new FormData(loginForm);
+      const password = formData.get('password');
+
+      // Simple password check (in production, use proper authentication)
+      if (password === 'admin123') {
+        enableAdminMode();
+        updateAdminControlsVisibility();
+        showToast('Вход выполнен успешно');
+        if (loginModal) {
+          console.log('Closing admin login modal after successful login');
+          loginModal.style.display = 'none';
+          console.log('Modal display style set to none');
+        }
+        loginForm.reset();
+
+        // Re-render products to show admin controls
+        const merged = getMergedProducts();
+        setProducts(merged);
+        window.products = merged;
+        renderProducts(lang, translations, merged);
+      } else {
+        showToast('Неверный пароль', 3000);
+        const passwordInput = document.getElementById('adminPassword');
+        if (passwordInput) {
+          passwordInput.focus();
+          passwordInput.select();
+        }
+      }
+    });
+  }
+
+  // Close login modal
+  [loginCloseBtn, loginCancelBtn].forEach(btn => {
+    if (btn) {
+      btn.addEventListener('click', () => {
+        console.log('Closing admin login modal via button');
+        if (loginModal) {
+          loginModal.style.display = 'none';
+          console.log('Modal display style set to none');
+        }
+        loginForm.reset();
+      });
+    }
+  });
+
+  // Close modal on backdrop click
+  if (loginModal) {
+    loginModal.addEventListener('click', (e) => {
+      if (e.target === loginModal) {
+        console.log('Closing admin login modal via backdrop click');
+        loginModal.style.display = 'none';
+        console.log('Modal display style set to none');
+        loginForm.reset();
+      }
+    });
+  }
   const openBtn = document.createElement('button');
   openBtn.textContent = 'Add Product';
   openBtn.className = 'btn btn--primary header-add-product';
   openBtn.type = 'button';
+  openBtn.style.display = 'none'; // Hidden by default
+
   // Кнопка очистки локальных товаров
   const clearBtn = document.createElement('button');
   clearBtn.textContent = 'Clear Products';
   clearBtn.className = 'btn btn--ghost header-clear-products';
   clearBtn.type = 'button';
+  clearBtn.style.display = 'none'; // Hidden by default
   // Добавляем в header controls если есть
   const headerControls = document.querySelector('.header__controls');
   if (headerControls) {
@@ -498,6 +642,9 @@ export function initAdminProducts(translations, lang = 'ru') {
 
   // On init: cache initial products available on window (from products.js)
   try { window.__initialProducts = window.products || []; } catch {}
+
+  // Log keyboard shortcut hint for developers
+  console.log('💡 Admin mode: Press Ctrl+Shift+A to open admin login');
 }
 
 export default { initAdminProducts };

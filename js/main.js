@@ -423,11 +423,15 @@ async function initApp() {
         }
     } catch (err) { /* ignore fetch errors */ }
     try {
+        console.log('Importing admin-products.js...');
         const admin = await import('./admin-products.js');
         if (admin && typeof admin.initAdminProducts === 'function') {
+            console.log('Initializing admin products...');
             admin.initAdminProducts(translations, savedLanguage);
+        } else {
+            console.error('initAdminProducts function not found');
         }
-    } catch (err) { /* ignore */ }
+    } catch (err) { console.error('Error importing admin module:', err); }
 
     // Инициализируем маркетинговые CTA и форму контактов (кнопки позвонить/WhatsApp/Telegram)
     try { initMarketing(); } catch (e) { /* no-op */ }
@@ -649,7 +653,39 @@ async function initApp() {
     const catalogButton = document.querySelector('#catalogButton');
     const catalogDropdown = document.querySelector('#catalogDropdown');
     if (catalogButton && catalogDropdown) {
+        // Open dropdown on hover
+        catalogButton.addEventListener('mouseenter', () => {
+            catalogDropdown.classList.add('catalog-dropdown--open');
+            catalogButton.setAttribute('aria-expanded', 'true');
+        });
+        
+        // Close dropdown when mouse leaves both button and dropdown
+        const closeDropdown = () => {
+            catalogDropdown.classList.remove('catalog-dropdown--open');
+            catalogButton.setAttribute('aria-expanded', 'false');
+        };
+        
+        catalogButton.addEventListener('mouseleave', (e) => {
+            // Check if mouse is moving to dropdown
+            setTimeout(() => {
+                if (!catalogDropdown.matches(':hover') && !catalogButton.matches(':hover')) {
+                    closeDropdown();
+                }
+            }, 100);
+        });
+        
+        catalogDropdown.addEventListener('mouseleave', (e) => {
+            // Check if mouse is moving to button
+            setTimeout(() => {
+                if (!catalogDropdown.matches(':hover') && !catalogButton.matches(':hover')) {
+                    closeDropdown();
+                }
+            }, 100);
+        });
+        
+        // Keep click functionality for accessibility
         catalogButton.addEventListener('click', toggleCatalogDropdown);
+        
         document.addEventListener('click', (e) => {
             if (!catalogDropdown.contains(e.target) && !catalogButton.contains(e.target)) {
                 catalogDropdown.classList.remove('catalog-dropdown--open');
@@ -1255,6 +1291,9 @@ function showSection(id, show) {
 function setupHashRouting(initialLang) {
     function handleRoute() {
         const hash = location.hash || '';
+        const urlParams = new URLSearchParams(location.search);
+        const categoryParam = urlParams.get('category');
+        
         const m = hash.match(/^#product-(.+)$/);
         if (m) {
             const pid = m[1];
@@ -1270,6 +1309,29 @@ function setupHashRouting(initialLang) {
                 renderProductDetail(pid);
                 bindProductDetailEvents();
             });
+        } else if (hash === '#products' || categoryParam) {
+            // Show products section with potential filtering
+            showSection('hero-container', true);
+            showSection('services-container', true);
+            showSection('products-container', true);
+            showSection('portfolio-container', true);
+            showSection('contacts-container', true);
+            showSection('product-detail-container', false);
+            
+            // Scroll to products section
+            const productsSection = document.querySelector('#products-container');
+            if (productsSection) {
+                productsSection.scrollIntoView({ behavior: 'smooth' });
+            }
+            
+            // Apply filters if category parameter is present
+            if (categoryParam) {
+                setTimeout(() => {
+                    if (typeof filterProducts === 'function') {
+                        filterProducts(savedLanguage, translations);
+                    }
+                }, 100);
+            }
         } else {
             // Show main sections
             showSection('hero-container', true);

@@ -80,6 +80,24 @@
     <!-- Toast area for cart Undo messages -->
     <div id="toast-container" aria-live="polite" aria-atomic="true" class="toast-container" style="position: fixed; left: 50%; transform: translateX(-50%); bottom: 16px; z-index: 4000;"></div>
     
+    <!-- Admin Login Modal -->
+    <div class="modal" id="adminLoginModal" role="dialog" aria-modal="true" aria-labelledby="adminLoginTitle" style="display:none">
+      <div class="modal__content modal__content--small">
+        <button class="modal__close" id="adminLoginClose" aria-label="Закрыть">✕</button>
+        <h2 id="adminLoginTitle">Вход в режим администратора</h2>
+        <form id="adminLoginForm" class="admin-login-form">
+          <div class="form-group">
+            <label for="adminPassword">Пароль администратора</label>
+            <input type="password" id="adminPassword" name="password" required autocomplete="current-password">
+          </div>
+          <div class="form-actions">
+            <button type="button" id="adminLoginCancel" class="btn btn--secondary">Отмена</button>
+            <button type="submit" class="btn btn--primary">Войти</button>
+          </div>
+        </form>
+      </div>
+    </div>
+    
     <script type="module" src="js/main.js"></script>
 </body>
 </html>

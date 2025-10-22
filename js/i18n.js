@@ -2,6 +2,7 @@ export const translations = {
     ru: {
         "site-title": "ClimaTech",
         "header-title": "ClimaTech",
+        "home": "Главная",
         "nav-home": "Главная",
         "nav-services": "Услуги",
         "nav-products": "Товары",
@@ -159,6 +160,7 @@ export const translations = {
         "site-title": "ClimaTech",
         "header-title": "ClimaTech",
         "footer-title": "ClimaTech",
+        "home": "Головна",
         // Добавлены недостающие ключи навигации для украинского
         "nav-home": "Головна",
         "nav-services": "Послуги",

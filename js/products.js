@@ -388,6 +388,9 @@ export function renderProducts(lang, translations, filteredProducts = products) 
         const productCard = document.createElement('div');
         productCard.classList.add('product-card');
         productCard.dataset.id = String(product.id);
+        // Add microdata for SEO
+        productCard.setAttribute('itemscope', '');
+        productCard.setAttribute('itemtype', 'https://schema.org/Product');
     const isPrimary = idx === 0; // fallback: первый элемент
     const loadingAttr = isPrimary ? 'eager' : 'lazy';
     const fetchPrio = isPrimary ? 'high' : 'low';
@@ -425,7 +428,8 @@ export function renderProducts(lang, translations, filteredProducts = products) 
                             <div class="product-card__badges product-card__badges--top-right">
                                 <span class="badge ${stockClass}">${stockLabel}</span>
                                 ${saleBadge}
-                            </div>`;
+                            </div>
+                            <meta itemprop="availability" content="${inStock ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock'}" />`;
                 } catch(_) { /* ignore badge errors */ }
 
                     // Flag badges (из i18n.flags) stacked vertically at top-left over the image
@@ -496,7 +500,7 @@ export function renderProducts(lang, translations, filteredProducts = products) 
                 if (brandNameRaw) {
                     const brandNameSafe = escapeHtml(brandNameRaw);
                     const brandAria = escapeHtml(`${brandChipLabel}: ${brandNameRaw}`);
-                    chips.push(`<span class="product-card__chip product-card__chip--brand" role="listitem" aria-label="${brandAria}">${brandNameSafe}</span>`);
+                    chips.push(`<span class="product-card__chip product-card__chip--brand" role="listitem" aria-label="${brandAria}" itemprop="brand">${brandNameSafe}</span>`);
                 }
                 if (categoryNameRaw) {
                     const normalizedCategory = typeof categoryNameRaw === 'string' ? categoryNameRaw.trim() : String(categoryNameRaw);
@@ -589,12 +593,12 @@ export function renderProducts(lang, translations, filteredProducts = products) 
                       ${srcsetLine}
                       sizes="(max-width: 480px) 45vw, (max-width: 768px) 30vw, 240px"
                       onerror="this.src='https://placehold.co/150x150/blue/white?text=Image+Not+Found'">
-                    <h3 class="product-card__title"><a href="#product-${product.id}" class="product-card__title-link" aria-label="${viewDetailsLabel} ${product.name[lang]}">${product.name[lang]}</a></h3>
+                    <h3 class="product-card__title"><a href="#product-${product.id}" class="product-card__title-link" aria-label="${viewDetailsLabel} ${product.name[lang]}" itemprop="name">${product.name[lang]}</a></h3>
                     ${metaHtml}
                                         ${ratingHtml}
                     <p class="product-card__description">${product.description[lang]}</p>
                     ${specsHtml}
-                                        <p class="product-card__price">${priceHtml}</p>
+                                        <p class="product-card__price" itemprop="price" content="${product.price}">${priceHtml}</p>
                     <div class="product-card__purchase">
                         <button class="product-card__button product-card__button--icon" data-id="${product.id}" data-i18n="service-order" aria-label="${orderButtonLabel}">
                             <span class="sr-only">${orderLabel}</span>

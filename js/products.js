@@ -15,6 +15,7 @@ const baseProducts = [
         brand: "EcoCool",
         inStock: true,
         warrantyMonths: 12,
+        rating: { value: 4.8, count: 164 },
         specs: [
             { key: 'power', value: { ru: '2,5 кВт', uk: '2,5 кВт' } },
             { key: 'area', value: { ru: 'до 25 м²', uk: 'до 25 м²' } },
@@ -40,6 +41,7 @@ const baseProducts = [
         brand: "FreshAir",
         inStock: false,
         warrantyMonths: 24,
+        rating: { value: 4.6, count: 98 },
         specs: [
             { key: 'power', value: { ru: '80 м³/ч', uk: '80 м³/год' } },
             { key: 'area', value: { ru: 'до 60 м²', uk: 'до 60 м²' } },
@@ -60,6 +62,7 @@ const baseProducts = [
         brand: "ClimaTech",
         inStock: true,
         warrantyMonths: 6,
+        rating: { value: 4.9, count: 72 },
         specs: [
             { key: 'power', value: { ru: '—', uk: '—' } },
             { key: 'area', value: { ru: '—', uk: '—' } },
@@ -80,6 +83,7 @@ const baseProducts = [
         brand: "ClimaTech",
         inStock: true,
         warrantyMonths: 6,
+    rating: { value: 4.8, count: 54 },
         specs: [
             { key: 'power', value: { ru: '—', uk: '—' } },
             { key: 'area', value: { ru: '—', uk: '—' } },
@@ -100,6 +104,7 @@ const baseProducts = [
         brand: "ClimaTech",
         inStock: true,
         warrantyMonths: 3,
+    rating: { value: 4.7, count: 91 },
         specs: [
             { key: 'power', value: { ru: '—', uk: '—' } },
             { key: 'area', value: { ru: '—', uk: '—' } },
@@ -284,6 +289,36 @@ export function renderProducts(lang, translations, filteredProducts = products) 
     const compareAddLabel = langDict['compare-add'] || fallbackDict['compare-add'] || 'Add to compare';
     const compareRemoveLabel = langDict['compare-remove'] || fallbackDict['compare-remove'] || 'Remove from compare';
     const orderLabel = langDict['service-order'] || fallbackDict['service-order'] || 'Заказать';
+    const specsLabel = langDict['specs'] || fallbackDict['specs'] || 'Характеристики';
+    const brandChipLabel = langDict['chips-brand'] || fallbackDict['chips-brand'] || (lang === 'uk' ? 'Бренд' : 'Бренд');
+    const categoryChipLabel = langDict['chips-category'] || fallbackDict['chips-category'] || (lang === 'uk' ? 'Категорія' : 'Категория');
+    const ratingLabel = langDict['rating-label'] || fallbackDict['rating-label'] || 'Рейтинг';
+    const reviewsOne = langDict['reviews-one'] || fallbackDict['reviews-one'] || (lang === 'uk' ? 'відгук' : 'отзыв');
+    const reviewsFew = langDict['reviews-few'] || fallbackDict['reviews-few'] || (lang === 'uk' ? 'відгуки' : 'отзыва');
+    const reviewsMany = langDict['reviews-many'] || fallbackDict['reviews-many'] || (lang === 'uk' ? 'відгуків' : 'отзывов');
+    const escapeHtml = (value) => {
+        if (value === null || value === undefined) return '';
+        return String(value)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    };
+    const selectPluralForm = (count) => {
+        const absCount = Math.abs(Number(count) || 0);
+        const mod10 = absCount % 10;
+        const mod100 = absCount % 100;
+        if (lang === 'uk') {
+            if (mod10 === 1 && mod100 !== 11) return reviewsOne;
+            if (mod10 >= 2 && mod10 <= 4 && !(mod100 >= 12 && mod100 <= 14)) return reviewsFew;
+            return reviewsMany;
+        }
+        if (mod10 === 1 && mod100 !== 11) return reviewsOne;
+        if (mod10 >= 2 && mod10 <= 4 && !(mod100 >= 12 && mod100 <= 14)) return reviewsFew;
+        return reviewsMany;
+    };
+    const specsLabelSafe = escapeHtml(specsLabel);
     filteredProducts.forEach((product, idx) => {
         const productCard = document.createElement('div');
         productCard.classList.add('product-card');
@@ -388,6 +423,98 @@ export function renderProducts(lang, translations, filteredProducts = products) 
                 const favoriteLabel = favoriteActive ? favoriteRemoveLabel : favoriteAddLabel;
                 const compareLabel = compareActive ? compareRemoveLabel : compareAddLabel;
 
+                const brandNameRaw = typeof product.brand === 'string' ? product.brand.trim() : '';
+                const categoryKey = `filter-${product.category}`;
+                const categoryNameRaw = (product && product.category)
+                    ? (langDict[categoryKey] || fallbackDict[categoryKey] || String(product.category))
+                    : '';
+                const chips = [];
+                if (brandNameRaw) {
+                    const brandNameSafe = escapeHtml(brandNameRaw);
+                    const brandAria = escapeHtml(`${brandChipLabel}: ${brandNameRaw}`);
+                    chips.push(`<span class="product-card__chip product-card__chip--brand" role="listitem" aria-label="${brandAria}">${brandNameSafe}</span>`);
+                }
+                if (categoryNameRaw) {
+                    const normalizedCategory = typeof categoryNameRaw === 'string' ? categoryNameRaw.trim() : String(categoryNameRaw);
+                    const categoryText = normalizedCategory.charAt(0).toUpperCase() + normalizedCategory.slice(1);
+                    const categorySafe = escapeHtml(categoryText);
+                    const categoryAria = escapeHtml(`${categoryChipLabel}: ${categoryText}`);
+                    chips.push(`<span class="product-card__chip product-card__chip--category" role="listitem" aria-label="${categoryAria}">${categorySafe}</span>`);
+                }
+                const metaHtml = chips.length ? `<div class="product-card__meta" role="list">${chips.join('')}</div>` : '';
+
+                let ratingValue = null;
+                let ratingCount = null;
+                if (product && typeof product.rating === 'object' && product.rating !== null) {
+                    if (typeof product.rating.value === 'number') {
+                        ratingValue = product.rating.value;
+                    } else if (typeof product.rating.score === 'number') {
+                        ratingValue = product.rating.score;
+                    }
+                    if (typeof product.rating.count === 'number') {
+                        ratingCount = product.rating.count;
+                    } else if (typeof product.rating.reviews === 'number') {
+                        ratingCount = product.rating.reviews;
+                    }
+                } else if (typeof product.rating === 'number') {
+                    ratingValue = product.rating;
+                }
+                if (typeof product.reviews === 'number' && ratingCount === null) {
+                    ratingCount = product.reviews;
+                }
+
+                let ratingHtml = '';
+                if (typeof ratingValue === 'number' && Number.isFinite(ratingValue)) {
+                    const clampedRating = Math.min(Math.max(ratingValue, 0), 5);
+                    const ratingRounded = Math.round(clampedRating * 10) / 10;
+                    const ratingDisplay = ratingRounded.toFixed(1);
+                    const stars = [];
+                    for (let i = 1; i <= 5; i++) {
+                        const diff = clampedRating - (i - 1);
+                        let starClass = 'product-card__star--empty';
+                        if (diff >= 1) {
+                            starClass = 'product-card__star--full';
+                        } else if (diff >= 0.5) {
+                            starClass = 'product-card__star--half';
+                        }
+                        stars.push(`<span class="product-card__star ${starClass}" aria-hidden="true"></span>`);
+                    }
+                    const reviewsNumber = typeof ratingCount === 'number' && Number.isFinite(ratingCount) ? Math.max(0, Math.round(ratingCount)) : null;
+                    const reviewsText = reviewsNumber !== null ? `${reviewsNumber} ${selectPluralForm(reviewsNumber)}` : '';
+                    const ratingAriaParts = [`${ratingLabel} ${ratingDisplay} / 5`];
+                    if (reviewsText) {
+                        ratingAriaParts.push(reviewsText);
+                    }
+                    const ratingAria = escapeHtml(ratingAriaParts.join(', '));
+                    const ratingDisplaySafe = escapeHtml(ratingDisplay);
+                    const reviewsTextSafe = escapeHtml(reviewsText);
+                    const starsHtml = stars.join('');
+                    const reviewsPart = reviewsText ? `<span class="product-card__rating-count">(${reviewsTextSafe})</span>` : '';
+                    ratingHtml = `<div class="product-card__rating" aria-label="${ratingAria}"><div class="product-card__stars" aria-hidden="true">${starsHtml}</div><span class="product-card__rating-value">${ratingDisplaySafe}</span>${reviewsPart}</div>`;
+                }
+
+                const preferredSpecs = ['power', 'area', 'noise'];
+                const productSpecs = Array.isArray(product.specs) ? product.specs : [];
+                const prioritizedSpecs = productSpecs.filter(spec => preferredSpecs.includes(spec.key));
+                const visibleSpecsSource = prioritizedSpecs.length ? prioritizedSpecs : productSpecs;
+                const specEntries = visibleSpecsSource.slice(0, 3).map((spec) => {
+                    const label = langDict[`spec-${spec.key}`] || fallbackDict[`spec-${spec.key}`] || spec.key;
+                    const specValueObj = spec.value;
+                    let valueText = '';
+                    if (specValueObj && typeof specValueObj === 'object') {
+                        valueText = specValueObj[lang] || specValueObj.ru || specValueObj.uk || '';
+                    } else if (specValueObj) {
+                        valueText = String(specValueObj);
+                    }
+                    if (!valueText) return '';
+                    const labelSafe = escapeHtml(label);
+                    const valueSafe = escapeHtml(valueText);
+                    return `<li class="product-card__spec" role="listitem"><span class="product-card__spec-label">${labelSafe}</span><span class="product-card__spec-value">${valueSafe}</span></li>`;
+                }).filter(Boolean);
+                const specsHtml = specEntries.length
+                    ? `<ul class="product-card__specs" role="list" aria-label="${specsLabelSafe}">${specEntries.join('')}</ul>`
+                    : '';
+
                                 productCard.innerHTML = `
                                  ${flagBadgesHtml}
                                  ${badgesHtml}
@@ -399,7 +526,10 @@ export function renderProducts(lang, translations, filteredProducts = products) 
                       sizes="(max-width: 480px) 45vw, (max-width: 768px) 30vw, 240px"
                       onerror="this.src='https://placehold.co/150x150/blue/white?text=Image+Not+Found'">
                     <h3 class="product-card__title">${product.name[lang]}</h3>
+                    ${metaHtml}
+                                        ${ratingHtml}
                     <p class="product-card__description">${product.description[lang]}</p>
+                    ${specsHtml}
                                         <p class="product-card__price">${priceHtml}</p>
                     <div class="product-card__quick-actions" role="group" aria-label="${quickActionsLabel}">
                         <button type="button" class="product-card__quick-btn${favoriteActive ? ' is-active' : ''}" data-action="favorite" data-id="${product.id}" aria-label="${favoriteLabel}" aria-pressed="${favoriteActive}" title="${favoriteLabel}">
@@ -424,7 +554,6 @@ export function renderProducts(lang, translations, filteredProducts = products) 
                             <img src="icons/shopping-bag-icon.svg" alt="" aria-hidden="true" class="product-card__button-icon">
                         </button>
                     </div>
-                    <button class="product-card__more card-actions-size--compact" data-id="${product.id}" data-i18n="details">${(translations && translations[lang] && translations[lang]['details']) || 'Подробнее'}</button>
                     ${adminHtml}
                 `;
         productsGrid.appendChild(productCard);
@@ -452,13 +581,6 @@ export function renderProducts(lang, translations, filteredProducts = products) 
             if (imgEl.complete && imgEl.naturalWidth > 0) {
                 markLoaded();
             }
-        // Навигация по клику на кнопку 'Подробнее'
-        const moreBtn = productCard.querySelector('.product-card__more');
-        if (moreBtn) {
-            moreBtn.addEventListener('click', () => {
-                window.location.hash = `product-${product.id}`;
-            });
-        }
             imgs.push(imgEl);
         }
     });

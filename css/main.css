@@ -778,11 +778,18 @@ body.compare-modal-open {
     --button-bg-hover: rgba(255, 255, 255, 0.25);
     --font-thin: 400;
     --font-bold: 600;
+    --background-color-secondary: #008CBA;
+    --background-color-secondary-hover: #007B9E;
     /* TODO(theme-refactor): сократить область применения --transition (all) до конкретных свойств для снижения лишних repaint */
     --transition: all 0.3s ease-in-out;
     --shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     --focus-ring: 2px solid var(--accent-color);
     --focus-ring-offset: 2px;
+    /* Базовый фон приложения для тёмной темы по умолчанию */
+    --background-color: #0e1117;
+    /* Базовый нижний отступ страницы (без горизонтальных, чтобы не конфликтовать с .container) */
+    --page-bottom: 24px;
+    --fab-right: 24px;
     
     /* 2025 Мобильные тренды */
     --glass-bg: rgba(255, 255, 255, 0.1);
@@ -833,6 +840,27 @@ body.compare-modal-open {
     --toast-action-bg: rgba(255, 255, 255, 0.2);
     --toast-action-border: rgba(255, 255, 255, 0.24);
     --toast-action-color: #ffffff;
+    /* Spacing tokens */
+    --gutter-sm: 16px;
+    --gutter-md: 24px;
+    --gutter-lg: 32px;
+    --gutter-xl: 48px;
+    --section-y-sm: 32px;
+    --section-y-md: 40px; /* соответствует текущим 40px у секций */
+    --section-y-lg: 64px;
+    --page-top: 35px; /* соответствует текущему padding-top у контейнера */
+    --fab-bottom: 32px;
+    --fab-gap: 12px;
+    --product-chip-bg: rgba(255,255,255,0.12);
+    --product-chip-border: rgba(255,255,255,0.18);
+    --product-chip-text: var(--nav-text-color);
+    --product-chip-accent-bg: rgba(0,122,255,0.28);
+    --product-chip-accent-color: #ffffff;
+    --product-spec-text: rgba(255,255,255,0.88);
+    --product-spec-muted: rgba(255,255,255,0.65);
+    --product-star-full: #ffd166;
+    --product-star-empty: rgba(255,255,255,0.25);
+    --product-rating-text: var(--nav-text-color);
 }
 
 /* Переменные для светлой темы */
@@ -868,19 +896,14 @@ body.compare-modal-open {
     --toast-bg: rgba(0, 0, 0, 0.85);
     --toast-success-bg: #2e7d32;
     --toast-text: #fff;
-    --quick-action-bg: rgba(255, 255, 255, 0.08);
-    --quick-action-border: rgba(255, 255, 255, 0.25);
-    --quick-action-color: var(--nav-text-color);
-    --quick-action-hover-bg: rgba(255, 255, 255, 0.16);
-    --quick-action-active-bg: var(--accent-color);
-    --quick-action-active-color: #fff;
-    --quick-action-active-border: transparent;
+    /* Quick action tokens: single set for light theme */
     --quick-action-bg: rgba(0, 0, 0, 0.06);
     --quick-action-border: rgba(0, 0, 0, 0.12);
     --quick-action-color: #1C2526;
     --quick-action-hover-bg: rgba(0, 0, 0, 0.12);
     --quick-action-active-bg: var(--accent-color);
     --quick-action-active-color: #fff;
+    --quick-action-active-border: transparent;
     --quick-action-active-border: transparent;
     --compare-bar-bg: rgba(255,255,255,0.92);
     --compare-bar-border: rgba(0,0,0,0.08);
@@ -903,6 +926,16 @@ body.compare-modal-open {
     --toast-action-bg: rgba(0, 0, 0, 0.08);
     --toast-action-border: rgba(0, 0, 0, 0.18);
     --toast-action-color: #0d1a26;
+    --product-chip-bg: rgba(0,0,0,0.06);
+    --product-chip-border: rgba(0,0,0,0.1);
+    --product-chip-text: #1C2526;
+    --product-chip-accent-bg: rgba(0,122,255,0.14);
+    --product-chip-accent-color: #0d1a26;
+    --product-spec-text: rgba(28,37,38,0.85);
+    --product-spec-muted: rgba(28,37,38,0.6);
+    --product-star-full: #f5a623;
+    --product-star-empty: rgba(28,37,38,0.2);
+    --product-rating-text: #1C2526;
 }
 
 /* Сброс базовых стилей */
@@ -951,8 +984,8 @@ body {
 
 .container {
     max-width: var(--container-width);
-    margin: 0 auto;
-    padding: 0 16px;
+    margin: 0 112.5px;
+    padding: var(--page-top) var(--gutter-sm) 0;
 }
 
 .header {
@@ -1658,7 +1691,8 @@ body {
 @media (max-width: 480px) {
     .container {
         max-width: 100%;
-        padding: 0 8px;
+        padding: 35px 8px 0;
+        margin: 0 8px;
     }
 
     .header__container {
@@ -1678,8 +1712,8 @@ body {
 
 .hero__container {
     max-width: var(--container-width);
-    margin: 0 auto;
-    padding: 0 16px;
+    margin: 0 112.5px;
+    padding: var(--page-top) var(--gutter-sm) 0;
 }
 
 .hero__title {
@@ -1810,8 +1844,7 @@ body {
     background: var(--background-color-secondary-hover);
 }
 
-.service-card__more,
-.product-card__more {
+.service-card__more {
     border: none;
     display: inline-block;
     margin-top: 8px;
@@ -1823,8 +1856,7 @@ body {
     transition: background-color .2s ease, color .2s ease;
     /* размеры стандартизированы ниже для всех карточечных кнопок */
 }
-.service-card__more:hover,
-.product-card__more:hover { background: var(--button-bg); }
+.service-card__more:hover { background: var(--button-bg); }
 
 @media (max-width: 768px) {
     .services__title {
@@ -1950,10 +1982,40 @@ body {
     overflow-wrap: anywhere; /* предотвращаем выход длинных слов за пределы */
 }
 
+.product-card__meta {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.product-card__chip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 600;
+    background: var(--product-chip-bg);
+    border: 1px solid var(--product-chip-border);
+    color: var(--product-chip-text);
+    letter-spacing: 0.01em;
+    min-width: 0;
+}
+
+.product-card__chip--category {
+    background: var(--product-chip-accent-bg);
+    border-color: transparent;
+    color: var(--product-chip-accent-color);
+}
+
 .product-card__description {
     font-size: 14px;
     color: var(--nav-text-color);
-    margin-bottom: 8px;
+    margin-bottom: 10px;
     line-height: 1.5;
     min-height: calc(1.5em * 3);
     /* Трёхстрочное обрезание длинных описаний с многоточием */
@@ -1964,6 +2026,93 @@ body {
     overflow: hidden;
     text-overflow: ellipsis;
     overflow-wrap: anywhere;
+}
+
+.product-card__specs {
+    list-style: none;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 6px 16px;
+    padding: 0;
+    margin: 0 0 14px;
+}
+
+.product-card__spec {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 6px;
+    font-size: 13px;
+}
+
+.product-card__spec-label {
+    font-weight: 600;
+    color: var(--product-spec-muted);
+}
+
+.product-card__spec-value {
+    font-weight: 600;
+    color: var(--product-spec-text);
+}
+
+.product-card__rating {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--product-rating-text);
+    margin-bottom: 12px;
+}
+
+.product-card__stars {
+    display: inline-flex;
+    gap: 2px;
+}
+
+.product-card__star {
+    position: relative;
+    width: 16px;
+    height: 16px;
+    display: inline-block;
+}
+
+.product-card__star::before {
+    content: '★';
+    position: absolute;
+    inset: 0;
+    font-size: 16px;
+    line-height: 1;
+    color: var(--product-star-empty);
+}
+
+.product-card__star--full::before {
+    color: var(--product-star-full);
+}
+
+.product-card__star--half::before {
+    color: var(--product-star-full);
+    clip-path: inset(0 50% 0 0);
+}
+
+.product-card__star--half::after {
+    content: '★';
+    position: absolute;
+    inset: 0;
+    font-size: 16px;
+    line-height: 1;
+    color: var(--product-star-empty);
+    clip-path: inset(0 0 0 50%);
+}
+
+.product-card__rating-value {
+    font-weight: 700;
+    letter-spacing: 0.01em;
+}
+
+.product-card__rating-count {
+    font-size: 12px;
+    color: var(--product-spec-muted);
 }
 
 .product-card__price {
@@ -2007,8 +2156,7 @@ body {
 /* Применяем размеры */
 .product-card__button,
 .service-card__button,
-.service-card__more,
-.product-card__more {
+.service-card__more {
     padding: 10px 14px;
     font-size: 15px;
     min-width: 120px;
@@ -2623,8 +2771,8 @@ textarea.form-input { resize: vertical; min-height: 120px; }
 
 .footer__container {
     max-width: var(--container-width);
-    margin: 0 auto;
-    padding: 0 16px;
+    margin: 0 112.5px;
+    padding: var(--page-top) var(--gutter-sm) 0;
 }
 
 .footer__info h3 {
@@ -2700,6 +2848,7 @@ textarea.form-input { resize: vertical; min-height: 120px; }
     --thumb-spacing: 12px;
     --fab-bottom: 20px;
     --fab-gap: 12px;
+        --fab-right: 16px;
   }
 
   [data-theme="dark"] {
@@ -2752,12 +2901,12 @@ textarea.form-input { resize: vertical; min-height: 120px; }
 
 /* Floating buttons container для лучшей группировки */
 .floating-buttons {
-  position: fixed;
-  right: var(--fab-right);
-  bottom: var(--fab-bottom);
+    position: fixed;
+    right: var(--fab-right, 24px);
+    bottom: var(--fab-bottom, 32px);
   display: flex;
   flex-direction: column;
-  gap: var(--fab-gap);
+    gap: var(--fab-gap, 12px);
   z-index: 1000;
   align-items: center; /* Центрируем кнопки для идеального выравнивания */
 }
@@ -2772,15 +2921,15 @@ textarea.form-input { resize: vertical; min-height: 120px; }
 /* Дополнительные стили для кнопок */
 .scroll-to-top {
   /* Стилизуем кнопку "наверх" с адаптивными цветами */
-    width: 56px;
-    height: 56px;
-    background: #007B9E; /* Цвет для темной темы */
+        width: 56px;
+        height: 56px;
+        background: #007B9E; /* Цвет для темной темы */
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow: 0 4px 15px rgba(0, 123, 158, 0.3);
   order: 2; /* Кнопка "наверх" будет снизу */
-    position: relative; /* Убираем fixed позиционирование */
+        position: relative; /* Убираем fixed позиционирование */
   font-size: 24px; /* Одинаковый размер иконки */
   border-radius: 50%;
   color: white;
@@ -2788,10 +2937,7 @@ textarea.form-input { resize: vertical; min-height: 120px; }
   align-items: center;
   justify-content: center;
   cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
-  opacity: 0;
-  transform: translateY(20px);
-  pointer-events: none;
+        transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 /* Цвета для светлой темы */
@@ -2806,28 +2952,22 @@ textarea.form-input { resize: vertical; min-height: 120px; }
 }
 
 .scroll-to-top.visible {
-  opacity: 1;
-  transform: translateY(0);
-  pointer-events: auto;
-}
-
-.scroll-to-top:hover {
-  background: #006B8A !important; /* Цвет hover для темной темы */
-  transform: scale(1.1);
-  box-shadow: 0 6px 20px rgba(0, 107, 138, 0.4);
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
 }
 
 .fab {
   /* FAB с адаптивными цветами */
-    width: 56px;
-    height: 56px;
-    background: #007B9E; /* Цвет для темной темы */
+        width: 56px;
+        height: 56px;
+        background: #007B9E; /* Цвет для темной темы */
   box-shadow: 0 4px 15px rgba(0, 123, 158, 0.3);
   border: 1px solid rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   order: 1; /* FAB будет сверху */
-    position: relative; /* Убираем fixed позиционирование */
+        position: relative; /* Убираем fixed позиционирование */
   font-size: 24px; /* Одинаковый размер иконки */
   border-radius: 50%;
   color: white;
@@ -2835,7 +2975,7 @@ textarea.form-input { resize: vertical; min-height: 120px; }
   align-items: center;
   justify-content: center;
   cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+        transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
   border: none;
 }
 
@@ -2961,7 +3101,8 @@ textarea.form-input { resize: vertical; min-height: 120px; }
     
     /* Современные отступы */
     .container {
-        padding: 0 var(--mobile-padding);
+        padding: 35px var(--mobile-padding) 0;
+        margin: 0 var(--mobile-padding);
     }
 }
 

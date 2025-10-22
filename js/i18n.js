@@ -117,6 +117,8 @@ export const translations = {
         "on-order": "Под заказ",
         "warranty": "Гарантия",
         "brand": "Бренд",
+    "chips-brand": "Бренд",
+    "chips-category": "Категория",
         "sku": "Артикул",
         "add-to-cart": "Добавить в корзину",
         "specs": "Характеристики",
@@ -128,6 +130,10 @@ export const translations = {
         "spec-energy": "Энергоэффективность",
         "spec-dimensions": "Габариты"
         ,
+    "rating-label": "Рейтинг",
+    "reviews-one": "отзыв",
+    "reviews-few": "отзыва",
+    "reviews-many": "отзывов",
         "details": "Подробнее"
         ,
         "welcome-greeting": "Добро пожаловать на ClimaTech",
@@ -270,6 +276,8 @@ export const translations = {
         "on-order": "Під замовлення",
         "warranty": "Гарантія",
         "brand": "Бренд",
+    "chips-brand": "Бренд",
+    "chips-category": "Категорія",
         "sku": "Артикул",
         "add-to-cart": "Додати до кошика",
         "specs": "Характеристики",
@@ -281,6 +289,10 @@ export const translations = {
         "spec-energy": "Енергоефективність",
         "spec-dimensions": "Габарити"
         ,
+    "rating-label": "Рейтинг",
+    "reviews-one": "відгук",
+    "reviews-few": "відгуки",
+    "reviews-many": "відгуків",
         "details": "Докладніше"
         ,
         "welcome-greeting": "Ласкаво просимо до ClimaTech",

@@ -79,12 +79,12 @@ export function initAdminProducts(translations, lang = 'ru') {
     const el = document.createElement('div'); el.id = 'toast-container'; document.body.appendChild(el); return el;
   })();
   const openBtn = document.createElement('button');
-  openBtn.textContent = 'Добавить товар';
+  openBtn.textContent = 'Add Product';
   openBtn.className = 'btn btn--primary header-add-product';
   openBtn.type = 'button';
   // Кнопка очистки локальных товаров
   const clearBtn = document.createElement('button');
-  clearBtn.textContent = 'Очистить локальные товары';
+  clearBtn.textContent = 'Clear Products';
   clearBtn.className = 'btn btn--ghost header-clear-products';
   clearBtn.type = 'button';
   // Добавляем в header controls если есть

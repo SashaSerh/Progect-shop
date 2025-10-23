@@ -11,7 +11,7 @@
 }
 
 /* Generic badges */
-.badge { display:inline-block; padding:2px 6px; font-size:12px; line-height:1; border-radius:6px; background:rgba(0,0,0,.06); color:var(--text, #222); }
+.badge { display:inline-block; padding:2px 6px; font-size:12px; line-height:1; border-radius:6px; background:rgba(0,0,0,.06); color:var(--nav-text-color, #222); }
 .badge--ok { background:#e8f5e9; color:#1b5e20; }
 .badge--warn { background:#fff3e0; color:#e65100; }
 .badge--sale { background:#ffebee; color:#b71c1c; }
@@ -1653,7 +1653,7 @@ body {
 }
 
 .light-theme .modal__button {
-    color: #000000;
+    color: var(--nav-text-color);
 }
 
 /* Admin Login Modal */
@@ -4084,12 +4084,12 @@ body.nav-open { overflow:hidden; touch-action:none; }
 .category-page { padding: 40px 0; min-height: 60vh; }
 .category-header { text-align: center; margin-bottom: 40px; }
 .category-title { font-size: 2.5rem; font-weight: 700; color: var(--nav-text-color); margin-bottom: 16px; }
-.category-description { font-size: 1.2rem; color: var(--text-secondary); max-width: 600px; margin: 0 auto; line-height: 1.6; }
+.category-description { font-size: 1.2rem; color: var(--nav-text-color); max-width: 600px; margin: 0 auto; line-height: 1.6; }
 
 .category-content { max-width: 800px; margin: 0 auto; }
 .category-cta { text-align: center; padding: 40px 20px; background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 16px; margin-bottom: 40px; }
 .category-cta h2 { font-size: 1.8rem; font-weight: 600; color: var(--nav-text-color); margin-bottom: 12px; }
-.category-cta p { font-size: 1.1rem; color: var(--text-secondary); margin-bottom: 24px; line-height: 1.5; }
+.category-cta p { font-size: 1.1rem; color: var(--nav-text-color); margin-bottom: 24px; line-height: 1.5; }
 .cta-buttons { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
 
 /* Category Products */
@@ -4222,7 +4222,7 @@ body.nav-open { overflow:hidden; touch-action:none; }
 .category-products__filter-label {
     font-size: 13px;
     font-weight: 600;
-    color: var(--text-secondary, #666);
+    color: var(--nav-text-color, #666);
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
@@ -4236,7 +4236,7 @@ body.nav-open { overflow:hidden; touch-action:none; }
     border: 2px solid var(--border-color, #e0e0e0);
     border-radius: 8px;
     background: var(--input-bg, #fff);
-    color: var(--text, #222);
+    color: var(--nav-text-color, #222);
     font-size: 14px;
     font-weight: 500;
     min-width: 160px;
@@ -4325,7 +4325,7 @@ body.nav-open { overflow:hidden; touch-action:none; }
 
 .pagination__info {
     font-size: 14px;
-    color: var(--text-secondary, #666);
+    color: var(--nav-text-color, #666);
     font-weight: 500;
 }
 
@@ -4344,7 +4344,7 @@ body.nav-open { overflow:hidden; touch-action:none; }
     padding: 10px 14px;
     border: 2px solid var(--border-color, #e0e0e0);
     background: var(--button-bg, #fff);
-    color: var(--text, #222);
+    color: var(--nav-text-color, #222);
     border-radius: 8px;
     cursor: pointer;
     font-size: 14px;

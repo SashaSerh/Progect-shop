@@ -4086,7 +4086,7 @@ body.nav-open { overflow:hidden; touch-action:none; }
 .category-title { font-size: 2.5rem; font-weight: 700; color: var(--nav-text-color); margin-bottom: 16px; }
 .category-description { font-size: 1.2rem; color: var(--nav-text-color); max-width: 600px; margin: 0 auto; line-height: 1.6; }
 
-.category-content { max-width: 800px; margin: 0 auto; }
+.category-content { max-width: 800px; margin: 0 auto; color: var(--nav-text-color);}
 .category-cta { text-align: center; padding: 40px 20px; background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 16px; margin-bottom: 40px; }
 .category-cta h2 { font-size: 1.8rem; font-weight: 600; color: var(--nav-text-color); margin-bottom: 12px; }
 .category-cta p { font-size: 1.1rem; color: var(--nav-text-color); margin-bottom: 24px; line-height: 1.5; }

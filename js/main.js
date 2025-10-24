@@ -2,7 +2,7 @@ import { cart, saveCart, updateCartUI, addToCart, removeFromCart, clearCart, tog
 import { toggleTheme, initTheme } from './theme.js';
 import { translations, switchLanguage } from './i18n.js';
 import { initWelcomeOverlay, needsWelcomeOverlay } from './welcome.js';
-import { products, renderProducts, filterProducts, toggleFavorite, toggleCompare, getFavoriteIds, getCompareIds, getProductsByCategory } from './products.js';
+import { products, renderProducts, filterProducts, toggleFavorite, toggleCompare, getFavoriteIds, getCompareIds, getProductsByCategory, isFavorite, isCompared, isAdminMode } from './products.js';
 import { initCompareBar } from './compare-bar.js';
 import { initCompareModal } from './compare-modal.js';
 import { contentConfig } from './content-config.js';
@@ -111,29 +111,7 @@ function renderCategoryProducts(categorySlug, lang, translations, sortBy = 'defa
     const fallbackDict = (translations && translations['ru']) || {};
 
     displayProducts.forEach(product => {
-        const productCard = document.createElement('div');
-        productCard.classList.add('product-card', 'product-card--compact');
-        productCard.dataset.id = String(product.id);
-
-        // Простая версия карточки товара для категории
-        const priceFormatted = Math.round(product.price).toLocaleString('uk-UA');
-        
-        productCard.innerHTML = `
-            <img src="${product.image || 'https://placehold.co/300x200/4CAF50/white?text=No+Image'}" 
-                 alt="${product.name[lang]}" 
-                 class="product-card__image"
-                 loading="lazy">
-            <h4 class="product-card__title">
-                <a href="#product-${product.id}" class="product-card__title-link">${product.name[lang]}</a>
-            </h4>
-            <p class="product-card__price">${priceFormatted} ₴</p>
-            <button class="product-card__button product-card__button--primary" 
-                    data-id="${product.id}" 
-                    onclick="addToCart('${product.id}')">
-                Додати в кошик
-            </button>
-        `;
-        
+        const productCard = renderCategoryProductCard(product, lang, translations);
         grid.appendChild(productCard);
     });
 
@@ -202,6 +180,369 @@ function renderCategoryPagination(container, currentPage, totalPages, totalItems
             }
         });
     });
+}
+
+const FAVORITES_STORAGE_KEY = 'products_favorites_v1';
+const COMPARE_STORAGE_KEY = 'products_compare_v1';
+
+function loadStoredIds(key) {
+    if (typeof localStorage === 'undefined') return new Set();
+    try {
+        const raw = localStorage.getItem(key);
+        if (!raw) return new Set();
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) {
+            return new Set(parsed.map((value) => String(value)));
+        }
+    } catch (_) { /* ignore broken payload */ }
+    return new Set();
+}
+
+let favoriteIds = loadStoredIds(FAVORITES_STORAGE_KEY);
+let compareIds = loadStoredIds(COMPARE_STORAGE_KEY);
+
+function persistIds(key, idsSet) {
+    if (typeof localStorage === 'undefined') return;
+    try {
+        localStorage.setItem(key, JSON.stringify(Array.from(idsSet)));
+    } catch (_) { /* ignore storage quota */ }
+}
+
+function hashCodeToHue(str) {
+    if (!str) return 210; // default blue
+    let h = 0;
+    for (let i = 0; i < str.length; i++) {
+        h = (h << 5) - h + str.charCodeAt(i);
+        h |= 0; // keep 32-bit
+    }
+    // map to 0..360
+    return Math.abs(h) % 360;
+}
+
+function hydrateCollectionsFromStorage() {
+    if (typeof localStorage === 'undefined') return;
+    favoriteIds = loadStoredIds(FAVORITES_STORAGE_KEY);
+    compareIds = loadStoredIds(COMPARE_STORAGE_KEY);
+}
+
+function renderCategoryProductCard(product, lang, translations) {
+    const langDict = (translations && translations[lang]) || (translations && translations['ru']) || {};
+    const fallbackDict = (translations && translations['ru']) || {};
+    const quantityLabel = langDict['quantity-label'] || fallbackDict['quantity-label'] || 'Количество';
+    const quantityDecreaseLabel = langDict['quantity-decrease'] || fallbackDict['quantity-decrease'] || 'Уменьшить количество';
+    const quantityIncreaseLabel = langDict['quantity-increase'] || fallbackDict['quantity-increase'] || 'Увеличить количество';
+    const quickActionsLabel = langDict['quick-actions'] || fallbackDict['quick-actions'] || 'Quick actions';
+    const favoriteAddLabel = langDict['favorite-add'] || fallbackDict['favorite-add'] || 'Add to favorites';
+    const favoriteRemoveLabel = langDict['favorite-remove'] || fallbackDict['favorite-remove'] || 'Remove from favorites';
+    const compareAddLabel = langDict['compare-add'] || fallbackDict['compare-add'] || 'Add to compare';
+    const compareRemoveLabel = langDict['compare-remove'] || fallbackDict['compare-remove'] || 'Remove from compare';
+    const viewDetailsLabel = langDict['view-details'] || fallbackDict['view-details'] || 'View details';
+    const orderLabel = langDict['service-order'] || fallbackDict['service-order'] || 'Заказать';
+    const specsLabel = langDict['specs'] || fallbackDict['specs'] || 'Характеристики';
+    const brandChipLabel = langDict['chips-brand'] || fallbackDict['chips-brand'] || (lang === 'uk' ? 'Бренд' : 'Бренд');
+    const categoryChipLabel = langDict['chips-category'] || fallbackDict['chips-category'] || (lang === 'uk' ? 'Категорія' : 'Категория');
+    const ratingLabel = langDict['rating-label'] || fallbackDict['rating-label'] || 'Рейтинг';
+    const reviewsOne = langDict['reviews-one'] || fallbackDict['reviews-one'] || (lang === 'uk' ? 'відгук' : 'отзыв');
+    const reviewsFew = langDict['reviews-few'] || fallbackDict['reviews-few'] || (lang === 'uk' ? 'відгуки' : 'отзыва');
+    const reviewsMany = langDict['reviews-many'] || fallbackDict['reviews-many'] || (lang === 'uk' ? 'відгуків' : 'отзывов');
+
+    const escapeHtml = (value) => {
+        if (value === null || value === undefined) return '';
+        return String(value)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    };
+
+    const selectPluralForm = (count) => {
+        const absCount = Math.abs(Number(count) || 0);
+        const mod10 = absCount % 10;
+        const mod100 = absCount % 100;
+        if (lang === 'uk') {
+            if (mod10 === 1 && mod100 !== 11) return reviewsOne;
+            if (mod10 >= 2 && mod10 <= 4 && !(mod100 >= 12 && mod100 <= 14)) return reviewsFew;
+            return reviewsMany;
+        }
+        if (mod10 === 1 && mod100 !== 11) return reviewsOne;
+        if (mod10 >= 2 && mod10 <= 4 && !(mod100 >= 12 && mod100 <= 14)) return reviewsFew;
+        return reviewsMany;
+    };
+
+    const specsLabelSafe = escapeHtml(specsLabel);
+
+    const productCard = document.createElement('div');
+    productCard.classList.add('product-card');
+    productCard.dataset.id = String(product.id);
+    // Add microdata for SEO
+    productCard.setAttribute('itemscope', '');
+    productCard.setAttribute('itemtype', 'https://schema.org/Product');
+
+    const isPrimary = false; // Для категорий не primary
+    const loadingAttr = 'lazy';
+    const fetchPrio = 'low';
+
+    // Admin actions
+    let adminHtml = '';
+    try {
+        const locals = JSON.parse(localStorage.getItem('products_local_v1') || '[]');
+        const isLocal = String(product.id).startsWith('p_') || (Array.isArray(locals) && locals.some(lp => String(lp.id) === String(product.id)));
+        if (isLocal) {
+            if (isAdminMode()) {
+                adminHtml = `<div class="product-card__admin-actions"><button class="product-card__button" data-edit data-id="${product.id}">Редактировать</button><button class="product-card__button" data-delete data-id="${product.id}">Удалить</button></div>`;
+            }
+            const localBadge = `<span class="badge badge--local" title="Сохранено только в вашем браузере">Локально</span>`;
+        }
+    } catch (err) { adminHtml = ''; }
+
+    // Badges
+    let badgesHtml = '';
+    try {
+        const inStock = !!product.inStock;
+        const stockLabel = inStock
+            ? ((translations && translations[lang] && translations[lang]['in-stock']) || 'В наличии')
+            : ((translations && translations[lang] && translations[lang]['on-order']) || 'Под заказ');
+        const stockClass = inStock ? 'badge--ok' : 'badge--warn';
+        const hasOld = typeof product.oldPrice === 'number' && product.oldPrice > (product.price || 0);
+        const hasDiscount = typeof product.discountPercent === 'number' && product.discountPercent > 0;
+        let saleBadge = '';
+        if (hasOld || hasDiscount) {
+            const lbl = (lang === 'uk') ? 'Знижка' : 'Скидка';
+            const pct = hasDiscount ? ` −${Math.round(product.discountPercent)}%` : '';
+            saleBadge = `<span class="badge badge--sale" aria-label="${lbl}${pct}">${lbl}${pct}</span>`;
+        }
+        badgesHtml = `
+            <div class="product-card__badges product-card__badges--top-right">
+                <span class="badge ${stockClass}">${stockLabel}</span>
+                ${saleBadge}
+            </div>
+            <meta itemprop="availability" content="${inStock ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock'}" />`;
+    } catch(_) { /* ignore badge errors */ }
+
+    // Flag badges
+    let flagBadgesHtml = '';
+    let colorMap = null;
+    try {
+        const flags = Array.isArray(product.flags) ? product.flags : [];
+        if (flags.length) {
+            const dict = (translations && translations[lang] && translations[lang].flags) || {};
+            colorMap = {};
+            const items = flags.map(f => {
+                const key = typeof f === 'string' ? f : (f?.key || '');
+                const text = dict[key] || (typeof f === 'string' ? f : (f?.label || ''));
+                if (!text) return '';
+                const variant = `flag-badge--${key}`;
+                const providedColor = (typeof f === 'object' && f?.color) ? f.color : null;
+                const h = hashCodeToHue(key || text);
+                const color = providedColor || `hsl(${h} 70% 45%)`;
+                colorMap[key] = color;
+                return `<span class="flag-badge ${variant}" data-flag-key="${key}" role="note">${text}</span>`;
+            }).join('');
+            if (items.trim().length) {
+                flagBadgesHtml = `<div class="product-card__flag-badges" aria-label="badges">${items}</div>`;
+            }
+        }
+    } catch(_) { /* ignore flags */ }
+
+    // Image
+    const placeholder = 'https://placehold.co/600x400?text=No+Image';
+    const baseSrc = (product.image && String(product.image).trim().length) ? product.image : placeholder;
+    let srcsetAttr = '';
+    try {
+        const isPicsum600 = /^https?:\/\/picsum\.photos\/600/i.test(baseSrc);
+        if (isPicsum600) {
+            const s320 = baseSrc.replace('600','320');
+            const s480 = baseSrc.replace('600','480');
+            const s600 = baseSrc;
+            const s1200 = (product.images?.[0] && product.images[0].startsWith('http')) ? product.images[0] : s600;
+            srcsetAttr = `${s320} 320w, ${s480} 480w, ${s600} 600w, ${s1200} 1200w`;
+        } else if (baseSrc.startsWith('http')) {
+            srcsetAttr = `${baseSrc} 600w`;
+        } else if (baseSrc.startsWith('data:')) {
+            srcsetAttr = '';
+        }
+    } catch {}
+
+    const srcsetLine = srcsetAttr ? `srcset="${srcsetAttr}"` : '';
+
+    // Price
+    const formatPriceInt = (v) => Math.round(v).toLocaleString('uk-UA', { maximumFractionDigits: 0 });
+    let priceHtml = `${formatPriceInt(product.price)} грн`;
+    if (typeof product.oldPrice === 'number' && product.oldPrice > product.price) {
+        priceHtml = `<span class="product-card__price-current">${formatPriceInt(product.price)} грн</span> <s class="product-card__price-old" aria-label="Старая цена">${formatPriceInt(product.oldPrice)} грн</s>`;
+    }
+
+    const favoriteActive = isFavorite(product.id);
+    const compareActive = isCompared(product.id);
+    const favoriteLabel = favoriteActive ? `${favoriteRemoveLabel} ${product.name[lang]}` : `${favoriteAddLabel} ${product.name[lang]}`;
+    const compareLabel = compareActive ? `${compareRemoveLabel} ${product.name[lang]}` : `${compareAddLabel} ${product.name[lang]}`;
+    const orderButtonLabel = `${orderLabel} ${product.name[lang]}`;
+
+    // Chips
+    const brandNameRaw = typeof product.brand === 'string' ? product.brand.trim() : '';
+    const categoryKey = `filter-${product.category}`;
+    const categoryNameRaw = (product && product.category)
+        ? (langDict[categoryKey] || fallbackDict[categoryKey] || String(product.category))
+        : '';
+    const chips = [];
+    if (brandNameRaw) {
+        const brandNameSafe = escapeHtml(brandNameRaw);
+        const brandAria = escapeHtml(`${brandChipLabel}: ${brandNameRaw}`);
+        chips.push(`<span class="product-card__chip product-card__chip--brand" role="listitem" aria-label="${brandAria}" itemprop="brand">${brandNameSafe}</span>`);
+    }
+    if (categoryNameRaw) {
+        const normalizedCategory = typeof categoryNameRaw === 'string' ? categoryNameRaw.trim() : String(categoryNameRaw);
+        const categoryText = normalizedCategory.charAt(0).toUpperCase() + normalizedCategory.slice(1);
+        const categorySafe = escapeHtml(categoryText);
+        const categoryAria = escapeHtml(`${categoryChipLabel}: ${categoryText}`);
+        chips.push(`<span class="product-card__chip product-card__chip--category" role="listitem" aria-label="${categoryAria}">${categorySafe}</span>`);
+    }
+    const metaHtml = chips.length ? `<div class="product-card__meta" role="list">${chips.join('')}</div>` : '';
+
+    // Rating
+    let ratingValue = null;
+    let ratingCount = null;
+    if (product && typeof product.rating === 'object' && product.rating !== null) {
+        if (typeof product.rating.value === 'number') {
+            ratingValue = product.rating.value;
+        } else if (typeof product.rating.score === 'number') {
+            ratingValue = product.rating.score;
+        }
+        if (typeof product.rating.count === 'number') {
+            ratingCount = product.rating.count;
+        } else if (typeof product.rating.reviews === 'number') {
+            ratingCount = product.rating.reviews;
+        }
+    } else if (typeof product.rating === 'number') {
+        ratingValue = product.rating;
+    }
+    if (typeof product.reviews === 'number' && ratingCount === null) {
+        ratingCount = product.reviews;
+    }
+
+    let ratingHtml = '';
+    if (typeof ratingValue === 'number' && Number.isFinite(ratingValue)) {
+        const clampedRating = Math.min(Math.max(ratingValue, 0), 5);
+        const ratingRounded = Math.round(clampedRating * 10) / 10;
+        const ratingDisplay = ratingRounded.toFixed(1);
+        const stars = [];
+        for (let i = 1; i <= 5; i++) {
+            const diff = clampedRating - (i - 1);
+            let starClass = 'product-card__star--empty';
+            if (diff >= 1) {
+                starClass = 'product-card__star--full';
+            } else if (diff >= 0.5) {
+                starClass = 'product-card__star--half';
+            }
+            stars.push(`<span class="product-card__star ${starClass}" aria-hidden="true"></span>`);
+        }
+        const reviewsNumber = typeof ratingCount === 'number' && Number.isFinite(ratingCount) ? Math.max(0, Math.round(ratingCount)) : null;
+        const reviewsText = reviewsNumber !== null ? `${reviewsNumber} ${selectPluralForm(reviewsNumber)}` : '';
+        const ratingAriaParts = [`${ratingLabel} ${ratingDisplay} / 5`];
+        if (reviewsText) {
+            ratingAriaParts.push(reviewsText);
+        }
+        const ratingAria = escapeHtml(ratingAriaParts.join(', '));
+        const ratingDisplaySafe = escapeHtml(ratingDisplay);
+        const reviewsTextSafe = escapeHtml(reviewsText);
+        const starsHtml = stars.join('');
+        const reviewsPart = reviewsText ? `<span class="product-card__rating-count">(${reviewsTextSafe})</span>` : '';
+        ratingHtml = `<div class="product-card__rating" aria-label="${ratingAria}"><div class="product-card__stars" aria-hidden="true">${starsHtml}</div><span class="product-card__rating-value">${ratingDisplaySafe}</span>${reviewsPart}</div>`;
+    }
+
+    // Specs
+    const preferredSpecs = ['power', 'area', 'noise'];
+    const productSpecs = Array.isArray(product.specs) ? product.specs : [];
+    const prioritizedSpecs = productSpecs.filter(spec => preferredSpecs.includes(spec.key));
+    const visibleSpecsSource = prioritizedSpecs.length ? prioritizedSpecs : productSpecs;
+    const specEntries = visibleSpecsSource.slice(0, 3).map((spec) => {
+        const label = langDict[`spec-${spec.key}`] || fallbackDict[`spec-${spec.key}`] || spec.key;
+        const specValueObj = spec.value;
+        let valueText = '';
+        if (specValueObj && typeof specValueObj === 'object') {
+            valueText = specValueObj[lang] || specValueObj.ru || specValueObj.uk || '';
+        } else if (specValueObj) {
+            valueText = String(specValueObj);
+        }
+        if (!valueText) return '';
+        const labelSafe = escapeHtml(label);
+        const valueSafe = escapeHtml(valueText);
+        return `<li class="product-card__spec" role="listitem"><span class="product-card__spec-label">${labelSafe}</span><span class="product-card__spec-value">${valueSafe}</span></li>`;
+    }).filter(Boolean);
+    const specsHtml = specEntries.length
+        ? `<ul class="product-card__specs" role="list" aria-label="${specsLabelSafe}">${specEntries.join('')}</ul>`
+        : '';
+
+    productCard.innerHTML = `
+         ${flagBadgesHtml}
+         ${badgesHtml}
+  <img src="${baseSrc}"
+      alt="${product.name[lang]}"
+      class="product-card__image lqip"
+      loading="${loadingAttr}" decoding="async" fetchpriority="${fetchPrio}"
+      ${srcsetLine}
+      sizes="(max-width: 480px) 45vw, (max-width: 768px) 30vw, 240px"
+      onerror="this.src='https://placehold.co/150x150/blue/white?text=Image+Not+Found'">
+    <h3 class="product-card__title"><a href="#product-${product.id}" class="product-card__title-link" aria-label="${viewDetailsLabel} ${product.name[lang]}" itemprop="name">${product.name[lang]}</a></h3>
+    ${metaHtml}
+                ${ratingHtml}
+    <p class="product-card__description">${product.description[lang]}</p>
+    ${specsHtml}
+                <p class="product-card__price" itemprop="price" content="${product.price}">${priceHtml}</p>
+    <div class="product-card__purchase">
+        <button class="product-card__button product-card__button--icon" data-id="${product.id}" data-i18n="service-order" aria-label="${orderButtonLabel}">
+            <span class="sr-only">${orderLabel}</span>
+            <img src="icons/shopping-bag-icon.svg" alt="" aria-hidden="true" class="product-card__button-icon">
+        </button>
+        <div class="quantity-stepper quantity-stepper--vertical" role="group" aria-label="${quantityLabel}">
+            <button type="button" class="quantity-stepper__btn quantity-stepper__btn--increment" data-action="increment" data-id="${product.id}" aria-label="${quantityIncreaseLabel}" aria-controls="qty-${product.id}">▲</button>
+            <input type="number" id="qty-${product.id}" class="quantity-stepper__input" value="1" min="1" max="99" data-id="${product.id}" inputmode="numeric" pattern="\\d*" aria-label="${quantityLabel}">
+            <button type="button" class="quantity-stepper__btn quantity-stepper__btn--decrement" data-action="decrement" data-id="${product.id}" aria-label="${quantityDecreaseLabel}" aria-controls="qty-${product.id}">▼</button>
+        </div>
+    </div>
+    <div class="product-card__quick-actions" role="group" aria-label="${quickActionsLabel}">
+        <button type="button" class="product-card__quick-btn${favoriteActive ? ' is-active' : ''}" data-action="favorite" data-id="${product.id}" aria-label="${favoriteLabel}" aria-pressed="${favoriteActive}" title="${favoriteLabel}">
+            <svg class="product-card__quick-icon" aria-hidden="true" focusable="false">
+                <use href="icons/icons-sprite.svg#icon-heart"></use>
+            </svg>
+        </button>
+        <button type="button" class="product-card__quick-btn${compareActive ? ' is-active' : ''}" data-action="compare" data-id="${product.id}" aria-label="${compareLabel}" aria-pressed="${compareActive}" title="${compareLabel}">
+            <svg class="product-card__quick-icon" aria-hidden="true" focusable="false">
+                <use href="icons/icons-sprite.svg#icon-compare"></use>
+            </svg>
+        </button>
+    </div>
+    ${adminHtml}
+`;
+
+    // Apply CSS variables for flag colors
+    try {
+        if (colorMap && Object.keys(colorMap).length) {
+            Object.entries(colorMap).forEach(([k, v]) => {
+                productCard.style.setProperty(`--flag-${k}-bg`, v);
+                productCard.style.setProperty(`--flag-${k}-color`, '#fff');
+            });
+            const styleEl = document.createElement('style');
+            const rules = Object.keys(colorMap).map(k => {
+                return `.product-card[data-id="${product.id}"] .flag-badge[data-flag-key="${k}"]{ background: var(--flag-${k}-bg); color: var(--flag-${k}-color); }`;
+            }).join('\n');
+            styleEl.textContent = rules;
+            productCard.appendChild(styleEl);
+        }
+    } catch (_) {}
+
+    // LQIP
+    const imgEl = productCard.querySelector('img.product-card__image');
+    if (imgEl) {
+        const markLoaded = () => imgEl.classList.add('lqip--loaded');
+        imgEl.addEventListener('load', markLoaded, { once: true });
+        if (imgEl.complete && imgEl.naturalWidth > 0) {
+            markLoaded();
+        }
+    }
+
+    return productCard;
 }
 
 function updateCategoryFilters(updates = {}) {
@@ -1080,6 +1421,135 @@ async function initApp() {
         });
 
         productsGrid.addEventListener('change', (e) => {
+            const input = e.target;
+            if (!(input instanceof HTMLInputElement)) return;
+            if (!input.classList.contains('quantity-stepper__input')) return;
+            input.value = String(clampQuantity(input.value));
+        });
+    }
+
+    // Обработчик событий для карточек товаров в категориях
+    const categoryProductsGrid = document.getElementById('category-products-grid');
+    if (categoryProductsGrid) {
+        categoryProductsGrid.addEventListener('click', (e) => {
+            const target = e.target;
+            if (!(target instanceof Element)) return;
+            const quickBtn = target.closest('.product-card__quick-btn');
+            if (quickBtn) {
+                const action = quickBtn.dataset.action;
+                const productId = quickBtn.dataset.id;
+                if (!action || !productId) return;
+                const productName = getProductDisplayName(productId, savedLanguage);
+                let isActive = false;
+                if (action === 'favorite') {
+                    const skipToast = suppressFavoriteToast;
+                    if (suppressFavoriteToast) suppressFavoriteToast = false;
+                    isActive = toggleFavorite(productId);
+                    const labelKey = isActive ? 'favorite-remove' : 'favorite-add';
+                    const label = translateKey(labelKey, savedLanguage);
+                    if (label) {
+                        quickBtn.setAttribute('aria-label', label);
+                        quickBtn.setAttribute('title', label);
+                    }
+                    quickBtn.classList.toggle('is-active', isActive);
+                    quickBtn.setAttribute('aria-pressed', String(isActive));
+                    updateQuickActionButtons('favorite', getFavoriteIds(), savedLanguage);
+                    if (!skipToast) {
+                        const messageKey = isActive ? 'toast-favorite-added' : 'toast-favorite-removed';
+                        const message = formatCollectionToastMessage(messageKey, productName, savedLanguage);
+                        const undoLabel = translateKey('toast-undo', savedLanguage);
+                        const actions = [];
+                        if (undoLabel) {
+                            actions.push({
+                                label: undoLabel,
+                                handler: () => {
+                                    suppressFavoriteToast = true;
+                                    toggleFavorite(productId);
+                                    updateQuickActionButtons('favorite', getFavoriteIds(), savedLanguage);
+                                }
+                            });
+                        }
+                        showActionToast({ type: 'favorite', message, actions });
+                    }
+                } else if (action === 'compare') {
+                    const skipToast = suppressCompareToast;
+                    if (suppressCompareToast) suppressCompareToast = false;
+                    isActive = toggleCompare(productId);
+                    const labelKey = isActive ? 'compare-remove' : 'compare-add';
+                    const label = translateKey(labelKey, savedLanguage);
+                    if (label) {
+                        quickBtn.setAttribute('aria-label', label);
+                        quickBtn.setAttribute('title', label);
+                    }
+                    quickBtn.classList.toggle('is-active', isActive);
+                    quickBtn.setAttribute('aria-pressed', String(isActive));
+                    updateQuickActionButtons('compare', getCompareIds(), savedLanguage);
+                    if (!skipToast) {
+                        const messageKey = isActive ? 'toast-compare-added' : 'toast-compare-removed';
+                        const message = formatCollectionToastMessage(messageKey, productName, savedLanguage);
+                        const undoLabel = translateKey('toast-undo', savedLanguage);
+                        const openLabel = translateKey('toast-open-compare', savedLanguage);
+                        const actions = [];
+                        if (isActive && openLabel) {
+                            actions.push({
+                                label: openLabel,
+                                handler: () => {
+                                    const ids = getCompareIds();
+                                    if (ids.length && typeof window !== 'undefined') {
+                                        window.dispatchEvent(new CustomEvent('compare:open', { detail: { ids } }));
+                                    }
+                                }
+                            });
+                        }
+                        if (undoLabel) {
+                            actions.push({
+                                label: undoLabel,
+                                handler: () => {
+                                    suppressCompareToast = true;
+                                    toggleCompare(productId);
+                                    updateQuickActionButtons('compare', getCompareIds(), savedLanguage);
+                                }
+                            });
+                        }
+                        showActionToast({ type: 'compare', message, actions });
+                    }
+                } else {
+                    return;
+                }
+                return;
+            }
+            const quantityBtn = target.closest('.quantity-stepper__btn');
+            if (quantityBtn) {
+                const card = quantityBtn.closest('.product-card');
+                const input = card?.querySelector('.quantity-stepper__input');
+                if (!input) return;
+                const delta = quantityBtn.dataset.action === 'increment' ? 1 : -1;
+                const next = clampQuantity(Number(input.value) + delta);
+                input.value = String(next);
+                return;
+            }
+            if (target.classList.contains('product-card__button') && !target.hasAttribute('data-edit') && !target.hasAttribute('data-delete')) {
+                const productId = target.dataset.id;
+                if (!productId) return;
+                const card = target.closest('.product-card');
+                const input = card?.querySelector('.quantity-stepper__input');
+                const qty = clampQuantity(input ? Number(input.value) : 1);
+                if (input) input.value = String(qty);
+                addToCart(productId, products, qty);
+                updateCartUI(translations, savedLanguage);
+                showActionToast({ type: 'cart', message: getCartAddedMessage(savedLanguage) });
+                return;
+            }
+            if (target.classList.contains('product-card__image') || target.classList.contains('product-card__title')) {
+                const card = target.closest('.product-card');
+                const id = card?.dataset.id;
+                if (id) {
+                    location.hash = `#product-${id}`;
+                }
+            }
+        });
+
+        categoryProductsGrid.addEventListener('change', (e) => {
             const input = e.target;
             if (!(input instanceof HTMLInputElement)) return;
             if (!input.classList.contains('quantity-stepper__input')) return;

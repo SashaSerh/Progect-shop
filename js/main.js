@@ -1302,259 +1302,7 @@ async function initApp() {
 
     const productsGrid = document.querySelector('.products__grid');
     if (productsGrid) {
-        productsGrid.addEventListener('click', (e) => {
-            const target = e.target;
-            if (!(target instanceof Element)) return;
-            const quickBtn = target.closest('.product-card__quick-btn');
-            if (quickBtn) {
-                const action = quickBtn.dataset.action;
-                const productId = quickBtn.dataset.id;
-                if (!action || !productId) return;
-                const productName = getProductDisplayName(productId, savedLanguage);
-                let isActive = false;
-                if (action === 'favorite') {
-                    const skipToast = suppressFavoriteToast;
-                    if (suppressFavoriteToast) suppressFavoriteToast = false;
-                    isActive = toggleFavorite(productId);
-                    const labelKey = isActive ? 'favorite-remove' : 'favorite-add';
-                    const label = translateKey(labelKey, savedLanguage);
-                    if (label) {
-                        quickBtn.setAttribute('aria-label', label);
-                        quickBtn.setAttribute('title', label);
-                    }
-                    quickBtn.classList.toggle('is-active', isActive);
-                    quickBtn.setAttribute('aria-pressed', String(isActive));
-                    updateQuickActionButtons('favorite', getFavoriteIds(), savedLanguage);
-                    if (!skipToast) {
-                        const messageKey = isActive ? 'toast-favorite-added' : 'toast-favorite-removed';
-                        const message = formatCollectionToastMessage(messageKey, productName, savedLanguage);
-                        const undoLabel = translateKey('toast-undo', savedLanguage);
-                        const actions = [];
-                        if (undoLabel) {
-                            actions.push({
-                                label: undoLabel,
-                                handler: () => {
-                                    suppressFavoriteToast = true;
-                                    toggleFavorite(productId);
-                                    updateQuickActionButtons('favorite', getFavoriteIds(), savedLanguage);
-                                }
-                            });
-                        }
-                        showActionToast({ type: 'favorite', message, actions });
-                    }
-                } else if (action === 'compare') {
-                    const skipToast = suppressCompareToast;
-                    if (suppressCompareToast) suppressCompareToast = false;
-                    isActive = toggleCompare(productId);
-                    const labelKey = isActive ? 'compare-remove' : 'compare-add';
-                    const label = translateKey(labelKey, savedLanguage);
-                    if (label) {
-                        quickBtn.setAttribute('aria-label', label);
-                        quickBtn.setAttribute('title', label);
-                    }
-                    quickBtn.classList.toggle('is-active', isActive);
-                    quickBtn.setAttribute('aria-pressed', String(isActive));
-                    updateQuickActionButtons('compare', getCompareIds(), savedLanguage);
-                    if (!skipToast) {
-                        const messageKey = isActive ? 'toast-compare-added' : 'toast-compare-removed';
-                        const message = formatCollectionToastMessage(messageKey, productName, savedLanguage);
-                        const undoLabel = translateKey('toast-undo', savedLanguage);
-                        const openLabel = translateKey('toast-open-compare', savedLanguage);
-                        const actions = [];
-                        if (isActive && openLabel) {
-                            actions.push({
-                                label: openLabel,
-                                handler: () => {
-                                    const ids = getCompareIds();
-                                    if (ids.length && typeof window !== 'undefined') {
-                                        window.dispatchEvent(new CustomEvent('compare:open', { detail: { ids } }));
-                                    }
-                                }
-                            });
-                        }
-                        if (undoLabel) {
-                            actions.push({
-                                label: undoLabel,
-                                handler: () => {
-                                    suppressCompareToast = true;
-                                    toggleCompare(productId);
-                                    updateQuickActionButtons('compare', getCompareIds(), savedLanguage);
-                                }
-                            });
-                        }
-                        showActionToast({ type: 'compare', message, actions });
-                    }
-                } else {
-                    return;
-                }
-                return;
-            }
-            const quantityBtn = target.closest('.quantity-stepper__btn');
-            if (quantityBtn) {
-                const card = quantityBtn.closest('.product-card');
-                const input = card?.querySelector('.quantity-stepper__input');
-                if (!input) return;
-                const delta = quantityBtn.dataset.action === 'increment' ? 1 : -1;
-                const next = clampQuantity(Number(input.value) + delta);
-                input.value = String(next);
-                return;
-            }
-            if (target.classList.contains('product-card__button') && !target.hasAttribute('data-edit') && !target.hasAttribute('data-delete')) {
-                const productId = target.dataset.id;
-                if (!productId) return;
-                const card = target.closest('.product-card');
-                const input = card?.querySelector('.quantity-stepper__input');
-                const qty = clampQuantity(input ? Number(input.value) : 1);
-                if (input) input.value = String(qty);
-                addToCart(productId, products, qty);
-                updateCartUI(translations, savedLanguage);
-                showActionToast({ type: 'cart', message: getCartAddedMessage(savedLanguage) });
-                return;
-            }
-            if (target.classList.contains('product-card__image') || target.classList.contains('product-card__title')) {
-                const card = target.closest('.product-card');
-                const id = card?.dataset.id;
-                if (id) {
-                    location.hash = `#product-${id}`;
-                }
-            }
-        });
-
-        productsGrid.addEventListener('change', (e) => {
-            const input = e.target;
-            if (!(input instanceof HTMLInputElement)) return;
-            if (!input.classList.contains('quantity-stepper__input')) return;
-            input.value = String(clampQuantity(input.value));
-        });
-    }
-
-    // Обработчик событий для карточек товаров в категориях
-    const categoryProductsGrid = document.getElementById('category-products-grid');
-    if (categoryProductsGrid) {
-        categoryProductsGrid.addEventListener('click', (e) => {
-            const target = e.target;
-            if (!(target instanceof Element)) return;
-            const quickBtn = target.closest('.product-card__quick-btn');
-            if (quickBtn) {
-                const action = quickBtn.dataset.action;
-                const productId = quickBtn.dataset.id;
-                if (!action || !productId) return;
-                const productName = getProductDisplayName(productId, savedLanguage);
-                let isActive = false;
-                if (action === 'favorite') {
-                    const skipToast = suppressFavoriteToast;
-                    if (suppressFavoriteToast) suppressFavoriteToast = false;
-                    isActive = toggleFavorite(productId);
-                    const labelKey = isActive ? 'favorite-remove' : 'favorite-add';
-                    const label = translateKey(labelKey, savedLanguage);
-                    if (label) {
-                        quickBtn.setAttribute('aria-label', label);
-                        quickBtn.setAttribute('title', label);
-                    }
-                    quickBtn.classList.toggle('is-active', isActive);
-                    quickBtn.setAttribute('aria-pressed', String(isActive));
-                    updateQuickActionButtons('favorite', getFavoriteIds(), savedLanguage);
-                    if (!skipToast) {
-                        const messageKey = isActive ? 'toast-favorite-added' : 'toast-favorite-removed';
-                        const message = formatCollectionToastMessage(messageKey, productName, savedLanguage);
-                        const undoLabel = translateKey('toast-undo', savedLanguage);
-                        const actions = [];
-                        if (undoLabel) {
-                            actions.push({
-                                label: undoLabel,
-                                handler: () => {
-                                    suppressFavoriteToast = true;
-                                    toggleFavorite(productId);
-                                    updateQuickActionButtons('favorite', getFavoriteIds(), savedLanguage);
-                                }
-                            });
-                        }
-                        showActionToast({ type: 'favorite', message, actions });
-                    }
-                } else if (action === 'compare') {
-                    const skipToast = suppressCompareToast;
-                    if (suppressCompareToast) suppressCompareToast = false;
-                    isActive = toggleCompare(productId);
-                    const labelKey = isActive ? 'compare-remove' : 'compare-add';
-                    const label = translateKey(labelKey, savedLanguage);
-                    if (label) {
-                        quickBtn.setAttribute('aria-label', label);
-                        quickBtn.setAttribute('title', label);
-                    }
-                    quickBtn.classList.toggle('is-active', isActive);
-                    quickBtn.setAttribute('aria-pressed', String(isActive));
-                    updateQuickActionButtons('compare', getCompareIds(), savedLanguage);
-                    if (!skipToast) {
-                        const messageKey = isActive ? 'toast-compare-added' : 'toast-compare-removed';
-                        const message = formatCollectionToastMessage(messageKey, productName, savedLanguage);
-                        const undoLabel = translateKey('toast-undo', savedLanguage);
-                        const openLabel = translateKey('toast-open-compare', savedLanguage);
-                        const actions = [];
-                        if (isActive && openLabel) {
-                            actions.push({
-                                label: openLabel,
-                                handler: () => {
-                                    const ids = getCompareIds();
-                                    if (ids.length && typeof window !== 'undefined') {
-                                        window.dispatchEvent(new CustomEvent('compare:open', { detail: { ids } }));
-                                    }
-                                }
-                            });
-                        }
-                        if (undoLabel) {
-                            actions.push({
-                                label: undoLabel,
-                                handler: () => {
-                                    suppressCompareToast = true;
-                                    toggleCompare(productId);
-                                    updateQuickActionButtons('compare', getCompareIds(), savedLanguage);
-                                }
-                            });
-                        }
-                        showActionToast({ type: 'compare', message, actions });
-                    }
-                } else {
-                    return;
-                }
-                return;
-            }
-            const quantityBtn = target.closest('.quantity-stepper__btn');
-            if (quantityBtn) {
-                const card = quantityBtn.closest('.product-card');
-                const input = card?.querySelector('.quantity-stepper__input');
-                if (!input) return;
-                const delta = quantityBtn.dataset.action === 'increment' ? 1 : -1;
-                const next = clampQuantity(Number(input.value) + delta);
-                input.value = String(next);
-                return;
-            }
-            if (target.classList.contains('product-card__button') && !target.hasAttribute('data-edit') && !target.hasAttribute('data-delete')) {
-                const productId = target.dataset.id;
-                if (!productId) return;
-                const card = target.closest('.product-card');
-                const input = card?.querySelector('.quantity-stepper__input');
-                const qty = clampQuantity(input ? Number(input.value) : 1);
-                if (input) input.value = String(qty);
-                addToCart(productId, products, qty);
-                updateCartUI(translations, savedLanguage);
-                showActionToast({ type: 'cart', message: getCartAddedMessage(savedLanguage) });
-                return;
-            }
-            if (target.classList.contains('product-card__image') || target.classList.contains('product-card__title')) {
-                const card = target.closest('.product-card');
-                const id = card?.dataset.id;
-                if (id) {
-                    location.hash = `#product-${id}`;
-                }
-            }
-        });
-
-        categoryProductsGrid.addEventListener('change', (e) => {
-            const input = e.target;
-            if (!(input instanceof HTMLInputElement)) return;
-            if (!input.classList.contains('quantity-stepper__input')) return;
-            input.value = String(clampQuantity(input.value));
-        });
+        // Обработчики теперь глобальные, см. выше
     }
 
     const servicesGrid = document.querySelector('.services__grid');
@@ -1719,6 +1467,146 @@ document.addEventListener('click', (e) => {
             }).catch(()=>{});
         }
     }
+});
+
+// Global handler for product card quick buttons (works for both main page and category pages)
+document.addEventListener('click', (e) => {
+    const target = e.target;
+    if (!(target instanceof Element)) return;
+    const quickBtn = target.closest('.product-card__quick-btn');
+    if (quickBtn) {
+        const action = quickBtn.dataset.action;
+        const productId = quickBtn.dataset.id;
+        if (!action || !productId) return;
+        const productName = getProductDisplayName(productId, savedLanguage);
+        let isActive = false;
+        if (action === 'favorite') {
+            const skipToast = suppressFavoriteToast;
+            if (suppressFavoriteToast) suppressFavoriteToast = false;
+            isActive = toggleFavorite(productId);
+            const labelKey = isActive ? 'favorite-remove' : 'favorite-add';
+            const label = translateKey(labelKey, savedLanguage);
+            if (label) {
+                quickBtn.setAttribute('aria-label', label);
+                quickBtn.setAttribute('title', label);
+            }
+            quickBtn.classList.toggle('is-active', isActive);
+            quickBtn.setAttribute('aria-pressed', String(isActive));
+            updateQuickActionButtons('favorite', getFavoriteIds(), savedLanguage);
+            if (!skipToast) {
+                const messageKey = isActive ? 'toast-favorite-added' : 'toast-favorite-removed';
+                const message = formatCollectionToastMessage(messageKey, productName, savedLanguage);
+                const undoLabel = translateKey('toast-undo', savedLanguage);
+                const actions = [];
+                if (undoLabel) {
+                    actions.push({
+                        label: undoLabel,
+                        handler: () => {
+                            suppressFavoriteToast = true;
+                            toggleFavorite(productId);
+                            updateQuickActionButtons('favorite', getFavoriteIds(), savedLanguage);
+                        }
+                    });
+                }
+                showActionToast({ type: 'favorite', message, actions });
+            }
+        } else if (action === 'compare') {
+            const skipToast = suppressCompareToast;
+            if (suppressCompareToast) suppressCompareToast = false;
+            isActive = toggleCompare(productId);
+            const labelKey = isActive ? 'compare-remove' : 'compare-add';
+            const label = translateKey(labelKey, savedLanguage);
+            if (label) {
+                quickBtn.setAttribute('aria-label', label);
+                quickBtn.setAttribute('title', label);
+            }
+            quickBtn.classList.toggle('is-active', isActive);
+            quickBtn.setAttribute('aria-pressed', String(isActive));
+            updateQuickActionButtons('compare', getCompareIds(), savedLanguage);
+            if (!skipToast) {
+                const messageKey = isActive ? 'toast-compare-added' : 'toast-compare-removed';
+                const message = formatCollectionToastMessage(messageKey, productName, savedLanguage);
+                const undoLabel = translateKey('toast-undo', savedLanguage);
+                const openLabel = translateKey('toast-open-compare', savedLanguage);
+                const actions = [];
+                if (isActive && openLabel) {
+                    actions.push({
+                        label: openLabel,
+                        handler: () => {
+                            const ids = getCompareIds();
+                            if (ids.length && typeof window !== 'undefined') {
+                                window.dispatchEvent(new CustomEvent('compare:open', { detail: { ids } }));
+                            }
+                        }
+                    });
+                }
+                if (undoLabel) {
+                    actions.push({
+                        label: undoLabel,
+                        handler: () => {
+                            suppressCompareToast = true;
+                            toggleCompare(productId);
+                            updateQuickActionButtons('compare', getCompareIds(), savedLanguage);
+                        }
+                    });
+                }
+                showActionToast({ type: 'compare', message, actions });
+            }
+        } else {
+            return;
+        }
+        return;
+    }
+});
+
+// Global handlers for product card interactions (quantity, cart, navigation)
+document.addEventListener('click', (e) => {
+    const target = e.target;
+    if (!(target instanceof Element)) return;
+    
+    // Quantity stepper buttons
+    const quantityBtn = target.closest('.quantity-stepper__btn');
+    if (quantityBtn) {
+        const card = quantityBtn.closest('.product-card');
+        const input = card?.querySelector('.quantity-stepper__input');
+        if (!input) return;
+        const delta = quantityBtn.dataset.action === 'increment' ? 1 : -1;
+        const next = clampQuantity(Number(input.value) + delta);
+        input.value = String(next);
+        return;
+    }
+    
+    // Main product card button (add to cart)
+    if (target.classList.contains('product-card__button') && !target.hasAttribute('data-edit') && !target.hasAttribute('data-delete')) {
+        const productId = target.dataset.id;
+        if (!productId) return;
+        const card = target.closest('.product-card');
+        const input = card?.querySelector('.quantity-stepper__input');
+        const qty = clampQuantity(input ? Number(input.value) : 1);
+        if (input) input.value = String(qty);
+        addToCart(productId, products, qty);
+        updateCartUI(translations, savedLanguage);
+        showActionToast({ type: 'cart', message: getCartAddedMessage(savedLanguage) });
+        return;
+    }
+    
+    // Product card image or title click (navigate to product detail)
+    if (target.classList.contains('product-card__image') || target.classList.contains('product-card__title') || target.classList.contains('product-card__title-link')) {
+        const card = target.closest('.product-card');
+        const id = card?.dataset.id;
+        if (id) {
+            location.hash = `#product-${id}`;
+        }
+        return;
+    }
+});
+
+// Global handler for quantity input changes
+document.addEventListener('change', (e) => {
+    const input = e.target;
+    if (!(input instanceof HTMLInputElement)) return;
+    if (!input.classList.contains('quantity-stepper__input')) return;
+    input.value = String(clampQuantity(input.value));
 });
 
 // Экспорт функций для использования в других файлах

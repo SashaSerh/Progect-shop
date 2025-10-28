@@ -35,24 +35,17 @@ function toggleCatalogDropdown(e) {
     e.stopPropagation();
     const catalogDropdown = document.querySelector('#catalogDropdown');
     const catalogButton = document.querySelector('#catalogButton');
-    if (catalogDropdown) {
+    if (catalogDropdown && catalogButton) {
+        const isOpen = catalogDropdown.classList.contains('catalog-dropdown--open');
+        if (!isOpen) {
+            // Position the dropdown relative to the button
+            const rect = catalogButton.getBoundingClientRect();
+            catalogDropdown.style.top = `${rect.bottom + window.scrollY}px`;
+            catalogDropdown.style.left = `${rect.left + window.scrollX}px`;
+            catalogDropdown.style.position = 'absolute';
+        }
         catalogDropdown.classList.toggle('catalog-dropdown--open');
-        if (catalogDropdown.classList.contains('catalog-dropdown--open')) {
-            positionCatalogDropdown();
-        }
-        if (catalogButton) {
-            catalogButton.setAttribute('aria-expanded', catalogDropdown.classList.contains('catalog-dropdown--open'));
-        }
-    }
-}
-
-function positionCatalogDropdown() {
-    const catalogButton = document.querySelector('#catalogButton');
-    const catalogDropdown = document.querySelector('#catalogDropdown');
-    if (catalogButton && catalogDropdown) {
-        const rect = catalogButton.getBoundingClientRect();
-        catalogDropdown.style.top = `${rect.bottom + window.scrollY}px`;
-        catalogDropdown.style.left = `${rect.left + window.scrollX}px`;
+        catalogButton.setAttribute('aria-expanded', catalogDropdown.classList.contains('catalog-dropdown--open'));
     }
 }
 
@@ -908,9 +901,12 @@ async function initApp() {
     if (catalogButton && catalogDropdown) {
         // Open dropdown on hover
         catalogButton.addEventListener('mouseenter', () => {
+            const rect = catalogButton.getBoundingClientRect();
+            catalogDropdown.style.top = `${rect.bottom + window.scrollY}px`;
+            catalogDropdown.style.left = `${rect.left + window.scrollX}px`;
+            catalogDropdown.style.position = 'absolute';
             catalogDropdown.classList.add('catalog-dropdown--open');
             catalogButton.setAttribute('aria-expanded', 'true');
-            positionCatalogDropdown();
         });
         
         // Close dropdown when mouse leaves both button and dropdown
@@ -939,13 +935,6 @@ async function initApp() {
         
         // Keep click functionality for accessibility
         catalogButton.addEventListener('click', toggleCatalogDropdown);
-        
-        // Update position on scroll if dropdown is open
-        window.addEventListener('scroll', () => {
-            if (catalogDropdown.classList.contains('catalog-dropdown--open')) {
-                positionCatalogDropdown();
-            }
-        });
         
         document.addEventListener('click', (e) => {
             if (!catalogDropdown.contains(e.target) && !catalogButton.contains(e.target)) {

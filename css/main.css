@@ -1064,6 +1064,7 @@ body {
     justify-content: space-between;
     align-items: center;
     flex-wrap: wrap;
+    position: relative;
 }
 
 .header__title {
@@ -1395,6 +1396,7 @@ body {
     align-items: center;
     gap: 8px;
     margin-right: 16px;
+    position: relative;
 }
 
 .catalog-button:hover {
@@ -1462,7 +1464,7 @@ body {
 .catalog-dropdown,
 .search-dropdown {
     display: none;
-    position: fixed;
+    position: absolute;
     background: var(--primary-color);
     backdrop-filter: blur(10px);
     border-radius: 14px;
@@ -1470,7 +1472,6 @@ body {
     padding: 16px;
     z-index: 101;
     transition: opacity 0.3s ease, transform 0.3s ease;
-    min-width: 250px;
 }
 
 .catalog-dropdown--open,

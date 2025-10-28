@@ -37,9 +37,22 @@ function toggleCatalogDropdown(e) {
     const catalogButton = document.querySelector('#catalogButton');
     if (catalogDropdown) {
         catalogDropdown.classList.toggle('catalog-dropdown--open');
+        if (catalogDropdown.classList.contains('catalog-dropdown--open')) {
+            positionCatalogDropdown();
+        }
         if (catalogButton) {
             catalogButton.setAttribute('aria-expanded', catalogDropdown.classList.contains('catalog-dropdown--open'));
         }
+    }
+}
+
+function positionCatalogDropdown() {
+    const catalogButton = document.querySelector('#catalogButton');
+    const catalogDropdown = document.querySelector('#catalogDropdown');
+    if (catalogButton && catalogDropdown) {
+        const rect = catalogButton.getBoundingClientRect();
+        catalogDropdown.style.top = `${rect.bottom + window.scrollY}px`;
+        catalogDropdown.style.left = `${rect.left + window.scrollX}px`;
     }
 }
 
@@ -897,6 +910,7 @@ async function initApp() {
         catalogButton.addEventListener('mouseenter', () => {
             catalogDropdown.classList.add('catalog-dropdown--open');
             catalogButton.setAttribute('aria-expanded', 'true');
+            positionCatalogDropdown();
         });
         
         // Close dropdown when mouse leaves both button and dropdown
@@ -925,6 +939,13 @@ async function initApp() {
         
         // Keep click functionality for accessibility
         catalogButton.addEventListener('click', toggleCatalogDropdown);
+        
+        // Update position on scroll if dropdown is open
+        window.addEventListener('scroll', () => {
+            if (catalogDropdown.classList.contains('catalog-dropdown--open')) {
+                positionCatalogDropdown();
+            }
+        });
         
         document.addEventListener('click', (e) => {
             if (!catalogDropdown.contains(e.target) && !catalogButton.contains(e.target)) {

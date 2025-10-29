@@ -2,75 +2,107 @@
   <div class="container">
     <header class="admin-page__header">
       <nav class="admin-breadcrumbs" aria-label="Хлебные крошки">
-        <a href="#products" class="admin-breadcrumbs__link">Каталог</a>
+        <a href="#products" class="admin-breadcrumbs__link" data-i18n="admin-breadcrumbs-root">Каталог</a>
         <span class="admin-breadcrumbs__sep">/</span>
-        <span class="admin-breadcrumbs__current">Админ: Товары</span>
+        <span class="admin-breadcrumbs__current" data-i18n="admin-breadcrumbs-current">Админ: Товары</span>
       </nav>
       <div class="admin-page__actions">
-        <a href="#products" class="btn btn--ghost" aria-label="Назад в каталог">← Назад</a>
-        <button id="adminExportBtn" type="button" class="btn">Экспорт JSON</button>
-        <label class="btn btn--secondary" for="adminImportInput">Импорт JSON</label>
+        <a href="#products" class="btn btn--ghost" aria-label="Назад в каталог" data-i18n="admin-back">← Назад</a>
+        <button id="adminExportBtn" type="button" class="btn" data-i18n="admin-export-json">Экспорт JSON</button>
+        <label class="btn btn--secondary" for="adminImportInput" data-i18n="admin-import-json">Импорт JSON</label>
         <input id="adminImportInput" type="file" accept="application/json" hidden>
+        <button id="clearConflictsBtn" type="button" class="btn btn--ghost" title="Сбросить конфликты" data-i18n="admin-clear-conflicts">Очистить конфликты</button>
       </div>
+      <details class="admin-gitcms" id="gitcmsSettingsAdmin">
+        <summary>Git‑CMS</summary>
+        <div class="gitcms-form">
+          <label>Провайдер
+            <select id="dataProviderSelect">
+              <option value="localStorage">LocalStorage</option>
+              <option value="gitcms">Git‑CMS</option>
+            </select>
+          </label>
+          <label>Repo (owner/repo)
+            <input id="gitcmsRepo" placeholder="owner/repo">
+          </label>
+          <label>Branch
+            <input id="gitcmsBranch" placeholder="main">
+          </label>
+          <label>Path
+            <input id="gitcmsPath" placeholder="data/products.json">
+          </label>
+          <label>Token
+            <input id="gitcmsToken" type="password" placeholder="ghp_...">
+          </label>
+          <div class="gitcms-actions">
+            <button type="button" id="gitcmsSaveBtn">Сохранить</button>
+            <button type="button" id="gitcmsLoadBtn" title="Загрузить товары из Git в локальные">Загрузить из Git</button>
+            <button type="button" id="gitcmsMergeBtn" title="Загрузить из Git и слить с текущими" data-i18n="git-merge">Загрузить и слить</button>
+            <button type="button" id="gitcmsPushBtn" title="Записать локальные товары в Git">Записать в Git</button>
+            <span id="gitcmsStatus" aria-live="polite" style="margin-left:8px; font-size:12px;"></span>
+          </div>
+        </div>
+      </details>
     </header>
 
     <div class="admin-page__content">
       <aside class="admin-page__list">
-        <h3 class="admin-block__title">Локальные товары</h3>
+        <h3 class="admin-block__title" data-i18n="admin-local-products">Локальные товары</h3>
         <ul id="adminLocalProductsList" class="admin-list"></ul>
       </aside>
 
       <main class="admin-page__formwrap">
-        <h3 class="admin-block__title">Добавить / Редактировать</h3>
+        <h3 class="admin-block__title" data-i18n="admin-form-title">Добавить / Редактировать</h3>
         <form id="adminProductForm" class="admin-product-form">
           <input type="hidden" name="id">
           <div class="form-row">
-            <label>Название (RU)
+            <label><span data-i18n="admin-field-title-ru">Название (RU)</span>
               <input name="title_ru" required>
               <small class="form-error" data-for="title_ru" role="alert"></small>
             </label>
-            <label>Название (UK)
+            <label><span data-i18n="admin-field-title-uk">Название (UK)</span>
               <input name="title_uk">
             </label>
           </div>
           <div class="form-row">
-            <label>Короткое описание (RU)
+            <label><span data-i18n="admin-field-desc-ru">Короткое описание (RU)</span>
               <textarea name="description_ru"></textarea>
             </label>
-            <label>Короткое описание (UK)
+            <label><span data-i18n="admin-field-desc-uk">Короткое описание (UK)</span>
               <textarea name="description_uk"></textarea>
             </label>
           </div>
           <div class="form-row">
-            <label>Цена
+            <label><span data-i18n="admin-field-price">Цена</span>
               <input name="price" type="number" min="0" step="1" required>
               <small class="form-error" data-for="price" role="alert"></small>
             </label>
-            <label>SKU
-              <input name="sku">
+            <label><span data-i18n="admin-field-sku">SKU</span>
+              <input name="sku" required>
               <small class="form-error" data-for="sku" role="alert"></small>
+              <small class="form-hint" data-i18n="admin-hint-sku-required">Обязательное поле</small>
             </label>
           </div>
           <div class="form-row">
-            <label>Категория
+            <label><span data-i18n="admin-field-category">Категория</span>
               <input name="category" placeholder="ac / recuperator / service">
               <small class="form-error" data-for="category" role="alert"></small>
             </label>
-            <label>В наличии
+            <label><span data-i18n="admin-field-in-stock">В наличии</span>
               <select name="inStock">
-                <option value="true">Да</option>
-                <option value="false">Нет</option>
+                <option value="true" data-i18n="admin-in-stock-yes">Да</option>
+                <option value="false" data-i18n="admin-in-stock-no">Нет</option>
               </select>
             </label>
           </div>
           <div class="form-row">
-            <label>Главное изображение
+            <label><span data-i18n="admin-field-image">Главное изображение</span>
               <input name="image" type="file" accept="image/*">
             </label>
             <div id="adminImagePreview" aria-hidden="true"></div>
           </div>
           <div class="form-row">
-            <label>Флаги
+            <label><span data-i18n="admin-field-flags">Флаги</span>
               <div id="flagSelector" class="flag-selector">
                 <div id="availableFlags" class="available-flags" aria-live="polite"></div>
                 <div id="selectedFlags" class="selected-flags" aria-live="polite"></div>
@@ -79,11 +111,33 @@
             </label>
           </div>
           <div class="form-actions">
-            <button type="submit" id="adminProductSave" class="btn btn--primary">Сохранить</button>
-            <button type="reset" id="adminProductCancel" class="btn btn--secondary">Сброс</button>
+            <button type="submit" id="adminProductSave" class="btn btn--primary" data-i18n="admin-save">Сохранить</button>
+            <button type="reset" id="adminProductCancel" class="btn btn--secondary" data-i18n="admin-reset">Сброс</button>
           </div>
         </form>
       </main>
     </div>
   </div>
 </section>
+
+<!-- Diff modal for conflict preview -->
+<div class="modal" id="conflictDiffModal" role="dialog" aria-modal="true" aria-labelledby="conflictDiffTitle" style="display:none;">
+  <div class="modal__content">
+    <button class="modal__close" type="button" aria-label="Закрыть">✕</button>
+    <h3 id="conflictDiffTitle">Различия</h3>
+    <div id="conflictDiffContent"></div>
+  </div>
+  <div class="modal__backdrop" aria-hidden="true"></div>
+  <script>
+    (function(){
+      const modal = document.getElementById('conflictDiffModal');
+      if (!modal) return;
+      const closeBtn = modal.querySelector('.modal__close');
+      const backdrop = modal.querySelector('.modal__backdrop');
+      function close(){ modal.style.display='none'; }
+      closeBtn && closeBtn.addEventListener('click', close);
+      backdrop && backdrop.addEventListener('click', close);
+      modal.addEventListener('keydown', (e)=>{ if(e.key==='Escape') close(); });
+    })();
+  </script>
+</div>

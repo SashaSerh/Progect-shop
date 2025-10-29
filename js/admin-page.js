@@ -1,9 +1,20 @@
 import { getLocalProducts, saveLocalProducts, upsertLocalProduct, exportLocalProducts, importLocalProducts } from './admin-products.js';
+import { autoFlagColor } from './flags-color.js';
 import { getMergedProducts, setProducts, renderProducts } from './products.js';
+import { mergeProduct, computeDiff } from './merge-utils.js';
 
 const DRAFT_KEY = 'admin:product:draft:v1';
 
 export async function initAdminPage(translations, lang = 'ru') {
+  const t = (key, vars) => {
+    let s = (translations && translations[lang] && translations[lang][key]) ?? (translations && translations.ru && translations.ru[key]) ?? key;
+    if (vars && typeof vars === 'object') {
+      for (const [k, v] of Object.entries(vars)) {
+        s = String(s).replaceAll(`{{${k}}}`, String(v));
+      }
+    }
+    return s;
+  };
   const listEl = document.getElementById('adminLocalProductsList');
   const form = document.getElementById('adminProductForm');
   const preview = document.getElementById('adminImagePreview');
@@ -12,6 +23,7 @@ export async function initAdminPage(translations, lang = 'ru') {
   const flagsHiddenInput = form?.querySelector('input[name="_flags"]');
   const exportBtn = document.getElementById('adminExportBtn');
   const importInput = document.getElementById('adminImportInput');
+  const clearConflictsBtn = document.getElementById('clearConflictsBtn');
 
   function showToast(text) {
     const host = document.getElementById('toast-container');
@@ -26,24 +38,94 @@ export async function initAdminPage(translations, lang = 'ru') {
 
   function renderList() {
     if (!listEl) return;
+    let conflictMap = {};
+    try { conflictMap = JSON.parse(localStorage.getItem('admin:merge:conflicts') || '{}') || {}; } catch {}
+    let remoteById = {}; let remoteBySku = {};
+    try { remoteById = JSON.parse(localStorage.getItem('admin:merge:lastRemoteById') || '{}') || {}; } catch {}
+    try { remoteBySku = JSON.parse(localStorage.getItem('admin:merge:lastRemoteBySku') || '{}') || {}; } catch {}
     const items = getLocalProducts();
     if (!items.length) {
-      listEl.innerHTML = '<li class="admin-list__empty">Локальные товары отсутствуют</li>';
+      listEl.innerHTML = `<li class="admin-list__empty">${t('admin-list-empty')}</li>`;
       return;
     }
     listEl.innerHTML = '';
     items.forEach(p => {
       const li = document.createElement('li');
+      const pid = String(p.id);
+      const conf = conflictMap[pid];
+      const conflictBadge = conf ? `<span class="admin-badge admin-badge--conflict">${conf === 'both' ? t('admin-conflict-both') : (conf === 'sku' ? t('admin-conflict-sku') : t('admin-conflict-id'))}</span>` : '';
+      const actions = conf ? `
+        <div class="admin-conflict-actions" data-id="${pid}" data-type="${conf}">
+          <button type="button" class="btn btn--tiny" data-act="conf-merge">${t('admin-conf-merge')}</button>
+          <button type="button" class="btn btn--tiny" data-act="conf-keep-local">${t('admin-conf-keep-local')}</button>
+          <button type="button" class="btn btn--tiny btn--danger" data-act="conf-replace-git">${t('admin-conf-replace-git')}</button>
+        </div>` : '';
       li.innerHTML = `
         <div class="admin-list__meta">
-          <div class="admin-list__meta-title">${(p.name?.[lang] || p.name?.ru || '').slice(0,120) || '(без названия)'} </div>
+          <div class="admin-list__meta-title">${(p.name?.[lang] || p.name?.ru || '').slice(0,120) || t('admin-untitled')} ${conflictBadge}</div>
           <div class="admin-list__meta-sub">ID: ${p.id} · SKU: ${p.sku || '—'}</div>
         </div>
         <div class="admin-list__actions">
-          <button type="button" data-act="edit" data-id="${p.id}" class="btn btn--small">Редактировать</button>
-          <button type="button" data-act="del" data-id="${p.id}" class="btn btn--danger btn--small">Удалить</button>
+          <button type="button" data-act="edit" data-id="${p.id}" class="btn btn--small">${t('admin-edit')}</button>
+          <button type="button" data-act="del" data-id="${p.id}" class="btn btn--danger btn--small">${t('admin-delete')}</button>
         </div>`;
-      listEl.appendChild(li);
+      const wrap = document.createElement('div');
+      wrap.appendChild(li);
+      if (conf) {
+        // attach conflict actions UI
+        const cont = document.createElement('div');
+        cont.innerHTML = actions + ` <button type="button" class="btn btn--tiny" data-act="conf-show-diff">${t('admin-conf-show-diff')}</button>`;
+        wrap.appendChild(cont);
+      }
+      listEl.appendChild(wrap);
+    });
+
+    // bind conflict actions
+    listEl.querySelectorAll('.admin-conflict-actions').forEach(box => {
+      box.addEventListener('click', (e) => {
+        const btn = e.target.closest('button'); if (!btn) return;
+        const id = box.getAttribute('data-id');
+        const type = box.getAttribute('data-type');
+        const localList = getLocalProducts();
+        const idx = localList.findIndex(p => String(p.id) === String(id));
+        if (idx < 0) return;
+        const localItem = localList[idx];
+        const remoteItem = remoteById[id] || (localItem?.sku ? remoteBySku[String(localItem.sku).toLowerCase()] : null);
+        const act = btn.getAttribute('data-act');
+        if (act === 'conf-show-diff') {
+          if (!remoteItem) return;
+          const diffs = computeDiff(localItem, remoteItem);
+          const modal = document.getElementById('conflictDiffModal');
+          const content = document.getElementById('conflictDiffContent');
+          if (modal && content) {
+            content.innerHTML = renderDiffTable(diffs);
+            modal.style.display = 'flex';
+            modal.querySelector('.modal__close')?.focus();
+          }
+          return;
+        } else if (act === 'conf-keep-local') {
+          delete conflictMap[id];
+          saveLocalProducts(localList);
+        } else if (act === 'conf-replace-git') {
+          if (remoteItem) {
+            const keptId = localItem.id; // preserve current ID
+            localList[idx] = { ...remoteItem, id: keptId, updatedAt: new Date().toISOString() };
+            delete conflictMap[id];
+            saveLocalProducts(localList);
+          }
+        } else if (act === 'conf-merge') {
+          if (remoteItem) {
+            localList[idx] = mergeProduct(localItem, remoteItem);
+            delete conflictMap[id];
+            saveLocalProducts(localList);
+          }
+        }
+        try { localStorage.setItem('admin:merge:conflicts', JSON.stringify(conflictMap)); } catch {}
+        renderList();
+        try {
+          const mergedAll = getMergedProducts(); setProducts(mergedAll); window.products = mergedAll; renderProducts(lang, translations, mergedAll);
+        } catch {}
+      });
     });
   }
 
@@ -62,9 +144,9 @@ export async function initAdminPage(translations, lang = 'ru') {
       wrap.className = 'selected-flag';
       wrap.setAttribute('data-flag-key', key);
       wrap.setAttribute('data-flag-color', color);
-      wrap.innerHTML = `<span class="selected-flag__label">${key}</span>
-                        <input type="color" class="selected-flag__color" value="${color}">
-                        <button type="button" class="selected-flag__remove" aria-label="Удалить">✕</button>`;
+  wrap.innerHTML = `<span class="selected-flag__label">${key}</span>
+        <input type="color" class="selected-flag__color" value="${color}">
+        <button type="button" class="selected-flag__remove" aria-label="${t('admin-selected-flag-remove-aria')}">✕</button>`;
       wrap.querySelector('.selected-flag__remove').addEventListener('click', () => { wrap.remove(); serializeSelectedFlags(); });
       wrap.querySelector('.selected-flag__color').addEventListener('input', (e) => { wrap.setAttribute('data-flag-color', e.target.value); serializeSelectedFlags(); });
       selectedFlagsContainer.appendChild(wrap);
@@ -83,8 +165,8 @@ export async function initAdminPage(translations, lang = 'ru') {
       btn.addEventListener('click', () => {
         const exists = Array.from(selectedFlagsContainer.querySelectorAll('.selected-flag')).some(el => el.getAttribute('data-flag-key') === key);
         if (exists) return;
-        const cur = Array.from(selectedFlagsContainer.querySelectorAll('.selected-flag')).map(el => ({ key: el.getAttribute('data-flag-key'), color: el.getAttribute('data-flag-color') || '#007aff' }));
-        cur.push({ key, color: '#007aff' });
+        const cur = Array.from(selectedFlagsContainer.querySelectorAll('.selected-flag')).map(el => ({ key: el.getAttribute('data-flag-key'), color: el.getAttribute('data-flag-color') || autoFlagColor(el.getAttribute('data-flag-key')) }));
+        cur.push({ key, color: autoFlagColor(key) });
         renderSelectedFlags(cur);
       });
       availableFlagsContainer.appendChild(btn);
@@ -133,7 +215,7 @@ export async function initAdminPage(translations, lang = 'ru') {
       if (item) fillForm(item);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } else if (act === 'del') {
-      if (!confirm('Удалить товар?')) return;
+      if (!confirm(t('admin-confirm-delete'))) return;
       const rest = getLocalProducts().filter(p => String(p.id) !== String(id));
       saveLocalProducts(rest);
       renderList();
@@ -141,7 +223,7 @@ export async function initAdminPage(translations, lang = 'ru') {
         const merged = getMergedProducts();
         setProducts(merged); window.products = merged; renderProducts(lang, translations, merged);
       } catch {}
-      showToast('Товар удалён');
+      showToast(t('admin-toast-removed'));
     }
   });
 
@@ -150,7 +232,7 @@ export async function initAdminPage(translations, lang = 'ru') {
     const f = e.target.files && e.target.files[0]; if (!f) return;
     const reader = new FileReader();
     reader.onload = (ev) => {
-      preview.innerHTML = `<img src="${ev.target.result}" alt="preview" style="max-width:200px;max-height:120px;"/>`;
+  preview.innerHTML = `<img src="${ev.target.result}" alt="${t('admin-preview-alt')}" style="max-width:200px;max-height:120px;"/>`;
       let hidden = form.querySelector('input[name="_image_data"]');
       if (!hidden) { hidden = document.createElement('input'); hidden.type = 'hidden'; hidden.name = '_image_data'; form.appendChild(hidden); }
       hidden.value = ev.target.result;
@@ -203,14 +285,15 @@ export async function initAdminPage(translations, lang = 'ru') {
     const titleRu = form.querySelector('[name="title_ru"]').value.trim();
     const priceVal = Number(form.querySelector('[name="price"]').value || 0);
     const categoryVal = form.querySelector('[name="category"]').value.trim();
-    const skuVal = form.querySelector('[name="sku"]').value.trim();
+  const skuVal = form.querySelector('[name="sku"]').value.trim();
     const idVal = form.querySelector('[name="id"]').value.trim();
     let ok = true;
-    if (!titleRu) { setError('title_ru', 'Укажите название'); ok = false; }
-    if (!Number.isFinite(priceVal) || priceVal < 0) { setError('price', 'Цена должна быть неотрицательной'); ok = false; }
-    if (!categoryVal) { setError('category', 'Укажите категорию'); ok = false; }
-    if (skuVal && !isUnique('sku', skuVal, idVal)) { setError('sku', 'SKU уже используется'); ok = false; }
-    if (idVal && !isUnique('id', idVal, idVal)) { setError('id', 'ID уже используется'); ok = false; }
+  if (!titleRu) { setError('title_ru', t('admin-error-title-ru')); ok = false; }
+  if (!Number.isFinite(priceVal) || priceVal < 0) { setError('price', t('admin-error-price')); ok = false; }
+  if (!skuVal) { setError('sku', t('admin-error-sku-required')); ok = false; }
+  if (!categoryVal) { setError('category', t('admin-error-category')); ok = false; }
+  if (skuVal && !isUnique('sku', skuVal, idVal)) { setError('sku', t('admin-error-sku-unique')); ok = false; }
+  if (idVal && !isUnique('id', idVal, idVal)) { setError('id', t('admin-error-id-unique')); ok = false; }
     if (!ok) return;
     const data = new FormData(form);
     let flags = [];
@@ -234,24 +317,24 @@ export async function initAdminPage(translations, lang = 'ru') {
     try {
       const merged = getMergedProducts(); setProducts(merged); window.products = merged; renderProducts(lang, translations, merged);
     } catch {}
-    showToast('Товар сохранён');
+    showToast(t('admin-toast-saved'));
   });
 
   // Export/Import bindings
   exportBtn?.addEventListener('click', () => {
     exportLocalProducts();
-    showToast('Экспорт завершён');
+    showToast(t('admin-export-done'));
   });
   importInput?.addEventListener('change', async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
     try {
       const count = await importLocalProducts(file);
-      showToast(`Импортировано ${count} товаров`);
+      showToast(t('admin-import-done', { count }));
       renderList();
       const merged = getMergedProducts(); setProducts(merged); window.products = merged; renderProducts(lang, translations, merged);
     } catch (err) {
-      showToast(`Ошибка импорта: ${err?.message || 'неизвестная ошибка'}`);
+      showToast(t('admin-import-error', { message: err?.message || 'неизвестная ошибка' }));
     } finally {
       e.target.value = '';
     }
@@ -260,6 +343,10 @@ export async function initAdminPage(translations, lang = 'ru') {
   // Initial
   initFlagSelector();
   renderList();
+  clearConflictsBtn?.addEventListener('click', () => {
+    try { localStorage.removeItem('admin:merge:conflicts'); } catch {}
+    renderList();
+  });
   // Prefill from draft
   try {
     const draft = JSON.parse(localStorage.getItem(DRAFT_KEY) || 'null') || null;
@@ -272,6 +359,34 @@ export async function initAdminPage(translations, lang = 'ru') {
       if (draft._flags) { try { const fl = JSON.parse(draft._flags); if (Array.isArray(fl)) renderSelectedFlags(fl); } catch {} }
     }
   } catch {}
+}
+
+function renderDiffTable(diffs) {
+  if (!Array.isArray(diffs) || !diffs.length) return '<div class="diff-empty">Нет различий</div>';
+  const label = (f) => {
+    const map = {
+      'name.ru':'Название (RU)', 'name.uk':'Название (UK)', 'description.ru':'Описание (RU)', 'description.uk':'Описание (UK)',
+      'price':'Цена', 'sku':'SKU', 'category':'Категория', 'image':'Главное изображение', 'images':'Галерея', 'inStock':'В наличии', 'flags':'Флаги'
+    };
+    return map[f] || f;
+  };
+  const rows = diffs.map(d => `
+    <tr>
+      <th>${label(d.field)}</th>
+      <td>${formatVal(d.local)}</td>
+      <td>${formatVal(d.remote)}</td>
+    </tr>`).join('');
+  return `<table class="diff-table">
+    <thead><tr><th>Поле</th><th>Локально</th><th>Git</th></tr></thead>
+    <tbody>${rows}</tbody>
+  </table>`;
+}
+
+function formatVal(v) {
+  if (Array.isArray(v)) return v.map(x => (typeof x === 'object' ? JSON.stringify(x) : String(x))).join(', ');
+  if (v && typeof v === 'object') return JSON.stringify(v);
+  if (v === undefined) return '<i>—</i>';
+  return String(v ?? '');
 }
 
 export default { initAdminPage };

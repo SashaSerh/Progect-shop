@@ -1,4 +1,5 @@
 import { renderProducts, getMergedProducts, setProducts, isAdminMode, enableAdminMode, disableAdminMode } from './products.js';
+import { autoFlagColor } from './flags-color.js';
 
 const STORAGE_KEY = 'products_local_v1';
 const DRAFT_KEY = 'admin:product:draft:v1';
@@ -136,6 +137,10 @@ export function importLocalProducts(file) {
 }
 
 export function initAdminProducts(translations, lang = 'ru') {
+  // Safe wrappers for test/mocked environments
+  const isAdmin = () => (typeof isAdminMode === 'function' ? isAdminMode() : false);
+  const enableAdmin = () => { if (typeof enableAdminMode === 'function') enableAdminMode(); };
+  const disableAdmin = () => { if (typeof disableAdminMode === 'function') disableAdminMode(); };
   const modal = document.getElementById('adminProductModal');
   const form = document.getElementById('adminProductForm');
   const dp = getProvider();
@@ -156,7 +161,7 @@ export function initAdminProducts(translations, lang = 'ru') {
     loginForm: !!loginForm,
     loginCloseBtn: !!loginCloseBtn,
     loginCancelBtn: !!loginCancelBtn,
-    isAdminMode: isAdminMode()
+    isAdminMode: isAdmin()
   });
 
   // Show/hide admin login button based on admin mode
@@ -166,13 +171,13 @@ export function initAdminProducts(translations, lang = 'ru') {
     const adminLink = document.getElementById('adminPageLink');
 
     if (addBtn) {
-      addBtn.style.display = isAdminMode() ? 'inline-block' : 'none';
+      addBtn.style.display = isAdmin() ? 'inline-block' : 'none';
     }
     if (clearBtn) {
-      clearBtn.style.display = isAdminMode() ? 'inline-block' : 'none';
+      clearBtn.style.display = isAdmin() ? 'inline-block' : 'none';
     }
     if (adminLink) {
-      adminLink.style.display = isAdminMode() ? 'inline-block' : 'none';
+      adminLink.style.display = isAdmin() ? 'inline-block' : 'none';
     }
   }
 
@@ -183,7 +188,7 @@ export function initAdminProducts(translations, lang = 'ru') {
   const adminToggleBtn = document.getElementById('adminToggleBtn');
   function reflectAdminToggleBtn() {
     if (!adminToggleBtn) return;
-    const on = isAdminMode();
+    const on = isAdmin();
     adminToggleBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
     adminToggleBtn.textContent = on ? 'Admin: ON' : 'Admin';
     adminToggleBtn.title = on ? 'Отключить админ-режим' : 'Включить админ-режим';
@@ -191,11 +196,11 @@ export function initAdminProducts(translations, lang = 'ru') {
   reflectAdminToggleBtn();
   if (adminToggleBtn) {
     adminToggleBtn.addEventListener('click', () => {
-      if (!isAdminMode()) {
-        enableAdminMode();
+      if (!isAdmin()) {
+        enableAdmin();
         showToast('Админ‑режим включён');
       } else {
-        disableAdminMode();
+        disableAdmin();
         showToast('Админ‑режим выключен');
       }
       // обновить видимость контролов и перерендерить каталог,
@@ -224,9 +229,9 @@ export function initAdminProducts(translations, lang = 'ru') {
     const isAdminShortcut = (e.ctrlKey || e.metaKey) && e.altKey && (e.key === 'A' || e.key === 'a');
     if (isAdminShortcut) {
       e.preventDefault();
-      console.log('Admin shortcut triggered, isAdminMode:', isAdminMode(), 'loginModal exists:', !!loginModal);
+      console.log('Admin shortcut triggered, isAdminMode:', isAdmin(), 'loginModal exists:', !!loginModal);
 
-      if (!isAdminMode() && loginModal) {
+      if (!isAdmin() && loginModal) {
         console.log('Opening admin login modal');
         loginModal.style.display = 'flex';
         console.log('Modal display style set to flex, computed style:', getComputedStyle(loginModal).display);
@@ -236,7 +241,7 @@ export function initAdminProducts(translations, lang = 'ru') {
           console.log('Focused password input');
         }
         showToast('Режим администратора: введите пароль (Ctrl+Alt+A)', 2000);
-      } else if (isAdminMode()) {
+      } else if (isAdmin()) {
         console.log('Already in admin mode');
         showToast('Вы уже в режиме администратора (Ctrl+Alt+A для входа)', 2000);
       } else {
@@ -267,7 +272,7 @@ export function initAdminProducts(translations, lang = 'ru') {
 
       // Simple password check (in production, use proper authentication)
       if (password === 'admin123') {
-        enableAdminMode();
+  enableAdmin();
         updateAdminControlsVisibility();
         showToast('Вход выполнен успешно');
         if (loginModal) {
@@ -339,12 +344,12 @@ export function initAdminProducts(translations, lang = 'ru') {
 
   const closeBtn = document.getElementById('adminProductModalClose');
   const cancelBtn = document.getElementById('adminProductCancel');
-  const fileInput = form.querySelector('input[name="image"]');
+  const fileInput = form ? form.querySelector('input[name="image"]') : null;
   const preview = document.getElementById('adminImagePreview');
   const flagSelector = document.getElementById('flagSelector');
   const availableFlagsContainer = document.getElementById('availableFlags');
   const selectedFlagsContainer = document.getElementById('selectedFlags');
-  const flagsHiddenInput = form.querySelector('input[name="_flags"]');
+  const flagsHiddenInput = form ? form.querySelector('input[name="_flags"]') : null;
 
   function serializeSelectedFlags() {
     if (!selectedFlagsContainer || !flagsHiddenInput) return;
@@ -456,11 +461,10 @@ export function initAdminProducts(translations, lang = 'ru') {
       btn.className = 'flag-chip';
       btn.setAttribute('data-flag-key', key);
       btn.textContent = dict[key] || key;
-      const color = defaults[key] || `#${((hashCodeToHue && ((hashCodeToHue(key)%360)|0))||210).toString(16)}`;
       const colorInput = document.createElement('input');
       colorInput.type = 'color';
       colorInput.className = 'flag-default-color';
-      colorInput.value = defaults[key] || `#${hslToHex(hashCodeToHue(key),70,45)}`;
+      colorInput.value = defaults[key] || autoFlagColor(key);
       // save default color on change
       colorInput.addEventListener('input', (e) => {
         const cur = JSON.parse(localStorage.getItem('flag_color_defaults') || '{}');
@@ -472,7 +476,7 @@ export function initAdminProducts(translations, lang = 'ru') {
         const exists = Array.from(selectedFlagsContainer.querySelectorAll('.selected-flag')).some(el => el.getAttribute('data-flag-key') === key);
         if (exists) return;
         const cur = Array.from(selectedFlagsContainer.querySelectorAll('.selected-flag')).map(el => ({ key: el.getAttribute('data-flag-key'), color: el.getAttribute('data-flag-color') }));
-        cur.push({ key, color: colorInput.value });
+        cur.push({ key, color: colorInput.value || autoFlagColor(key) });
         renderSelectedFlags(cur);
       });
       wrap.appendChild(btn);
@@ -496,8 +500,8 @@ export function initAdminProducts(translations, lang = 'ru') {
         // add to selected if not present
         const exists = Array.from(selectedFlagsContainer.querySelectorAll('.selected-flag')).some(el => el.getAttribute('data-flag-key') === key);
         if (exists) return;
-        const cur = Array.from(selectedFlagsContainer.querySelectorAll('.selected-flag')).map(el => el.getAttribute('data-flag-key'));
-        cur.push(key);
+        const cur = Array.from(selectedFlagsContainer.querySelectorAll('.selected-flag')).map(el => ({ key: el.getAttribute('data-flag-key'), color: el.getAttribute('data-flag-color') || autoFlagColor(el.getAttribute('data-flag-key')) }));
+        cur.push({ key, color: autoFlagColor(key) });
         renderSelectedFlags(cur);
       });
       availableFlagsContainer.appendChild(btn);
@@ -564,9 +568,9 @@ export function initAdminProducts(translations, lang = 'ru') {
     reader.onload = function(ev) {
       preview.innerHTML = `<img src="${ev.target.result}" alt="preview" style="max-width:200px;max-height:120px;"/>`;
       // set hidden input value to base64 image for localStorage
-      const hidden = form.querySelector('input[name="_image_data"]');
+      const hidden = form ? form.querySelector('input[name="_image_data"]') : null;
       if (!hidden) {
-        const inp = document.createElement('input'); inp.type = 'hidden'; inp.name = '_image_data'; inp.value = ev.target.result; form.appendChild(inp);
+        if (form) { const inp = document.createElement('input'); inp.type = 'hidden'; inp.name = '_image_data'; inp.value = ev.target.result; form.appendChild(inp); }
       } else hidden.value = ev.target.result;
     };
     reader.readAsDataURL(f);
@@ -595,7 +599,7 @@ export function initAdminProducts(translations, lang = 'ru') {
 
   // При открытии пробуем подставить черновик — реализовано внутри openModal
 
-  form.addEventListener('submit', async (evt) => {
+  form?.addEventListener('submit', async (evt) => {
     evt.preventDefault();
     const data = new FormData(form);
     // parse flags
@@ -720,7 +724,7 @@ export function initAdminProducts(translations, lang = 'ru') {
   // Admin controls visibility and handlers
   const adminControls = document.getElementById('adminControls');
   if (adminControls) {
-    adminControls.style.display = isAdminMode() ? 'flex' : 'none';
+    adminControls.style.display = isAdmin() ? 'flex' : 'none';
 
     // Export button
     const exportBtn = document.getElementById('exportProductsBtn');
@@ -774,6 +778,32 @@ export function initAdminProducts(translations, lang = 'ru') {
     const saveBtn = document.getElementById('gitcmsSaveBtn');
   const loadBtn = document.getElementById('gitcmsLoadBtn');
   const pushBtn = document.getElementById('gitcmsPushBtn');
+  const mergeBtn = document.getElementById('gitcmsMergeBtn');
+  const statusEl = document.getElementById('gitcmsStatus');
+
+    // i18n helper
+    const tr = (key, vars) => {
+      let s = (translations && translations[lang] && translations[lang][key]) ?? (translations && translations.ru && translations.ru[key]) ?? '';
+      if (vars && typeof vars === 'object') {
+        for (const [k, v] of Object.entries(vars)) s = String(s).replaceAll(`{{${k}}}`, String(v));
+      }
+      return s;
+    };
+
+    function setGitStatus(text, isError = false) {
+      if (!statusEl) return;
+      statusEl.textContent = text || '';
+      statusEl.style.color = isError ? 'var(--color-danger, #c0392b)' : 'inherit';
+    }
+    function withLoading(btn, fn, statusText) {
+      if (btn) { btn.disabled = true; btn.setAttribute('aria-busy', 'true'); }
+      if (statusEl) {
+        statusEl.innerHTML = `<span class="spinner spinner--inline" aria-hidden="true"></span> ${statusText || ''}`;
+      }
+      return Promise.resolve()
+        .then(fn)
+        .finally(() => { if (btn) { btn.disabled = false; btn.removeAttribute('aria-busy'); } });
+    }
 
     // hydrate current values
     try {
@@ -785,9 +815,16 @@ export function initAdminProducts(translations, lang = 'ru') {
       if (tokenInp) tokenInp.value = localStorage.getItem('admin:gitcms:token') || '';
     } catch {}
 
+    function updateGitButtonsEnabled() {
+      const v = (providerSelect && providerSelect.value) || (localStorage.getItem('admin:dataProvider') || 'localStorage');
+      const isGit = v === 'gitcms';
+      [loadBtn, pushBtn, mergeBtn].forEach(btn => { if (btn) { btn.disabled = !isGit; btn.title = isGit ? '' : 'Доступно только для Git‑CMS'; } });
+      if (statusEl) statusEl.textContent = '';
+    }
     providerSelect?.addEventListener('change', (ev) => {
       const v = ev.target.value;
       localStorage.setItem('admin:dataProvider', v);
+      updateGitButtonsEnabled();
       showToast(`Провайдер: ${v}`);
     });
     saveBtn?.addEventListener('click', () => {
@@ -801,18 +838,25 @@ export function initAdminProducts(translations, lang = 'ru') {
         console.error('Save gitcms settings error', e);
         showToast('Ошибка сохранения настроек Git‑CMS');
       }
-    });
+  });
+
+  // Initialize buttons enabled state
+  updateGitButtonsEnabled();
 
     // Git‑CMS: загрузить товары из Git в локальные (безопасно для оффлайна)
     loadBtn?.addEventListener('click', async () => {
-      try {
+      await withLoading(loadBtn, async () => {
+        try {
         const p = getProvider();
         if (!p || p.kind !== 'gitcms' || typeof p.isConfigured !== 'function' || !p.isConfigured()) {
+          setGitStatus(tr('git-not-configured') || 'Git‑CMS не настроен', true);
           showToast('Git‑CMS не настроен');
           return;
         }
+        setGitStatus(tr('git-loading') || 'Загрузка…');
         const list = await p.loadAll();
         if (!Array.isArray(list)) {
+          setGitStatus(tr('git-load-failed') || 'Не удалось загрузить товары', true);
           showToast('Не удалось загрузить товары');
           return;
         }
@@ -821,29 +865,112 @@ export function initAdminProducts(translations, lang = 'ru') {
         setProducts(merged);
         window.products = merged;
         renderProducts(lang, translations, merged);
+        setGitStatus(tr('git-load-success', { count: list.length }) || `Загружено: ${list.length}`);
         showToast(`Загружено из Git: ${list.length}`);
       } catch (e) {
         console.error('GitCMS load error', e);
+        setGitStatus((tr('git-error') || 'Ошибка') + `: ${e?.message || e}`, true);
         showToast('Ошибка загрузки из Git‑CMS');
       }
+      });
     });
 
     // Git‑CMS: записать локальные товары в Git (полная замена файла)
     pushBtn?.addEventListener('click', async () => {
-      try {
+      await withLoading(pushBtn, async () => {
+        try {
         const p = getProvider();
         if (!p || p.kind !== 'gitcms' || typeof p.isConfigured !== 'function' || !p.isConfigured()) {
+          setGitStatus(tr('git-not-configured') || 'Git‑CMS не настроен', true);
           showToast('Git‑CMS не настроен');
           return;
         }
         const list = getLocalProducts();
         if (!list.length && !confirm('Локальный список пуст. Очистить удалённый файл в Git?')) return;
+        setGitStatus(tr('git-pushing') || 'Запись…');
         await p.replaceAll(list, 'feat(admin): sync local products to git');
+        setGitStatus(tr('git-push-success') || 'Записано');
         showToast('Товары записаны в Git');
       } catch (e) {
         console.error('GitCMS push error', e);
+        setGitStatus((tr('git-error') || 'Ошибка') + `: ${e?.message || e}`, true);
         showToast('Ошибка записи в Git‑CMS');
       }
+      });
+    });
+
+    // Smart merge: load from git and merge into local with conflict detection
+    mergeBtn?.addEventListener('click', async () => {
+      await withLoading(mergeBtn, async () => {
+        try {
+          const p = getProvider();
+          if (!p || p.kind !== 'gitcms' || typeof p.isConfigured !== 'function' || !p.isConfigured()) {
+            setGitStatus(tr('git-not-configured') || 'Git‑CMS не настроен', true);
+            showToast('Git‑CMS не настроен');
+            return;
+          }
+          setGitStatus(tr('git-loading') || 'Загрузка…');
+          const remote = await p.loadAll();
+          if (!Array.isArray(remote)) {
+            setGitStatus(tr('git-load-failed') || 'Не удалось загрузить товары', true);
+            return;
+          }
+          const local = getLocalProducts();
+          const byId = new Map(local.map(p => [String(p.id), p]));
+          const bySku = new Map(local.filter(p => p.sku).map(p => [String(p.sku).toLowerCase(), p]));
+
+          const conflicts = {};
+          let added = 0, updated = 0, conflicted = 0;
+          const result = [...local];
+          const upsert = (item) => {
+            const idKey = String(item.id);
+            const skuKey = String(item.sku || '').toLowerCase();
+            const idMatch = byId.get(idKey);
+            const skuMatch = skuKey ? bySku.get(skuKey) : null;
+            if (idMatch && skuMatch && idMatch.id !== skuMatch.id) {
+              // id and sku refer to different local items — conflict
+              conflicts[idKey] = conflicts[idKey] ? 'both' : 'both';
+              conflicted++;
+              return; // skip merge for this item
+            }
+            if (idMatch) {
+              // Update existing by ID
+              const idx = result.findIndex(p => String(p.id) === idKey);
+              if (idx >= 0) { result[idx] = { ...idMatch, ...item, updatedAt: new Date().toISOString() }; updated++; }
+            } else if (skuMatch) {
+              // IDs differ but same SKU — treat as update, but mark conflict on ID
+              const idx = result.findIndex(p => String(p.id) === String(skuMatch.id));
+              if (idx >= 0) { result[idx] = { ...skuMatch, ...item, updatedAt: new Date().toISOString() }; updated++; }
+              conflicts[String(skuMatch.id)] = 'id';
+              conflicted++;
+            } else {
+              // New item
+              result.push(item);
+              added++;
+            }
+          };
+          // Persist last remote snapshot for conflict resolution UI
+          try {
+            const byIdObj = Object.fromEntries(remote.filter(r => r && r.id).map(r => [String(r.id), r]));
+            const bySkuObj = Object.fromEntries(remote.filter(r => r && r.sku).map(r => [String(r.sku).toLowerCase(), r]));
+            localStorage.setItem('admin:merge:lastRemoteById', JSON.stringify(byIdObj));
+            localStorage.setItem('admin:merge:lastRemoteBySku', JSON.stringify(bySkuObj));
+          } catch {}
+
+          remote.forEach(upsert);
+          saveLocalProducts(result);
+          try { localStorage.setItem('admin:merge:conflicts', JSON.stringify(conflicts)); } catch {}
+
+          const merged = getMergedProducts();
+          setProducts(merged); window.products = merged; renderProducts(lang, translations, merged);
+          setGitStatus(tr('git-merge-result', { added, updated, conflicts: conflicted }) || `Добавлено: ${added}, Обновлено: ${updated}, Конфликты: ${conflicted}`);
+          showToast('Слияние завершено');
+        } catch (e) {
+          console.error('GitCMS merge error', e);
+          setGitStatus((tr('git-error') || 'Ошибка') + `: ${e?.message || e}`, true);
+          showToast('Ошибка слияния');
+        }
+      });
     });
   }
 

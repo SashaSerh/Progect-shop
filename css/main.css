@@ -49,6 +49,34 @@
     outline-offset: 4px;
     box-shadow: 0 4px 16px rgba(0,0,0,0.08);
 }
+/* Admin page styles */
+.admin-products-page { padding: 24px 0; }
+.admin-page__header { display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:16px; flex-wrap:wrap; }
+.admin-breadcrumbs { display:flex; align-items:center; gap:8px; font-size:14px; opacity:.9; }
+.admin-breadcrumbs__link { color: var(--link, #2a6afc); text-decoration: none; }
+.admin-breadcrumbs__link:hover { text-decoration: underline; }
+.admin-breadcrumbs__sep { opacity:.5; }
+.admin-page__actions { display:flex; gap:8px; align-items:center; }
+.admin-page__content { display:grid; grid-template-columns: 320px 1fr; gap:24px; align-items:start; }
+.admin-block__title { margin: 8px 0; font-size: 18px; font-weight: 600; }
+.admin-list { display:flex; flex-direction:column; gap:8px; list-style:none; padding:0; margin:0; }
+.admin-list > li { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:8px 10px; border:1px solid var(--border, #ddd); border-radius:8px; background: var(--surface, #fff); }
+.admin-list__meta { min-width:0; flex:1; }
+.admin-list__meta-title { font-weight:600; }
+.admin-list__meta-sub { opacity:.7; font-size:12px; }
+.admin-product-form .form-row { display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-bottom:12px; }
+.admin-product-form label { display:flex; flex-direction:column; gap:6px; }
+.admin-product-form input[type="text"],
+.admin-product-form input[type="number"],
+.admin-product-form textarea,
+.admin-product-form select { padding:8px 10px; border:1px solid var(--border, #ddd); border-radius:8px; background: var(--surface, #fff); color: var(--on-surface, #111); }
+.admin-product-form .form-actions { display:flex; gap:8px; align-items:center; margin-top:8px; }
+.form-error { color: #c62828; font-size: 12px; min-height: 16px; }
+.is-invalid { border-color: #c62828 !important; outline-color: #c62828 !important; }
+
+@media (max-width: 920px) {
+    .admin-page__content { grid-template-columns: 1fr; }
+}
 .product-card__price-old { color:#999; margin-left:6px; }
 .product-card__price-current { font-weight:600; }
 .product-card__purchase { position:absolute; right:16px; bottom:16px; display:flex; align-items:flex-end; gap:12px; }

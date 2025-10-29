@@ -8,6 +8,13 @@ import { initCompareModal } from './compare-modal.js';
 import { contentConfig } from './content-config.js';
 import { initMarketing } from './marketing.js';
 import { initNavigation } from './navigation.js';
+
+// Utility functions
+const clampQuantity = (value) => {
+    const numeric = Math.floor(Number(value));
+    if (!Number.isFinite(numeric) || numeric < 1) return 1;
+    return numeric > 99 ? 99 : numeric;
+};
 import { updateProfileButton, openModal, closeModal } from './auth.js';
 import { gesturesConfig as defaultGesturesConfig } from './gestures-config.js';
 
@@ -56,10 +63,51 @@ function renderCategoryProducts(categorySlug, lang, translations, sortBy = 'defa
     
     if (!grid) return;
 
-    // Применяем фильтры и сортировку
+    // Get filter values from checkboxes and selects (same as filterProducts)
+    const selectedTypes = Array.from(document.querySelectorAll('input[name="type"]:checked')).map(cb => cb.value);
+    const selectedCapacities = Array.from(document.querySelectorAll('input[name="capacity"]:checked')).map(cb => cb.value);
+    const selectedControls = Array.from(document.querySelectorAll('input[name="control"]:checked')).map(cb => cb.value);
+    const selectedFeatures = Array.from(document.querySelectorAll('input[name="features"]:checked')).map(cb => cb.value);
+    const priceSort = document.getElementById('price-sort')?.value || 'default';
+    
+    // Start with category products
     let filteredProducts = [...allProducts];
 
-    // Фильтр по цене
+    // Apply advanced filters (same logic as filterProducts)
+    if (selectedTypes.length > 0) {
+        filteredProducts = filteredProducts.filter(product => {
+            const productType = getProductType(product);
+            return selectedTypes.includes(productType);
+        });
+    }
+    
+    if (selectedCapacities.length > 0) {
+        filteredProducts = filteredProducts.filter(product => {
+            const productCapacity = getProductCapacity(product);
+            return selectedCapacities.includes(productCapacity);
+        });
+    }
+    
+    if (selectedControls.length > 0) {
+        filteredProducts = filteredProducts.filter(product => {
+            const productControl = getProductControlType(product);
+            return selectedControls.includes(productControl);
+        });
+    }
+    
+    if (selectedFeatures.length > 0) {
+        filteredProducts = filteredProducts.filter(product => {
+            const productFeatures = getProductFeatures(product);
+            return selectedFeatures.some(feature => productFeatures.includes(feature));
+        });
+    }
+    
+    // Price sorting (from select)
+    if (priceSort !== 'default') {
+        filteredProducts.sort((a, b) => priceSort === 'low-to-high' ? a.price - b.price : b.price - a.price);
+    }
+
+    // Legacy filters (for backward compatibility)
     if (priceFilter !== 'all') {
         switch (priceFilter) {
             case '0-15000':
@@ -77,24 +125,22 @@ function renderCategoryProducts(categorySlug, lang, translations, sortBy = 'defa
         }
     }
 
-    // Сортировка
-    switch (sortBy) {
-        case 'price-low':
-            filteredProducts.sort((a, b) => a.price - b.price);
-            break;
-        case 'price-high':
-            filteredProducts.sort((a, b) => b.price - a.price);
-            break;
-        case 'rating':
-            filteredProducts.sort((a, b) => (b.rating?.value || 0) - (a.rating?.value || 0));
-            break;
-        case 'newest':
-            // Для демо сортируем по ID (больший ID = новее)
-            filteredProducts.sort((a, b) => String(b.id).localeCompare(String(a.id)));
-            break;
-        default:
-            // По умолчанию оставляем как есть
-            break;
+    // Legacy sorting
+    if (sortBy !== 'default' && priceSort === 'default') {
+        switch (sortBy) {
+            case 'price-low':
+                filteredProducts.sort((a, b) => a.price - b.price);
+                break;
+            case 'price-high':
+                filteredProducts.sort((a, b) => b.price - a.price);
+                break;
+            case 'rating':
+                filteredProducts.sort((a, b) => (b.rating?.value || 0) - (a.rating?.value || 0));
+                break;
+            case 'newest':
+                filteredProducts.sort((a, b) => String(b.id).localeCompare(String(a.id)));
+                break;
+        }
     }
 
     // Пагинация
@@ -123,6 +169,9 @@ function renderCategoryProducts(categorySlug, lang, translations, sortBy = 'defa
 
     // Рендерим пагинацию
     renderCategoryPagination(pagination, page, totalPages, totalItems);
+    
+    // Update products count
+    updateProductsCount(totalItems);
 }
 
 function renderCategoryPagination(container, currentPage, totalPages, totalItems) {
@@ -876,6 +925,80 @@ async function initApp() {
         }
     });
 
+    // New advanced filter event listeners
+    const filterCheckboxes = document.querySelectorAll('input[type="checkbox"][name="type"], input[type="checkbox"][name="capacity"], input[type="checkbox"][name="control"], input[type="checkbox"][name="features"]');
+    filterCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', () => {
+            // Check if we're on a category page
+            const categoryGrid = document.getElementById('category-products-grid');
+            if (categoryGrid) {
+                // We're on a category page, re-render category products
+                const urlParams = new URLSearchParams(window.location.hash.substring(1));
+                const categorySlug = window.location.hash.split('#')[1]?.split('?')[0] || 'conditioners';
+                renderCategoryProducts(categorySlug, savedLanguage, translations);
+            } else {
+                // We're on the main products page
+                if (typeof filterProductsWithSkeleton === 'function') {
+                    filterProductsWithSkeleton(savedLanguage, translations);
+                } else {
+                    filterProducts(savedLanguage, translations);
+                }
+            }
+        });
+    });
+
+    const priceSortSelect = document.getElementById('price-sort');
+    if (priceSortSelect) {
+        priceSortSelect.addEventListener('change', () => {
+            // Check if we're on a category page
+            const categoryGrid = document.getElementById('category-products-grid');
+            if (categoryGrid) {
+                // We're on a category page, re-render category products
+                const urlParams = new URLSearchParams(window.location.hash.substring(1));
+                const categorySlug = window.location.hash.split('#')[1]?.split('?')[0] || 'conditioners';
+                renderCategoryProducts(categorySlug, savedLanguage, translations);
+            } else {
+                // We're on the main products page
+                if (typeof filterProductsWithSkeleton === 'function') {
+                    filterProductsWithSkeleton(savedLanguage, translations);
+                } else {
+                    filterProducts(savedLanguage, translations);
+                }
+            }
+        });
+    }
+
+    const resetFiltersBtn = document.getElementById('resetFilters');
+    if (resetFiltersBtn) {
+        resetFiltersBtn.addEventListener('click', () => {
+            // Reset all checkboxes
+            filterCheckboxes.forEach(checkbox => {
+                checkbox.checked = false;
+            });
+            // Reset price sort
+            if (priceSortSelect) priceSortSelect.value = 'default';
+            // Reset legacy filters
+            if (categorySelect) categorySelect.value = 'all';
+            if (priceSelect) priceSelect.value = 'all';
+            
+            // Re-filter - check if we're on a category page
+            const categoryGrid = document.getElementById('category-products-grid');
+            if (categoryGrid) {
+                // We're on a category page, re-render category products
+                const urlParams = new URLSearchParams(window.location.hash.substring(1));
+                const categorySlug = window.location.hash.split('#')[1]?.split('?')[0] || 'conditioners';
+                renderCategoryProducts(categorySlug, savedLanguage, translations);
+            } else {
+                // We're on the main products page
+                if (typeof filterProductsWithSkeleton === 'function') {
+                    filterProductsWithSkeleton(savedLanguage, translations);
+                } else {
+                    filterProducts(savedLanguage, translations);
+                }
+            }
+        });
+    }
+
     // Языковые переключатели теперь инициализируются централизованно через initLanguageSwitchers()
 
     const cartDropdownToggle = document.querySelector('#cartDropdownToggle');
@@ -988,12 +1111,6 @@ async function initApp() {
         clearCart();
         updateCartUI(translations, savedLanguage);
     });
-
-    const clampQuantity = (value) => {
-        const numeric = Math.floor(Number(value));
-        if (!Number.isFinite(numeric) || numeric < 1) return 1;
-        return numeric > 99 ? 99 : numeric;
-    };
 
     const productsGrid = document.querySelector('.products__grid');
     if (productsGrid) {
@@ -1640,7 +1757,7 @@ function setupHashRouting(initialLang) {
             }
         }
         
-        const m = hash.match(/^#product-(.+)$/);
+    const m = hash.match(/^#product-(.+)$/);
         if (m) {
             const pid = m[1];
             ensureProductDetailLoaded().then(ok => {
@@ -1655,7 +1772,7 @@ function setupHashRouting(initialLang) {
                 renderProductDetail(pid);
                 bindProductDetailEvents();
             });
-        } else if (hash === '#products') {
+    } else if (hash === '#products') {
             // Show products section
             showSection('hero-container', true);
             showSection('services-container', true);
@@ -1670,6 +1787,27 @@ function setupHashRouting(initialLang) {
             if (productsSection) {
                 productsSection.scrollIntoView({ behavior: 'smooth' });
             }
+        } else if (hash === '#admin/products') {
+            // Load Admin Products page
+            loadComponent('admin-page-container', 'components/admin-products.html').then(async () => {
+                // Hide other sections, show admin
+                showSection('hero-container', false);
+                showSection('services-container', false);
+                showSection('products-container', false);
+                showSection('portfolio-container', false);
+                showSection('contacts-container', false);
+                showSection('product-detail-container', false);
+                showSection('main-container', false);
+                showSection('admin-page-container', true);
+                try {
+                    const mod = await import('./admin-page.js');
+                    if (mod && typeof mod.initAdminPage === 'function') {
+                        const lang = getLangSafe();
+                        await mod.initAdminPage(translations, lang);
+                    }
+                } catch (e) { console.error('Admin page init error', e); }
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }).catch(err => console.error('Error loading admin page component:', err));
         } else {
             // Show main sections
             showSection('hero-container', true);
@@ -1678,6 +1816,7 @@ function setupHashRouting(initialLang) {
             showSection('portfolio-container', true);
             showSection('contacts-container', true);
             showSection('product-detail-container', false);
+            showSection('admin-page-container', false);
             showSection('main-container', false);
             // Restore title via i18n
             const lang = getLangSafe();
@@ -2668,4 +2807,28 @@ function initDesktopHeaderCondense() {
     updateTopBarHeightVar();
     applyFixedDecision();
     onScroll();
+}
+
+// Helper functions for advanced filtering (copied from products.js)
+function getProductType(product) {
+    return product.type || 'wall';
+}
+
+function getProductCapacity(product) {
+    return product.capacity || '9';
+}
+
+function getProductControlType(product) {
+    return product.controlType || 'on-off';
+}
+
+function getProductFeatures(product) {
+    return product.features || [];
+}
+
+function updateProductsCount(count) {
+    const countElement = document.getElementById('productsCount');
+    if (countElement) {
+        countElement.textContent = count;
+    }
 }

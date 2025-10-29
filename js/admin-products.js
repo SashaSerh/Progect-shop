@@ -1,6 +1,16 @@
 import { renderProducts, getMergedProducts, setProducts, isAdminMode, enableAdminMode, disableAdminMode } from './products.js';
 
 const STORAGE_KEY = 'products_local_v1';
+const DRAFT_KEY = 'admin:product:draft:v1';
+
+// Provider helpers (safe fallback to legacy localStorage flow)
+function getProvider() {
+  try { return (typeof window !== 'undefined' && window.getDataProvider) ? window.getDataProvider() : null; } catch { return null; }
+}
+function providerKind() {
+  const p = getProvider();
+  return p && p.kind || 'localStorage';
+}
 
 function uid(prefix = 'p') {
   return `${prefix}_${Math.random().toString(36).slice(2,9)}`;
@@ -128,6 +138,7 @@ export function importLocalProducts(file) {
 export function initAdminProducts(translations, lang = 'ru') {
   const modal = document.getElementById('adminProductModal');
   const form = document.getElementById('adminProductForm');
+  const dp = getProvider();
   // small toast helper
   const toastHost = document.getElementById('toast-container') || (() => {
     const el = document.createElement('div'); el.id = 'toast-container'; document.body.appendChild(el); return el;
@@ -152,6 +163,7 @@ export function initAdminProducts(translations, lang = 'ru') {
   function updateAdminControlsVisibility() {
     const addBtn = document.querySelector('.header-add-product');
     const clearBtn = document.querySelector('.header-clear-products');
+    const adminLink = document.getElementById('adminPageLink');
 
     if (addBtn) {
       addBtn.style.display = isAdminMode() ? 'inline-block' : 'none';
@@ -159,10 +171,43 @@ export function initAdminProducts(translations, lang = 'ru') {
     if (clearBtn) {
       clearBtn.style.display = isAdminMode() ? 'inline-block' : 'none';
     }
+    if (adminLink) {
+      adminLink.style.display = isAdminMode() ? 'inline-block' : 'none';
+    }
   }
 
   // Initialize admin controls visibility
   updateAdminControlsVisibility();
+
+  // Header admin toggle button (simple enable/disable without password)
+  const adminToggleBtn = document.getElementById('adminToggleBtn');
+  function reflectAdminToggleBtn() {
+    if (!adminToggleBtn) return;
+    const on = isAdminMode();
+    adminToggleBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    adminToggleBtn.textContent = on ? 'Admin: ON' : 'Admin';
+    adminToggleBtn.title = on ? 'Отключить админ-режим' : 'Включить админ-режим';
+  }
+  reflectAdminToggleBtn();
+  if (adminToggleBtn) {
+    adminToggleBtn.addEventListener('click', () => {
+      if (!isAdminMode()) {
+        enableAdminMode();
+        showToast('Админ‑режим включён');
+      } else {
+        disableAdminMode();
+        showToast('Админ‑режим выключен');
+      }
+      // обновить видимость контролов и перерендерить каталог,
+      // чтобы показать/скрыть админские кнопки на карточках
+      updateAdminControlsVisibility();
+      reflectAdminToggleBtn();
+      const merged = getMergedProducts();
+      setProducts(merged);
+      window.products = merged;
+      renderProducts(lang, translations, merged);
+    });
+  }
 
   // Keyboard shortcut for admin login (Ctrl+Alt+A)
   document.addEventListener('keydown', (e) => {
@@ -471,18 +516,34 @@ export function initAdminProducts(translations, lang = 'ru') {
     modal.style.display = 'flex';
     const first = form.querySelector('input[name="title_ru"]');
     first?.focus();
+    // Подставляем черновик, если есть
+    try {
+      const d = (function(){ try { return JSON.parse(localStorage.getItem(DRAFT_KEY) || 'null') || null; } catch { return null; } })();
+      if (d) {
+        for (const [k, v] of Object.entries(d)) {
+          const field = form.querySelector(`[name="${k}"]`);
+          if (field) field.value = v;
+        }
+        if (d._flags) {
+          try { const fl = JSON.parse(d._flags); if (Array.isArray(fl)) renderSelectedFlags(fl); } catch {}
+        }
+      }
+    } catch {}
   }
   function closeModal() {
-    modal.style.display = 'none';
-    form.reset();
-    preview.innerHTML = '';
+    if (modal) {
+      modal.style.display = 'none';
+    }
+    form?.reset();
+    if (preview) preview.innerHTML = '';
   }
 
-  openBtn.addEventListener('click', openModal);
+  // Вместо модалки переходим на отдельную страницу админки
+  openBtn.addEventListener('click', () => { location.hash = '#admin/products'; });
   closeBtn?.addEventListener('click', closeModal);
   cancelBtn?.addEventListener('click', closeModal);
 
-  // Очистка локальных товаров
+  // Очистка локальных товаров (оставляем кнопку, действует только на локальные)
   clearBtn.addEventListener('click', () => {
     if (!confirm('Очистить все локальные товары? Это действие нельзя отменить.')) return;
     saveLocalProducts([]);
@@ -511,7 +572,30 @@ export function initAdminProducts(translations, lang = 'ru') {
     reader.readAsDataURL(f);
   });
 
-  form.addEventListener('submit', (evt) => {
+  // Автосохранение черновика
+  function readFormDraft() {
+    try { return JSON.parse(localStorage.getItem(DRAFT_KEY) || 'null') || null; } catch { return null; }
+  }
+  function writeFormDraft() {
+    if (!form) return;
+    const data = new FormData(form);
+    const draft = Object.fromEntries(data.entries());
+    try { localStorage.setItem(DRAFT_KEY, JSON.stringify(draft)); } catch {}
+  }
+  function clearFormDraft() { try { localStorage.removeItem(DRAFT_KEY); } catch {} }
+  let draftTimer = null;
+  form?.addEventListener('input', () => {
+    clearTimeout(draftTimer);
+    draftTimer = setTimeout(writeFormDraft, 300);
+  });
+  form?.addEventListener('change', () => {
+    clearTimeout(draftTimer);
+    draftTimer = setTimeout(writeFormDraft, 100);
+  });
+
+  // При открытии пробуем подставить черновик — реализовано внутри openModal
+
+  form.addEventListener('submit', async (evt) => {
     evt.preventDefault();
     const data = new FormData(form);
     // parse flags
@@ -531,8 +615,24 @@ export function initAdminProducts(translations, lang = 'ru') {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
-    upsertLocalProduct(product);
-  showToast('Товар сохранён');
+
+    // Если доступен общий провайдер — используем его, иначе локальный upsert
+    try {
+      if (dp && typeof dp.create === 'function') {
+        const res = await dp.create(product);
+        if (!res?.ok) {
+          console.warn('Provider create validation errors:', res?.errors);
+          showToast('Ошибка сохранения (валидация)');
+        }
+      } else {
+        upsertLocalProduct(product);
+      }
+    } catch (e) {
+      console.error('Provider create error', e);
+      upsertLocalProduct(product);
+    }
+    clearFormDraft();
+    showToast('Товар сохранён');
     // Re-render products with localStorage + bundled products
     try {
       const merged = getMergedProducts();
@@ -583,8 +683,23 @@ export function initAdminProducts(translations, lang = 'ru') {
       const locals = getLocalProducts();
       const prod = locals.find(p => String(p.id) === String(id));
       if (prod) {
-        fillFormWithProduct(prod);
-        modal.style.display = 'flex';
+        try {
+          // Сохраняем как черновик, чтобы страница подтянула значения
+          const draft = {
+            id: prod.id || '',
+            title_ru: prod.name?.ru || '',
+            title_uk: prod.name?.uk || '',
+            description_ru: prod.description?.ru || '',
+            description_uk: prod.description?.uk || '',
+            price: String(prod.price || 0),
+            sku: prod.sku || '',
+            category: prod.category || 'service',
+            inStock: prod.inStock ? 'true' : 'false',
+            _flags: JSON.stringify(Array.isArray(prod.flags) ? prod.flags : [])
+          };
+          localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+        } catch {}
+        location.hash = '#admin/products';
       }
     }
     // delete button: .product-card__button with data-delete
@@ -611,6 +726,11 @@ export function initAdminProducts(translations, lang = 'ru') {
     const exportBtn = document.getElementById('exportProductsBtn');
     if (exportBtn) {
       exportBtn.addEventListener('click', () => {
+        // Для Git‑CMS экспорт в файл не имеет смысла — оставляем только для локального
+        if (providerKind() !== 'localStorage') {
+          showToast('Экспорт файла доступен только для LocalStorage');
+          return;
+        }
         exportLocalProducts();
         showToast('Экспорт завершён');
       });
@@ -624,6 +744,12 @@ export function initAdminProducts(translations, lang = 'ru') {
         if (!file) return;
 
         try {
+          // Импорт файла поддерживаем только для LocalStorage
+          if (providerKind() !== 'localStorage') {
+            showToast('Импорт файла доступен только для LocalStorage');
+            e.target.value = '';
+            return;
+          }
           const count = await importLocalProducts(file);
           showToast(`Импортировано ${count} товаров`);
           // Re-render products
@@ -638,6 +764,87 @@ export function initAdminProducts(translations, lang = 'ru') {
         e.target.value = '';
       });
     }
+
+    // Git‑CMS settings panel bindings
+    const providerSelect = document.getElementById('dataProviderSelect');
+    const repoInp = document.getElementById('gitcmsRepo');
+    const branchInp = document.getElementById('gitcmsBranch');
+    const pathInp = document.getElementById('gitcmsPath');
+    const tokenInp = document.getElementById('gitcmsToken');
+    const saveBtn = document.getElementById('gitcmsSaveBtn');
+  const loadBtn = document.getElementById('gitcmsLoadBtn');
+  const pushBtn = document.getElementById('gitcmsPushBtn');
+
+    // hydrate current values
+    try {
+      const currentPref = (localStorage.getItem('admin:dataProvider') || 'localStorage');
+      if (providerSelect) providerSelect.value = currentPref;
+      if (repoInp) repoInp.value = localStorage.getItem('admin:gitcms:repo') || '';
+      if (branchInp) branchInp.value = localStorage.getItem('admin:gitcms:branch') || 'main';
+      if (pathInp) pathInp.value = localStorage.getItem('admin:gitcms:path') || 'data/products.json';
+      if (tokenInp) tokenInp.value = localStorage.getItem('admin:gitcms:token') || '';
+    } catch {}
+
+    providerSelect?.addEventListener('change', (ev) => {
+      const v = ev.target.value;
+      localStorage.setItem('admin:dataProvider', v);
+      showToast(`Провайдер: ${v}`);
+    });
+    saveBtn?.addEventListener('click', () => {
+      try {
+        if (repoInp) localStorage.setItem('admin:gitcms:repo', repoInp.value.trim());
+        if (branchInp) localStorage.setItem('admin:gitcms:branch', branchInp.value.trim() || 'main');
+        if (pathInp) localStorage.setItem('admin:gitcms:path', pathInp.value.trim() || 'data/products.json');
+        if (tokenInp) localStorage.setItem('admin:gitcms:token', tokenInp.value.trim());
+        showToast('Настройки Git‑CMS сохранены');
+      } catch (e) {
+        console.error('Save gitcms settings error', e);
+        showToast('Ошибка сохранения настроек Git‑CMS');
+      }
+    });
+
+    // Git‑CMS: загрузить товары из Git в локальные (безопасно для оффлайна)
+    loadBtn?.addEventListener('click', async () => {
+      try {
+        const p = getProvider();
+        if (!p || p.kind !== 'gitcms' || typeof p.isConfigured !== 'function' || !p.isConfigured()) {
+          showToast('Git‑CMS не настроен');
+          return;
+        }
+        const list = await p.loadAll();
+        if (!Array.isArray(list)) {
+          showToast('Не удалось загрузить товары');
+          return;
+        }
+        saveLocalProducts(list);
+        const merged = getMergedProducts();
+        setProducts(merged);
+        window.products = merged;
+        renderProducts(lang, translations, merged);
+        showToast(`Загружено из Git: ${list.length}`);
+      } catch (e) {
+        console.error('GitCMS load error', e);
+        showToast('Ошибка загрузки из Git‑CMS');
+      }
+    });
+
+    // Git‑CMS: записать локальные товары в Git (полная замена файла)
+    pushBtn?.addEventListener('click', async () => {
+      try {
+        const p = getProvider();
+        if (!p || p.kind !== 'gitcms' || typeof p.isConfigured !== 'function' || !p.isConfigured()) {
+          showToast('Git‑CMS не настроен');
+          return;
+        }
+        const list = getLocalProducts();
+        if (!list.length && !confirm('Локальный список пуст. Очистить удалённый файл в Git?')) return;
+        await p.replaceAll(list, 'feat(admin): sync local products to git');
+        showToast('Товары записаны в Git');
+      } catch (e) {
+        console.error('GitCMS push error', e);
+        showToast('Ошибка записи в Git‑CMS');
+      }
+    });
   }
 
   // On init: cache initial products available on window (from products.js)

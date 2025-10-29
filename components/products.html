@@ -27,6 +27,34 @@
                 <button class="admin-btn admin-btn--export" id="exportProductsBtn" aria-label="Экспортировать локальные товары">Экспорт</button>
                 <label class="admin-btn admin-btn--import" for="importProductsInput" aria-label="Импортировать товары из файла">Импорт</label>
                 <input type="file" id="importProductsInput" accept=".json" style="display: none;">
+                <details class="admin-gitcms" id="gitcmsSettings">
+                    <summary>Git‑CMS</summary>
+                    <div class="gitcms-form">
+                        <label>Провайдер
+                            <select id="dataProviderSelect">
+                                <option value="localStorage">LocalStorage</option>
+                                <option value="gitcms">Git‑CMS</option>
+                            </select>
+                        </label>
+                        <label>Repo (owner/repo)
+                            <input id="gitcmsRepo" placeholder="owner/repo">
+                        </label>
+                        <label>Branch
+                            <input id="gitcmsBranch" placeholder="main">
+                        </label>
+                        <label>Path
+                            <input id="gitcmsPath" placeholder="data/products.json">
+                        </label>
+                        <label>Token
+                            <input id="gitcmsToken" type="password" placeholder="ghp_...">
+                        </label>
+                        <div class="gitcms-actions">
+                            <button type="button" id="gitcmsSaveBtn">Сохранить</button>
+                            <button type="button" id="gitcmsLoadBtn" title="Загрузить товары из Git в локальные">Загрузить из Git</button>
+                            <button type="button" id="gitcmsPushBtn" title="Записать локальные товары в Git">Записать в Git</button>
+                        </div>
+                    </div>
+                </details>
             </div>
         </div>
         <div class="products__grid"></div>

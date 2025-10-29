@@ -55,6 +55,7 @@
     <div id="hero-container"></div>
     <div id="services-container"></div>
     <div id="products-container"></div>
+    <div id="admin-page-container" style="display:none"></div>
     <div id="product-detail-container" style="display:none"></div>
     <div id="comparison-container"></div>
     <div id="compare-modal-container"></div>
@@ -99,6 +100,10 @@
       </div>
     </div>
     
+    <!-- Core helpers (IIFE) before main app -->
+    <script src="js/content-config.js"></script>
+    <script src="js/product-schema.js"></script>
+    <script src="js/data-provider.js"></script>
     <script type="module" src="js/main.js"></script>
 </body>
 </html>

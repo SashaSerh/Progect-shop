@@ -1,0 +1,89 @@
+<section id="adminProductsPage" class="admin-products-page">
+  <div class="container">
+    <header class="admin-page__header">
+      <nav class="admin-breadcrumbs" aria-label="Хлебные крошки">
+        <a href="#products" class="admin-breadcrumbs__link">Каталог</a>
+        <span class="admin-breadcrumbs__sep">/</span>
+        <span class="admin-breadcrumbs__current">Админ: Товары</span>
+      </nav>
+      <div class="admin-page__actions">
+        <a href="#products" class="btn btn--ghost" aria-label="Назад в каталог">← Назад</a>
+        <button id="adminExportBtn" type="button" class="btn">Экспорт JSON</button>
+        <label class="btn btn--secondary" for="adminImportInput">Импорт JSON</label>
+        <input id="adminImportInput" type="file" accept="application/json" hidden>
+      </div>
+    </header>
+
+    <div class="admin-page__content">
+      <aside class="admin-page__list">
+        <h3 class="admin-block__title">Локальные товары</h3>
+        <ul id="adminLocalProductsList" class="admin-list"></ul>
+      </aside>
+
+      <main class="admin-page__formwrap">
+        <h3 class="admin-block__title">Добавить / Редактировать</h3>
+        <form id="adminProductForm" class="admin-product-form">
+          <input type="hidden" name="id">
+          <div class="form-row">
+            <label>Название (RU)
+              <input name="title_ru" required>
+              <small class="form-error" data-for="title_ru" role="alert"></small>
+            </label>
+            <label>Название (UK)
+              <input name="title_uk">
+            </label>
+          </div>
+          <div class="form-row">
+            <label>Короткое описание (RU)
+              <textarea name="description_ru"></textarea>
+            </label>
+            <label>Короткое описание (UK)
+              <textarea name="description_uk"></textarea>
+            </label>
+          </div>
+          <div class="form-row">
+            <label>Цена
+              <input name="price" type="number" min="0" step="1" required>
+              <small class="form-error" data-for="price" role="alert"></small>
+            </label>
+            <label>SKU
+              <input name="sku">
+              <small class="form-error" data-for="sku" role="alert"></small>
+            </label>
+          </div>
+          <div class="form-row">
+            <label>Категория
+              <input name="category" placeholder="ac / recuperator / service">
+              <small class="form-error" data-for="category" role="alert"></small>
+            </label>
+            <label>В наличии
+              <select name="inStock">
+                <option value="true">Да</option>
+                <option value="false">Нет</option>
+              </select>
+            </label>
+          </div>
+          <div class="form-row">
+            <label>Главное изображение
+              <input name="image" type="file" accept="image/*">
+            </label>
+            <div id="adminImagePreview" aria-hidden="true"></div>
+          </div>
+          <div class="form-row">
+            <label>Флаги
+              <div id="flagSelector" class="flag-selector">
+                <div id="availableFlags" class="available-flags" aria-live="polite"></div>
+                <div id="selectedFlags" class="selected-flags" aria-live="polite"></div>
+                <input type="hidden" name="_flags" value="[]">
+              </div>
+            </label>
+          </div>
+          <div class="form-actions">
+            <button type="submit" id="adminProductSave" class="btn btn--primary">Сохранить</button>
+            <button type="reset" id="adminProductCancel" class="btn btn--secondary">Сброс</button>
+          </div>
+        </form>
+      </main>
+    </div>
+  </div>
+</section>

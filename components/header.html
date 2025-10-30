@@ -111,7 +111,7 @@
                     </span>
                     <span class="visually-hidden">ClimaTech</span>
                 </div>
-            <button class="catalog-button" id="catalogButton" aria-haspopup="true" aria-controls="catalogDropdown" aria-expanded="false" aria-label="Открыть меню каталога">
+            <button class="catalog-button" id="catalogButton" aria-haspopup="menu" aria-controls="catalogDropdown" aria-expanded="false" aria-label="Открыть меню каталога">
                 <span class="catalog-icon"><img src="icons/squares-button-of-view-options.svg" alt="Каталог" style="width: 24px; height: 24px; vertical-align:middle; fill: currentColor;" /></span>
                 <!-- <span data-i18n="catalog">Каталог</span> -->
             </button>
@@ -160,8 +160,8 @@
     <div class="cart-dropdown__summary" data-i18n="cart-total" aria-live="polite" aria-atomic="true">Итого: $0.00</div>
     <button class="cart-dropdown__button" id="openCartModal" data-i18n="cart-checkout">Оформить заказ</button>
 </div>
-<div class="catalog-dropdown" id="catalogDropdown" role="menu" aria-label="Меню каталога" aria-hidden="true">
-    <ul class="catalog-dropdown__list">
+<div class="catalog-dropdown" id="catalogDropdown" role="menu" aria-label="Меню каталога" aria-hidden="true" aria-labelledby="catalogButton">
+    <ul class="catalog-dropdown__list" role="menu">
         <li><a href="#category-conditioners">Кондиціонери</a></li>
         <li><a href="#category-commercial-ac">Комерційні кондиціонери</a></li>
         <li><a href="#category-multi-split">Мульти-спліт системи</a></li>

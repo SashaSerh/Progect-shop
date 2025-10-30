@@ -21,11 +21,16 @@
     pointer-events: none;
 }
 
+/* Prevent conflicting nested transitions during fast toggle: root controls animation */
+.catalog-dropdown * {
+    transition: none !important;
+}
+
 /* Optional: basic dropdown panel styling if missing */
 .catalog-dropdown__list {
     list-style: none;
     margin: 0;
-    padding: 8px 0;
+    padding: 4px 0;
     background: var(--color-surface, #fff);
     color: var(--color-on-surface, #111);
     border: 1px solid rgba(0,0,0,0.08);
@@ -35,12 +40,23 @@
 }
 .catalog-dropdown__list > li > a {
     display: block;
-    padding: 10px 14px;
+    padding: 8px 12px;
     color: inherit;
     text-decoration: none;
 }
 .catalog-dropdown__list > li > a:hover {
     background: rgba(0,0,0,0.06);
+}
+
+/* Respect user's reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+    .catalog-dropdown {
+        transition: none !important;
+        transform: none !important;
+    }
+    .catalog-dropdown.catalog-dropdown--closing {
+        transform: none !important;
+    }
 }
 /* Conflict badge style */
 .admin-badge.admin-badge--conflict {

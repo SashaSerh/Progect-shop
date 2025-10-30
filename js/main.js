@@ -17,6 +17,7 @@ const clampQuantity = (value) => {
 };
 import { updateProfileButton, openModal, closeModal } from './auth.js';
 import { gesturesConfig as defaultGesturesConfig } from './gestures-config.js';
+import { getTabBehavior, setTabBehavior, nextIndex as _nextIndex } from './catalog-a11y-config.js';
 
 async function loadComponent(containerId, componentPath) {
     try {
@@ -38,21 +39,214 @@ async function loadComponent(containerId, componentPath) {
     }
 }
 
+// ===== Catalog dropdown A11y helpers =====
+// Public API to update behavior at runtime (backward compat)
+window.setCatalogTabBehavior = setTabBehavior;
+let catalogTrapActive = false;
+let catalogLastActive = null;
+let catalogKeydownHandler = null;
+let catalogFocusinHandler = null;
+let catalogMenuItems = [];
+let catalogActiveIndex = 0;
+let catalogCloseTimeoutId = null;
+let catalogOnEndRef = null;
+
+function getFocusableElements(container) {
+    if (!container) return [];
+    return Array.from(container.querySelectorAll(
+        'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+    ));
+}
+
+function openCatalogDropdown({ withTrap = false } = {}) {
+    const catalogDropdown = document.querySelector('#catalogDropdown');
+    const catalogButton = document.querySelector('#catalogButton');
+    if (!catalogDropdown || !catalogButton) return;
+    // Persist current trap mode for handlers
+    catalogTrapActive = !!withTrap;
+
+    // Cancel pending close animation if any
+    if (catalogDropdown.classList.contains('catalog-dropdown--closing')) {
+        catalogDropdown.classList.remove('catalog-dropdown--closing');
+    }
+    if (catalogCloseTimeoutId) {
+        clearTimeout(catalogCloseTimeoutId);
+        catalogCloseTimeoutId = null;
+    }
+
+    // Position relative to button
+    const rect = catalogButton.getBoundingClientRect();
+    catalogDropdown.style.top = `${rect.bottom + window.scrollY}px`;
+    catalogDropdown.style.left = `${rect.left + window.scrollX}px`;
+    catalogDropdown.style.position = 'absolute';
+
+    catalogDropdown.classList.add('catalog-dropdown--open');
+    catalogDropdown.classList.remove('catalog-dropdown--closing');
+    catalogButton.setAttribute('aria-expanded', 'true');
+    catalogDropdown.setAttribute('aria-hidden', 'false');
+
+    // Setup menu semantics and roving tabindex
+    catalogMenuItems = Array.from(catalogDropdown.querySelectorAll('.catalog-dropdown__list a'));
+    catalogMenuItems.forEach((a) => {
+        a.setAttribute('role', 'menuitem');
+        a.setAttribute('tabindex', '-1');
+        const li = a.closest('li');
+        if (li) li.setAttribute('role', 'none');
+    });
+    catalogActiveIndex = 0;
+    if (catalogMenuItems[0]) catalogMenuItems[0].setAttribute('tabindex', '0');
+
+    // Remember last active element for focus restore
+    catalogLastActive = document.activeElement;
+
+    // Move focus to current menu item (roving pattern)
+    if (catalogMenuItems.length) {
+        try { catalogMenuItems[catalogActiveIndex].focus(); } catch(_) {}
+    } else {
+        catalogDropdown.tabIndex = -1;
+        try { catalogDropdown.focus(); } catch(_) {}
+    }
+
+    // Attach keydown for roving and optional Tab trap
+    if (!catalogKeydownHandler) {
+        catalogKeydownHandler = (ev) => {
+            const key = ev.key;
+            const max = catalogMenuItems.length - 1;
+            if (key === 'ArrowDown') {
+                ev.preventDefault();
+                if (!catalogMenuItems.length) return;
+                catalogActiveIndex = (catalogActiveIndex + 1) % catalogMenuItems.length;
+                catalogMenuItems.forEach((a, i) => a.setAttribute('tabindex', i === catalogActiveIndex ? '0' : '-1'));
+                catalogMenuItems[catalogActiveIndex].focus();
+                return;
+            }
+            if (key === 'ArrowUp') {
+                ev.preventDefault();
+                if (!catalogMenuItems.length) return;
+                catalogActiveIndex = (catalogActiveIndex - 1 + catalogMenuItems.length) % catalogMenuItems.length;
+                catalogMenuItems.forEach((a, i) => a.setAttribute('tabindex', i === catalogActiveIndex ? '0' : '-1'));
+                catalogMenuItems[catalogActiveIndex].focus();
+                return;
+            }
+            if (key === 'Home') {
+                ev.preventDefault();
+                if (!catalogMenuItems.length) return;
+                catalogActiveIndex = 0;
+                catalogMenuItems.forEach((a, i) => a.setAttribute('tabindex', i === catalogActiveIndex ? '0' : '-1'));
+                catalogMenuItems[catalogActiveIndex].focus();
+                return;
+            }
+            if (key === 'End') {
+                ev.preventDefault();
+                if (!catalogMenuItems.length) return;
+                catalogActiveIndex = max;
+                catalogMenuItems.forEach((a, i) => a.setAttribute('tabindex', i === catalogActiveIndex ? '0' : '-1'));
+                catalogMenuItems[catalogActiveIndex].focus();
+                return;
+            }
+            if (key === 'Enter' || key === ' ') {
+                if (!catalogMenuItems.length) return;
+                ev.preventDefault();
+                catalogMenuItems[catalogActiveIndex].click();
+                return;
+            }
+            if (key === 'Escape') {
+                ev.preventDefault();
+                if (typeof closeCatalogAnimated === 'function') {
+                    closeCatalogAnimated({ restoreFocus: true });
+                }
+                return;
+            }
+            if (key === 'Tab' && (catalogTrapActive || getTabBehavior() === 'trap')) {
+                // Trap focus within menu items
+                ev.preventDefault();
+                if (!catalogMenuItems.length) return;
+                const dir = ev.shiftKey ? -1 : 1;
+                catalogActiveIndex = (catalogActiveIndex + dir + catalogMenuItems.length) % catalogMenuItems.length;
+                catalogMenuItems.forEach((a, i) => a.setAttribute('tabindex', i === catalogActiveIndex ? '0' : '-1'));
+                catalogMenuItems[catalogActiveIndex].focus();
+                return;
+            }
+        };
+        catalogDropdown.addEventListener('keydown', catalogKeydownHandler);
+    }
+
+    // Ensure focus stays inside while open only in trap mode
+    if (catalogTrapActive && !catalogFocusinHandler) {
+        catalogFocusinHandler = (ev) => {
+            if (!catalogDropdown.classList.contains('catalog-dropdown--open')) return;
+            if (!catalogDropdown.contains(ev.target)) {
+                const items = getFocusableElements(catalogDropdown);
+                (items[0] || catalogDropdown).focus();
+            }
+        };
+        document.addEventListener('focusin', catalogFocusinHandler);
+    }
+}
+
+function closeCatalogAnimated({ restoreFocus = false } = {}) {
+    const catalogDropdown = document.querySelector('#catalogDropdown');
+    const catalogButton = document.querySelector('#catalogButton');
+    if (!catalogDropdown || !catalogButton) return;
+    if (!catalogDropdown.classList.contains('catalog-dropdown--open')) return;
+
+    // Remove handlers
+    if (catalogKeydownHandler) {
+        try { catalogDropdown.removeEventListener('keydown', catalogKeydownHandler); } catch(_) {}
+        catalogKeydownHandler = null;
+    }
+    if (catalogFocusinHandler) {
+        try { document.removeEventListener('focusin', catalogFocusinHandler); } catch(_) {}
+        catalogFocusinHandler = null;
+    }
+
+    // Add closing class to animate opacity/transform
+    catalogDropdown.classList.add('catalog-dropdown--closing');
+    const done = () => {
+        catalogDropdown.classList.remove('catalog-dropdown--open');
+        catalogDropdown.classList.remove('catalog-dropdown--closing');
+        catalogButton.setAttribute('aria-expanded', 'false');
+        catalogDropdown.setAttribute('aria-hidden', 'true');
+        catalogTrapActive = false;
+        // cleanup roving tabindex state
+        catalogMenuItems.forEach(a => a.setAttribute('tabindex', '-1'));
+        catalogMenuItems = [];
+        catalogActiveIndex = 0;
+        if (catalogCloseTimeoutId) { clearTimeout(catalogCloseTimeoutId); catalogCloseTimeoutId = null; }
+        if (restoreFocus && catalogLastActive instanceof HTMLElement) {
+            // Return focus to the opener button by default
+            try { (catalogLastActive.isConnected ? catalogLastActive : catalogButton).focus(); } catch(_) {}
+        }
+        catalogLastActive = null;
+        if (catalogOnEndRef) {
+            catalogDropdown.removeEventListener('transitionend', catalogOnEndRef);
+            catalogOnEndRef = null;
+        }
+    };
+    const onEnd = (ev) => {
+        if (ev && ev.target !== catalogDropdown) return; // only root dropdown
+        done();
+    };
+    catalogOnEndRef = onEnd;
+    catalogDropdown.addEventListener('transitionend', onEnd, { once: true });
+    // Fallback in case transitionend doesn't fire (short in tests/jsdom)
+    const fallbackMs = (typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)
+        ? 20
+        : 60;
+    catalogCloseTimeoutId = setTimeout(done, fallbackMs);
+}
+
 function toggleCatalogDropdown(e) {
     e.stopPropagation();
     const catalogDropdown = document.querySelector('#catalogDropdown');
-    const catalogButton = document.querySelector('#catalogButton');
-    if (catalogDropdown && catalogButton) {
-        const isOpen = catalogDropdown.classList.contains('catalog-dropdown--open');
-        if (!isOpen) {
-            // Position the dropdown relative to the button
-            const rect = catalogButton.getBoundingClientRect();
-            catalogDropdown.style.top = `${rect.bottom + window.scrollY}px`;
-            catalogDropdown.style.left = `${rect.left + window.scrollX}px`;
-            catalogDropdown.style.position = 'absolute';
+    if (!catalogDropdown) return;
+    const isOpen = catalogDropdown.classList.contains('catalog-dropdown--open');
+    if (isOpen) {
+        if (typeof closeCatalogAnimated === 'function') {
+            closeCatalogAnimated({ restoreFocus: true });
         }
-        catalogDropdown.classList.toggle('catalog-dropdown--open');
-        catalogButton.setAttribute('aria-expanded', catalogDropdown.classList.contains('catalog-dropdown--open'));
+    } else {
+        openCatalogDropdown({ withTrap: getTabBehavior() === 'trap' });
     }
 }
 
@@ -634,6 +828,9 @@ async function initApp() {
         loadComponent('cart-modal-container', 'components/cart.html')
     ]);
 
+    // Применяем тему по умолчанию (теперь светлая) и синхронизируем иконки/ARIA
+    try { initTheme(); } catch(_) {}
+
     const openCartModalButton = document.querySelector('#openCartModal');
     const cartModal = document.querySelector('#cartModal');
     const closeModalButton = document.querySelector('.cart-modal__close');
@@ -1022,39 +1219,16 @@ async function initApp() {
     const catalogButton = document.querySelector('#catalogButton');
     const catalogDropdown = document.querySelector('#catalogDropdown');
     if (catalogButton && catalogDropdown) {
-        // Helper: animated close for catalog dropdown
-        const closeCatalogAnimated = () => {
-            if (!catalogDropdown.classList.contains('catalog-dropdown--open')) return;
-            // Add closing class to animate opacity/transform
-            catalogDropdown.classList.add('catalog-dropdown--closing');
-            const done = () => {
-                catalogDropdown.classList.remove('catalog-dropdown--open');
-                catalogDropdown.classList.remove('catalog-dropdown--closing');
-                catalogButton.setAttribute('aria-expanded', 'false');
-                catalogDropdown.removeEventListener('transitionend', onEnd);
-            };
-            const onEnd = (ev) => {
-                if (ev && ev.target !== catalogDropdown) return; // only root dropdown
-                done();
-            };
-            catalogDropdown.addEventListener('transitionend', onEnd, { once: true });
-            // Fallback in case transitionend doesn't fire
-            setTimeout(done, 180);
-        };
-
-        // Open dropdown on hover
+        // Open dropdown on hover (no focus trap)
         catalogButton.addEventListener('mouseenter', () => {
-            const rect = catalogButton.getBoundingClientRect();
-            catalogDropdown.style.top = `${rect.bottom + window.scrollY}px`;
-            catalogDropdown.style.left = `${rect.left + window.scrollX}px`;
-            catalogDropdown.style.position = 'absolute';
-            catalogDropdown.classList.add('catalog-dropdown--open');
-            catalogButton.setAttribute('aria-expanded', 'true');
+            openCatalogDropdown({ withTrap: false });
         });
         
         // Close dropdown when mouse leaves both button and dropdown
         const closeDropdown = () => {
-            closeCatalogAnimated();
+            if (typeof closeCatalogAnimated === 'function') {
+                closeCatalogAnimated({ restoreFocus: false });
+            }
         };
         
         catalogButton.addEventListener('mouseleave', (e) => {
@@ -1075,33 +1249,102 @@ async function initApp() {
             }, 100);
         });
         
-        // Keep click functionality for accessibility
-        catalogButton.addEventListener('click', toggleCatalogDropdown);
-        
-        document.addEventListener('click', (e) => {
-            if (!catalogDropdown.contains(e.target) && !catalogButton.contains(e.target)) {
-                closeCatalogAnimated();
-            }
-        });
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && catalogDropdown.classList.contains('catalog-dropdown--open')) {
-                closeCatalogAnimated();
-            }
-        });
+        // Global, one-time delegated handlers to avoid duplication across mounts/tests
+        if (!window.__catalogGlobalHandlersAttached) {
+            window.__catalogGlobalHandlersAttached = true;
+            // Toggle on button click (delegated)
+            document.addEventListener('click', (e) => {
+                const t = e.target;
+                if (!(t instanceof HTMLElement)) return;
+                const btnEl = t.closest('#catalogButton');
+                if (btnEl) {
+                    toggleCatalogDropdown(e);
+                }
+            });
+            // Outside click closes immediately
+            document.addEventListener('click', (e) => {
+                const btn = document.querySelector('#catalogButton');
+                const dd = document.querySelector('#catalogDropdown');
+                if (!dd || !btn) return;
+                if (!dd.contains(e.target) && !btn.contains(e.target)) {
+                    if (typeof closeCatalogAnimated === 'function') {
+                        if (!dd.classList.contains('catalog-dropdown--open')) return;
+                        dd.classList.remove('catalog-dropdown--open');
+                        dd.classList.remove('catalog-dropdown--closing');
+                        btn.setAttribute('aria-expanded', 'false');
+                        dd.setAttribute('aria-hidden', 'true');
+                        catalogMenuItems.forEach(a => a.setAttribute('tabindex', '-1'));
+                        catalogMenuItems = [];
+                        catalogActiveIndex = 0;
+                        if (catalogKeydownHandler) { try { dd.removeEventListener('keydown', catalogKeydownHandler); } catch(_) {}
+                            catalogKeydownHandler = null; }
+                        if (catalogFocusinHandler) { try { document.removeEventListener('focusin', catalogFocusinHandler); } catch(_) {}
+                            catalogFocusinHandler = null; }
+                        catalogLastActive = null;
+                    }
+                }
+            });
+            // Escape closes
+            document.addEventListener('keydown', (e) => {
+                const dd = document.querySelector('#catalogDropdown');
+                if (!dd) return;
+                if (e.key === 'Escape' && dd.classList.contains('catalog-dropdown--open')) {
+                    if (typeof closeCatalogAnimated === 'function') {
+                        closeCatalogAnimated({ restoreFocus: true });
+                    }
+                }
+            });
+            // Close on route change as an extra safety net
+            window.addEventListener('hashchange', () => {
+                const dd = document.querySelector('#catalogDropdown');
+                const btn = document.querySelector('#catalogButton');
+                if (!dd || !btn) return;
+                if (typeof closeCatalogAnimated === 'function') {
+                    if (!dd.classList.contains('catalog-dropdown--open')) return;
+                    dd.classList.remove('catalog-dropdown--open');
+                    dd.classList.remove('catalog-dropdown--closing');
+                    btn.setAttribute('aria-expanded', 'false');
+                    dd.setAttribute('aria-hidden', 'true');
+                    catalogMenuItems.forEach(a => a.setAttribute('tabindex', '-1'));
+                    catalogMenuItems = [];
+                    catalogActiveIndex = 0;
+                    if (catalogKeydownHandler) { try { dd.removeEventListener('keydown', catalogKeydownHandler); } catch(_) {}
+                        catalogKeydownHandler = null; }
+                    if (catalogFocusinHandler) { try { document.removeEventListener('focusin', catalogFocusinHandler); } catch(_) {}
+                        catalogFocusinHandler = null; }
+                    catalogLastActive = null;
+                }
+            });
+        }
 
         // Close dropdown when a catalog link is clicked
         catalogDropdown.addEventListener('click', (e) => {
             const link = e.target.closest('a');
             if (link && catalogDropdown.contains(link)) {
                 // Let navigation happen, just close visually
-                closeCatalogAnimated();
+                if (typeof closeCatalogAnimated === 'function') {
+                    // Immediate close on direct link activation
+                    const dd = catalogDropdown;
+                    const btn = catalogButton;
+                    if (!dd.classList.contains('catalog-dropdown--open')) return;
+                    dd.classList.remove('catalog-dropdown--open');
+                    dd.classList.remove('catalog-dropdown--closing');
+                    btn.setAttribute('aria-expanded', 'false');
+                    dd.setAttribute('aria-hidden', 'true');
+                    catalogMenuItems.forEach(a => a.setAttribute('tabindex', '-1'));
+                    catalogMenuItems = [];
+                    catalogActiveIndex = 0;
+                    if (catalogKeydownHandler) { try { dd.removeEventListener('keydown', catalogKeydownHandler); } catch(_) {}
+                        catalogKeydownHandler = null; }
+                    if (catalogFocusinHandler) { try { document.removeEventListener('focusin', catalogFocusinHandler); } catch(_) {}
+                        catalogFocusinHandler = null; }
+                    // Do not restore focus here to avoid stealing during navigation
+                    catalogLastActive = null;
+                }
             }
         });
 
-        // Close on route change as an extra safety net
-        window.addEventListener('hashchange', () => {
-            closeCatalogAnimated();
-        });
+        // Per-dropdown click on links still closes immediately (kept per-instance)
     }
 
     const searchInput = document.querySelector('#site-search');

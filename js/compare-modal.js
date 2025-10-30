@@ -466,29 +466,36 @@ export function initCompareModal(lang = currentLanguage) {
     currentLanguage = resolveLanguage(lang);
     modalElements = queryElements();
     if (!modalElements) return;
-    if (isInitialized) {
-        setCompareModalLanguage(currentLanguage);
-        return;
-    }
-    isInitialized = true;
-    modalElements.root.setAttribute('aria-hidden', 'true');
-    modalElements.root.setAttribute('hidden', '');
-    modalElements.root.addEventListener('click', handleRootClick);
+    // Always (re)bind click handler for the current root in case DOM was remounted between tests/renders
+    try {
+        const root = modalElements.root;
+        if (!root.__compareClickBound) {
+            root.addEventListener('click', handleRootClick);
+            // mark to avoid duplicate bindings on the same element
+            Object.defineProperty(root, '__compareClickBound', { value: true, configurable: true });
+        }
+    } catch (_) { /* noop */ }
 
-    if (typeof window !== 'undefined') {
-        window.addEventListener('compare:open', (event) => {
-            const ids = event?.detail?.ids;
-            if (Array.isArray(ids) && ids.length) {
-                renderCompareModal(ids, currentLanguage);
-            }
-        });
-        window.addEventListener('compare:change', handleCompareChange);
-        window.addEventListener('languagechange', (event) => {
-            const nextLang = event?.detail?.lang;
-            if (typeof nextLang === 'string') {
-                setCompareModalLanguage(nextLang);
-            }
-        });
+    if (!isInitialized) {
+        isInitialized = true;
+        modalElements.root.setAttribute('aria-hidden', 'true');
+        modalElements.root.setAttribute('hidden', '');
+
+        if (typeof window !== 'undefined') {
+            window.addEventListener('compare:open', (event) => {
+                const ids = event?.detail?.ids;
+                if (Array.isArray(ids) && ids.length) {
+                    renderCompareModal(ids, currentLanguage);
+                }
+            });
+            window.addEventListener('compare:change', handleCompareChange);
+            window.addEventListener('languagechange', (event) => {
+                const nextLang = event?.detail?.lang;
+                if (typeof nextLang === 'string') {
+                    setCompareModalLanguage(nextLang);
+                }
+            });
+        }
     }
 
     setCompareModalLanguage(currentLanguage);

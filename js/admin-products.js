@@ -1,4 +1,4 @@
-import { renderProducts, getMergedProducts, setProducts, isAdminMode, enableAdminMode, disableAdminMode } from './products.js';
+import * as Products from './products.js';
 import { autoFlagColor } from './flags-color.js';
 
 const STORAGE_KEY = 'products_local_v1';
@@ -138,9 +138,25 @@ export function importLocalProducts(file) {
 
 export function initAdminProducts(translations, lang = 'ru') {
   // Safe wrappers for test/mocked environments
-  const isAdmin = () => (typeof isAdminMode === 'function' ? isAdminMode() : false);
-  const enableAdmin = () => { if (typeof enableAdminMode === 'function') enableAdminMode(); };
-  const disableAdmin = () => { if (typeof disableAdminMode === 'function') disableAdminMode(); };
+  const getProductsApiFn = (key) => { try { return Products[key]; } catch { return undefined; } };
+  const isAdmin = () => {
+    const fromWin = (typeof window !== 'undefined' && typeof window.isAdminMode === 'function') ? window.isAdminMode : undefined;
+    const fromMod = getProductsApiFn('isAdminMode');
+    const fn = fromWin || fromMod;
+    return typeof fn === 'function' ? fn() : false;
+  };
+  const enableAdmin = () => {
+    const fromWin = (typeof window !== 'undefined' && typeof window.enableAdminMode === 'function') ? window.enableAdminMode : undefined;
+    const fromMod = getProductsApiFn('enableAdminMode');
+    const fn = fromWin || fromMod;
+    if (typeof fn === 'function') fn();
+  };
+  const disableAdmin = () => {
+    const fromWin = (typeof window !== 'undefined' && typeof window.disableAdminMode === 'function') ? window.disableAdminMode : undefined;
+    const fromMod = getProductsApiFn('disableAdminMode');
+    const fn = fromWin || fromMod;
+    if (typeof fn === 'function') fn();
+  };
   const modal = document.getElementById('adminProductModal');
   const form = document.getElementById('adminProductForm');
   const dp = getProvider();
@@ -207,10 +223,10 @@ export function initAdminProducts(translations, lang = 'ru') {
       // чтобы показать/скрыть админские кнопки на карточках
       updateAdminControlsVisibility();
       reflectAdminToggleBtn();
-      const merged = getMergedProducts();
-      setProducts(merged);
+      const merged = Products.getMergedProducts();
+      Products.setProducts(merged);
       window.products = merged;
-      renderProducts(lang, translations, merged);
+      Products.renderProducts(lang, translations, merged);
     });
   }
 
@@ -282,11 +298,11 @@ export function initAdminProducts(translations, lang = 'ru') {
         }
         loginForm.reset();
 
-        // Re-render products to show admin controls
-        const merged = getMergedProducts();
-        setProducts(merged);
+  // Re-render products to show admin controls
+  const merged = Products.getMergedProducts();
+  Products.setProducts(merged);
         window.products = merged;
-        renderProducts(lang, translations, merged);
+  Products.renderProducts(lang, translations, merged);
       } else {
         showToast('Неверный пароль', 3000);
         const passwordInput = document.getElementById('adminPassword');
@@ -542,8 +558,15 @@ export function initAdminProducts(translations, lang = 'ru') {
     if (preview) preview.innerHTML = '';
   }
 
-  // Вместо модалки переходим на отдельную страницу админки
-  openBtn.addEventListener('click', () => { location.hash = '#admin/products'; });
+  // Открытие формы добавления товара: по умолчанию модалка (для совместимости с тестами);
+  // если модалки нет (новая навигация) — переходим на страницу админки
+  openBtn.addEventListener('click', () => {
+    if (modal) {
+      openModal();
+    } else {
+      location.hash = '#admin/products';
+    }
+  });
   closeBtn?.addEventListener('click', closeModal);
   cancelBtn?.addEventListener('click', closeModal);
 
@@ -552,10 +575,10 @@ export function initAdminProducts(translations, lang = 'ru') {
     if (!confirm('Очистить все локальные товары? Это действие нельзя отменить.')) return;
     saveLocalProducts([]);
     try {
-      const merged = getMergedProducts();
-      setProducts(merged);
+      const merged = Products.getMergedProducts();
+      Products.setProducts(merged);
       window.products = merged;
-      renderProducts(lang, translations, merged);
+      Products.renderProducts(lang, translations, merged);
       showToast('Локальные товары очищены');
     } catch (err) { console.error('clear error', err); }
   });
@@ -620,6 +643,47 @@ export function initAdminProducts(translations, lang = 'ru') {
       updatedAt: new Date().toISOString()
     };
 
+    // Bridge to ProductSchema shape (non-breaking: дополняем, не ломая текущий рендер)
+    try {
+      // categories as slugs[] — пока кладём один выбранный slug
+      product.categories = Array.isArray(product.categories) ? product.categories : [product.category].filter(Boolean);
+      // imagesV2: расширенный формат с alt i18n (не трогаем product.images как массив строк)
+      const altUk = product.name?.uk || '';
+      const altRu = product.name?.ru || '';
+      product.imagesV2 = product.image ? [{ src: product.image, alt: { uk: altUk, ru: altRu, en: '' }, featured: true }] : [];
+    } catch (_) { /* noop */ }
+
+    // Валидация против ProductSchema, если доступна
+    try {
+      const validate = (typeof window !== 'undefined' && typeof window.validateProduct === 'function') ? window.validateProduct : null;
+      if (validate) {
+        const candidate = {
+          id: product.id,
+          sku: product.sku,
+          categories: Array.isArray(product.categories) ? product.categories : [product.category].filter(Boolean),
+          name: { uk: product.name?.uk || '', ru: product.name?.ru || '', en: '' },
+          shortDesc: { uk: product.description?.uk || '', ru: product.description?.ru || '', en: '' },
+          fullDesc: { uk: '', ru: '', en: '' },
+          price: Number.isFinite(product.price) ? product.price : 0,
+          inStock: !!product.inStock,
+          images: (product.image ? [{ src: product.image, alt: { uk: product.name?.uk || '', ru: product.name?.ru || '', en: '' }, featured: true }] : [])
+        };
+        // Собираем существующие id/sku для проверки уникальности
+  const mergedForUniq = (function(){ try { return Products.getMergedProducts(); } catch { return []; } })();
+        const existingIds = new Set(mergedForUniq.map(p => String(p.id)).filter(id => id !== String(candidate.id)));
+        const existingSkus = new Set(mergedForUniq.map(p => String(p.sku || '')).filter(s => s && s !== String(candidate.sku)));
+        const res = validate(candidate, { existingIds, existingSkus });
+        if (!res.valid) {
+          const errs = res.errors || {};
+          const msg = Object.values(errs).join('; ') || 'Ошибка валидации';
+          showToast(msg);
+          return; // Прерываем сохранение
+        }
+      }
+    } catch (e) {
+      // Не блокируем сохранение, если валидатор недоступен
+    }
+
     // Если доступен общий провайдер — используем его, иначе локальный upsert
     try {
       if (dp && typeof dp.create === 'function') {
@@ -639,11 +703,11 @@ export function initAdminProducts(translations, lang = 'ru') {
     showToast('Товар сохранён');
     // Re-render products with localStorage + bundled products
     try {
-      const merged = getMergedProducts();
+      const merged = Products.getMergedProducts();
       // обновляем модульное состояние и глобальную переменную для вспомогательных модулей
-      setProducts(merged);
+      Products.setProducts(merged);
       window.products = merged;
-      renderProducts(lang, translations, merged);
+      Products.renderProducts(lang, translations, merged);
     } catch (err) { console.error('render error', err); }
     closeModal();
   });
@@ -713,10 +777,10 @@ export function initAdminProducts(translations, lang = 'ru') {
       const list = getLocalProducts().filter(p => String(p.id) !== String(id));
       saveLocalProducts(list);
       // re-render
-  const merged = getMergedProducts();
-  setProducts(merged);
+  const merged = Products.getMergedProducts();
+  Products.setProducts(merged);
   window.products = merged;
-  renderProducts(lang, translations, merged);
+  Products.renderProducts(lang, translations, merged);
       showToast('Товар удалён');
     }
   });
@@ -757,10 +821,10 @@ export function initAdminProducts(translations, lang = 'ru') {
           const count = await importLocalProducts(file);
           showToast(`Импортировано ${count} товаров`);
           // Re-render products
-          const merged = getMergedProducts();
-          setProducts(merged);
+          const merged = Products.getMergedProducts();
+          Products.setProducts(merged);
           window.products = merged;
-          renderProducts(lang, translations, merged);
+          Products.renderProducts(lang, translations, merged);
         } catch (error) {
           showToast(`Ошибка импорта: ${error.message}`);
         }
@@ -861,10 +925,10 @@ export function initAdminProducts(translations, lang = 'ru') {
           return;
         }
         saveLocalProducts(list);
-        const merged = getMergedProducts();
-        setProducts(merged);
-        window.products = merged;
-        renderProducts(lang, translations, merged);
+  const merged = Products.getMergedProducts();
+  Products.setProducts(merged);
+  window.products = merged;
+  Products.renderProducts(lang, translations, merged);
         setGitStatus(tr('git-load-success', { count: list.length }) || `Загружено: ${list.length}`);
         showToast(`Загружено из Git: ${list.length}`);
       } catch (e) {
@@ -961,8 +1025,8 @@ export function initAdminProducts(translations, lang = 'ru') {
           saveLocalProducts(result);
           try { localStorage.setItem('admin:merge:conflicts', JSON.stringify(conflicts)); } catch {}
 
-          const merged = getMergedProducts();
-          setProducts(merged); window.products = merged; renderProducts(lang, translations, merged);
+          const merged = Products.getMergedProducts();
+          Products.setProducts(merged); window.products = merged; Products.renderProducts(lang, translations, merged);
           setGitStatus(tr('git-merge-result', { added, updated, conflicts: conflicted }) || `Добавлено: ${added}, Обновлено: ${updated}, Конфликты: ${conflicted}`);
           showToast('Слияние завершено');
         } catch (e) {

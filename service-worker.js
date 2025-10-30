@@ -1,4 +1,4 @@
-const CACHE_NAME = 'climat-control-v42';
+const CACHE_NAME = 'climat-control-v43';
 const urlsToCache = [
     '/',
     '/index.html',

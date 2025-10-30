@@ -1022,6 +1022,26 @@ async function initApp() {
     const catalogButton = document.querySelector('#catalogButton');
     const catalogDropdown = document.querySelector('#catalogDropdown');
     if (catalogButton && catalogDropdown) {
+        // Helper: animated close for catalog dropdown
+        const closeCatalogAnimated = () => {
+            if (!catalogDropdown.classList.contains('catalog-dropdown--open')) return;
+            // Add closing class to animate opacity/transform
+            catalogDropdown.classList.add('catalog-dropdown--closing');
+            const done = () => {
+                catalogDropdown.classList.remove('catalog-dropdown--open');
+                catalogDropdown.classList.remove('catalog-dropdown--closing');
+                catalogButton.setAttribute('aria-expanded', 'false');
+                catalogDropdown.removeEventListener('transitionend', onEnd);
+            };
+            const onEnd = (ev) => {
+                if (ev && ev.target !== catalogDropdown) return; // only root dropdown
+                done();
+            };
+            catalogDropdown.addEventListener('transitionend', onEnd, { once: true });
+            // Fallback in case transitionend doesn't fire
+            setTimeout(done, 180);
+        };
+
         // Open dropdown on hover
         catalogButton.addEventListener('mouseenter', () => {
             const rect = catalogButton.getBoundingClientRect();
@@ -1034,8 +1054,7 @@ async function initApp() {
         
         // Close dropdown when mouse leaves both button and dropdown
         const closeDropdown = () => {
-            catalogDropdown.classList.remove('catalog-dropdown--open');
-            catalogButton.setAttribute('aria-expanded', 'false');
+            closeCatalogAnimated();
         };
         
         catalogButton.addEventListener('mouseleave', (e) => {
@@ -1061,15 +1080,27 @@ async function initApp() {
         
         document.addEventListener('click', (e) => {
             if (!catalogDropdown.contains(e.target) && !catalogButton.contains(e.target)) {
-                catalogDropdown.classList.remove('catalog-dropdown--open');
-                catalogButton.setAttribute('aria-expanded', 'false');
+                closeCatalogAnimated();
             }
         });
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape' && catalogDropdown.classList.contains('catalog-dropdown--open')) {
-                catalogDropdown.classList.remove('catalog-dropdown--open');
-                catalogButton.setAttribute('aria-expanded', 'false');
+                closeCatalogAnimated();
             }
+        });
+
+        // Close dropdown when a catalog link is clicked
+        catalogDropdown.addEventListener('click', (e) => {
+            const link = e.target.closest('a');
+            if (link && catalogDropdown.contains(link)) {
+                // Let navigation happen, just close visually
+                closeCatalogAnimated();
+            }
+        });
+
+        // Close on route change as an extra safety net
+        window.addEventListener('hashchange', () => {
+            closeCatalogAnimated();
         });
     }
 
@@ -1146,6 +1177,18 @@ async function initApp() {
             }
         });
     }
+
+    // Fallback delegation for cart dropdown remove in environments where container listener wasn't bound
+    document.addEventListener('click', (e) => {
+        const t = e.target;
+        if (t && t.classList && t.classList.contains('cart-dropdown__item-remove')) {
+            const productId = t.dataset.id;
+            if (productId) {
+                removeFromCart(productId);
+                updateCartUI(translations, savedLanguage);
+            }
+        }
+    });
 
     const cartItems = document.querySelector('.cart-items');
     if (cartItems) {
@@ -1673,8 +1716,8 @@ function showSection(id, show) {
 }
 
 function setupHashRouting(initialLang) {
-    // Mapping of category parameters to component paths
-    const categoryComponents = {
+    // Prefer content-config helpers; keep minimal fallback for robustness
+    const fallbackCategoryComponents = {
         'conditioners': 'components/category-conditioners.html',
         'commercial-ac': 'components/category-commercial-ac.html',
         'multi-split': 'components/category-multi-split.html',
@@ -1691,24 +1734,6 @@ function setupHashRouting(initialLang) {
         'accessories': 'components/category-accessories.html'
     };
 
-    // Mapping of category slugs to product categories
-    const categorySlugToProductCategory = {
-        'conditioners': 'ac',
-        'commercial-ac': 'ac',
-        'multi-split': 'ac',
-        'indoor-units': 'ac',
-        'outdoor-units': 'ac',
-        'mobile-ac': 'ac',
-        'fan-coils': 'ac',
-        'humidifiers': 'ac',
-        'air-purifiers': 'ac',
-        'dehumidifiers': 'ac',
-        'controllers': 'ac',
-        'heat-pumps': 'ac',
-        'electric-heaters': 'ac',
-        'accessories': 'accessory'
-    };
-
     function handleRoute() {
         const hash = location.hash || '';
         
@@ -1716,8 +1741,10 @@ function setupHashRouting(initialLang) {
         const categoryMatch = hash.match(/^#category-(.+)$/);
         if (categoryMatch) {
             const categorySlug = categoryMatch[1];
-            if (categoryComponents[categorySlug]) {
-                const componentPath = categoryComponents[categorySlug];
+            const componentPath = (typeof window !== 'undefined' && typeof window.getComponentBySlug === 'function')
+                ? (window.getComponentBySlug(categorySlug) || fallbackCategoryComponents[categorySlug])
+                : fallbackCategoryComponents[categorySlug];
+            if (componentPath) {
                 loadComponent('main-container', componentPath).then(() => {
                     // Hide other sections and show the category page
                     showSection('hero-container', false);
@@ -1849,40 +1876,12 @@ function bindProductCardNavigation() {
     // No-op here: kept for potential future enhancements
 }
 
-// Toast helper to prompt user to refresh when SW updates
+// Ненавязчивый тост по активации нового SW
 function showUpdateToast() {
-    const host = document.getElementById('toast-container');
-    if (!host) return;
-    const toast = document.createElement('div');
-    toast.className = 'toast';
-    toast.style.maxWidth = '520px';
-    toast.style.margin = '8px auto';
-    toast.style.background = 'var(--surface, #222)';
-    toast.style.color = 'var(--on-surface, #fff)';
-    toast.style.padding = '12px 16px';
-    toast.style.borderRadius = '12px';
-    toast.style.boxShadow = '0 6px 16px rgba(0,0,0,.25)';
-    toast.style.display = 'flex';
-    toast.style.alignItems = 'center';
-    toast.style.gap = '12px';
-    toast.style.zIndex = '5000';
-    const text = document.createElement('div');
-    text.textContent = 'Доступно обновление. Обновить страницу?';
-    const btn = document.createElement('button');
-    btn.className = 'btn';
-    btn.textContent = 'Обновить';
-    btn.addEventListener('click', () => {
-        // Reload to pick latest assets
-        location.reload();
-    });
-    const close = document.createElement('button');
-    close.className = 'btn btn--ghost';
-    close.textContent = 'Позже';
-    close.addEventListener('click', () => toast.remove());
-    toast.appendChild(text);
-    toast.appendChild(btn);
-    toast.appendChild(close);
-    host.appendChild(toast);
+    // Используем общий механизм тостов и i18n
+    const message = translateKey('toast-update-installed');
+    // Короткое авто‑скрытие, без действий — просто уведомление
+    showActionToast({ message: message || 'Обновление установлено', type: 'success', duration: 2400 });
 }
 
 // ====== SEO/OG/Twitter helpers ======

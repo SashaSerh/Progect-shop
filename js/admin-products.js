@@ -873,7 +873,8 @@ export function initAdminProducts(translations, lang = 'ru') {
     try {
       const currentPref = (localStorage.getItem('admin:dataProvider') || 'localStorage');
       if (providerSelect) providerSelect.value = currentPref;
-      if (repoInp) repoInp.value = localStorage.getItem('admin:gitcms:repo') || '';
+  // Prefill repo with current project as a sensible default if nothing saved yet
+  if (repoInp) repoInp.value = localStorage.getItem('admin:gitcms:repo') || 'SashaSerh/Progect-shop';
       if (branchInp) branchInp.value = localStorage.getItem('admin:gitcms:branch') || 'main';
       if (pathInp) pathInp.value = localStorage.getItem('admin:gitcms:path') || 'data/products.json';
       if (tokenInp) tokenInp.value = localStorage.getItem('admin:gitcms:token') || '';

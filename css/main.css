@@ -30,7 +30,7 @@
 .catalog-dropdown__list {
     list-style: none;
     margin: 0;
-    padding: 2px 0; /* tighter vertical padding for a more compact list */
+    padding: 0; /* even tighter vertical padding */
     background: var(--color-surface, #fff);
     color: var(--color-on-surface, #111);
     border: 1px solid rgba(0,0,0,0.08);
@@ -40,7 +40,7 @@
 }
 .catalog-dropdown__list > li > a {
     display: block;
-    padding: 6px 10px; /* reduce item padding to make gaps smaller */
+    padding: 4px 10px; /* reduce vertical padding further for compact layout */
     color: inherit;
     text-decoration: none;
 }

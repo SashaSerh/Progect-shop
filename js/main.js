@@ -17,7 +17,6 @@ const clampQuantity = (value) => {
 };
 import { updateProfileButton, openModal, closeModal } from './auth.js';
 import { gesturesConfig as defaultGesturesConfig } from './gestures-config.js';
-import { getTabBehavior, setTabBehavior, nextIndex as _nextIndex } from './catalog-a11y-config.js';
 
 async function loadComponent(containerId, componentPath) {
     try {
@@ -40,8 +39,16 @@ async function loadComponent(containerId, componentPath) {
 }
 
 // ===== Catalog dropdown A11y helpers =====
-// Public API to update behavior at runtime (backward compat)
-window.setCatalogTabBehavior = setTabBehavior;
+// Configurable Tab behavior: 'trap' (Tab циклично по пунктам меню) | 'classic' (Tab выходит наружу)
+const catalogA11yConfig = {
+    tabBehavior: (typeof localStorage !== 'undefined' && localStorage.getItem('catalogTabBehavior')) || 'classic'
+};
+// Public API to update behavior at runtime
+window.setCatalogTabBehavior = function setCatalogTabBehavior(mode) {
+    if (mode !== 'trap' && mode !== 'classic') return;
+    catalogA11yConfig.tabBehavior = mode;
+    try { localStorage.setItem('catalogTabBehavior', mode); } catch(_) {}
+};
 let catalogTrapActive = false;
 let catalogLastActive = null;
 let catalogKeydownHandler = null;
@@ -62,8 +69,6 @@ function openCatalogDropdown({ withTrap = false } = {}) {
     const catalogDropdown = document.querySelector('#catalogDropdown');
     const catalogButton = document.querySelector('#catalogButton');
     if (!catalogDropdown || !catalogButton) return;
-    // Persist current trap mode for handlers
-    catalogTrapActive = !!withTrap;
 
     // Cancel pending close animation if any
     if (catalogDropdown.classList.contains('catalog-dropdown--closing')) {
@@ -157,7 +162,7 @@ function openCatalogDropdown({ withTrap = false } = {}) {
                 }
                 return;
             }
-            if (key === 'Tab' && (catalogTrapActive || getTabBehavior() === 'trap')) {
+            if (key === 'Tab' && catalogA11yConfig.tabBehavior === 'trap') {
                 // Trap focus within menu items
                 ev.preventDefault();
                 if (!catalogMenuItems.length) return;
@@ -172,7 +177,7 @@ function openCatalogDropdown({ withTrap = false } = {}) {
     }
 
     // Ensure focus stays inside while open only in trap mode
-    if (catalogTrapActive && !catalogFocusinHandler) {
+    if (catalogA11yConfig.tabBehavior === 'trap' && !catalogFocusinHandler) {
         catalogFocusinHandler = (ev) => {
             if (!catalogDropdown.classList.contains('catalog-dropdown--open')) return;
             if (!catalogDropdown.contains(ev.target)) {
@@ -207,7 +212,6 @@ function closeCatalogAnimated({ restoreFocus = false } = {}) {
         catalogDropdown.classList.remove('catalog-dropdown--closing');
         catalogButton.setAttribute('aria-expanded', 'false');
         catalogDropdown.setAttribute('aria-hidden', 'true');
-        catalogTrapActive = false;
         // cleanup roving tabindex state
         catalogMenuItems.forEach(a => a.setAttribute('tabindex', '-1'));
         catalogMenuItems = [];
@@ -229,11 +233,8 @@ function closeCatalogAnimated({ restoreFocus = false } = {}) {
     };
     catalogOnEndRef = onEnd;
     catalogDropdown.addEventListener('transitionend', onEnd, { once: true });
-    // Fallback in case transitionend doesn't fire (short in tests/jsdom)
-    const fallbackMs = (typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)
-        ? 20
-        : 60;
-    catalogCloseTimeoutId = setTimeout(done, fallbackMs);
+    // Fallback in case transitionend doesn't fire
+    catalogCloseTimeoutId = setTimeout(done, 200);
 }
 
 function toggleCatalogDropdown(e) {
@@ -246,7 +247,7 @@ function toggleCatalogDropdown(e) {
             closeCatalogAnimated({ restoreFocus: true });
         }
     } else {
-        openCatalogDropdown({ withTrap: getTabBehavior() === 'trap' });
+        openCatalogDropdown({ withTrap: catalogA11yConfig.tabBehavior === 'trap' });
     }
 }
 
@@ -1249,73 +1250,27 @@ async function initApp() {
             }, 100);
         });
         
-        // Global, one-time delegated handlers to avoid duplication across mounts/tests
-        if (!window.__catalogGlobalHandlersAttached) {
-            window.__catalogGlobalHandlersAttached = true;
-            // Toggle on button click (delegated)
-            document.addEventListener('click', (e) => {
-                const t = e.target;
-                if (!(t instanceof HTMLElement)) return;
-                const btnEl = t.closest('#catalogButton');
-                if (btnEl) {
-                    toggleCatalogDropdown(e);
-                }
-            });
-            // Outside click closes immediately
-            document.addEventListener('click', (e) => {
-                const btn = document.querySelector('#catalogButton');
-                const dd = document.querySelector('#catalogDropdown');
-                if (!dd || !btn) return;
-                if (!dd.contains(e.target) && !btn.contains(e.target)) {
-                    if (typeof closeCatalogAnimated === 'function') {
-                        if (!dd.classList.contains('catalog-dropdown--open')) return;
-                        dd.classList.remove('catalog-dropdown--open');
-                        dd.classList.remove('catalog-dropdown--closing');
-                        btn.setAttribute('aria-expanded', 'false');
-                        dd.setAttribute('aria-hidden', 'true');
-                        catalogMenuItems.forEach(a => a.setAttribute('tabindex', '-1'));
-                        catalogMenuItems = [];
-                        catalogActiveIndex = 0;
-                        if (catalogKeydownHandler) { try { dd.removeEventListener('keydown', catalogKeydownHandler); } catch(_) {}
-                            catalogKeydownHandler = null; }
-                        if (catalogFocusinHandler) { try { document.removeEventListener('focusin', catalogFocusinHandler); } catch(_) {}
-                            catalogFocusinHandler = null; }
-                        catalogLastActive = null;
-                    }
-                }
-            });
-            // Escape closes
-            document.addEventListener('keydown', (e) => {
-                const dd = document.querySelector('#catalogDropdown');
-                if (!dd) return;
-                if (e.key === 'Escape' && dd.classList.contains('catalog-dropdown--open')) {
-                    if (typeof closeCatalogAnimated === 'function') {
-                        closeCatalogAnimated({ restoreFocus: true });
-                    }
-                }
-            });
-            // Close on route change as an extra safety net
-            window.addEventListener('hashchange', () => {
-                const dd = document.querySelector('#catalogDropdown');
-                const btn = document.querySelector('#catalogButton');
-                if (!dd || !btn) return;
+        // Click toggles with focus trap only if configured
+        catalogButton.addEventListener('click', (e) => {
+            const useTrap = catalogA11yConfig.tabBehavior === 'trap';
+            // For toggleCatalogDropdown we decide inside based on config
+            toggleCatalogDropdown(e);
+        });
+        
+        document.addEventListener('click', (e) => {
+            if (!catalogDropdown.contains(e.target) && !catalogButton.contains(e.target)) {
                 if (typeof closeCatalogAnimated === 'function') {
-                    if (!dd.classList.contains('catalog-dropdown--open')) return;
-                    dd.classList.remove('catalog-dropdown--open');
-                    dd.classList.remove('catalog-dropdown--closing');
-                    btn.setAttribute('aria-expanded', 'false');
-                    dd.setAttribute('aria-hidden', 'true');
-                    catalogMenuItems.forEach(a => a.setAttribute('tabindex', '-1'));
-                    catalogMenuItems = [];
-                    catalogActiveIndex = 0;
-                    if (catalogKeydownHandler) { try { dd.removeEventListener('keydown', catalogKeydownHandler); } catch(_) {}
-                        catalogKeydownHandler = null; }
-                    if (catalogFocusinHandler) { try { document.removeEventListener('focusin', catalogFocusinHandler); } catch(_) {}
-                        catalogFocusinHandler = null; }
-                    catalogLastActive = null;
+                    closeCatalogAnimated({ restoreFocus: false });
                 }
-            });
-        }
+            }
+        });
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && catalogDropdown.classList.contains('catalog-dropdown--open')) {
+                if (typeof closeCatalogAnimated === 'function') {
+                    closeCatalogAnimated({ restoreFocus: true });
+                }
+            }
+        });
 
         // Close dropdown when a catalog link is clicked
         catalogDropdown.addEventListener('click', (e) => {
@@ -1323,28 +1278,17 @@ async function initApp() {
             if (link && catalogDropdown.contains(link)) {
                 // Let navigation happen, just close visually
                 if (typeof closeCatalogAnimated === 'function') {
-                    // Immediate close on direct link activation
-                    const dd = catalogDropdown;
-                    const btn = catalogButton;
-                    if (!dd.classList.contains('catalog-dropdown--open')) return;
-                    dd.classList.remove('catalog-dropdown--open');
-                    dd.classList.remove('catalog-dropdown--closing');
-                    btn.setAttribute('aria-expanded', 'false');
-                    dd.setAttribute('aria-hidden', 'true');
-                    catalogMenuItems.forEach(a => a.setAttribute('tabindex', '-1'));
-                    catalogMenuItems = [];
-                    catalogActiveIndex = 0;
-                    if (catalogKeydownHandler) { try { dd.removeEventListener('keydown', catalogKeydownHandler); } catch(_) {}
-                        catalogKeydownHandler = null; }
-                    if (catalogFocusinHandler) { try { document.removeEventListener('focusin', catalogFocusinHandler); } catch(_) {}
-                        catalogFocusinHandler = null; }
-                    // Do not restore focus here to avoid stealing during navigation
-                    catalogLastActive = null;
+                    closeCatalogAnimated({ restoreFocus: false });
                 }
             }
         });
 
-        // Per-dropdown click on links still closes immediately (kept per-instance)
+        // Close on route change as an extra safety net
+        window.addEventListener('hashchange', () => {
+            if (typeof closeCatalogAnimated === 'function') {
+                closeCatalogAnimated({ restoreFocus: false });
+            }
+        });
     }
 
     const searchInput = document.querySelector('#site-search');

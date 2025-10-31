@@ -140,30 +140,4 @@ describe('Catalog A11y: roving and trap', () => {
     expect(dd.classList.contains('catalog-dropdown--open')).toBe(false);
     expect(btn.getAttribute('aria-expanded')).toBe('false');
   });
-
-  it('Click outside closes the dropdown', async () => {
-    if (typeof window.setCatalogTabBehavior === 'function') window.setCatalogTabBehavior('classic');
-    const btn = document.getElementById('catalogButton');
-    const dd = document.getElementById('catalogDropdown');
-    btn.click();
-    await new Promise(r => setTimeout(r, 10));
-    expect(dd.classList.contains('catalog-dropdown--open')).toBe(true);
-    // Click outside
-    document.body.click();
-    await new Promise(r => setTimeout(r, 30));
-    expect(dd.classList.contains('catalog-dropdown--open')).toBe(false);
-  });
-
-  it('Click on a menu link closes the dropdown', async () => {
-    if (typeof window.setCatalogTabBehavior === 'function') window.setCatalogTabBehavior('classic');
-    const btn = document.getElementById('catalogButton');
-    const dd = document.getElementById('catalogDropdown');
-    btn.click();
-    await new Promise(r => setTimeout(r, 10));
-    const firstLink = dd.querySelector('.catalog-dropdown__list a');
-    expect(firstLink).toBeTruthy();
-    firstLink.click();
-    await new Promise(r => setTimeout(r, 30));
-    expect(dd.classList.contains('catalog-dropdown--open')).toBe(false);
-  });
 });

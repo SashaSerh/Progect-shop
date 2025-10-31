@@ -155,4 +155,42 @@
   // Public API
   window.DataProviders = { LocalStorageProvider, GitCMSProvider };
   window.getDataProvider = getConfiguredProvider;
+
+  // Utility helpers to simplify Git‑CMS setup from console or scripts
+  // configureGitCMS({ repo: 'owner/name', branch: 'main', path: 'data/products.json', token: 'ghp_...' })
+  window.configureGitCMS = function configureGitCMS(opts = {}) {
+    try {
+      if (opts.repo) localStorage.setItem('admin:gitcms:repo', String(opts.repo).trim());
+      if (opts.branch) localStorage.setItem('admin:gitcms:branch', String(opts.branch).trim() || 'main');
+      if (opts.path) localStorage.setItem('admin:gitcms:path', String(opts.path).trim() || 'data/products.json');
+      if (opts.token) localStorage.setItem('admin:gitcms:token', String(opts.token).trim());
+      localStorage.setItem('admin:dataProvider', 'gitcms');
+      return true;
+    } catch (_) { return false; }
+  };
+
+  // Quickly switch current provider to Git‑CMS (requires saved settings)
+  window.switchToGitCMS = function switchToGitCMS() {
+    try { localStorage.setItem('admin:dataProvider', 'gitcms'); return true; } catch(_) { return false; }
+  };
+
+  // Switch back to LocalStorage provider
+  window.switchToLocalProvider = function switchToLocalProvider() {
+    try { localStorage.setItem('admin:dataProvider', 'localStorage'); return true; } catch(_) { return false; }
+  };
+
+  // Dump locally saved products (admin local storage) normalized to ProductSchema JSON
+  // Useful to prepare products.json for Git manually if needed
+  window.dumpLocalProductsNormalized = function dumpLocalProductsNormalized() {
+    try {
+      const raw = localStorage.getItem('products_local_v1') || '[]';
+      const arr = JSON.parse(raw);
+      if (!Array.isArray(arr)) return '[]';
+      const normalize = (typeof window !== 'undefined' && typeof window.normalizeProduct === 'function') ? window.normalizeProduct : (x) => x;
+      const out = arr.map(p => normalize(p));
+      return JSON.stringify(out, null, 2);
+    } catch (_) {
+      return '[]';
+    }
+  };
 })();

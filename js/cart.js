@@ -22,14 +22,16 @@ export function saveCart() {
     localStorage.setItem('cart', JSON.stringify(cart));
 }
 
-export function addToCart(productId, products) {
-    const product = products.find(p => p.id == productId);
+export function addToCart(productId, productsList, quantity = 1) {
+    const catalog = Array.isArray(productsList) && productsList.length ? productsList : products;
+    const product = catalog.find(p => p.id == productId);
     if (!product) return;
     const cartItem = cart.find(item => item.id == productId);
+    const safeQuantity = Math.max(1, Math.min(99, Number(quantity) || 1));
     if (cartItem) {
-        cartItem.quantity += 1;
+        cartItem.quantity += safeQuantity;
     } else {
-        cart.push({ id: productId, quantity: 1 });
+        cart.push({ id: productId, quantity: safeQuantity });
     }
     saveCart();
 }
@@ -546,10 +548,14 @@ export function updateCartUI(translations, lang) {
     });
     
     if (cartItemsText) cartItemsText.textContent = translations[lang]['cart-items'].replace('0', totalItems);
-    const fmt = (v) => Number(v).toLocaleString('uk-UA', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const fmt = (v) => Math.round(Number(v)).toLocaleString('uk-UA', { maximumFractionDigits: 0 });
     if (cartTotalText) cartTotalText.textContent = `${fmt(totalPrice)} грн`;
-    if (cartDropdownSummary) cartDropdownSummary.textContent = translations[lang]['cart-total'].replace('$0.00', `${fmt(totalPrice)} грн`);
-    if (cartSummary) cartSummary.textContent = translations[lang]['cart-total'].replace('$0.00', `${fmt(totalPrice)} грн`);
+    // Robust update for summaries: derive label before ':' from i18n and always append formatted UAH total
+    const totalTemplate = (translations && translations[lang] && translations[lang]['cart-total']) || (translations && translations['ru'] && translations['ru']['cart-total']) || 'Итого: $0.00';
+    const totalLabel = String(totalTemplate).split(':')[0] || 'Итого';
+    const totalText = `${totalLabel}: ${fmt(totalPrice)} грн`;
+    if (cartDropdownSummary) cartDropdownSummary.textContent = totalText;
+    if (cartSummary) cartSummary.textContent = totalText;
 
     if (cartDropdownItems) {
         cartDropdownItems.innerHTML = '';

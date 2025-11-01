@@ -1,0 +1,68 @@
+<section class="category-page fade-in-section" id="dehumidifiers">
+    <div class="container">
+        <nav class="breadcrumbs" aria-label="breadcrumb">
+            <a href="#" class="breadcrumbs__link">Главная</a>
+            <span class="breadcrumbs__sep">›</span>
+            <a href="#products" class="breadcrumbs__link">Каталог</a>
+            <span class="breadcrumbs__sep">›</span>
+            <span class="breadcrumbs__current">Осушувачі повітря</span>
+        </nav>
+
+        <div class="category-header">
+            <h1 class="category-title">Осушувачі повітря</h1>
+            <p class="category-description">Боротьба з підвищеною вологістю. Запобігайте появі цвілі та створюйте комфортний мікроклімат.</p>
+        </div>
+
+        <div class="category-content">
+            <div class="category-products">
+                <h2>Популярні моделі</h2>
+                
+                <!-- Элементы управления фильтрами -->
+                <div class="category-products__controls">
+                    <div class="category-products__filter-group">
+                        <label for="category-sort-select" class="category-products__filter-label">Сортувати за:</label>
+                        <select id="category-sort-select" class="category-products__select">
+                            <option value="default">За замовчуванням</option>
+                            <option value="price-low">Ціна: від низької до високої</option>
+                            <option value="price-high">Ціна: від високої до низької</option>
+                            <option value="rating">За рейтингом</option>
+                            <option value="newest">Найновіші</option>
+                        </select>
+                    </div>
+                    
+                    <div class="category-products__filter-group">
+                        <label for="category-price-filter" class="category-products__filter-label">Ціновий діапазон:</label>
+                        <select id="category-price-filter" class="category-products__select">
+                            <option value="all">Всі ціни</option>
+                            <option value="0-15000">До 15 000 ₴</option>
+                            <option value="15000-30000">15 000 - 30 000 ₴</option>
+                            <option value="30000-50000">30 000 - 50 000 ₴</option>
+                            <option value="50000+">Понад 50 000 ₴</option>
+                        </select>
+                    </div>
+                    
+                    <button id="category-reset-filters" class="category-products__reset-btn">Скинути фільтри</button>
+                </div>
+                
+                <div class="category-products__grid" id="category-products-grid">
+                    <!-- Товары будут загружены динамически -->
+                </div>
+                
+                <!-- Пагинация -->
+                <div id="category-pagination"></div>
+                
+                <div class="category-products__actions">
+                    <a href="#products" class="btn btn--primary">Переглянути всі товари</a>
+                </div>
+            </div>
+                        <div class="category-cta">
+                <h2>Контроль вологості</h2>
+                <p>Осушувачі для дому та промисловості</p>
+                <div class="cta-buttons">
+                    <a href="#contacts" class="btn btn--primary">Консультація</a>
+                    <a href="#products?category=dehumidifiers" class="btn btn--secondary">Переглянути моделі</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

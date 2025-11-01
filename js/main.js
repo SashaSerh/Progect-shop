@@ -1,11 +1,21 @@
 import { cart, saveCart, updateCartUI, addToCart, removeFromCart, clearCart, toggleCartDropdown, openCartModal, closeCartModal } from './cart.js';
-import { toggleTheme, initTheme, bindThemeEvents } from './theme.js';
+import { toggleTheme, initTheme } from './theme.js';
 import { translations, switchLanguage } from './i18n.js';
 import { initWelcomeOverlay, needsWelcomeOverlay } from './welcome.js';
-import { products, renderProducts, filterProducts, getMergedProducts, setProducts } from './products.js';
-import { contentConfig } from './content-config.js';
+import { products, renderProducts, renderProductCard, filterProducts, toggleFavorite, toggleCompare, getFavoriteIds, getCompareIds, getProductsByCategory, isFavorite, isCompared, isAdminMode } from './products.js';
+import { initCompareBar } from './compare-bar.js';
+import { initCompareModal } from './compare-modal.js';
+// content-config is loaded as a global (classic script tag)
+const contentConfig = (typeof window !== 'undefined' && window.contentConfig) ? window.contentConfig : {};
 import { initMarketing } from './marketing.js';
 import { initNavigation } from './navigation.js';
+
+// Utility functions
+const clampQuantity = (value) => {
+    const numeric = Math.floor(Number(value));
+    if (!Number.isFinite(numeric) || numeric < 1) return 1;
+    return numeric > 99 ? 99 : numeric;
+};
 import { updateProfileButton, openModal, closeModal } from './auth.js';
 import { gesturesConfig as defaultGesturesConfig } from './gestures-config.js';
 
@@ -29,15 +39,498 @@ async function loadComponent(containerId, componentPath) {
     }
 }
 
+// ===== Catalog dropdown A11y helpers =====
+// Configurable Tab behavior: 'trap' (Tab циклично по пунктам меню) | 'classic' (Tab выходит наружу)
+const catalogA11yConfig = {
+    tabBehavior: (typeof localStorage !== 'undefined' && localStorage.getItem('catalogTabBehavior')) || 'classic'
+};
+// Public API to update behavior at runtime
+window.setCatalogTabBehavior = function setCatalogTabBehavior(mode) {
+    if (mode !== 'trap' && mode !== 'classic') return;
+    catalogA11yConfig.tabBehavior = mode;
+    try { localStorage.setItem('catalogTabBehavior', mode); } catch(_) {}
+};
+let catalogTrapActive = false;
+let catalogLastActive = null;
+let catalogKeydownHandler = null;
+let catalogFocusinHandler = null;
+let catalogMenuItems = [];
+let catalogActiveIndex = 0;
+let catalogCloseTimeoutId = null;
+let catalogOnEndRef = null;
+
+function getFocusableElements(container) {
+    if (!container) return [];
+    return Array.from(container.querySelectorAll(
+        'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+    ));
+}
+
+function openCatalogDropdown({ withTrap = false } = {}) {
+    const catalogDropdown = document.querySelector('#catalogDropdown');
+    const catalogButton = document.querySelector('#catalogButton');
+    if (!catalogDropdown || !catalogButton) return;
+
+    // Cancel pending close animation if any
+    if (catalogDropdown.classList.contains('catalog-dropdown--closing')) {
+        catalogDropdown.classList.remove('catalog-dropdown--closing');
+    }
+    if (catalogCloseTimeoutId) {
+        clearTimeout(catalogCloseTimeoutId);
+        catalogCloseTimeoutId = null;
+    }
+
+    // Position relative to button
+    const rect = catalogButton.getBoundingClientRect();
+    catalogDropdown.style.top = `${rect.bottom + window.scrollY}px`;
+    catalogDropdown.style.left = `${rect.left + window.scrollX}px`;
+    catalogDropdown.style.position = 'absolute';
+
+    catalogDropdown.classList.add('catalog-dropdown--open');
+    catalogDropdown.classList.remove('catalog-dropdown--closing');
+    catalogButton.setAttribute('aria-expanded', 'true');
+    catalogDropdown.setAttribute('aria-hidden', 'false');
+
+    // Setup menu semantics and roving tabindex
+    catalogMenuItems = Array.from(catalogDropdown.querySelectorAll('.catalog-dropdown__list a'));
+    catalogMenuItems.forEach((a) => {
+        a.setAttribute('role', 'menuitem');
+        a.setAttribute('tabindex', '-1');
+        const li = a.closest('li');
+        if (li) li.setAttribute('role', 'none');
+    });
+    catalogActiveIndex = 0;
+    if (catalogMenuItems[0]) catalogMenuItems[0].setAttribute('tabindex', '0');
+
+    // Remember last active element for focus restore
+    catalogLastActive = document.activeElement;
+
+    // Move focus to current menu item (roving pattern)
+    if (catalogMenuItems.length) {
+        try { catalogMenuItems[catalogActiveIndex].focus(); } catch(_) {}
+    } else {
+        catalogDropdown.tabIndex = -1;
+        try { catalogDropdown.focus(); } catch(_) {}
+    }
+
+    // Attach keydown for roving and optional Tab trap
+    if (!catalogKeydownHandler) {
+        catalogKeydownHandler = (ev) => {
+            const key = ev.key;
+            const max = catalogMenuItems.length - 1;
+            if (key === 'ArrowDown') {
+                ev.preventDefault();
+                if (!catalogMenuItems.length) return;
+                catalogActiveIndex = (catalogActiveIndex + 1) % catalogMenuItems.length;
+                catalogMenuItems.forEach((a, i) => a.setAttribute('tabindex', i === catalogActiveIndex ? '0' : '-1'));
+                catalogMenuItems[catalogActiveIndex].focus();
+                return;
+            }
+            if (key === 'ArrowUp') {
+                ev.preventDefault();
+                if (!catalogMenuItems.length) return;
+                catalogActiveIndex = (catalogActiveIndex - 1 + catalogMenuItems.length) % catalogMenuItems.length;
+                catalogMenuItems.forEach((a, i) => a.setAttribute('tabindex', i === catalogActiveIndex ? '0' : '-1'));
+                catalogMenuItems[catalogActiveIndex].focus();
+                return;
+            }
+            if (key === 'Home') {
+                ev.preventDefault();
+                if (!catalogMenuItems.length) return;
+                catalogActiveIndex = 0;
+                catalogMenuItems.forEach((a, i) => a.setAttribute('tabindex', i === catalogActiveIndex ? '0' : '-1'));
+                catalogMenuItems[catalogActiveIndex].focus();
+                return;
+            }
+            if (key === 'End') {
+                ev.preventDefault();
+                if (!catalogMenuItems.length) return;
+                catalogActiveIndex = max;
+                catalogMenuItems.forEach((a, i) => a.setAttribute('tabindex', i === catalogActiveIndex ? '0' : '-1'));
+                catalogMenuItems[catalogActiveIndex].focus();
+                return;
+            }
+            if (key === 'Enter' || key === ' ') {
+                if (!catalogMenuItems.length) return;
+                ev.preventDefault();
+                catalogMenuItems[catalogActiveIndex].click();
+                return;
+            }
+            if (key === 'Escape') {
+                ev.preventDefault();
+                if (typeof closeCatalogAnimated === 'function') {
+                    closeCatalogAnimated({ restoreFocus: true });
+                }
+                return;
+            }
+            if (key === 'Tab' && catalogA11yConfig.tabBehavior === 'trap') {
+                // Trap focus within menu items
+                ev.preventDefault();
+                if (!catalogMenuItems.length) return;
+                const dir = ev.shiftKey ? -1 : 1;
+                catalogActiveIndex = (catalogActiveIndex + dir + catalogMenuItems.length) % catalogMenuItems.length;
+                catalogMenuItems.forEach((a, i) => a.setAttribute('tabindex', i === catalogActiveIndex ? '0' : '-1'));
+                catalogMenuItems[catalogActiveIndex].focus();
+                return;
+            }
+        };
+        catalogDropdown.addEventListener('keydown', catalogKeydownHandler);
+    }
+
+    // Ensure focus stays inside while open only in trap mode
+    if (catalogA11yConfig.tabBehavior === 'trap' && !catalogFocusinHandler) {
+        catalogFocusinHandler = (ev) => {
+            if (!catalogDropdown.classList.contains('catalog-dropdown--open')) return;
+            if (!catalogDropdown.contains(ev.target)) {
+                const items = getFocusableElements(catalogDropdown);
+                (items[0] || catalogDropdown).focus();
+            }
+        };
+        document.addEventListener('focusin', catalogFocusinHandler);
+    }
+}
+
+function closeCatalogAnimated({ restoreFocus = false } = {}) {
+    const catalogDropdown = document.querySelector('#catalogDropdown');
+    const catalogButton = document.querySelector('#catalogButton');
+    if (!catalogDropdown || !catalogButton) return;
+    if (!catalogDropdown.classList.contains('catalog-dropdown--open')) return;
+
+    // Remove handlers
+    if (catalogKeydownHandler) {
+        try { catalogDropdown.removeEventListener('keydown', catalogKeydownHandler); } catch(_) {}
+        catalogKeydownHandler = null;
+    }
+    if (catalogFocusinHandler) {
+        try { document.removeEventListener('focusin', catalogFocusinHandler); } catch(_) {}
+        catalogFocusinHandler = null;
+    }
+
+    // Add closing class to animate opacity/transform
+    catalogDropdown.classList.add('catalog-dropdown--closing');
+    const done = () => {
+        catalogDropdown.classList.remove('catalog-dropdown--open');
+        catalogDropdown.classList.remove('catalog-dropdown--closing');
+        catalogButton.setAttribute('aria-expanded', 'false');
+        catalogDropdown.setAttribute('aria-hidden', 'true');
+        // cleanup roving tabindex state
+        catalogMenuItems.forEach(a => a.setAttribute('tabindex', '-1'));
+        catalogMenuItems = [];
+        catalogActiveIndex = 0;
+        if (catalogCloseTimeoutId) { clearTimeout(catalogCloseTimeoutId); catalogCloseTimeoutId = null; }
+        if (restoreFocus && catalogLastActive instanceof HTMLElement) {
+            // Return focus to the opener button by default
+            try { (catalogLastActive.isConnected ? catalogLastActive : catalogButton).focus(); } catch(_) {}
+        }
+        catalogLastActive = null;
+        if (catalogOnEndRef) {
+            catalogDropdown.removeEventListener('transitionend', catalogOnEndRef);
+            catalogOnEndRef = null;
+        }
+    };
+    const onEnd = (ev) => {
+        if (ev && ev.target !== catalogDropdown) return; // only root dropdown
+        done();
+    };
+    catalogOnEndRef = onEnd;
+    catalogDropdown.addEventListener('transitionend', onEnd, { once: true });
+    // Fallback in case transitionend doesn't fire
+    catalogCloseTimeoutId = setTimeout(done, 200);
+}
+
 function toggleCatalogDropdown(e) {
     e.stopPropagation();
     const catalogDropdown = document.querySelector('#catalogDropdown');
-    const catalogButton = document.querySelector('#catalogButton');
-    if (catalogDropdown) {
-        catalogDropdown.classList.toggle('catalog-dropdown--open');
-        if (catalogButton) {
-            catalogButton.setAttribute('aria-expanded', catalogDropdown.classList.contains('catalog-dropdown--open'));
+    if (!catalogDropdown) return;
+    const isOpen = catalogDropdown.classList.contains('catalog-dropdown--open');
+    if (isOpen) {
+        if (typeof closeCatalogAnimated === 'function') {
+            closeCatalogAnimated({ restoreFocus: true });
         }
+    } else {
+        openCatalogDropdown({ withTrap: catalogA11yConfig.tabBehavior === 'trap' });
+    }
+}
+
+function renderCategoryProducts(categorySlug, lang, translations, sortBy = 'default', priceFilter = 'all', page = 1, itemsPerPage = 6) {
+    const allProducts = getProductsByCategory(categorySlug);
+    const grid = document.getElementById('category-products-grid');
+    const pagination = document.getElementById('category-pagination');
+    
+    if (!grid) return;
+
+    // Get filter values from checkboxes and selects (same as filterProducts)
+    const selectedTypes = Array.from(document.querySelectorAll('input[name="type"]:checked')).map(cb => cb.value);
+    const selectedCapacities = Array.from(document.querySelectorAll('input[name="capacity"]:checked')).map(cb => cb.value);
+    const selectedControls = Array.from(document.querySelectorAll('input[name="control"]:checked')).map(cb => cb.value);
+    const selectedFeatures = Array.from(document.querySelectorAll('input[name="features"]:checked')).map(cb => cb.value);
+    const priceSort = document.getElementById('price-sort')?.value || 'default';
+    
+    // Start with category products
+    let filteredProducts = [...allProducts];
+
+    // Apply advanced filters (same logic as filterProducts)
+    if (selectedTypes.length > 0) {
+        filteredProducts = filteredProducts.filter(product => {
+            const productType = getProductType(product);
+            return selectedTypes.includes(productType);
+        });
+    }
+    
+    if (selectedCapacities.length > 0) {
+        filteredProducts = filteredProducts.filter(product => {
+            const productCapacity = getProductCapacity(product);
+            return selectedCapacities.includes(productCapacity);
+        });
+    }
+    
+    if (selectedControls.length > 0) {
+        filteredProducts = filteredProducts.filter(product => {
+            const productControl = getProductControlType(product);
+            return selectedControls.includes(productControl);
+        });
+    }
+    
+    if (selectedFeatures.length > 0) {
+        filteredProducts = filteredProducts.filter(product => {
+            const productFeatures = getProductFeatures(product);
+            return selectedFeatures.some(feature => productFeatures.includes(feature));
+        });
+    }
+    
+    // Price sorting (from select)
+    if (priceSort !== 'default') {
+        filteredProducts.sort((a, b) => priceSort === 'low-to-high' ? a.price - b.price : b.price - a.price);
+    }
+
+    // Legacy filters (for backward compatibility)
+    if (priceFilter !== 'all') {
+        switch (priceFilter) {
+            case '0-15000':
+                filteredProducts = filteredProducts.filter(p => p.price <= 15000);
+                break;
+            case '15000-30000':
+                filteredProducts = filteredProducts.filter(p => p.price > 15000 && p.price <= 30000);
+                break;
+            case '30000-50000':
+                filteredProducts = filteredProducts.filter(p => p.price > 30000 && p.price <= 50000);
+                break;
+            case '50000+':
+                filteredProducts = filteredProducts.filter(p => p.price > 50000);
+                break;
+        }
+    }
+
+    // Legacy sorting
+    if (sortBy !== 'default' && priceSort === 'default') {
+        switch (sortBy) {
+            case 'price-low':
+                filteredProducts.sort((a, b) => a.price - b.price);
+                break;
+            case 'price-high':
+                filteredProducts.sort((a, b) => b.price - a.price);
+                break;
+            case 'rating':
+                filteredProducts.sort((a, b) => (b.rating?.value || 0) - (a.rating?.value || 0));
+                break;
+            case 'newest':
+                filteredProducts.sort((a, b) => String(b.id).localeCompare(String(a.id)));
+                break;
+        }
+    }
+
+    // Пагинация
+    const totalItems = filteredProducts.length;
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
+    const startIndex = (page - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const displayProducts = filteredProducts.slice(startIndex, endIndex);
+
+    // Рендерим товары
+    grid.innerHTML = '';
+    
+    if (displayProducts.length === 0) {
+        grid.innerHTML = '<p>Товари за вибраними критеріями не знайдені</p>';
+        if (pagination) pagination.innerHTML = '';
+        return;
+    }
+
+    const langDict = (translations && translations[lang]) || (translations && translations['ru']) || {};
+    const fallbackDict = (translations && translations['ru']) || {};
+
+    displayProducts.forEach(product => {
+        const productCard = renderCategoryProductCard(product, lang, translations);
+        grid.appendChild(productCard);
+    });
+
+    // Рендерим пагинацию
+    renderCategoryPagination(pagination, page, totalPages, totalItems);
+    
+    // Update products count
+    updateProductsCount(totalItems);
+}
+
+function renderCategoryPagination(container, currentPage, totalPages, totalItems) {
+    if (!container || totalPages <= 1) {
+        container.innerHTML = '';
+        return;
+    }
+
+    const paginationHTML = [];
+    
+    // Кнопка "Предыдущая"
+    if (currentPage > 1) {
+        paginationHTML.push(`<button class="pagination__button pagination__button--prev" data-page="${currentPage - 1}">« Попередня</button>`);
+    }
+
+    // Номера страниц
+    const startPage = Math.max(1, currentPage - 2);
+    const endPage = Math.min(totalPages, currentPage + 2);
+
+    if (startPage > 1) {
+        paginationHTML.push(`<button class="pagination__button" data-page="1">1</button>`);
+        if (startPage > 2) {
+            paginationHTML.push('<span class="pagination__dots">...</span>');
+        }
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+        const activeClass = i === currentPage ? ' pagination__button--active' : '';
+        paginationHTML.push(`<button class="pagination__button${activeClass}" data-page="${i}">${i}</button>`);
+    }
+
+    if (endPage < totalPages) {
+        if (endPage < totalPages - 1) {
+            paginationHTML.push('<span class="pagination__dots">...</span>');
+        }
+        paginationHTML.push(`<button class="pagination__button" data-page="${totalPages}">${totalPages}</button>`);
+    }
+
+    // Кнопка "Следующая"
+    if (currentPage < totalPages) {
+        paginationHTML.push(`<button class="pagination__button pagination__button--next" data-page="${currentPage + 1}">Наступна »</button>`);
+    }
+
+    container.innerHTML = `
+        <div class="pagination">
+            <div class="pagination__info">
+                Показано товарів: ${Math.min(currentPage * 6, totalItems)} з ${totalItems}
+            </div>
+            <div class="pagination__controls">
+                ${paginationHTML.join('')}
+            </div>
+        </div>
+    `;
+
+    // Добавляем обработчики событий
+    container.querySelectorAll('.pagination__button').forEach(button => {
+        button.addEventListener('click', (e) => {
+            const page = parseInt(e.target.dataset.page);
+            if (page) {
+                updateCategoryFilters({ page });
+            }
+        });
+    });
+}
+
+const FAVORITES_STORAGE_KEY = 'products_favorites_v1';
+const COMPARE_STORAGE_KEY = 'products_compare_v1';
+
+function loadStoredIds(key) {
+    if (typeof localStorage === 'undefined') return new Set();
+    try {
+        const raw = localStorage.getItem(key);
+        if (!raw) return new Set();
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) {
+            return new Set(parsed.map((value) => String(value)));
+        }
+    } catch (_) { /* ignore broken payload */ }
+    return new Set();
+}
+
+let favoriteIds = loadStoredIds(FAVORITES_STORAGE_KEY);
+let compareIds = loadStoredIds(COMPARE_STORAGE_KEY);
+
+function persistIds(key, idsSet) {
+    if (typeof localStorage === 'undefined') return;
+    try {
+        localStorage.setItem(key, JSON.stringify(Array.from(idsSet)));
+    } catch (_) { /* ignore storage quota */ }
+}
+
+function hashCodeToHue(str) {
+    if (!str) return 210; // default blue
+    let h = 0;
+    for (let i = 0; i < str.length; i++) {
+        h = (h << 5) - h + str.charCodeAt(i);
+        h |= 0; // keep 32-bit
+    }
+    // map to 0..360
+    return Math.abs(h) % 360;
+}
+
+function hydrateCollectionsFromStorage() {
+    if (typeof localStorage === 'undefined') return;
+    favoriteIds = loadStoredIds(FAVORITES_STORAGE_KEY);
+    compareIds = loadStoredIds(COMPARE_STORAGE_KEY);
+}
+
+function renderCategoryProductCard(product, lang, translations) {
+    return renderProductCard(product, lang, translations);
+}
+
+
+function updateCategoryFilters(updates = {}) {
+    const urlParams = new URLSearchParams(window.location.hash.substring(1));
+    const categorySlug = urlParams.get('category');
+    if (!categorySlug) return;
+
+    // Получаем текущие параметры
+    const currentSort = urlParams.get('sort') || 'default';
+    const currentPriceFilter = urlParams.get('price') || 'all';
+    const currentPage = parseInt(urlParams.get('page')) || 1;
+
+    // Обновляем параметры
+    const newSort = updates.sort !== undefined ? updates.sort : currentSort;
+    const newPriceFilter = updates.price !== undefined ? updates.price : currentPriceFilter;
+    const newPage = updates.page !== undefined ? updates.page : (updates.sort || updates.price ? 1 : currentPage);
+
+    // Обновляем URL
+    const newUrl = `#category=${categorySlug}&sort=${newSort}&price=${newPriceFilter}&page=${newPage}`;
+    window.location.hash = newUrl;
+
+    // Перерендериваем товары
+    const lang = localStorage.getItem('selectedLanguage') || 'ru';
+    renderCategoryProducts(categorySlug, lang, translations, newSort, newPriceFilter, newPage);
+}
+
+function initCategoryControls() {
+    // Обработчики для сортировки
+    const sortSelect = document.getElementById('category-sort-select');
+    if (sortSelect) {
+        sortSelect.addEventListener('change', (e) => {
+            updateCategoryFilters({ sort: e.target.value });
+        });
+    }
+
+    // Обработчики для фильтра цены
+    const priceSelect = document.getElementById('category-price-filter');
+    if (priceSelect) {
+        priceSelect.addEventListener('change', (e) => {
+            updateCategoryFilters({ price: e.target.value });
+        });
+    }
+
+    // Обработчики для сброса фильтров
+    const resetButton = document.getElementById('category-reset-filters');
+    if (resetButton) {
+        resetButton.addEventListener('click', () => {
+            updateCategoryFilters({ sort: 'default', price: 'all', page: 1 });
+            // Сбрасываем селекторы
+            if (sortSelect) sortSelect.value = 'default';
+            if (priceSelect) priceSelect.value = 'all';
+        });
     }
 }
 
@@ -81,7 +574,247 @@ function showSearchSuggestions(query, lang) {
     searchDropdown.classList.add('search-dropdown--open');
 }
 
-document.addEventListener('DOMContentLoaded', async () => {
+// Saved language is used across listeners; keep at module scope so tests and other modules can read it
+let savedLanguage;
+let mobileHeaderInitialized = false;
+
+if (typeof window !== 'undefined') {
+    window.addEventListener('languagechange', (event) => {
+        const lang = event?.detail?.lang;
+        if (typeof lang === 'string' && ['ru', 'uk'].includes(lang)) {
+            savedLanguage = lang;
+        }
+    });
+}
+
+function getCartAddedMessage(lang) {
+    const storedLang = (() => {
+        try { return localStorage.getItem('language'); } catch (_) { return null; }
+    })();
+    const fallback = ['ru', 'uk'].includes(lang) ? lang : (['ru', 'uk'].includes(storedLang) ? storedLang : 'ru');
+    return (translations?.[fallback]?.['cart-added']) || (translations?.ru?.['cart-added']) || 'Добавлено в корзину';
+}
+
+const MAX_TOAST_STACK = 3;
+const TOAST_TYPE_CLASS = {
+    cart: 'toast--success',
+    success: 'toast--success',
+    favorite: 'toast--favorite',
+    compare: 'toast--compare'
+};
+
+let suppressFavoriteToast = false;
+let suppressCompareToast = false;
+let collectionBadgesInitialized = false;
+
+const badgeSelectors = {
+    favorite: ['favoriteBadge', 'mobileFavoriteBadge'],
+    compare: ['compareBadge', 'mobileCompareBadge']
+};
+
+const badgeCache = {
+    favorite: [],
+    compare: []
+};
+
+function translateKey(key, lang = savedLanguage) {
+    const fallback = translations?.ru || {};
+    const dict = translations?.[lang] || fallback;
+    return dict?.[key] || fallback?.[key] || '';
+}
+
+function getProductDisplayName(productId, lang = savedLanguage) {
+    const targetId = String(productId);
+    const product = Array.isArray(products) ? products.find((item) => String(item.id) === targetId) : null;
+    return (product?.name?.[lang]) || (product?.name?.ru) || '';
+}
+
+function showActionToast({ message, type = 'success', actions = [], duration = 2600 } = {}) {
+    if (!message) return () => {};
+    const host = document.getElementById('toast-container');
+    if (!host) return () => {};
+
+    while (host.children.length >= MAX_TOAST_STACK) {
+        host.removeChild(host.firstElementChild);
+    }
+
+    const toast = document.createElement('div');
+    const typeClass = TOAST_TYPE_CLASS[type] || TOAST_TYPE_CLASS.success;
+    toast.className = ['toast', typeClass].filter(Boolean).join(' ');
+    toast.setAttribute('role', 'status');
+
+    const messageEl = document.createElement('div');
+    messageEl.className = 'toast__message';
+    messageEl.textContent = message;
+    toast.appendChild(messageEl);
+
+    if (Array.isArray(actions) && actions.length) {
+        const actionsWrap = document.createElement('div');
+        actionsWrap.className = 'toast__actions';
+        actions.forEach((action) => {
+            if (!action || !action.label) return;
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'toast__button';
+            btn.textContent = action.label;
+            if (action.ariaLabel) btn.setAttribute('aria-label', action.ariaLabel);
+            btn.addEventListener('click', () => {
+                try { action.handler?.(); } catch (_) { /* noop */ }
+                if (action.autoClose !== false) hideToast();
+            });
+            actionsWrap.appendChild(btn);
+        });
+        if (actionsWrap.childElementCount) {
+            toast.appendChild(actionsWrap);
+        }
+    }
+
+    host.appendChild(toast);
+
+    const reveal = () => toast.classList.add('is-visible');
+    if (typeof requestAnimationFrame === 'function') requestAnimationFrame(reveal);
+    else setTimeout(reveal, 16);
+
+    let removed = false;
+    let timerId = null;
+    const hideDelay = (typeof duration === 'number' && Number.isFinite(duration) && duration > 0) ? duration : null;
+    if (hideDelay !== null) {
+        timerId = setTimeout(() => hideToast(), hideDelay);
+    }
+
+    function hideToast() {
+        if (removed) return;
+        removed = true;
+        if (timerId) clearTimeout(timerId);
+        toast.classList.remove('is-visible');
+        const cleanup = () => toast.remove();
+        toast.addEventListener('transitionend', cleanup, { once: true });
+        setTimeout(cleanup, 320);
+    }
+
+    toast.addEventListener('mouseenter', () => {
+        if (timerId) {
+            clearTimeout(timerId);
+            timerId = null;
+        }
+    });
+
+    toast.addEventListener('mouseleave', () => {
+        if (!removed && hideDelay !== null && !timerId) {
+            timerId = setTimeout(() => hideToast(), 1200);
+        }
+    });
+
+    return hideToast;
+}
+
+function ensureBadgeRefs(type) {
+    const selectors = badgeSelectors[type];
+    if (!selectors) return [];
+    badgeCache[type] = selectors.map((id, index) => {
+        const cached = badgeCache[type][index];
+        if (cached && cached.isConnected) return cached;
+        return document.getElementById(id);
+    }).filter(Boolean);
+    return badgeCache[type];
+}
+
+function updateBadgeGroup(type, ids, lang = savedLanguage) {
+    const elements = ensureBadgeRefs(type);
+    if (!elements.length) return;
+    const list = Array.isArray(ids) ? ids : (type === 'favorite' ? getFavoriteIds() : getCompareIds());
+    const normalized = Array.isArray(list) ? list : [];
+    const count = normalized.length;
+    const labelKey = type === 'favorite' ? 'badge-favorites' : 'badge-compare';
+    const label = translateKey(labelKey, lang);
+    const accessible = label ? `${label}: ${count}` : String(count);
+    elements.forEach((el) => {
+        if (!el) return;
+        el.hidden = count === 0;
+        el.textContent = String(count);
+        if (label) {
+            el.dataset.label = label;
+        }
+        el.setAttribute('aria-label', accessible);
+        el.setAttribute('title', accessible);
+    });
+}
+
+function updateQuickActionButtons(type, ids, lang = savedLanguage) {
+    const action = type === 'favorite' ? 'favorite' : 'compare';
+    const activeSet = new Set((Array.isArray(ids) ? ids : []).map(String));
+    const addKey = action === 'favorite' ? 'favorite-add' : 'compare-add';
+    const removeKey = action === 'favorite' ? 'favorite-remove' : 'compare-remove';
+    const addLabel = translateKey(addKey, lang);
+    const removeLabel = translateKey(removeKey, lang);
+    const selector = '.product-card__quick-btn[data-action=' + action + ']';
+    document.querySelectorAll(selector).forEach((btn) => {
+        const id = btn.dataset.id;
+        const isActive = activeSet.has(String(id));
+        btn.classList.toggle('is-active', isActive);
+        btn.setAttribute('aria-pressed', String(isActive));
+        const label = isActive ? removeLabel : addLabel;
+        if (label) {
+            btn.setAttribute('aria-label', label);
+            btn.setAttribute('title', label);
+        }
+    });
+}
+
+function normalizeIds(list, fallbackGetter) {
+    if (Array.isArray(list)) return list.map(String);
+    if (typeof fallbackGetter === 'function') {
+        const fallback = fallbackGetter();
+        return Array.isArray(fallback) ? fallback.map(String) : [];
+    }
+    return [];
+}
+
+function formatCollectionToastMessage(baseKey, productName, lang = savedLanguage) {
+    const base = translateKey(baseKey, lang);
+    if (productName) {
+        return `${base}: ${productName}`;
+    }
+    return base;
+}
+
+function initCollectionBadges() {
+    if (collectionBadgesInitialized) {
+        updateBadgeGroup('favorite', getFavoriteIds());
+        updateBadgeGroup('compare', getCompareIds());
+        updateQuickActionButtons('favorite', getFavoriteIds(), savedLanguage);
+        updateQuickActionButtons('compare', getCompareIds(), savedLanguage);
+        return;
+    }
+    collectionBadgesInitialized = true;
+
+    updateBadgeGroup('favorite', getFavoriteIds());
+    updateBadgeGroup('compare', getCompareIds());
+    updateQuickActionButtons('favorite', getFavoriteIds(), savedLanguage);
+    updateQuickActionButtons('compare', getCompareIds(), savedLanguage);
+
+    if (typeof window !== 'undefined') {
+        window.addEventListener('favorites:change', (event) => {
+            const ids = normalizeIds(event?.detail?.ids, getFavoriteIds);
+            updateBadgeGroup('favorite', ids);
+            updateQuickActionButtons('favorite', ids, savedLanguage);
+        });
+        window.addEventListener('compare:change', (event) => {
+            const ids = normalizeIds(event?.detail?.ids, getCompareIds);
+            updateBadgeGroup('compare', ids);
+            updateQuickActionButtons('compare', ids, savedLanguage);
+        });
+        window.addEventListener('languagechange', (event) => {
+            const lang = typeof event?.detail?.lang === 'string' ? event.detail.lang : savedLanguage;
+            updateBadgeGroup('favorite', getFavoriteIds(), lang);
+            updateBadgeGroup('compare', getCompareIds(), lang);
+            updateQuickActionButtons('favorite', getFavoriteIds(), lang);
+            updateQuickActionButtons('compare', getCompareIds(), lang);
+        });
+    }
+}
+
+async function initApp() {
     await Promise.all([
         loadComponent('header-container', 'components/header.html'),
         loadComponent('hero-container', 'components/hero.html'),
@@ -89,11 +822,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         loadComponent('products-container', 'components/products.html'),
         // product-detail загружается по маршруту, но подключаем шаблон заранее (скрыт)
         loadComponent('product-detail-container', 'components/product-detail.html').catch(() => {}),
+        loadComponent('comparison-container', 'components/compare-bar.html'),
+    loadComponent('compare-modal-container', 'components/compare-modal.html'),
         loadComponent('contacts-container', 'components/contacts.html'),
         loadComponent('portfolio-container', 'components/portfolio.html'),
         loadComponent('footer-container', 'components/footer.html'),
         loadComponent('cart-modal-container', 'components/cart.html')
     ]);
+
+    // Применяем тему по умолчанию (теперь светлая) и синхронизируем иконки/ARIA
+    try { initTheme(); } catch(_) {}
 
     const openCartModalButton = document.querySelector('#openCartModal');
     const cartModal = document.querySelector('#cartModal');
@@ -121,7 +859,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Инициализация языка и первичный рендер
     // Язык по умолчанию теперь Ukrainian (uk). Показываем приветственный выбор, если язык ещё не установлен.
     // Cookie helpers for language selection expiry
-    let savedLanguage = localStorage.getItem('language');
+    savedLanguage = localStorage.getItem('language');
     const cookieMissing = needsWelcomeOverlay(); // now always true (overlay each visit)
     if (!['ru','uk'].includes(savedLanguage)) {
         savedLanguage = 'uk';
@@ -132,16 +870,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         switchLanguage(savedLanguage);
     }
     // Рендерим товары сразу (в тестовой среде важна синхронность появления карточек)
-    try {
-        const merged = getMergedProducts();
-        // синхронизируем модульную переменную products для всей логики (поиск, фильтры, корзина)
-        setProducts(merged);
-        // expose для тестов/утилит
-        window.products = merged;
-        renderProducts(savedLanguage, translations, merged);
-    } catch (err) {
-        renderProducts(savedLanguage, translations);
-    }
+    renderProducts(savedLanguage, translations);
+    initCompareBar(savedLanguage);
+    initCompareModal(savedLanguage);
+    initCollectionBadges();
 
     // Загружаем компонент приветствия (лениво) и отображаем, если первый визит
     // Show overlay if cookie missing (first visit or expired manual clear scenario)
@@ -170,26 +902,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     // После первичного рендера привяжем переход на страницу товара
     bindProductCardNavigation();
 
-    // Загрузим админ-форму для добавления товаров и инициализируем модуль
+    // Ранее модалка добавления товара подгружалась прямо на главной; теперь используем отдельно страницу админки
     try {
-        // Попробуем получить HTML компонента и вставить в body (если не был загружен автоматически)
-        const resp = await fetch('components/admin-product-form.html');
-        if (resp.ok) {
-            const html = await resp.text();
-            // Вставим в конец body только если модал ещё не присутствует
-            if (!document.getElementById('adminProductModal')) {
-                const wrapper = document.createElement('div');
-                wrapper.innerHTML = html;
-                document.body.appendChild(wrapper.firstElementChild);
-            }
-        }
-    } catch (err) { /* ignore fetch errors */ }
-    try {
+        console.log('Importing admin-products.js...');
         const admin = await import('./admin-products.js');
         if (admin && typeof admin.initAdminProducts === 'function') {
+            console.log('Initializing admin products...');
             admin.initAdminProducts(translations, savedLanguage);
+        } else {
+            console.error('initAdminProducts function not found');
         }
-    } catch (err) { /* ignore */ }
+    } catch (err) { console.error('Error importing admin module:', err); }
 
     // Инициализируем маркетинговые CTA и форму контактов (кнопки позвонить/WhatsApp/Telegram)
     try { initMarketing(); } catch (e) { /* no-op */ }
@@ -338,7 +1061,27 @@ document.addEventListener('DOMContentLoaded', async () => {
     initDesktopHeaderCondense();
     
     // Привязываем обработчики тем ПОСЛЕ инициализации мобильного хедера
-    bindThemeEvents();
+    // Делегирование клика по .theme-toggle обеспечивает единый источник обработчика
+    document.addEventListener('click', (e) => {
+        const t = e.target;
+        if (!(t instanceof HTMLElement)) return;
+        const btn = t.closest('.theme-toggle');
+        if (btn) {
+            try { toggleTheme(); } catch(_) {}
+        }
+    });
+
+    // Fallback делегирование для кнопки каталога: гарантирует открытие даже если
+    // прямой обработчик не успел повеситься из-за гонки рендера в тестовой среде.
+    // Прямая привязка выше вызывает stopPropagation, поэтому дубля не будет.
+    document.addEventListener('click', (e) => {
+        const t = e.target;
+        if (!(t instanceof HTMLElement)) return;
+        const catalogBtn = t.closest('#catalogButton');
+        if (catalogBtn) {
+            toggleCatalogDropdown(e);
+        }
+    });
 
     const profileButton = document.getElementById('profileButton');
     const profileModal = document.getElementById('profileModal');
@@ -380,6 +1123,80 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
+    // New advanced filter event listeners
+    const filterCheckboxes = document.querySelectorAll('input[type="checkbox"][name="type"], input[type="checkbox"][name="capacity"], input[type="checkbox"][name="control"], input[type="checkbox"][name="features"]');
+    filterCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', () => {
+            // Check if we're on a category page
+            const categoryGrid = document.getElementById('category-products-grid');
+            if (categoryGrid) {
+                // We're on a category page, re-render category products
+                const urlParams = new URLSearchParams(window.location.hash.substring(1));
+                const categorySlug = window.location.hash.split('#')[1]?.split('?')[0] || 'conditioners';
+                renderCategoryProducts(categorySlug, savedLanguage, translations);
+            } else {
+                // We're on the main products page
+                if (typeof filterProductsWithSkeleton === 'function') {
+                    filterProductsWithSkeleton(savedLanguage, translations);
+                } else {
+                    filterProducts(savedLanguage, translations);
+                }
+            }
+        });
+    });
+
+    const priceSortSelect = document.getElementById('price-sort');
+    if (priceSortSelect) {
+        priceSortSelect.addEventListener('change', () => {
+            // Check if we're on a category page
+            const categoryGrid = document.getElementById('category-products-grid');
+            if (categoryGrid) {
+                // We're on a category page, re-render category products
+                const urlParams = new URLSearchParams(window.location.hash.substring(1));
+                const categorySlug = window.location.hash.split('#')[1]?.split('?')[0] || 'conditioners';
+                renderCategoryProducts(categorySlug, savedLanguage, translations);
+            } else {
+                // We're on the main products page
+                if (typeof filterProductsWithSkeleton === 'function') {
+                    filterProductsWithSkeleton(savedLanguage, translations);
+                } else {
+                    filterProducts(savedLanguage, translations);
+                }
+            }
+        });
+    }
+
+    const resetFiltersBtn = document.getElementById('resetFilters');
+    if (resetFiltersBtn) {
+        resetFiltersBtn.addEventListener('click', () => {
+            // Reset all checkboxes
+            filterCheckboxes.forEach(checkbox => {
+                checkbox.checked = false;
+            });
+            // Reset price sort
+            if (priceSortSelect) priceSortSelect.value = 'default';
+            // Reset legacy filters
+            if (categorySelect) categorySelect.value = 'all';
+            if (priceSelect) priceSelect.value = 'all';
+            
+            // Re-filter - check if we're on a category page
+            const categoryGrid = document.getElementById('category-products-grid');
+            if (categoryGrid) {
+                // We're on a category page, re-render category products
+                const urlParams = new URLSearchParams(window.location.hash.substring(1));
+                const categorySlug = window.location.hash.split('#')[1]?.split('?')[0] || 'conditioners';
+                renderCategoryProducts(categorySlug, savedLanguage, translations);
+            } else {
+                // We're on the main products page
+                if (typeof filterProductsWithSkeleton === 'function') {
+                    filterProductsWithSkeleton(savedLanguage, translations);
+                } else {
+                    filterProducts(savedLanguage, translations);
+                }
+            }
+        });
+    }
+
     // Языковые переключатели теперь инициализируются централизованно через initLanguageSwitchers()
 
     const cartDropdownToggle = document.querySelector('#cartDropdownToggle');
@@ -403,17 +1220,73 @@ document.addEventListener('DOMContentLoaded', async () => {
     const catalogButton = document.querySelector('#catalogButton');
     const catalogDropdown = document.querySelector('#catalogDropdown');
     if (catalogButton && catalogDropdown) {
-        catalogButton.addEventListener('click', toggleCatalogDropdown);
+        // Open dropdown on hover (no focus trap)
+        catalogButton.addEventListener('mouseenter', () => {
+            openCatalogDropdown({ withTrap: false });
+        });
+        
+        // Close dropdown when mouse leaves both button and dropdown
+        const closeDropdown = () => {
+            if (typeof closeCatalogAnimated === 'function') {
+                closeCatalogAnimated({ restoreFocus: false });
+            }
+        };
+        
+        catalogButton.addEventListener('mouseleave', (e) => {
+            // Check if mouse is moving to dropdown
+            setTimeout(() => {
+                if (!catalogDropdown.matches(':hover') && !catalogButton.matches(':hover')) {
+                    closeDropdown();
+                }
+            }, 100);
+        });
+        
+        catalogDropdown.addEventListener('mouseleave', (e) => {
+            // Check if mouse is moving to button
+            setTimeout(() => {
+                if (!catalogDropdown.matches(':hover') && !catalogButton.matches(':hover')) {
+                    closeDropdown();
+                }
+            }, 100);
+        });
+        
+        // Click toggles with focus trap only if configured
+        catalogButton.addEventListener('click', (e) => {
+            const useTrap = catalogA11yConfig.tabBehavior === 'trap';
+            // For toggleCatalogDropdown we decide inside based on config
+            toggleCatalogDropdown(e);
+        });
+        
         document.addEventListener('click', (e) => {
             if (!catalogDropdown.contains(e.target) && !catalogButton.contains(e.target)) {
-                catalogDropdown.classList.remove('catalog-dropdown--open');
-                catalogButton.setAttribute('aria-expanded', 'false');
+                if (typeof closeCatalogAnimated === 'function') {
+                    closeCatalogAnimated({ restoreFocus: false });
+                }
             }
         });
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape' && catalogDropdown.classList.contains('catalog-dropdown--open')) {
-                catalogDropdown.classList.remove('catalog-dropdown--open');
-                catalogButton.setAttribute('aria-expanded', 'false');
+                if (typeof closeCatalogAnimated === 'function') {
+                    closeCatalogAnimated({ restoreFocus: true });
+                }
+            }
+        });
+
+        // Close dropdown when a catalog link is clicked
+        catalogDropdown.addEventListener('click', (e) => {
+            const link = e.target.closest('a');
+            if (link && catalogDropdown.contains(link)) {
+                // Let navigation happen, just close visually
+                if (typeof closeCatalogAnimated === 'function') {
+                    closeCatalogAnimated({ restoreFocus: false });
+                }
+            }
+        });
+
+        // Close on route change as an extra safety net
+        window.addEventListener('hashchange', () => {
+            if (typeof closeCatalogAnimated === 'function') {
+                closeCatalogAnimated({ restoreFocus: false });
             }
         });
     }
@@ -446,7 +1319,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // Старый обработчик удален - теперь bindThemeEvents() обрабатывает все кнопки тем
+    // Обработчики темы подключаются через делегирование ниже
 
     const checkoutButton = document.querySelector('.cart-button--checkout');
     if (checkoutButton) checkoutButton.addEventListener('click', openCartModal);
@@ -459,20 +1332,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const productsGrid = document.querySelector('.products__grid');
     if (productsGrid) {
-        productsGrid.addEventListener('click', (e) => {
-            if (e.target.classList.contains('product-card__button')) {
-                const productId = e.target.dataset.id;
-                addToCart(productId, products);
-                updateCartUI(translations, savedLanguage);
-            } else if (e.target.classList.contains('product-card__image') || e.target.classList.contains('product-card__title')) {
-                // переход на страницу детали товара
-                const card = e.target.closest('.product-card');
-                const id = card?.dataset.id;
-                if (id) {
-                    location.hash = `#product-${id}`;
-                }
-            }
-        });
+        // Обработчики теперь глобальные, см. выше
     }
 
     const servicesGrid = document.querySelector('.services__grid');
@@ -482,6 +1342,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const productId = e.target.dataset.id;
                 addToCart(productId, products);
                 updateCartUI(translations, savedLanguage);
+                showActionToast({ type: 'cart', message: getCartAddedMessage(savedLanguage) });
             } else if (e.target.classList.contains('service-card__title')) {
                 const card = e.target.closest('.service-card');
                 const btn = card?.querySelector('.service-card__button');
@@ -503,6 +1364,18 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         });
     }
+
+    // Fallback delegation for cart dropdown remove in environments where container listener wasn't bound
+    document.addEventListener('click', (e) => {
+        const t = e.target;
+        if (t && t.classList && t.classList.contains('cart-dropdown__item-remove')) {
+            const productId = t.dataset.id;
+            if (productId) {
+                removeFromCart(productId);
+                updateCartUI(translations, savedLanguage);
+            }
+        }
+    });
 
     const cartItems = document.querySelector('.cart-items');
     if (cartItems) {
@@ -587,7 +1460,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         heroImg.addEventListener('load', mark, { once: true });
         if (heroImg.complete && heroImg.naturalWidth > 0) mark();
     }
-});
+};
 
 
 // Функция для изменения цветовой схемы логотипа
@@ -605,6 +1478,14 @@ function changeLogoColorScheme(scheme) {
     
     // Сохраняем выбор в localStorage
     localStorage.setItem('logoColorScheme', scheme || 'default');
+}
+
+// Run initApp immediately if document already parsed (tests import the module), otherwise wait for DOMContentLoaded
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initApp);
+} else {
+    // fire-and-forget
+    initApp().catch(() => {});
 }
 
 // Инициализация цветовой схемы логотипа при загрузке
@@ -628,6 +1509,146 @@ document.addEventListener('click', (e) => {
             }).catch(()=>{});
         }
     }
+});
+
+// Global handler for product card quick buttons (works for both main page and category pages)
+document.addEventListener('click', (e) => {
+    const target = e.target;
+    if (!(target instanceof Element)) return;
+    const quickBtn = target.closest('.product-card__quick-btn');
+    if (quickBtn) {
+        const action = quickBtn.dataset.action;
+        const productId = quickBtn.dataset.id;
+        if (!action || !productId) return;
+        const productName = getProductDisplayName(productId, savedLanguage);
+        let isActive = false;
+        if (action === 'favorite') {
+            const skipToast = suppressFavoriteToast;
+            if (suppressFavoriteToast) suppressFavoriteToast = false;
+            isActive = toggleFavorite(productId);
+            const labelKey = isActive ? 'favorite-remove' : 'favorite-add';
+            const label = translateKey(labelKey, savedLanguage);
+            if (label) {
+                quickBtn.setAttribute('aria-label', label);
+                quickBtn.setAttribute('title', label);
+            }
+            quickBtn.classList.toggle('is-active', isActive);
+            quickBtn.setAttribute('aria-pressed', String(isActive));
+            updateQuickActionButtons('favorite', getFavoriteIds(), savedLanguage);
+            if (!skipToast) {
+                const messageKey = isActive ? 'toast-favorite-added' : 'toast-favorite-removed';
+                const message = formatCollectionToastMessage(messageKey, productName, savedLanguage);
+                const undoLabel = translateKey('toast-undo', savedLanguage);
+                const actions = [];
+                if (undoLabel) {
+                    actions.push({
+                        label: undoLabel,
+                        handler: () => {
+                            suppressFavoriteToast = true;
+                            toggleFavorite(productId);
+                            updateQuickActionButtons('favorite', getFavoriteIds(), savedLanguage);
+                        }
+                    });
+                }
+                showActionToast({ type: 'favorite', message, actions });
+            }
+        } else if (action === 'compare') {
+            const skipToast = suppressCompareToast;
+            if (suppressCompareToast) suppressCompareToast = false;
+            isActive = toggleCompare(productId);
+            const labelKey = isActive ? 'compare-remove' : 'compare-add';
+            const label = translateKey(labelKey, savedLanguage);
+            if (label) {
+                quickBtn.setAttribute('aria-label', label);
+                quickBtn.setAttribute('title', label);
+            }
+            quickBtn.classList.toggle('is-active', isActive);
+            quickBtn.setAttribute('aria-pressed', String(isActive));
+            updateQuickActionButtons('compare', getCompareIds(), savedLanguage);
+            if (!skipToast) {
+                const messageKey = isActive ? 'toast-compare-added' : 'toast-compare-removed';
+                const message = formatCollectionToastMessage(messageKey, productName, savedLanguage);
+                const undoLabel = translateKey('toast-undo', savedLanguage);
+                const openLabel = translateKey('toast-open-compare', savedLanguage);
+                const actions = [];
+                if (isActive && openLabel) {
+                    actions.push({
+                        label: openLabel,
+                        handler: () => {
+                            const ids = getCompareIds();
+                            if (ids.length && typeof window !== 'undefined') {
+                                window.dispatchEvent(new CustomEvent('compare:open', { detail: { ids } }));
+                            }
+                        }
+                    });
+                }
+                if (undoLabel) {
+                    actions.push({
+                        label: undoLabel,
+                        handler: () => {
+                            suppressCompareToast = true;
+                            toggleCompare(productId);
+                            updateQuickActionButtons('compare', getCompareIds(), savedLanguage);
+                        }
+                    });
+                }
+                showActionToast({ type: 'compare', message, actions });
+            }
+        } else {
+            return;
+        }
+        return;
+    }
+});
+
+// Global handlers for product card interactions (quantity, cart, navigation)
+document.addEventListener('click', (e) => {
+    const target = e.target;
+    if (!(target instanceof Element)) return;
+    
+    // Quantity stepper buttons
+    const quantityBtn = target.closest('.quantity-stepper__btn');
+    if (quantityBtn) {
+        const card = quantityBtn.closest('.product-card');
+        const input = card?.querySelector('.quantity-stepper__input');
+        if (!input) return;
+        const delta = quantityBtn.dataset.action === 'increment' ? 1 : -1;
+        const next = clampQuantity(Number(input.value) + delta);
+        input.value = String(next);
+        return;
+    }
+    
+    // Main product card button (add to cart)
+    if (target.classList.contains('product-card__button') && !target.hasAttribute('data-edit') && !target.hasAttribute('data-delete')) {
+        const productId = target.dataset.id;
+        if (!productId) return;
+        const card = target.closest('.product-card');
+        const input = card?.querySelector('.quantity-stepper__input');
+        const qty = clampQuantity(input ? Number(input.value) : 1);
+        if (input) input.value = String(qty);
+        addToCart(productId, products, qty);
+        updateCartUI(translations, savedLanguage);
+        showActionToast({ type: 'cart', message: getCartAddedMessage(savedLanguage) });
+        return;
+    }
+    
+    // Product card image or title click (navigate to product detail)
+    if (target.classList.contains('product-card__image') || target.classList.contains('product-card__title') || target.classList.contains('product-card__title-link')) {
+        const card = target.closest('.product-card');
+        const id = card?.dataset.id;
+        if (id) {
+            location.hash = `#product-${id}`;
+        }
+        return;
+    }
+});
+
+// Global handler for quantity input changes
+document.addEventListener('change', (e) => {
+    const input = e.target;
+    if (!(input instanceof HTMLInputElement)) return;
+    if (!input.classList.contains('quantity-stepper__input')) return;
+    input.value = String(clampQuantity(input.value));
 });
 
 // Экспорт функций для использования в других файлах
@@ -693,7 +1714,7 @@ function renderProductDetail(productId) {
 
         // Fill basic fields
     section.querySelector('.product-detail__title').textContent = product.name?.[lang] || product.name?.ru || '';
-    section.querySelector('.product-detail__price').textContent = `${Number(product.price).toLocaleString('uk-UA', { minimumFractionDigits: 2 })} грн`;
+    section.querySelector('.product-detail__price').textContent = `${Math.round(Number(product.price)).toLocaleString('uk-UA', { maximumFractionDigits: 0 })} грн`;
     // Main image and thumbs
     const imgEl = section.querySelector('.product-detail__image');
     if (imgEl) {
@@ -773,7 +1794,11 @@ function renderProductDetail(productId) {
     // Actions
     const btn = section.querySelector('.product-detail__addtocart');
     if (btn) {
-        btn.onclick = () => { addToCart(product.id, products); updateCartUI(translations, lang); };
+        btn.onclick = () => {
+            addToCart(product.id, products);
+            updateCartUI(translations, lang);
+            showActionToast({ type: 'cart', message: getCartAddedMessage(lang) });
+        };
     }
     // Set document title
     try { document.title = `${product.name?.[lang] || ''} — ${translations?.[lang]?.['site-title'] || ''}`; } catch {}
@@ -878,9 +1903,75 @@ function showSection(id, show) {
 }
 
 function setupHashRouting(initialLang) {
+    // Prefer content-config helpers; keep minimal fallback for robustness
+    const fallbackCategoryComponents = {
+        'conditioners': 'components/category-conditioners.html',
+        'commercial-ac': 'components/category-commercial-ac.html',
+        'multi-split': 'components/category-multi-split.html',
+        'indoor-units': 'components/category-indoor-units.html',
+        'outdoor-units': 'components/category-outdoor-units.html',
+        'mobile-ac': 'components/category-mobile-ac.html',
+        'fan-coils': 'components/category-fan-coils.html',
+        'humidifiers': 'components/category-humidifiers.html',
+        'air-purifiers': 'components/category-air-purifiers.html',
+        'dehumidifiers': 'components/category-dehumidifiers.html',
+        'controllers': 'components/category-controllers.html',
+        'heat-pumps': 'components/category-heat-pumps.html',
+        'electric-heaters': 'components/category-electric-heaters.html',
+        'accessories': 'components/category-accessories.html'
+    };
+
     function handleRoute() {
         const hash = location.hash || '';
-        const m = hash.match(/^#product-(.+)$/);
+        
+        // Check for category hash pattern
+        const categoryMatch = hash.match(/^#category-(.+)$/);
+        if (categoryMatch) {
+            const categorySlug = categoryMatch[1];
+            const componentPath = (typeof window !== 'undefined' && typeof window.getComponentBySlug === 'function')
+                ? (window.getComponentBySlug(categorySlug) || fallbackCategoryComponents[categorySlug])
+                : fallbackCategoryComponents[categorySlug];
+            if (componentPath) {
+                loadComponent('main-container', componentPath).then(() => {
+                    // Hide other sections and show the category page
+                    showSection('hero-container', false);
+                    showSection('services-container', false);
+                    showSection('products-container', false);
+                    showSection('portfolio-container', false);
+                    showSection('contacts-container', false);
+                    showSection('product-detail-container', false);
+                    showSection('main-container', true); // Make sure main-container is visible
+                    
+                    // Render category products with filters from URL
+                    const lang = getLangSafe();
+                    const urlParams = new URLSearchParams(window.location.hash.substring(1));
+                    const sortBy = urlParams.get('sort') || 'default';
+                    const priceFilter = urlParams.get('price') || 'all';
+                    const page = parseInt(urlParams.get('page')) || 1;
+                    
+                    renderCategoryProducts(categorySlug, lang, translations, sortBy, priceFilter, page);
+                    
+                    // Initialize category controls with delay to ensure DOM is ready
+                    setTimeout(() => {
+                        initCategoryControls();
+                        
+                        // Update filter selectors to match URL params
+                        const sortSelect = document.getElementById('category-sort-select');
+                        const priceSelect = document.getElementById('category-price-filter');
+                        if (sortSelect) sortSelect.value = sortBy;
+                        if (priceSelect) priceSelect.value = priceFilter;
+                    }, 100);
+                    
+                    // Scroll to top
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }).catch(error => {
+                    console.error('Error loading category component:', error);
+                });
+                return;
+            }
+        }
+        
+    const m = hash.match(/^#product-(.+)$/);
         if (m) {
             const pid = m[1];
             ensureProductDetailLoaded().then(ok => {
@@ -895,6 +1986,42 @@ function setupHashRouting(initialLang) {
                 renderProductDetail(pid);
                 bindProductDetailEvents();
             });
+    } else if (hash === '#products') {
+            // Show products section
+            showSection('hero-container', true);
+            showSection('services-container', true);
+            showSection('products-container', true);
+            showSection('portfolio-container', true);
+            showSection('contacts-container', true);
+            showSection('product-detail-container', false);
+            showSection('main-container', false);
+            
+            // Scroll to products section
+            const productsSection = document.querySelector('#products-container');
+            if (productsSection) {
+                productsSection.scrollIntoView({ behavior: 'smooth' });
+            }
+        } else if (hash === '#admin/products') {
+            // Load Admin Products page
+            loadComponent('admin-page-container', 'components/admin-products.html').then(async () => {
+                // Hide other sections, show admin
+                showSection('hero-container', false);
+                showSection('services-container', false);
+                showSection('products-container', false);
+                showSection('portfolio-container', false);
+                showSection('contacts-container', false);
+                showSection('product-detail-container', false);
+                showSection('main-container', false);
+                showSection('admin-page-container', true);
+                try {
+                    const mod = await import('./admin-page.js');
+                    if (mod && typeof mod.initAdminPage === 'function') {
+                        const lang = getLangSafe();
+                        await mod.initAdminPage(translations, lang);
+                    }
+                } catch (e) { console.error('Admin page init error', e); }
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }).catch(err => console.error('Error loading admin page component:', err));
         } else {
             // Show main sections
             showSection('hero-container', true);
@@ -903,6 +2030,8 @@ function setupHashRouting(initialLang) {
             showSection('portfolio-container', true);
             showSection('contacts-container', true);
             showSection('product-detail-container', false);
+            showSection('admin-page-container', false);
+            showSection('main-container', false);
             // Restore title via i18n
             const lang = getLangSafe();
             if (typeof switchLanguage === 'function') switchLanguage(lang);
@@ -934,40 +2063,12 @@ function bindProductCardNavigation() {
     // No-op here: kept for potential future enhancements
 }
 
-// Toast helper to prompt user to refresh when SW updates
+// Ненавязчивый тост по активации нового SW
 function showUpdateToast() {
-    const host = document.getElementById('toast-container');
-    if (!host) return;
-    const toast = document.createElement('div');
-    toast.className = 'toast';
-    toast.style.maxWidth = '520px';
-    toast.style.margin = '8px auto';
-    toast.style.background = 'var(--surface, #222)';
-    toast.style.color = 'var(--on-surface, #fff)';
-    toast.style.padding = '12px 16px';
-    toast.style.borderRadius = '12px';
-    toast.style.boxShadow = '0 6px 16px rgba(0,0,0,.25)';
-    toast.style.display = 'flex';
-    toast.style.alignItems = 'center';
-    toast.style.gap = '12px';
-    toast.style.zIndex = '5000';
-    const text = document.createElement('div');
-    text.textContent = 'Доступно обновление. Обновить страницу?';
-    const btn = document.createElement('button');
-    btn.className = 'btn';
-    btn.textContent = 'Обновить';
-    btn.addEventListener('click', () => {
-        // Reload to pick latest assets
-        location.reload();
-    });
-    const close = document.createElement('button');
-    close.className = 'btn btn--ghost';
-    close.textContent = 'Позже';
-    close.addEventListener('click', () => toast.remove());
-    toast.appendChild(text);
-    toast.appendChild(btn);
-    toast.appendChild(close);
-    host.appendChild(toast);
+    // Используем общий механизм тостов и i18n
+    const message = translateKey('toast-update-installed');
+    // Короткое авто‑скрытие, без действий — просто уведомление
+    showActionToast({ message: message || 'Обновление установлено', type: 'success', duration: 2400 });
 }
 
 // ====== SEO/OG/Twitter helpers ======
@@ -1188,6 +2289,9 @@ function initModernMobileEffects() {
 
 // Функция инициализации мобильного заголовка
 function initMobileHeader() {
+    if (mobileHeaderInitialized) {
+        return;
+    }
     // Поддержка как старого, так и нового хедера
     const hamburgerToggle = document.querySelector('.hamburger-toggle') || document.querySelector('.minimal-menu-btn');
     const mobileNav = document.querySelector('.mobile-nav');
@@ -1227,6 +2331,8 @@ function initMobileHeader() {
         console.log('Мобильный заголовок не найден');
         return;
     }
+
+    mobileHeaderInitialized = true;
 
     // Инициализация доступности: запрещаем фокус на скрытых элементах
     const focusableElements = mobileNav.querySelectorAll('a, button, input, textarea, select, [tabindex]:not([tabindex="-1"])');
@@ -1887,4 +2993,28 @@ function initDesktopHeaderCondense() {
     updateTopBarHeightVar();
     applyFixedDecision();
     onScroll();
+}
+
+// Helper functions for advanced filtering (copied from products.js)
+function getProductType(product) {
+    return product.type || 'wall';
+}
+
+function getProductCapacity(product) {
+    return product.capacity || '9';
+}
+
+function getProductControlType(product) {
+    return product.controlType || 'on-off';
+}
+
+function getProductFeatures(product) {
+    return product.features || [];
+}
+
+function updateProductsCount(count) {
+    const countElement = document.getElementById('productsCount');
+    if (countElement) {
+        countElement.textContent = count;
+    }
 }

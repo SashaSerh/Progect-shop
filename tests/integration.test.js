@@ -188,13 +188,17 @@ describe('Integration: bootstrap и ключевые флоу', () => {
     expect(counts).toEqual(['0', '0']);
   });
 
-  it('Переключение темы добавляет класс light-theme и обновляет aria', async () => {
+  it('Переключение темы переключает светлую/тёмную и обновляет aria', async () => {
     const toggle = document.querySelector('.theme-toggle');
+    // По умолчанию теперь светлая тема
+    expect(document.body.classList.contains('light-theme')).toBe(true);
+    expect(localStorage.getItem('theme') || 'light').toBe('light');
+    // Клик переключает на тёмную
     toggle.click();
     await new Promise(r => setTimeout(r, 10));
-    expect(document.body.classList.contains('light-theme')).toBe(true);
-    expect(localStorage.getItem('theme')).toBe('light');
+    expect(document.body.classList.contains('light-theme')).toBe(false);
+    expect(localStorage.getItem('theme')).toBe('dark');
     // Ария-лейбл должен измениться
-    expect(toggle.getAttribute('aria-label')).toBe('Переключить на темную тему');
+    expect(toggle.getAttribute('aria-label')).toBe('Переключить на светлую тему');
   });
 });

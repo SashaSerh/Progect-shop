@@ -43,18 +43,14 @@ describe('admin UI integration (JSDOM)', () => {
     renderProducts.mockClear();
   });
 
-  it('добавляет кнопку, открывает модал и сохраняет товар', async () => {
+  it('сохраняет товар через форму админ-страницы', async () => {
     const { initAdminProducts } = await import('../js/admin-products.js');
     initAdminProducts({}, 'ru');
+    // Кнопка в хедере больше не используется
     const addBtn = document.querySelector('.header-add-product');
-    expect(addBtn).toBeTruthy();
+    expect(addBtn).toBeFalsy();
 
-    // Открываем модал
-    addBtn.click();
-    const modal = document.getElementById('adminProductModal');
-    expect(modal.style.display).toBe('flex');
-
-    // Заполняем форму и сабмитим
+    // Заполняем форму и сабмитим (без модалки)
     const form = document.getElementById('adminProductForm');
     form.querySelector('input[name="title_ru"]').value = 'Тестовый товар';
     form.querySelector('input[name="price"]').value = '1234';
@@ -65,7 +61,6 @@ describe('admin UI integration (JSDOM)', () => {
     expect(Array.isArray(data)).toBe(true);
     expect(data.length).toBe(1);
     expect(renderProducts).toHaveBeenCalled();
-    expect(modal.style.display).toBe('none');
   });
 
   it('удаляет товар по клику на кнопку с data-delete', async () => {

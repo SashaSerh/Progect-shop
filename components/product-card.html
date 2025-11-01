@@ -1,11 +1,39 @@
 <div class="product-card glass-card soft-card micro-fade-in">
     <img src="{image}" alt="{name}" class="product-card__image" loading="lazy" decoding="async">
     <h3 class="product-card__title">{name}</h3>
+    <div class="product-card__meta" role="list">
+        <span class="product-card__chip product-card__chip--brand" role="listitem">{brand}</span>
+        <span class="product-card__chip product-card__chip--category" role="listitem">{category}</span>
+    </div>
+    <div class="product-card__rating" aria-label="{ratingAria}">
+        <div class="product-card__stars" aria-hidden="true">
+            <span class="product-card__star product-card__star--full"></span>
+            <span class="product-card__star product-card__star--full"></span>
+            <span class="product-card__star product-card__star--full"></span>
+            <span class="product-card__star product-card__star--full"></span>
+            <span class="product-card__star product-card__star--half"></span>
+        </div>
+        <span class="product-card__rating-value">{ratingValue}</span>
+        <span class="product-card__rating-count">({ratingCount})</span>
+    </div>
     <p class="product-card__description">{description}</p>
+    <ul class="product-card__specs" role="list">
+        <li class="product-card__spec" role="listitem">
+            <span class="product-card__spec-label">{spec1Label}</span>
+            <span class="product-card__spec-value">{spec1Value}</span>
+        </li>
+        <li class="product-card__spec" role="listitem">
+            <span class="product-card__spec-label">{spec2Label}</span>
+            <span class="product-card__spec-value">{spec2Value}</span>
+        </li>
+        <li class="product-card__spec" role="listitem">
+            <span class="product-card__spec-label">{spec3Label}</span>
+            <span class="product-card__spec-value">{spec3Value}</span>
+        </li>
+    </ul>
     <p class="product-card__price">${price}</p>
-    <button class="product-card__button modern-button micro-bounce" data-id="{id}" data-i18n="service-order">
-        <span>Заказать</span>
-        <span style="font-size: 16px;">🛒</span>
+    <button class="product-card__button product-card__button--icon" data-id="{id}" data-i18n="service-order">
+        <span class="sr-only">Заказать</span>
+        <img src="icons/shopping-bag-icon.svg" alt="" aria-hidden="true" class="product-card__button-icon">
     </button>
-    <button class="product-card__more card-actions-size--compact" data-id="{id}" data-i18n="details">Подробнее</button>
 </div>

@@ -1,6 +1,17 @@
-import { renderProducts, getMergedProducts, setProducts } from './products.js';
+import * as Products from './products.js';
+import { autoFlagColor } from './flags-color.js';
 
 const STORAGE_KEY = 'products_local_v1';
+const DRAFT_KEY = 'admin:product:draft:v1';
+
+// Provider helpers (safe fallback to legacy localStorage flow)
+function getProvider() {
+  try { return (typeof window !== 'undefined' && window.getDataProvider) ? window.getDataProvider() : null; } catch { return null; }
+}
+function providerKind() {
+  const p = getProvider();
+  return p && p.kind || 'localStorage';
+}
 
 function uid(prefix = 'p') {
   return `${prefix}_${Math.random().toString(36).slice(2,9)}`;
@@ -71,37 +82,265 @@ export function upsertLocalProduct(product) {
   return product;
 }
 
+// Export local products to JSON file
+export function exportLocalProducts() {
+  const products = getLocalProducts();
+  if (!products.length) {
+    alert('Нет локальных товаров для экспорта');
+    return;
+  }
+  const dataStr = JSON.stringify(products, null, 2);
+  const dataBlob = new Blob([dataStr], { type: 'application/json' });
+  const url = URL.createObjectURL(dataBlob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `local-products-${new Date().toISOString().split('T')[0]}.json`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+}
+
+// Import local products from JSON file
+export function importLocalProducts(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const products = JSON.parse(e.target.result);
+        if (!Array.isArray(products)) {
+          throw new Error('Неверный формат файла');
+        }
+        // Validate products structure
+        const validProducts = products.filter(p => p && typeof p === 'object' && p.id && p.name);
+        if (validProducts.length !== products.length) {
+          alert(`Импортировано ${validProducts.length} из ${products.length} товаров (некоторые были пропущены из-за неверного формата)`);
+        }
+        // Generate new IDs to avoid conflicts
+        const importedWithNewIds = validProducts.map(p => ({
+          ...p,
+          id: uid(),
+          // Keep original ID for reference
+          originalId: p.id
+        }));
+        const existing = getLocalProducts();
+        const merged = [...existing, ...importedWithNewIds];
+        saveLocalProducts(merged);
+        resolve(importedWithNewIds.length);
+      } catch (error) {
+        reject(error);
+      }
+    };
+    reader.onerror = () => reject(new Error('Ошибка чтения файла'));
+    reader.readAsText(file);
+  });
+}
+
 export function initAdminProducts(translations, lang = 'ru') {
+  // Safe wrappers for test/mocked environments
+  const getProductsApiFn = (key) => { try { return Products[key]; } catch { return undefined; } };
+  const isAdmin = () => {
+    const fromWin = (typeof window !== 'undefined' && typeof window.isAdminMode === 'function') ? window.isAdminMode : undefined;
+    const fromMod = getProductsApiFn('isAdminMode');
+    const fn = fromWin || fromMod;
+    return typeof fn === 'function' ? fn() : false;
+  };
+  const enableAdmin = () => {
+    const fromWin = (typeof window !== 'undefined' && typeof window.enableAdminMode === 'function') ? window.enableAdminMode : undefined;
+    const fromMod = getProductsApiFn('enableAdminMode');
+    const fn = fromWin || fromMod;
+    if (typeof fn === 'function') fn();
+  };
+  const disableAdmin = () => {
+    const fromWin = (typeof window !== 'undefined' && typeof window.disableAdminMode === 'function') ? window.disableAdminMode : undefined;
+    const fromMod = getProductsApiFn('disableAdminMode');
+    const fn = fromWin || fromMod;
+    if (typeof fn === 'function') fn();
+  };
   const modal = document.getElementById('adminProductModal');
   const form = document.getElementById('adminProductForm');
+  const dp = getProvider();
   // small toast helper
   const toastHost = document.getElementById('toast-container') || (() => {
     const el = document.createElement('div'); el.id = 'toast-container'; document.body.appendChild(el); return el;
   })();
-  const openBtn = document.createElement('button');
-  openBtn.textContent = 'Добавить товар';
-  openBtn.className = 'btn btn--primary header-add-product';
-  openBtn.type = 'button';
-  // Кнопка очистки локальных товаров
-  const clearBtn = document.createElement('button');
-  clearBtn.textContent = 'Очистить локальные товары';
-  clearBtn.className = 'btn btn--ghost header-clear-products';
-  clearBtn.type = 'button';
-  // Добавляем в header controls если есть
-  const headerControls = document.querySelector('.header__controls');
-  if (headerControls) {
-    headerControls.insertBefore(openBtn, headerControls.firstChild);
-    headerControls.insertBefore(clearBtn, openBtn.nextSibling);
+
+  // Admin login modal
+  const loginModal = document.getElementById('adminLoginModal');
+  const loginForm = document.getElementById('adminLoginForm');
+  const loginCloseBtn = document.getElementById('adminLoginClose');
+  const loginCancelBtn = document.getElementById('adminLoginCancel');
+  const adminLoginBtn = document.getElementById('adminLoginBtn');
+
+  console.log('Admin modal initialization:', {
+    loginModal: !!loginModal,
+    loginForm: !!loginForm,
+    loginCloseBtn: !!loginCloseBtn,
+    loginCancelBtn: !!loginCancelBtn,
+    isAdminMode: isAdmin()
+  });
+
+  // Show/hide admin login button based on admin mode
+  function updateAdminControlsVisibility() {
+    const adminLink = document.getElementById('adminPageLink');
+
+    if (adminLink) {
+      adminLink.style.display = isAdmin() ? 'inline-block' : 'none';
+    }
   }
+
+  // Initialize admin controls visibility
+  updateAdminControlsVisibility();
+
+  // Header admin toggle button (simple enable/disable without password)
+  const adminToggleBtn = document.getElementById('adminToggleBtn');
+  function reflectAdminToggleBtn() {
+    if (!adminToggleBtn) return;
+    const on = isAdmin();
+    adminToggleBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    adminToggleBtn.textContent = on ? 'Admin: ON' : 'Admin';
+    adminToggleBtn.title = on ? 'Отключить админ-режим' : 'Включить админ-режим';
+  }
+  reflectAdminToggleBtn();
+  if (adminToggleBtn) {
+    adminToggleBtn.addEventListener('click', () => {
+      if (!isAdmin()) {
+        enableAdmin();
+        showToast('Админ‑режим включён');
+      } else {
+        disableAdmin();
+        showToast('Админ‑режим выключен');
+      }
+      // обновить видимость контролов и перерендерить каталог,
+      // чтобы показать/скрыть админские кнопки на карточках
+      updateAdminControlsVisibility();
+      reflectAdminToggleBtn();
+      const merged = Products.getMergedProducts();
+      Products.setProducts(merged);
+      window.products = merged;
+      Products.renderProducts(lang, translations, merged);
+    });
+  }
+
+  // Keyboard shortcut for admin login (Ctrl+Alt+A)
+  document.addEventListener('keydown', (e) => {
+    console.log('Key event:', {
+      key: e.key,
+      code: e.code,
+      ctrlKey: e.ctrlKey,
+      shiftKey: e.shiftKey,
+      altKey: e.altKey,
+      metaKey: e.metaKey
+    });
+
+    // Check for Ctrl+Alt+A or Cmd+Alt+A (case insensitive)
+    const isAdminShortcut = (e.ctrlKey || e.metaKey) && e.altKey && (e.key === 'A' || e.key === 'a');
+    if (isAdminShortcut) {
+      e.preventDefault();
+      console.log('Admin shortcut triggered, isAdminMode:', isAdmin(), 'loginModal exists:', !!loginModal);
+
+      if (!isAdmin() && loginModal) {
+        console.log('Opening admin login modal');
+        loginModal.style.display = 'flex';
+        console.log('Modal display style set to flex, computed style:', getComputedStyle(loginModal).display);
+        const passwordInput = document.getElementById('adminPassword');
+        if (passwordInput) {
+          passwordInput.focus();
+          console.log('Focused password input');
+        }
+        showToast('Режим администратора: введите пароль (Ctrl+Alt+A)', 2000);
+      } else if (isAdmin()) {
+        console.log('Already in admin mode');
+        showToast('Вы уже в режиме администратора (Ctrl+Alt+A для входа)', 2000);
+      } else {
+        console.error('Cannot open admin modal: not in admin mode or modal not found');
+      }
+    }
+  });
+
+  // Admin login button click (removed - using keyboard shortcut)
+  // if (adminLoginBtn) {
+  //   adminLoginBtn.addEventListener('click', () => {
+  //     if (loginModal) {
+  //       loginModal.style.display = 'flex';
+  //       const passwordInput = document.getElementById('adminPassword');
+  //       if (passwordInput) {
+  //         passwordInput.focus();
+  //       }
+  //     }
+  //   });
+  // }
+
+  // Admin login form submit
+  if (loginForm) {
+    loginForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const formData = new FormData(loginForm);
+      const password = formData.get('password');
+
+      // Simple password check (in production, use proper authentication)
+      if (password === 'admin123') {
+  enableAdmin();
+        updateAdminControlsVisibility();
+        showToast('Вход выполнен успешно');
+        if (loginModal) {
+          console.log('Closing admin login modal after successful login');
+          loginModal.style.display = 'none';
+          console.log('Modal display style set to none');
+        }
+        loginForm.reset();
+
+  // Re-render products to show admin controls
+  const merged = Products.getMergedProducts();
+  Products.setProducts(merged);
+        window.products = merged;
+  Products.renderProducts(lang, translations, merged);
+      } else {
+        showToast('Неверный пароль', 3000);
+        const passwordInput = document.getElementById('adminPassword');
+        if (passwordInput) {
+          passwordInput.focus();
+          passwordInput.select();
+        }
+      }
+    });
+  }
+
+  // Close login modal
+  [loginCloseBtn, loginCancelBtn].forEach(btn => {
+    if (btn) {
+      btn.addEventListener('click', () => {
+        console.log('Closing admin login modal via button');
+        if (loginModal) {
+          loginModal.style.display = 'none';
+          console.log('Modal display style set to none');
+        }
+        loginForm.reset();
+      });
+    }
+  });
+
+  // Close modal on backdrop click
+  if (loginModal) {
+    loginModal.addEventListener('click', (e) => {
+      if (e.target === loginModal) {
+        console.log('Closing admin login modal via backdrop click');
+        loginModal.style.display = 'none';
+        console.log('Modal display style set to none');
+        loginForm.reset();
+      }
+    });
+  }
+  // Кнопки управления в хедере (Add Product / Clear Products) убраны как дублирующие админ‑страницу
 
   const closeBtn = document.getElementById('adminProductModalClose');
   const cancelBtn = document.getElementById('adminProductCancel');
-  const fileInput = form.querySelector('input[name="image"]');
+  const fileInput = form ? form.querySelector('input[name="image"]') : null;
   const preview = document.getElementById('adminImagePreview');
   const flagSelector = document.getElementById('flagSelector');
   const availableFlagsContainer = document.getElementById('availableFlags');
   const selectedFlagsContainer = document.getElementById('selectedFlags');
-  const flagsHiddenInput = form.querySelector('input[name="_flags"]');
+  const flagsHiddenInput = form ? form.querySelector('input[name="_flags"]') : null;
 
   function serializeSelectedFlags() {
     if (!selectedFlagsContainer || !flagsHiddenInput) return;
@@ -213,11 +452,10 @@ export function initAdminProducts(translations, lang = 'ru') {
       btn.className = 'flag-chip';
       btn.setAttribute('data-flag-key', key);
       btn.textContent = dict[key] || key;
-      const color = defaults[key] || `#${((hashCodeToHue && ((hashCodeToHue(key)%360)|0))||210).toString(16)}`;
       const colorInput = document.createElement('input');
       colorInput.type = 'color';
       colorInput.className = 'flag-default-color';
-      colorInput.value = defaults[key] || `#${hslToHex(hashCodeToHue(key),70,45)}`;
+      colorInput.value = defaults[key] || autoFlagColor(key);
       // save default color on change
       colorInput.addEventListener('input', (e) => {
         const cur = JSON.parse(localStorage.getItem('flag_color_defaults') || '{}');
@@ -229,7 +467,7 @@ export function initAdminProducts(translations, lang = 'ru') {
         const exists = Array.from(selectedFlagsContainer.querySelectorAll('.selected-flag')).some(el => el.getAttribute('data-flag-key') === key);
         if (exists) return;
         const cur = Array.from(selectedFlagsContainer.querySelectorAll('.selected-flag')).map(el => ({ key: el.getAttribute('data-flag-key'), color: el.getAttribute('data-flag-color') }));
-        cur.push({ key, color: colorInput.value });
+        cur.push({ key, color: colorInput.value || autoFlagColor(key) });
         renderSelectedFlags(cur);
       });
       wrap.appendChild(btn);
@@ -253,8 +491,8 @@ export function initAdminProducts(translations, lang = 'ru') {
         // add to selected if not present
         const exists = Array.from(selectedFlagsContainer.querySelectorAll('.selected-flag')).some(el => el.getAttribute('data-flag-key') === key);
         if (exists) return;
-        const cur = Array.from(selectedFlagsContainer.querySelectorAll('.selected-flag')).map(el => el.getAttribute('data-flag-key'));
-        cur.push(key);
+        const cur = Array.from(selectedFlagsContainer.querySelectorAll('.selected-flag')).map(el => ({ key: el.getAttribute('data-flag-key'), color: el.getAttribute('data-flag-color') || autoFlagColor(el.getAttribute('data-flag-key')) }));
+        cur.push({ key, color: autoFlagColor(key) });
         renderSelectedFlags(cur);
       });
       availableFlagsContainer.appendChild(btn);
@@ -264,38 +502,9 @@ export function initAdminProducts(translations, lang = 'ru') {
   // Initialize flag selector UI
   initFlagSelector();
 
-  function openModal() {
-    form.reset();
-    // reset flags UI
-    selectedFlagsContainer && (selectedFlagsContainer.innerHTML = '');
-    flagsHiddenInput && (flagsHiddenInput.value = '[]');
-    const hid = form.querySelector('input[name="_image_data"]'); if (hid) hid.remove();
-    modal.style.display = 'flex';
-    const first = form.querySelector('input[name="title_ru"]');
-    first?.focus();
-  }
-  function closeModal() {
-    modal.style.display = 'none';
-    form.reset();
-    preview.innerHTML = '';
-  }
+  // Модальное окно добавления из хедера удалено; используем полноценную страницу админки
 
-  openBtn.addEventListener('click', openModal);
-  closeBtn?.addEventListener('click', closeModal);
-  cancelBtn?.addEventListener('click', closeModal);
-
-  // Очистка локальных товаров
-  clearBtn.addEventListener('click', () => {
-    if (!confirm('Очистить все локальные товары? Это действие нельзя отменить.')) return;
-    saveLocalProducts([]);
-    try {
-      const merged = getMergedProducts();
-      setProducts(merged);
-      window.products = merged;
-      renderProducts(lang, translations, merged);
-      showToast('Локальные товары очищены');
-    } catch (err) { console.error('clear error', err); }
-  });
+  // Очистка локальных товаров доступна через админ‑страницу; отдельно в хедере не отображается
 
   // preview image
   fileInput?.addEventListener('change', (e) => {
@@ -305,15 +514,38 @@ export function initAdminProducts(translations, lang = 'ru') {
     reader.onload = function(ev) {
       preview.innerHTML = `<img src="${ev.target.result}" alt="preview" style="max-width:200px;max-height:120px;"/>`;
       // set hidden input value to base64 image for localStorage
-      const hidden = form.querySelector('input[name="_image_data"]');
+      const hidden = form ? form.querySelector('input[name="_image_data"]') : null;
       if (!hidden) {
-        const inp = document.createElement('input'); inp.type = 'hidden'; inp.name = '_image_data'; inp.value = ev.target.result; form.appendChild(inp);
+        if (form) { const inp = document.createElement('input'); inp.type = 'hidden'; inp.name = '_image_data'; inp.value = ev.target.result; form.appendChild(inp); }
       } else hidden.value = ev.target.result;
     };
     reader.readAsDataURL(f);
   });
 
-  form.addEventListener('submit', (evt) => {
+  // Автосохранение черновика
+  function readFormDraft() {
+    try { return JSON.parse(localStorage.getItem(DRAFT_KEY) || 'null') || null; } catch { return null; }
+  }
+  function writeFormDraft() {
+    if (!form) return;
+    const data = new FormData(form);
+    const draft = Object.fromEntries(data.entries());
+    try { localStorage.setItem(DRAFT_KEY, JSON.stringify(draft)); } catch {}
+  }
+  function clearFormDraft() { try { localStorage.removeItem(DRAFT_KEY); } catch {} }
+  let draftTimer = null;
+  form?.addEventListener('input', () => {
+    clearTimeout(draftTimer);
+    draftTimer = setTimeout(writeFormDraft, 300);
+  });
+  form?.addEventListener('change', () => {
+    clearTimeout(draftTimer);
+    draftTimer = setTimeout(writeFormDraft, 100);
+  });
+
+  // При открытии пробуем подставить черновик — реализовано внутри openModal
+
+  form?.addEventListener('submit', async (evt) => {
     evt.preventDefault();
     const data = new FormData(form);
     // parse flags
@@ -333,17 +565,74 @@ export function initAdminProducts(translations, lang = 'ru') {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
-    upsertLocalProduct(product);
-  showToast('Товар сохранён');
+
+    // Bridge to ProductSchema shape (non-breaking: дополняем, не ломая текущий рендер)
+    try {
+      // categories as slugs[] — пока кладём один выбранный slug
+      product.categories = Array.isArray(product.categories) ? product.categories : [product.category].filter(Boolean);
+      // imagesV2: расширенный формат с alt i18n (не трогаем product.images как массив строк)
+      const altUk = product.name?.uk || '';
+      const altRu = product.name?.ru || '';
+      product.imagesV2 = product.image ? [{ src: product.image, alt: { uk: altUk, ru: altRu, en: '' }, featured: true }] : [];
+    } catch (_) { /* noop */ }
+
+    // Валидация против ProductSchema, если доступна
+    try {
+      const validate = (typeof window !== 'undefined' && typeof window.validateProduct === 'function') ? window.validateProduct : null;
+      if (validate) {
+        const candidate = {
+          id: product.id,
+          sku: product.sku,
+          categories: Array.isArray(product.categories) ? product.categories : [product.category].filter(Boolean),
+          name: { uk: product.name?.uk || '', ru: product.name?.ru || '', en: '' },
+          shortDesc: { uk: product.description?.uk || '', ru: product.description?.ru || '', en: '' },
+          fullDesc: { uk: '', ru: '', en: '' },
+          price: Number.isFinite(product.price) ? product.price : 0,
+          inStock: !!product.inStock,
+          images: (product.image ? [{ src: product.image, alt: { uk: product.name?.uk || '', ru: product.name?.ru || '', en: '' }, featured: true }] : [])
+        };
+        // Собираем существующие id/sku для проверки уникальности
+  const mergedForUniq = (function(){ try { return Products.getMergedProducts(); } catch { return []; } })();
+        const existingIds = new Set(mergedForUniq.map(p => String(p.id)).filter(id => id !== String(candidate.id)));
+        const existingSkus = new Set(mergedForUniq.map(p => String(p.sku || '')).filter(s => s && s !== String(candidate.sku)));
+        const res = validate(candidate, { existingIds, existingSkus });
+        if (!res.valid) {
+          const errs = res.errors || {};
+          const msg = Object.values(errs).join('; ') || 'Ошибка валидации';
+          showToast(msg);
+          return; // Прерываем сохранение
+        }
+      }
+    } catch (e) {
+      // Не блокируем сохранение, если валидатор недоступен
+    }
+
+    // Если доступен общий провайдер — используем его, иначе локальный upsert
+    try {
+      if (dp && typeof dp.create === 'function') {
+        const res = await dp.create(product);
+        if (!res?.ok) {
+          console.warn('Provider create validation errors:', res?.errors);
+          showToast('Ошибка сохранения (валидация)');
+        }
+      } else {
+        upsertLocalProduct(product);
+      }
+    } catch (e) {
+      console.error('Provider create error', e);
+      upsertLocalProduct(product);
+    }
+    clearFormDraft();
+    showToast('Товар сохранён');
     // Re-render products with localStorage + bundled products
     try {
-      const merged = getMergedProducts();
+      const merged = Products.getMergedProducts();
       // обновляем модульное состояние и глобальную переменную для вспомогательных модулей
-      setProducts(merged);
+      Products.setProducts(merged);
       window.products = merged;
-      renderProducts(lang, translations, merged);
+      Products.renderProducts(lang, translations, merged);
     } catch (err) { console.error('render error', err); }
-    closeModal();
+    // На админ‑странице форма остаётся открытой; здесь модалки нет
   });
 
   function showToast(text, ms = 2500) {
@@ -385,8 +674,23 @@ export function initAdminProducts(translations, lang = 'ru') {
       const locals = getLocalProducts();
       const prod = locals.find(p => String(p.id) === String(id));
       if (prod) {
-        fillFormWithProduct(prod);
-        modal.style.display = 'flex';
+        try {
+          // Сохраняем как черновик, чтобы страница подтянула значения
+          const draft = {
+            id: prod.id || '',
+            title_ru: prod.name?.ru || '',
+            title_uk: prod.name?.uk || '',
+            description_ru: prod.description?.ru || '',
+            description_uk: prod.description?.uk || '',
+            price: String(prod.price || 0),
+            sku: prod.sku || '',
+            category: prod.category || 'service',
+            inStock: prod.inStock ? 'true' : 'false',
+            _flags: JSON.stringify(Array.isArray(prod.flags) ? prod.flags : [])
+          };
+          localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+        } catch {}
+        location.hash = '#admin/products';
       }
     }
     // delete button: .product-card__button with data-delete
@@ -396,16 +700,273 @@ export function initAdminProducts(translations, lang = 'ru') {
       const list = getLocalProducts().filter(p => String(p.id) !== String(id));
       saveLocalProducts(list);
       // re-render
-  const merged = getMergedProducts();
-  setProducts(merged);
+  const merged = Products.getMergedProducts();
+  Products.setProducts(merged);
   window.products = merged;
-  renderProducts(lang, translations, merged);
+  Products.renderProducts(lang, translations, merged);
       showToast('Товар удалён');
     }
   });
 
+  // Admin controls visibility and handlers
+  const adminControls = document.getElementById('adminControls');
+  if (adminControls) {
+    adminControls.style.display = isAdmin() ? 'flex' : 'none';
+
+    // Export button
+    const exportBtn = document.getElementById('exportProductsBtn');
+    if (exportBtn) {
+      exportBtn.addEventListener('click', () => {
+        // Для Git‑CMS экспорт в файл не имеет смысла — оставляем только для локального
+        if (providerKind() !== 'localStorage') {
+          showToast('Экспорт файла доступен только для LocalStorage');
+          return;
+        }
+        exportLocalProducts();
+        showToast('Экспорт завершён');
+      });
+    }
+
+    // Import input
+    const importInput = document.getElementById('importProductsInput');
+    if (importInput) {
+      importInput.addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        try {
+          // Импорт файла поддерживаем только для LocalStorage
+          if (providerKind() !== 'localStorage') {
+            showToast('Импорт файла доступен только для LocalStorage');
+            e.target.value = '';
+            return;
+          }
+          const count = await importLocalProducts(file);
+          showToast(`Импортировано ${count} товаров`);
+          // Re-render products
+          const merged = Products.getMergedProducts();
+          Products.setProducts(merged);
+          window.products = merged;
+          Products.renderProducts(lang, translations, merged);
+        } catch (error) {
+          showToast(`Ошибка импорта: ${error.message}`);
+        }
+        // Reset input
+        e.target.value = '';
+      });
+    }
+
+    // Git‑CMS settings panel bindings
+    const providerSelect = document.getElementById('dataProviderSelect');
+    const repoInp = document.getElementById('gitcmsRepo');
+    const branchInp = document.getElementById('gitcmsBranch');
+    const pathInp = document.getElementById('gitcmsPath');
+    const tokenInp = document.getElementById('gitcmsToken');
+    const saveBtn = document.getElementById('gitcmsSaveBtn');
+  const loadBtn = document.getElementById('gitcmsLoadBtn');
+  const pushBtn = document.getElementById('gitcmsPushBtn');
+  const mergeBtn = document.getElementById('gitcmsMergeBtn');
+  const statusEl = document.getElementById('gitcmsStatus');
+
+    // i18n helper
+    const tr = (key, vars) => {
+      let s = (translations && translations[lang] && translations[lang][key]) ?? (translations && translations.ru && translations.ru[key]) ?? '';
+      if (vars && typeof vars === 'object') {
+        for (const [k, v] of Object.entries(vars)) s = String(s).replaceAll(`{{${k}}}`, String(v));
+      }
+      return s;
+    };
+
+    function setGitStatus(text, isError = false) {
+      if (!statusEl) return;
+      statusEl.textContent = text || '';
+      statusEl.style.color = isError ? 'var(--color-danger, #c0392b)' : 'inherit';
+    }
+    function withLoading(btn, fn, statusText) {
+      if (btn) { btn.disabled = true; btn.setAttribute('aria-busy', 'true'); }
+      if (statusEl) {
+        statusEl.innerHTML = `<span class="spinner spinner--inline" aria-hidden="true"></span> ${statusText || ''}`;
+      }
+      return Promise.resolve()
+        .then(fn)
+        .finally(() => { if (btn) { btn.disabled = false; btn.removeAttribute('aria-busy'); } });
+    }
+
+    // hydrate current values
+    try {
+      const currentPref = (localStorage.getItem('admin:dataProvider') || 'localStorage');
+      if (providerSelect) providerSelect.value = currentPref;
+  // Prefill repo with current project as a sensible default if nothing saved yet
+  if (repoInp) repoInp.value = localStorage.getItem('admin:gitcms:repo') || 'SashaSerh/Progect-shop';
+      if (branchInp) branchInp.value = localStorage.getItem('admin:gitcms:branch') || 'main';
+      if (pathInp) pathInp.value = localStorage.getItem('admin:gitcms:path') || 'data/products.json';
+      if (tokenInp) tokenInp.value = localStorage.getItem('admin:gitcms:token') || '';
+    } catch {}
+
+    function updateGitButtonsEnabled() {
+      const v = (providerSelect && providerSelect.value) || (localStorage.getItem('admin:dataProvider') || 'localStorage');
+      const isGit = v === 'gitcms';
+      [loadBtn, pushBtn, mergeBtn].forEach(btn => { if (btn) { btn.disabled = !isGit; btn.title = isGit ? '' : 'Доступно только для Git‑CMS'; } });
+      if (statusEl) statusEl.textContent = '';
+    }
+    providerSelect?.addEventListener('change', (ev) => {
+      const v = ev.target.value;
+      localStorage.setItem('admin:dataProvider', v);
+      updateGitButtonsEnabled();
+      showToast(`Провайдер: ${v}`);
+    });
+    saveBtn?.addEventListener('click', () => {
+      try {
+        if (repoInp) localStorage.setItem('admin:gitcms:repo', repoInp.value.trim());
+        if (branchInp) localStorage.setItem('admin:gitcms:branch', branchInp.value.trim() || 'main');
+        if (pathInp) localStorage.setItem('admin:gitcms:path', pathInp.value.trim() || 'data/products.json');
+        if (tokenInp) localStorage.setItem('admin:gitcms:token', tokenInp.value.trim());
+        showToast('Настройки Git‑CMS сохранены');
+      } catch (e) {
+        console.error('Save gitcms settings error', e);
+        showToast('Ошибка сохранения настроек Git‑CMS');
+      }
+  });
+
+  // Initialize buttons enabled state
+  updateGitButtonsEnabled();
+
+    // Git‑CMS: загрузить товары из Git в локальные (безопасно для оффлайна)
+    loadBtn?.addEventListener('click', async () => {
+      await withLoading(loadBtn, async () => {
+        try {
+        const p = getProvider();
+        if (!p || p.kind !== 'gitcms' || typeof p.isConfigured !== 'function' || !p.isConfigured()) {
+          setGitStatus(tr('git-not-configured') || 'Git‑CMS не настроен', true);
+          showToast('Git‑CMS не настроен');
+          return;
+        }
+        setGitStatus(tr('git-loading') || 'Загрузка…');
+        const list = await p.loadAll();
+        if (!Array.isArray(list)) {
+          setGitStatus(tr('git-load-failed') || 'Не удалось загрузить товары', true);
+          showToast('Не удалось загрузить товары');
+          return;
+        }
+        saveLocalProducts(list);
+  const merged = Products.getMergedProducts();
+  Products.setProducts(merged);
+  window.products = merged;
+  Products.renderProducts(lang, translations, merged);
+        setGitStatus(tr('git-load-success', { count: list.length }) || `Загружено: ${list.length}`);
+        showToast(`Загружено из Git: ${list.length}`);
+      } catch (e) {
+        console.error('GitCMS load error', e);
+        setGitStatus((tr('git-error') || 'Ошибка') + `: ${e?.message || e}`, true);
+        showToast('Ошибка загрузки из Git‑CMS');
+      }
+      });
+    });
+
+    // Git‑CMS: записать локальные товары в Git (полная замена файла)
+    pushBtn?.addEventListener('click', async () => {
+      await withLoading(pushBtn, async () => {
+        try {
+        const p = getProvider();
+        if (!p || p.kind !== 'gitcms' || typeof p.isConfigured !== 'function' || !p.isConfigured()) {
+          setGitStatus(tr('git-not-configured') || 'Git‑CMS не настроен', true);
+          showToast('Git‑CMS не настроен');
+          return;
+        }
+        const list = getLocalProducts();
+        if (!list.length && !confirm('Локальный список пуст. Очистить удалённый файл в Git?')) return;
+        setGitStatus(tr('git-pushing') || 'Запись…');
+        await p.replaceAll(list, 'feat(admin): sync local products to git');
+        setGitStatus(tr('git-push-success') || 'Записано');
+        showToast('Товары записаны в Git');
+      } catch (e) {
+        console.error('GitCMS push error', e);
+        setGitStatus((tr('git-error') || 'Ошибка') + `: ${e?.message || e}`, true);
+        showToast('Ошибка записи в Git‑CMS');
+      }
+      });
+    });
+
+    // Smart merge: load from git and merge into local with conflict detection
+    mergeBtn?.addEventListener('click', async () => {
+      await withLoading(mergeBtn, async () => {
+        try {
+          const p = getProvider();
+          if (!p || p.kind !== 'gitcms' || typeof p.isConfigured !== 'function' || !p.isConfigured()) {
+            setGitStatus(tr('git-not-configured') || 'Git‑CMS не настроен', true);
+            showToast('Git‑CMS не настроен');
+            return;
+          }
+          setGitStatus(tr('git-loading') || 'Загрузка…');
+          const remote = await p.loadAll();
+          if (!Array.isArray(remote)) {
+            setGitStatus(tr('git-load-failed') || 'Не удалось загрузить товары', true);
+            return;
+          }
+          const local = getLocalProducts();
+          const byId = new Map(local.map(p => [String(p.id), p]));
+          const bySku = new Map(local.filter(p => p.sku).map(p => [String(p.sku).toLowerCase(), p]));
+
+          const conflicts = {};
+          let added = 0, updated = 0, conflicted = 0;
+          const result = [...local];
+          const upsert = (item) => {
+            const idKey = String(item.id);
+            const skuKey = String(item.sku || '').toLowerCase();
+            const idMatch = byId.get(idKey);
+            const skuMatch = skuKey ? bySku.get(skuKey) : null;
+            if (idMatch && skuMatch && idMatch.id !== skuMatch.id) {
+              // id and sku refer to different local items — conflict
+              conflicts[idKey] = conflicts[idKey] ? 'both' : 'both';
+              conflicted++;
+              return; // skip merge for this item
+            }
+            if (idMatch) {
+              // Update existing by ID
+              const idx = result.findIndex(p => String(p.id) === idKey);
+              if (idx >= 0) { result[idx] = { ...idMatch, ...item, updatedAt: new Date().toISOString() }; updated++; }
+            } else if (skuMatch) {
+              // IDs differ but same SKU — treat as update, but mark conflict on ID
+              const idx = result.findIndex(p => String(p.id) === String(skuMatch.id));
+              if (idx >= 0) { result[idx] = { ...skuMatch, ...item, updatedAt: new Date().toISOString() }; updated++; }
+              conflicts[String(skuMatch.id)] = 'id';
+              conflicted++;
+            } else {
+              // New item
+              result.push(item);
+              added++;
+            }
+          };
+          // Persist last remote snapshot for conflict resolution UI
+          try {
+            const byIdObj = Object.fromEntries(remote.filter(r => r && r.id).map(r => [String(r.id), r]));
+            const bySkuObj = Object.fromEntries(remote.filter(r => r && r.sku).map(r => [String(r.sku).toLowerCase(), r]));
+            localStorage.setItem('admin:merge:lastRemoteById', JSON.stringify(byIdObj));
+            localStorage.setItem('admin:merge:lastRemoteBySku', JSON.stringify(bySkuObj));
+          } catch {}
+
+          remote.forEach(upsert);
+          saveLocalProducts(result);
+          try { localStorage.setItem('admin:merge:conflicts', JSON.stringify(conflicts)); } catch {}
+
+          const merged = Products.getMergedProducts();
+          Products.setProducts(merged); window.products = merged; Products.renderProducts(lang, translations, merged);
+          setGitStatus(tr('git-merge-result', { added, updated, conflicts: conflicted }) || `Добавлено: ${added}, Обновлено: ${updated}, Конфликты: ${conflicted}`);
+          showToast('Слияние завершено');
+        } catch (e) {
+          console.error('GitCMS merge error', e);
+          setGitStatus((tr('git-error') || 'Ошибка') + `: ${e?.message || e}`, true);
+          showToast('Ошибка слияния');
+        }
+      });
+    });
+  }
+
   // On init: cache initial products available on window (from products.js)
   try { window.__initialProducts = window.products || []; } catch {}
+
+  // Log keyboard shortcut hint for developers
+  console.log('💡 Admin mode: Press Ctrl+Shift+A to open admin login');
 }
 
 export default { initAdminProducts };

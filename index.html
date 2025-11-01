@@ -16,8 +16,8 @@
         <meta name="twitter:title" content="ClimaTech">
         <meta name="twitter:description" content="Продажа, монтаж и обслуживание климатической техники: кондиционеры, вентиляция, рекуператоры. Консультации и быстрый монтаж.">
         <meta name="twitter:image" content="/icons/icon-icon512x512.png">
-        <link rel="manifest" href="manifest.json">
-      <link rel="icon" type="image/x-icon" href="favicon.ico">
+                <link rel="manifest" href="manifest.json">
+                <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-icon192x192.png">
     <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="dns-prefetch" href="//fonts.googleapis.com">
@@ -51,10 +51,14 @@
 </head>
 <body>
     <div id="header-container"></div>
+    <div id="main-container" style="display:none"></div>
     <div id="hero-container"></div>
     <div id="services-container"></div>
     <div id="products-container"></div>
+    <div id="admin-page-container" style="display:none"></div>
     <div id="product-detail-container" style="display:none"></div>
+    <div id="comparison-container"></div>
+    <div id="compare-modal-container"></div>
     <div id="portfolio-container"></div>
     <div id="contacts-container"></div>
     <div id="footer-container"></div>
@@ -78,6 +82,28 @@
     <!-- Toast area for cart Undo messages -->
     <div id="toast-container" aria-live="polite" aria-atomic="true" class="toast-container" style="position: fixed; left: 50%; transform: translateX(-50%); bottom: 16px; z-index: 4000;"></div>
     
+    <!-- Admin Login Modal -->
+    <div class="modal" id="adminLoginModal" role="dialog" aria-modal="true" aria-labelledby="adminLoginTitle" style="display:none">
+      <div class="modal__content modal__content--small">
+        <button class="modal__close" id="adminLoginClose" aria-label="Закрыть">✕</button>
+        <h2 id="adminLoginTitle">Вход в режим администратора</h2>
+        <form id="adminLoginForm" class="admin-login-form">
+          <div class="form-group">
+            <label for="adminPassword">Пароль администратора</label>
+            <input type="password" id="adminPassword" name="password" required autocomplete="current-password">
+          </div>
+          <div class="form-actions">
+            <button type="button" id="adminLoginCancel" class="btn btn--secondary">Отмена</button>
+            <button type="submit" class="btn btn--primary">Войти</button>
+          </div>
+        </form>
+      </div>
+    </div>
+    
+    <!-- Core helpers (IIFE) before main app -->
+    <script src="js/content-config.js"></script>
+    <script src="js/product-schema.js"></script>
+    <script src="js/data-provider.js"></script>
     <script type="module" src="js/main.js"></script>
 </body>
 </html>

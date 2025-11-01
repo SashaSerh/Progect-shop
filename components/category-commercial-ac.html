@@ -1,0 +1,128 @@
+<section class="category-page fade-in-section" id="commercial-ac">
+    <div class="container">
+        <nav class="breadcrumbs" aria-label="breadcrumb">
+            <a href="#" class="breadcrumbs__link">Главная</a>
+            <span class="breadcrumbs__sep">›</span>
+            <a href="#products" class="breadcrumbs__link">Каталог</a>
+            <span class="breadcrumbs__sep">›</span>
+            <span class="breadcrumbs__current">Комерційні кондиціонери</span>
+        </nav>
+
+        <div class="category-header">
+            <h1 class="category-title">Комерційні кондиціонери</h1>
+            <p class="category-description">
+                Професійні рішення для офісів, магазинів, ресторанів та промислових приміщень.
+                Висока продуктивність, надійність та енергоефективність для комерційного використання.
+            </p>
+        </div>
+
+        <div class="category-content">
+            <div class="category-features">
+                <div class="feature-card">
+                    <div class="feature-icon">🏢</div>
+                    <h3>Для великих приміщень</h3>
+                    <p>Продуктивність від 5 до 50 кВт для офісів та комерційних об'єктів</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <h3>Енергоефективність</h3>
+                    <p>Клас A+++, зниження витрат на електроенергію до 60%</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔧</div>
+                    <h3>Сервісне обслуговування</h3>
+                    <p>Регулярне технічне обслуговування та підтримка 24/7</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h3>Системи управління</h3>
+                    <p>Централізоване керування всією системою кондиціонування</p>
+                </div>
+            </div>
+
+            <div class="category-applications">
+                <h2>Застосування</h2>
+                <div class="applications-grid">
+                    <div class="application-item">
+                        <h4>🏪 Магазини та торгові центри</h4>
+                        <p>Створення комфортних умов для покупців та персоналу</p>
+                    </div>
+                    <div class="application-item">
+                        <h4">🏢 Офіси та бізнес-центри</h4>
+                        <p>Продуктивна атмосфера для роботи співробітників</p>
+                    </div>
+                    <div class="application-item">
+                        <h4">🍽️ Ресторани та кафе</h4>
+                        <p>Комфорт для гостей та дотримання санітарних норм</p>
+                    </div>
+                    <div class="application-item">
+                        <h4">🏭 Промислові приміщення</h4>
+                        <p>Контроль температури та вологості для виробництва</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="category-benefits">
+                <h2>Переваги комерційних систем</h2>
+                <ul class="benefits-list">
+                    <li>✅ Висока продуктивність та надійність</li>
+                    <li>✅ Економія електроенергії</li>
+                    <li>✅ Можливість зонального керування</li>
+                    <li>✅ Професійне встановлення та обслуговування</li>
+                    <li>✅ Гарантія якості та довговічність</li>
+                </ul>
+            </div>
+
+            <div class="category-products">
+                <h2>Популярні моделі</h2>
+                
+                <!-- Элементы управления фильтрами -->
+                <div class="category-products__controls">
+                    <div class="category-products__filter-group">
+                        <label for="category-sort-select" class="category-products__filter-label">Сортувати за:</label>
+                        <select id="category-sort-select" class="category-products__select">
+                            <option value="default">За замовчуванням</option>
+                            <option value="price-low">Ціна: від низької до високої</option>
+                            <option value="price-high">Ціна: від високої до низької</option>
+                            <option value="rating">За рейтингом</option>
+                            <option value="newest">Найновіші</option>
+                        </select>
+                    </div>
+                    
+                    <div class="category-products__filter-group">
+                        <label for="category-price-filter" class="category-products__filter-label">Ціновий діапазон:</label>
+                        <select id="category-price-filter" class="category-products__select">
+                            <option value="all">Всі ціни</option>
+                            <option value="0-15000">До 15 000 ₴</option>
+                            <option value="15000-30000">15 000 - 30 000 ₴</option>
+                            <option value="30000-50000">30 000 - 50 000 ₴</option>
+                            <option value="50000+">Понад 50 000 ₴</option>
+                        </select>
+                    </div>
+                    
+                    <button id="category-reset-filters" class="category-products__reset-btn">Скинути фільтри</button>
+                </div>
+                
+                <div class="category-products__grid" id="category-products-grid">
+                    <!-- Товары будут загружены динамически -->
+                </div>
+                
+                <!-- Пагинация -->
+                <div id="category-pagination"></div>
+                
+                <div class="category-products__actions">
+                    <a href="#products" class="btn btn--primary">Переглянути всі комерційні кондиціонери</a>
+                </div>
+            </div>
+
+            <div class="category-cta">
+                <h2>Потрібна консультація для комерційного об'єкта?</h2>
+                <p>Наші фахівці підберуть оптимальну систему кондиціонування</p>
+                <div class="cta-buttons">
+                    <a href="#contacts" class="btn btn--primary">Замовити консультацію</a>
+                    <a href="#products?category=commercial-ac" class="btn btn--secondary">Переглянути моделі</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

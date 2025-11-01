@@ -1,5 +1,10 @@
 <section class="products fade-in-section" id="products">
     <div class="container">
+        <nav class="breadcrumbs" aria-label="breadcrumb">
+            <a href="#home" class="breadcrumbs__link" data-i18n="home">Главная</a>
+            <span class="breadcrumbs__sep">›</span>
+            <span class="breadcrumbs__current" data-i18n="products-title">Наши товары</span>
+        </nav>
         <h2 class="products__title" data-i18n="products-title">Наши товары</h2>
         <div class="products__filters">
             <div class="filter-group">
@@ -17,6 +22,41 @@
                     <option value="low" data-i18n="filter-low-to-high">От низкой к высокой</option>
                     <option value="high" data-i18n="filter-high-to-low">От высокой к низкой</option>
                 </select>
+            </div>
+            <div class="admin-controls" id="adminControls" style="display: none;">
+                <button class="admin-btn admin-btn--export" id="exportProductsBtn" aria-label="Экспортировать локальные товары">Экспорт</button>
+                <label class="admin-btn admin-btn--import" for="importProductsInput" aria-label="Импортировать товары из файла">Импорт</label>
+                <input type="file" id="importProductsInput" accept=".json" style="display: none;">
+                <details class="admin-gitcms" id="gitcmsSettings">
+                    <summary>Git‑CMS</summary>
+                    <div class="gitcms-form">
+                        <label>Провайдер
+                            <select id="dataProviderSelect">
+                                <option value="localStorage">LocalStorage</option>
+                                <option value="gitcms">Git‑CMS</option>
+                            </select>
+                        </label>
+                        <label>Repo (owner/repo)
+                            <input id="gitcmsRepo" placeholder="owner/repo">
+                        </label>
+                        <label>Branch
+                            <input id="gitcmsBranch" placeholder="main">
+                        </label>
+                        <label>Path
+                            <input id="gitcmsPath" placeholder="data/products.json">
+                        </label>
+                        <label>Token
+                            <input id="gitcmsToken" type="password" placeholder="ghp_...">
+                        </label>
+                        <div class="gitcms-actions">
+                            <button type="button" id="gitcmsSaveBtn">Сохранить</button>
+                            <button type="button" id="gitcmsLoadBtn" title="Загрузить товары из Git в локальные">Загрузить из Git</button>
+                            <button type="button" id="gitcmsMergeBtn" title="Загрузить из Git и слить с текущими">Загрузить и слить</button>
+                            <button type="button" id="gitcmsPushBtn" title="Записать локальные товары в Git">Записать в Git</button>
+                            <span id="gitcmsStatus" aria-live="polite" style="margin-left:8px; font-size:12px;"></span>
+                        </div>
+                    </div>
+                </details>
             </div>
         </div>
         <div class="products__grid"></div>

@@ -3,7 +3,7 @@
  * Работает с множественными иконками тем в мобильной и десктопной версиях
  */
 export function initTheme() {
-    const savedTheme = localStorage.getItem('theme') || 'dark';
+    const savedTheme = localStorage.getItem('theme') || 'light';
     document.body.classList.toggle('light-theme', savedTheme === 'light');
     
     // Обновляем все иконки тем

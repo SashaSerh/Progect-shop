@@ -1,0 +1,24 @@
+<section id="compareModal" class="compare-modal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="compareModalTitle">
+    <div class="compare-modal__backdrop" data-close="true"></div>
+    <div class="compare-modal__content" role="document" tabindex="-1">
+        <header class="compare-modal__header">
+            <h2 id="compareModalTitle" data-i18n="compare-modal-title">Сравнение товаров</h2>
+            <button type="button" class="compare-modal__close" aria-label="Закрыть" data-close="true">
+                <span aria-hidden="true">×</span>
+            </button>
+        </header>
+        <div class="compare-modal__body">
+            <p class="compare-modal__hint" hidden></p>
+            <div class="compare-modal__table-wrapper" aria-live="polite" aria-atomic="true">
+                <table class="compare-modal__table">
+                    <thead></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+        <footer class="compare-modal__footer">
+            <button type="button" class="compare-modal__cta" data-action="copy-link" data-i18n="compare-modal-copy-link">Скопировать ссылку</button>
+            <button type="button" class="compare-modal__cta compare-modal__cta--secondary" data-action="clear" data-i18n="compare-modal-clear">Очистить</button>
+        </footer>
+    </div>
+</section>

@@ -158,7 +158,7 @@
   window.listCategories = listCategories;
 })();
 // Контент и контакты для быстрой правки без участия верстки
-export const contentConfig = {
+window.contentConfig = {
   business: {
     name: 'ClimaTech',
     legalName: 'ИП ClimaTech',

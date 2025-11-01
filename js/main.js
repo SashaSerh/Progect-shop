@@ -5,7 +5,8 @@ import { initWelcomeOverlay, needsWelcomeOverlay } from './welcome.js';
 import { products, renderProducts, renderProductCard, filterProducts, toggleFavorite, toggleCompare, getFavoriteIds, getCompareIds, getProductsByCategory, isFavorite, isCompared, isAdminMode } from './products.js';
 import { initCompareBar } from './compare-bar.js';
 import { initCompareModal } from './compare-modal.js';
-import { contentConfig } from './content-config.js';
+// content-config is loaded as a global (classic script tag)
+const contentConfig = (typeof window !== 'undefined' && window.contentConfig) ? window.contentConfig : {};
 import { initMarketing } from './marketing.js';
 import { initNavigation } from './navigation.js';
 
@@ -1080,6 +1081,18 @@ async function initApp() {
         const btn = t.closest('.theme-toggle');
         if (btn) {
             try { toggleTheme(); } catch(_) {}
+        }
+    });
+
+    // Fallback делегирование для кнопки каталога: гарантирует открытие даже если
+    // прямой обработчик не успел повеситься из-за гонки рендера в тестовой среде.
+    // Прямая привязка выше вызывает stopPropagation, поэтому дубля не будет.
+    document.addEventListener('click', (e) => {
+        const t = e.target;
+        if (!(t instanceof HTMLElement)) return;
+        const catalogBtn = t.closest('#catalogButton');
+        if (catalogBtn) {
+            toggleCatalogDropdown(e);
         }
     });
 

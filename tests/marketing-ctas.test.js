@@ -1,11 +1,35 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { buildWhatsAppLink, buildTelegramLink, attachCTAs } from '../js/marketing.js';
-import { contentConfig } from '../js/content-config.js';
 
 // JSDOM env
 
 describe('marketing CTAs', () => {
   beforeEach(() => {
+    // Тестовый конфиг контента — маркетинговые функции читают его из window.contentConfig
+    window.contentConfig = {
+      contacts: {
+        whatsapp: '+380991112233',
+        telegram: 'TestUser',
+        phonePrimary: '+380991112233',
+        email: 'test@example.com',
+        address: 'Test street, Kyiv'
+      },
+      social: {
+        instagram: 'https://instagram.com/test',
+        facebook: 'https://facebook.com/test'
+      },
+      business: {
+        name: 'TestBiz',
+        description: 'desc',
+        areaServed: ['Kyiv'],
+        openingHours: ['Mo-Fr 09:00-18:00']
+      },
+      contactForm: {
+        provider: 'formspree',
+        endpoint: 'https://formspree.io/f/test',
+        mailto: 'test@example.com'
+      }
+    };
     document.body.innerHTML = `
       <div class="contacts__cta">
         <a class="btn" data-cta="call">Позвонить</a>
@@ -15,16 +39,18 @@ describe('marketing CTAs', () => {
   });
 
   it('buildWhatsAppLink uses phone from config', () => {
+    const cfg = window.contentConfig;
     const url = new URL(buildWhatsAppLink('hello'));
     expect(url.hostname).toBe('wa.me');
-    expect(url.pathname).toContain(contentConfig.contacts.whatsapp.replace(/\D/g,''));
+    expect(url.pathname).toContain(cfg.contacts.whatsapp.replace(/\D/g,''));
     expect(url.searchParams.get('text')).toBe('hello');
   });
 
   it('buildTelegramLink uses username when provided', () => {
+    const cfg = window.contentConfig;
     const url = buildTelegramLink('hi');
     expect(url.startsWith('https://t.me/')).toBe(true);
-    expect(url.includes(contentConfig.contacts.telegram)).toBe(true);
+    expect(url.includes(cfg.contacts.telegram)).toBe(true);
   });
 
   it('attachCTAs sets base hrefs and delegates clicks', () => {

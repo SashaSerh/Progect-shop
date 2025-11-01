@@ -1,4 +1,14 @@
-import { contentConfig } from './content-config.js';
+// contentConfig доступен глобально через script js/content-config.js; читаем его лениво
+function getContentConfig() {
+  if (typeof window !== 'undefined' && window.contentConfig) return window.contentConfig;
+  // Fallback для сред тестирования (Vitest/JSDOM), если конфиг не задан
+  return {
+    contacts: { whatsapp: '', telegram: '', phonePrimary: '', email: '', address: '' },
+    social: {},
+    business: { name: '', description: '', areaServed: [], openingHours: [] },
+    contactForm: { provider: '', endpoint: '', mailto: '' }
+  };
+}
 
 function safeOpen(url) {
   try {
@@ -13,20 +23,20 @@ function safeOpen(url) {
 }
 
 export function buildWhatsAppLink(text = '') {
-  const phone = contentConfig.contacts.whatsapp.replace(/\D/g, '');
+  const phone = getContentConfig().contacts.whatsapp.replace(/\D/g, '');
   const query = new URLSearchParams({ text }).toString();
   return `https://wa.me/${phone}?${query}`;
 }
 
 export function buildTelegramLink(text = '') {
   // Поддерживаем как username, так и номер телефона: если начинается с '+', направим в t.me/+380..., иначе в t.me/<username>
-  const user = (contentConfig.contacts.telegram || '').trim();
+  const user = (getContentConfig().contacts.telegram || '').trim();
   const query = new URLSearchParams({ text }).toString();
   const path = user.startsWith('+') ? encodeURIComponent(user) : user;
   return `https://t.me/${path}?${query}`;
 }
 
-export function buildPhoneLink(phone = contentConfig.contacts.phonePrimary) {
+export function buildPhoneLink(phone = getContentConfig().contacts.phonePrimary) {
   return `tel:${phone.replace(/\s+/g, '')}`;
 }
 
@@ -41,7 +51,7 @@ export function attachCTAs() {
     a.setAttribute('rel','noopener');
   });
   document.querySelectorAll('.btn--tg').forEach(a => {
-    const raw = (contentConfig.contacts.telegram || '').trim();
+    const raw = (getContentConfig().contacts.telegram || '').trim();
     const digits = raw.replace(/\D/g, '');
     const href = (raw.startsWith('+') || /^\d+$/.test(raw))
       ? `tg://resolve?phone=${digits}`
@@ -92,14 +102,14 @@ export function attachCTAs() {
     const igBtn = target.closest('.btn--ig');
     if (igBtn) {
       e.preventDefault();
-      const url = contentConfig.social?.instagram;
+      const url = getContentConfig().social?.instagram;
       if (url) safeOpen(url);
       return;
     }
     const fbBtn = target.closest('.btn--fb');
     if (fbBtn) {
       e.preventDefault();
-      const url = contentConfig.social?.facebook;
+      const url = getContentConfig().social?.facebook;
       if (url) safeOpen(url);
       return;
     }
@@ -107,7 +117,7 @@ export function attachCTAs() {
 }
 
 export function injectLocalBusinessJSONLD() {
-  const { business, contacts } = contentConfig;
+  const { business, contacts } = getContentConfig();
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'LocalBusiness',
@@ -217,7 +227,7 @@ export function attachContactForm() {
   statusEl.classList.remove('is-success','is-error');
   statusEl.classList.add('is-sending');
     try {
-      const { contactForm } = contentConfig;
+      const { contactForm } = getContentConfig();
       if (contactForm?.provider === 'formspree' && contactForm?.endpoint && contactForm.endpoint.includes('formspree.io')) {
   // Honeypot (дополнительно, хотя уже есть в разметке)
   fd.append('_gotcha', '');
@@ -256,7 +266,7 @@ export function attachContactForm() {
         }
       } else {
         // Fallback: mailto
-        const to = contactForm?.mailto || contentConfig.contacts.email;
+  const to = contactForm?.mailto || getContentConfig().contacts.email;
         const subject = encodeURIComponent('Заявка с сайта');
         const body = encodeURIComponent(`Имя: ${name}\nEmail: ${email}\nСообщение: ${message}`);
         const mailto = `mailto:${to}?subject=${subject}&body=${body}`;
@@ -269,7 +279,8 @@ export function attachContactForm() {
       console.warn('Contact form error', err);
       // Попробуем сделать mailto, если Formspree дал сбой
       try {
-        const to = contentConfig?.contactForm?.mailto || contentConfig.contacts.email;
+        const cfg = getContentConfig();
+        const to = cfg?.contactForm?.mailto || cfg.contacts.email;
         if (to) {
           const subject = encodeURIComponent('Заявка с сайта (fallback)');
           const body = encodeURIComponent(`Имя: ${name}\nEmail: ${email}\nСообщение: ${message}`);

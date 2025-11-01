@@ -1,0 +1,45 @@
+[
+  {
+    "id": "p_demo_001",
+    "sku": "AC-DEMO-001",
+    "categories": ["conditioners"],
+    "name": { "uk": "Кондиціонер DemoCool", "ru": "Кондиционер DemoCool", "en": "" },
+    "shortDesc": { "uk": "Тиха робота, A++", "ru": "Тихая работа, A++", "en": "" },
+    "fullDesc": { "uk": "", "ru": "", "en": "" },
+    "price": 19999,
+    "oldPrice": 0,
+    "inStock": true,
+    "stockCount": 10,
+    "flags": { "isNew": true, "isHit": false, "isPromo": false, "isBestseller": false },
+    "images": [
+      { "src": "https://picsum.photos/600?random=5001", "alt": { "uk": "DemoCool", "ru": "DemoCool", "en": "" }, "featured": true }
+    ],
+    "specs": [
+      { "key": "power", "label": { "uk": "Потужність", "ru": "Мощность", "en": "Power" }, "value": { "uk": "2,6 кВт", "ru": "2,6 кВт", "en": "2.6 kW" } },
+      { "key": "noise", "label": { "uk": "Шум", "ru": "Шум", "en": "Noise" }, "value": { "uk": "19 дБ", "ru": "19 дБ", "en": "19 dB" } }
+    ],
+    "attributes": {},
+    "seo": { "slug": "democool-ac-demo-001", "title": { "uk": "", "ru": "", "en": "" }, "metaDesc": { "uk": "", "ru": "", "en": "" } },
+    "createdAt": "2025-01-01T00:00:00.000Z",
+    "updatedAt": "2025-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "p_demo_002",
+    "sku": "REC-DEMO-002",
+    "categories": ["air-purifiers"],
+    "name": { "uk": "Очищувач DemoAir", "ru": "Очиститель DemoAir", "en": "" },
+    "shortDesc": { "uk": "HEPA фільтр, низький шум", "ru": "HEPA фильтр, низкий шум", "en": "" },
+    "fullDesc": { "uk": "", "ru": "", "en": "" },
+    "price": 12999,
+    "inStock": false,
+    "flags": { "isNew": false, "isHit": true, "isPromo": false, "isBestseller": false },
+    "images": [
+      { "src": "https://picsum.photos/600?random=5002", "alt": { "uk": "DemoAir", "ru": "DemoAir", "en": "" }, "featured": true }
+    ],
+    "specs": [],
+    "attributes": {},
+    "seo": { "slug": "demoair-rec-demo-002", "title": { "uk": "", "ru": "", "en": "" }, "metaDesc": { "uk": "", "ru": "", "en": "" } },
+    "createdAt": "2025-01-01T00:00:00.000Z",
+    "updatedAt": "2025-01-01T00:00:00.000Z"
+  }
+]

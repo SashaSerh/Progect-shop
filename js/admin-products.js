@@ -182,16 +182,8 @@ export function initAdminProducts(translations, lang = 'ru') {
 
   // Show/hide admin login button based on admin mode
   function updateAdminControlsVisibility() {
-    const addBtn = document.querySelector('.header-add-product');
-    const clearBtn = document.querySelector('.header-clear-products');
     const adminLink = document.getElementById('adminPageLink');
 
-    if (addBtn) {
-      addBtn.style.display = isAdmin() ? 'inline-block' : 'none';
-    }
-    if (clearBtn) {
-      clearBtn.style.display = isAdmin() ? 'inline-block' : 'none';
-    }
     if (adminLink) {
       adminLink.style.display = isAdmin() ? 'inline-block' : 'none';
     }
@@ -339,24 +331,7 @@ export function initAdminProducts(translations, lang = 'ru') {
       }
     });
   }
-  const openBtn = document.createElement('button');
-  openBtn.textContent = 'Add Product';
-  openBtn.className = 'btn btn--primary header-add-product';
-  openBtn.type = 'button';
-  openBtn.style.display = 'none'; // Hidden by default
-
-  // Кнопка очистки локальных товаров
-  const clearBtn = document.createElement('button');
-  clearBtn.textContent = 'Clear Products';
-  clearBtn.className = 'btn btn--ghost header-clear-products';
-  clearBtn.type = 'button';
-  clearBtn.style.display = 'none'; // Hidden by default
-  // Добавляем в header controls если есть
-  const headerControls = document.querySelector('.header__controls');
-  if (headerControls) {
-    headerControls.insertBefore(openBtn, headerControls.firstChild);
-    headerControls.insertBefore(clearBtn, openBtn.nextSibling);
-  }
+  // Кнопки управления в хедере (Add Product / Clear Products) убраны как дублирующие админ‑страницу
 
   const closeBtn = document.getElementById('adminProductModalClose');
   const cancelBtn = document.getElementById('adminProductCancel');
@@ -527,61 +502,9 @@ export function initAdminProducts(translations, lang = 'ru') {
   // Initialize flag selector UI
   initFlagSelector();
 
-  function openModal() {
-    form.reset();
-    // reset flags UI
-    selectedFlagsContainer && (selectedFlagsContainer.innerHTML = '');
-    flagsHiddenInput && (flagsHiddenInput.value = '[]');
-    const hid = form.querySelector('input[name="_image_data"]'); if (hid) hid.remove();
-    modal.style.display = 'flex';
-    const first = form.querySelector('input[name="title_ru"]');
-    first?.focus();
-    // Подставляем черновик, если есть
-    try {
-      const d = (function(){ try { return JSON.parse(localStorage.getItem(DRAFT_KEY) || 'null') || null; } catch { return null; } })();
-      if (d) {
-        for (const [k, v] of Object.entries(d)) {
-          const field = form.querySelector(`[name="${k}"]`);
-          if (field) field.value = v;
-        }
-        if (d._flags) {
-          try { const fl = JSON.parse(d._flags); if (Array.isArray(fl)) renderSelectedFlags(fl); } catch {}
-        }
-      }
-    } catch {}
-  }
-  function closeModal() {
-    if (modal) {
-      modal.style.display = 'none';
-    }
-    form?.reset();
-    if (preview) preview.innerHTML = '';
-  }
+  // Модальное окно добавления из хедера удалено; используем полноценную страницу админки
 
-  // Открытие формы добавления товара: по умолчанию модалка (для совместимости с тестами);
-  // если модалки нет (новая навигация) — переходим на страницу админки
-  openBtn.addEventListener('click', () => {
-    if (modal) {
-      openModal();
-    } else {
-      location.hash = '#admin/products';
-    }
-  });
-  closeBtn?.addEventListener('click', closeModal);
-  cancelBtn?.addEventListener('click', closeModal);
-
-  // Очистка локальных товаров (оставляем кнопку, действует только на локальные)
-  clearBtn.addEventListener('click', () => {
-    if (!confirm('Очистить все локальные товары? Это действие нельзя отменить.')) return;
-    saveLocalProducts([]);
-    try {
-      const merged = Products.getMergedProducts();
-      Products.setProducts(merged);
-      window.products = merged;
-      Products.renderProducts(lang, translations, merged);
-      showToast('Локальные товары очищены');
-    } catch (err) { console.error('clear error', err); }
-  });
+  // Очистка локальных товаров доступна через админ‑страницу; отдельно в хедере не отображается
 
   // preview image
   fileInput?.addEventListener('change', (e) => {
@@ -709,7 +632,7 @@ export function initAdminProducts(translations, lang = 'ru') {
       window.products = merged;
       Products.renderProducts(lang, translations, merged);
     } catch (err) { console.error('render error', err); }
-    closeModal();
+    // На админ‑странице форма остаётся открытой; здесь модалки нет
   });
 
   function showToast(text, ms = 2500) {

@@ -902,20 +902,7 @@ async function initApp() {
     // После первичного рендера привяжем переход на страницу товара
     bindProductCardNavigation();
 
-    // Загрузим админ-форму для добавления товаров и инициализируем модуль
-    try {
-        // Попробуем получить HTML компонента и вставить в body (если не был загружен автоматически)
-        const resp = await fetch('components/admin-product-form.html');
-        if (resp.ok) {
-            const html = await resp.text();
-            // Вставим в конец body только если модал ещё не присутствует
-            if (!document.getElementById('adminProductModal')) {
-                const wrapper = document.createElement('div');
-                wrapper.innerHTML = html;
-                document.body.appendChild(wrapper.firstElementChild);
-            }
-        }
-    } catch (err) { /* ignore fetch errors */ }
+    // Ранее модалка добавления товара подгружалась прямо на главной; теперь используем отдельно страницу админки
     try {
         console.log('Importing admin-products.js...');
         const admin = await import('./admin-products.js');

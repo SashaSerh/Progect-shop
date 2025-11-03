@@ -185,6 +185,12 @@ export function setProducts(list) {
     products = Array.isArray(list) ? [...list] : [...baseProducts];
     if (typeof window !== 'undefined') {
         window.products = products;
+        // Инвалидация кеша фильтров, чтобы новые локальные товары отображались сразу
+        try {
+            if (window.__productsFilterCache && typeof window.__productsFilterCache.clear === 'function') {
+                window.__productsFilterCache.clear();
+            }
+        } catch (_) { /* no-op */ }
     }
 }
 
@@ -566,7 +572,7 @@ export function renderProductCard(product, lang, translations) {
             .replace(/</g, '&lt;')
             .replace(/>/g, '&gt;')
             .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#39;');
+             .replace(/'/g, '&#39;');
     };
 
     const selectPluralForm = (count) => {

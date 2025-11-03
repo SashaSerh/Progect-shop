@@ -1311,6 +1311,19 @@ async function initApp() {
 
     // Обработчики темы подключаются через делегирование ниже
 
+    // Лёгкая навигация по кнопке Admin: без загрузки админ-кода на главной
+    // При клике вне админ-маршрута просто переходим на #admin/products.
+    // На самой админ-странице этим занимается модуль admin-products.js (мы не мешаем).
+    const adminToggle = document.getElementById('adminToggleBtn');
+    if (adminToggle) {
+        adminToggle.addEventListener('click', (e) => {
+            if (location.hash !== '#admin/products') {
+                e.preventDefault();
+                location.hash = '#admin/products';
+            }
+        });
+    }
+
     const checkoutButton = document.querySelector('.cart-button--checkout');
     if (checkoutButton) checkoutButton.addEventListener('click', openCartModal);
 

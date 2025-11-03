@@ -870,7 +870,7 @@ async function initApp() {
         switchLanguage(savedLanguage);
     }
     // Гидратируем товары локальными (LocalStorage) перед первым рендером,
-    // чтобы локальные карточки не пропадали после перезагрузки
+    // чтобы локальные карточки не пропадали после перезагрузки (быстрый первый рендер)
     try {
         const merged = getMergedProducts();
         setProducts(merged);
@@ -879,6 +879,19 @@ async function initApp() {
         // Фоллбек — рендер по базовым, если что-то пошло не так
         renderProducts(savedLanguage, translations);
     }
+    // После быстрого локального рендера попробуем подгрузить товары из Git‑CMS (если настроен провайдер)
+    try {
+        const provider = (typeof window !== 'undefined' && typeof window.getDataProvider === 'function') ? window.getDataProvider() : null;
+        if (provider && provider.kind === 'gitcms' && typeof provider.isConfigured === 'function' && provider.isConfigured()) {
+            // Загружаем удалённые товары и перерисовываем витрину, если пришли валидные данные
+            provider.loadAll().then((remoteList) => {
+                if (Array.isArray(remoteList) && remoteList.length) {
+                    setProducts(remoteList);
+                    renderProducts(savedLanguage, translations, remoteList);
+                }
+            }).catch(() => {/* молча фоллбэкаем на локальные */});
+        }
+    } catch (_) { /* ignore */ }
     initCompareBar(savedLanguage);
     initCompareModal(savedLanguage);
     initCollectionBadges();

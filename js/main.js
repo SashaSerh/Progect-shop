@@ -2,7 +2,7 @@ import { cart, saveCart, updateCartUI, addToCart, removeFromCart, clearCart, tog
 import { toggleTheme, initTheme } from './theme.js';
 import { translations, switchLanguage } from './i18n.js';
 import { initWelcomeOverlay, needsWelcomeOverlay } from './welcome.js';
-import { products, renderProducts, renderProductCard, filterProducts, toggleFavorite, toggleCompare, getFavoriteIds, getCompareIds, getProductsByCategory, isFavorite, isCompared, isAdminMode } from './products.js';
+import { products, renderProducts, renderProductCard, filterProducts, toggleFavorite, toggleCompare, getFavoriteIds, getCompareIds, getProductsByCategory, isFavorite, isCompared, isAdminMode, getMergedProducts, setProducts } from './products.js';
 import { initCompareBar } from './compare-bar.js';
 import { initCompareModal } from './compare-modal.js';
 // content-config is loaded as a global (classic script tag)
@@ -869,8 +869,16 @@ async function initApp() {
     if (typeof switchLanguage === 'function') {
         switchLanguage(savedLanguage);
     }
-    // Рендерим товары сразу (в тестовой среде важна синхронность появления карточек)
-    renderProducts(savedLanguage, translations);
+    // Гидратируем товары локальными (LocalStorage) перед первым рендером,
+    // чтобы локальные карточки не пропадали после перезагрузки
+    try {
+        const merged = getMergedProducts();
+        setProducts(merged);
+        renderProducts(savedLanguage, translations, merged);
+    } catch (_) {
+        // Фоллбек — рендер по базовым, если что-то пошло не так
+        renderProducts(savedLanguage, translations);
+    }
     initCompareBar(savedLanguage);
     initCompareModal(savedLanguage);
     initCollectionBadges();

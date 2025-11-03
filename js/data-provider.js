@@ -95,17 +95,23 @@
     // Commits full products.json (replace). In real flow we may implement per-item files.
     async replaceAll(products, commitMessage = 'chore: update products.json') {
       if (!this.isConfigured()) throw new Error('GitCMS is not configured');
-      // Get current SHA
+      // Get current SHA (optional). If file doesn't exist, we'll create it (no sha required)
+      let sha = undefined;
       const metaUrl = `https://api.github.com/repos/${this.repo}/contents/${this.path}?ref=${encodeURIComponent(this.branch)}`;
-      const meta = await this._fetchJson(metaUrl, { headers: { 'Authorization': `Bearer ${this.token}`, 'Accept': 'application/vnd.github+json' } });
-      const sha = meta?.sha;
+      try {
+        const meta = await this._fetchJson(metaUrl, { headers: { 'Authorization': `Bearer ${this.token}`, 'Accept': 'application/vnd.github+json' } });
+        sha = meta?.sha;
+      } catch (e) {
+        // If not found (404), we will create a new file by omitting sha
+        // Other errors should still propagate on PUT if any
+      }
       const putUrl = `https://api.github.com/repos/${this.repo}/contents/${this.path}`;
       const body = {
         message: commitMessage,
         content: btoa(unescape(encodeURIComponent(JSON.stringify(products, null, 2)))),
         branch: this.branch,
-        sha,
       };
+      if (sha) body.sha = sha;
       const res = await this._fetchJson(putUrl, {
         method: 'PUT',
         headers: { 'Authorization': `Bearer ${this.token}`, 'Accept': 'application/vnd.github+json', 'Content-Type': 'application/json' },

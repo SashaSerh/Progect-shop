@@ -24,6 +24,17 @@ export async function initAdminPage(translations, lang = 'ru') {
   const exportBtn = document.getElementById('adminExportBtn');
   const importInput = document.getElementById('adminImportInput');
   const clearConflictsBtn = document.getElementById('clearConflictsBtn');
+  // Git‑CMS settings controls
+  const providerSelect = document.getElementById('dataProviderSelect');
+  const repoInp = document.getElementById('gitcmsRepo');
+  const branchInp = document.getElementById('gitcmsBranch');
+  const pathInp = document.getElementById('gitcmsPath');
+  const tokenInp = document.getElementById('gitcmsToken');
+  const saveBtn = document.getElementById('gitcmsSaveBtn');
+  const loadBtn = document.getElementById('gitcmsLoadBtn');
+  const pushBtn = document.getElementById('gitcmsPushBtn');
+  const mergeBtn = document.getElementById('gitcmsMergeBtn');
+  const statusEl = document.getElementById('gitcmsStatus');
 
   function showToast(text) {
     const host = document.getElementById('toast-container');
@@ -359,6 +370,182 @@ export async function initAdminPage(translations, lang = 'ru') {
       if (draft._flags) { try { const fl = JSON.parse(draft._flags); if (Array.isArray(fl)) renderSelectedFlags(fl); } catch {} }
     }
   } catch {}
+
+  // ===== Git‑CMS wiring (settings + actions) =====
+  function setGitStatus(text, isError = false) {
+    if (!statusEl) return;
+    statusEl.textContent = text || '';
+    statusEl.style.color = isError ? 'var(--color-danger, #c0392b)' : 'inherit';
+  }
+  function updateGitButtonsEnabled() {
+    const v = (providerSelect && providerSelect.value) || (localStorage.getItem('admin:dataProvider') || 'localStorage');
+    const isGit = v === 'gitcms';
+    [loadBtn, pushBtn, mergeBtn].forEach(btn => { if (btn) { btn.disabled = !isGit; btn.title = isGit ? '' : 'Доступно только для Git‑CMS'; } });
+    if (statusEl) statusEl.textContent = '';
+  }
+  function withLoading(btn, fn, statusText) {
+    if (btn) { btn.disabled = true; btn.setAttribute('aria-busy', 'true'); }
+    if (statusEl) {
+      statusEl.innerHTML = `<span class="spinner spinner--inline" aria-hidden="true"></span> ${statusText || ''}`;
+    }
+    return Promise.resolve().then(fn).finally(() => { if (btn) { btn.disabled = false; btn.removeAttribute('aria-busy'); } });
+  }
+
+  // Hydrate current values
+  try {
+    const currentPref = (localStorage.getItem('admin:dataProvider') || 'localStorage');
+    if (providerSelect) providerSelect.value = currentPref;
+    if (repoInp) repoInp.value = localStorage.getItem('admin:gitcms:repo') || 'SashaSerh/Progect-shop';
+    if (branchInp) branchInp.value = localStorage.getItem('admin:gitcms:branch') || 'main';
+    if (pathInp) pathInp.value = localStorage.getItem('admin:gitcms:path') || 'data/products.json';
+    if (tokenInp) tokenInp.value = localStorage.getItem('admin:gitcms:token') || '';
+  } catch {}
+
+  updateGitButtonsEnabled();
+
+  providerSelect?.addEventListener('change', (ev) => {
+    const v = ev.target.value;
+    try { localStorage.setItem('admin:dataProvider', v); } catch {}
+    updateGitButtonsEnabled();
+    showToast(`Провайдер: ${v}`);
+  });
+
+  saveBtn?.addEventListener('click', () => {
+    try {
+      if (repoInp) localStorage.setItem('admin:gitcms:repo', (repoInp.value || '').trim());
+      if (branchInp) localStorage.setItem('admin:gitcms:branch', (branchInp.value || 'main').trim());
+      if (pathInp) localStorage.setItem('admin:gitcms:path', (pathInp.value || 'data/products.json').trim());
+      if (tokenInp) localStorage.setItem('admin:gitcms:token', (tokenInp.value || '').trim());
+      showToast('Настройки Git‑CMS сохранены');
+    } catch (e) {
+      console.error('Save gitcms settings error', e);
+      showToast('Ошибка сохранения настроек Git‑CMS');
+    }
+  });
+
+  loadBtn?.addEventListener('click', async () => {
+    await withLoading(loadBtn, async () => {
+      try {
+        const p = (typeof window !== 'undefined' && window.getDataProvider) ? window.getDataProvider() : null;
+        if (!p || p.kind !== 'gitcms' || typeof p.isConfigured !== 'function' || !p.isConfigured()) {
+          setGitStatus('Git‑CMS не настроен', true);
+          showToast('Git‑CMS не настроен');
+          return;
+        }
+        setGitStatus('Загрузка…');
+        const list = await p.loadAll();
+        if (!Array.isArray(list)) {
+          setGitStatus('Не удалось загрузить товары', true);
+          showToast('Не удалось загрузить товары');
+          return;
+        }
+        saveLocalProducts(list);
+        try {
+          const merged = getMergedProducts(); setProducts(merged); window.products = merged; renderProducts(lang, translations, merged);
+        } catch {}
+        setGitStatus(`Загружено: ${list.length}`);
+        showToast(`Загружено из Git: ${list.length}`);
+        renderList();
+      } catch (e) {
+        console.error('GitCMS load error', e);
+        setGitStatus(`Ошибка: ${e?.message || e}`, true);
+        showToast('Ошибка загрузки из Git‑CMS');
+      }
+    });
+  });
+
+  pushBtn?.addEventListener('click', async () => {
+    await withLoading(pushBtn, async () => {
+      try {
+        const p = (typeof window !== 'undefined' && window.getDataProvider) ? window.getDataProvider() : null;
+        if (!p || p.kind !== 'gitcms' || typeof p.isConfigured !== 'function' || !p.isConfigured()) {
+          setGitStatus('Git‑CMS не настроен', true);
+          showToast('Git‑CMS не настроен');
+          return;
+        }
+        const list = getLocalProducts();
+        if (!list.length) {
+          const ok = confirm('Локальный список пуст. Очистить удалённый файл в Git?');
+          if (!ok) return;
+        }
+        setGitStatus('Запись…');
+        await p.replaceAll(list, 'feat(admin): sync local products to git');
+        setGitStatus('Записано');
+        showToast('Товары записаны в Git');
+      } catch (e) {
+        console.error('GitCMS push error', e);
+        setGitStatus(`Ошибка: ${e?.message || e}`, true);
+        showToast('Ошибка записи в Git‑CMS');
+      }
+    });
+  });
+
+  mergeBtn?.addEventListener('click', async () => {
+    await withLoading(mergeBtn, async () => {
+      try {
+        const p = (typeof window !== 'undefined' && window.getDataProvider) ? window.getDataProvider() : null;
+        if (!p || p.kind !== 'gitcms' || typeof p.isConfigured !== 'function' || !p.isConfigured()) {
+          setGitStatus('Git‑CMS не настроен', true);
+          showToast('Git‑CMS не настроен');
+          return;
+        }
+        setGitStatus('Загрузка…');
+        const remote = await p.loadAll();
+        if (!Array.isArray(remote)) {
+          setGitStatus('Не удалось загрузить товары', true);
+          return;
+        }
+        const local = getLocalProducts();
+        const byId = new Map(local.map(p => [String(p.id), p]));
+        const bySku = new Map(local.filter(p => p.sku).map(p => [String(p.sku).toLowerCase(), p]));
+
+        const conflicts = {};
+        let added = 0, updated = 0, conflicted = 0;
+        const result = [...local];
+        const upsert = (item) => {
+          const idKey = String(item.id);
+          const skuKey = String(item.sku || '').toLowerCase();
+          const idMatch = byId.get(idKey);
+          const skuMatch = skuKey ? bySku.get(skuKey) : null;
+          if (idMatch && skuMatch && idMatch.id !== skuMatch.id) {
+            conflicts[idKey] = conflicts[idKey] ? 'both' : 'both';
+            conflicted++;
+            return;
+          }
+          if (idMatch) {
+            const idx = result.findIndex(p => String(p.id) === idKey);
+            if (idx >= 0) { result[idx] = { ...idMatch, ...item, updatedAt: new Date().toISOString() }; updated++; }
+          } else if (skuMatch) {
+            const idx = result.findIndex(p => String(p.id) === String(skuMatch.id));
+            if (idx >= 0) { result[idx] = { ...skuMatch, ...item, updatedAt: new Date().toISOString() }; updated++; }
+            conflicts[String(skuMatch.id)] = 'id';
+            conflicted++;
+          } else {
+            result.push(item);
+            added++;
+          }
+        };
+        try {
+          const byIdObj = Object.fromEntries(remote.filter(r => r && r.id).map(r => [String(r.id), r]));
+          const bySkuObj = Object.fromEntries(remote.filter(r => r && r.sku).map(r => [String(r.sku).toLowerCase(), r]));
+          localStorage.setItem('admin:merge:lastRemoteById', JSON.stringify(byIdObj));
+          localStorage.setItem('admin:merge:lastRemoteBySku', JSON.stringify(bySkuObj));
+        } catch {}
+
+        remote.forEach(upsert);
+        saveLocalProducts(result);
+        try { localStorage.setItem('admin:merge:conflicts', JSON.stringify(conflicts)); } catch {}
+        const merged = getMergedProducts(); setProducts(merged); window.products = merged; renderProducts(lang, translations, merged);
+        setGitStatus(`Добавлено: ${added}, Обновлено: ${updated}, Конфликты: ${conflicted}`);
+        showToast('Слияние завершено');
+        renderList();
+      } catch (e) {
+        console.error('GitCMS merge error', e);
+        setGitStatus(`Ошибка: ${e?.message || e}`, true);
+        showToast('Ошибка слияния');
+      }
+    });
+  });
 }
 
 function renderDiffTable(diffs) {

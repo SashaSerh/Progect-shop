@@ -45,7 +45,12 @@ export function initWelcomeOverlay(currentLang, options = {}) {
         focusableNodes = Array.from(overlay.querySelectorAll(focusableSelector)).filter(n => !n.disabled);
         firstNode = focusableNodes[0];
         lastNode = focusableNodes[focusableNodes.length - 1];
-        if (firstNode) firstNode.focus();
+        // Фокусируем кнопку "Продолжить", чтобы Enter сразу продолжал
+        if (continueBtn) {
+            continueBtn.focus();
+        } else if (firstNode) {
+            firstNode.focus();
+        }
         overlay.addEventListener('keydown', trapHandler);
     };
 

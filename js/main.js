@@ -902,17 +902,7 @@ async function initApp() {
     // После первичного рендера привяжем переход на страницу товара
     bindProductCardNavigation();
 
-    // Ранее модалка добавления товара подгружалась прямо на главной; теперь используем отдельно страницу админки
-    try {
-        console.log('Importing admin-products.js...');
-        const admin = await import('./admin-products.js');
-        if (admin && typeof admin.initAdminProducts === 'function') {
-            console.log('Initializing admin products...');
-            admin.initAdminProducts(translations, savedLanguage);
-        } else {
-            console.error('initAdminProducts function not found');
-        }
-    } catch (err) { console.error('Error importing admin module:', err); }
+    // Админ-модуль больше не загружаем на главной; он подгружается только при переходе в #admin/products
 
     // Инициализируем маркетинговые CTA и форму контактов (кнопки позвонить/WhatsApp/Telegram)
     try { initMarketing(); } catch (e) { /* no-op */ }

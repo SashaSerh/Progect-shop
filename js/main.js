@@ -2,7 +2,7 @@ import { cart, saveCart, updateCartUI, addToCart, removeFromCart, clearCart, tog
 import { toggleTheme, initTheme } from './theme.js';
 import { translations, switchLanguage } from './i18n.js';
 import { initWelcomeOverlay, needsWelcomeOverlay } from './welcome.js';
-import { products, renderProducts, renderProductCard, filterProducts, toggleFavorite, toggleCompare, getFavoriteIds, getCompareIds, getProductsByCategory, isFavorite, isCompared, isAdminMode, getMergedProducts, setProducts } from './products.js';
+import { products, renderProducts, renderProductCard, filterProducts, toggleFavorite, toggleCompare, getFavoriteIds, getCompareIds, getProductsByCategory, isFavorite, isCompared, isAdminMode, getMergedProducts, setProducts, showProductsSkeleton } from './products.js';
 import { initCompareBar } from './compare-bar.js';
 import { initCompareModal } from './compare-modal.js';
 // content-config is loaded as a global (classic script tag)
@@ -869,29 +869,36 @@ async function initApp() {
     if (typeof switchLanguage === 'function') {
         switchLanguage(savedLanguage);
     }
-    // Гидратируем товары локальными (LocalStorage) перед первым рендером,
-    // чтобы локальные карточки не пропадали после перезагрузки (быстрый первый рендер)
-    try {
-        const merged = getMergedProducts();
-        setProducts(merged);
-        renderProducts(savedLanguage, translations, merged);
-    } catch (_) {
-        // Фоллбек — рендер по базовым, если что-то пошло не так
-        renderProducts(savedLanguage, translations);
-    }
-    // После быстрого локального рендера попробуем подгрузить товары из Git‑CMS (если настроен провайдер)
+    // Строгий remote-first режим: если Git‑CMS настроен, не показываем локальные вовсе,
+    // а показываем скелетоны, пока не загрузим удалённый список. Иначе — обычный локальный рендер.
     try {
         const provider = (typeof window !== 'undefined' && typeof window.getDataProvider === 'function') ? window.getDataProvider() : null;
         if (provider && provider.kind === 'gitcms' && typeof provider.isConfigured === 'function' && provider.isConfigured()) {
-            // Загружаем удалённые товары и перерисовываем витрину, если пришли валидные данные
-            provider.loadAll().then((remoteList) => {
-                if (Array.isArray(remoteList) && remoteList.length) {
+            // Показать скелетоны и ждать удалённые товары
+            try { showProductsSkeleton(); } catch(_) {}
+            try {
+                const remoteList = await provider.loadAll();
+                if (Array.isArray(remoteList)) {
                     setProducts(remoteList);
                     renderProducts(savedLanguage, translations, remoteList);
+                } else {
+                    // Некорректный ответ — безопасный фоллбек: базовый рендер без локальных
+                    renderProducts(savedLanguage, translations);
                 }
-            }).catch(() => {/* молча фоллбэкаем на локальные */});
+            } catch (e) {
+                // Сеть/доступ недоступны — показываем базовые, но не локальные
+                renderProducts(savedLanguage, translations);
+            }
+        } else {
+            // Провайдер не настроен → оставляем прежнее локальное поведение
+            const merged = getMergedProducts();
+            setProducts(merged);
+            renderProducts(savedLanguage, translations, merged);
         }
-    } catch (_) { /* ignore */ }
+    } catch (_) {
+        // Если что-то пошло не так, рисуем базовые товары как безопасный фоллбек
+        renderProducts(savedLanguage, translations);
+    }
     initCompareBar(savedLanguage);
     initCompareModal(savedLanguage);
     initCollectionBadges();

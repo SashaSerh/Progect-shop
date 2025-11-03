@@ -487,7 +487,7 @@ window.translations = translations;
 
 // Унифицированная инициализация всех переключателей языка (десктоп + мобильные чипы)
 export function initLanguageSwitchers() {
-    const current = localStorage.getItem('language') || 'ru';
+    const current = localStorage.getItem('language') || 'uk';
     const desktopButtons = document.querySelectorAll('.language-switcher');
     const chips = document.querySelectorAll('.mobile-settings__lang .lang-chip');
 

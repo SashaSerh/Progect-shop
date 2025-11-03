@@ -492,7 +492,7 @@ export function filterProducts(lang, translations) {
 // Автоперерисовка товаров при смене языка (если секция уже на странице)
 if (typeof window !== 'undefined') {
     window.addEventListener('languagechange', (e) => {
-        const lang = e.detail?.lang || (typeof localStorage !== 'undefined' && localStorage.getItem('language')) || 'ru';
+    const lang = e.detail?.lang || (typeof localStorage !== 'undefined' && localStorage.getItem('language')) || 'uk';
         // Пытаемся получить глобальные translations, если доступны в window
         try {
             const globalTranslations = window.translations || undefined;

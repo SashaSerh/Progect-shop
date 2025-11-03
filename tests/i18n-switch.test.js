@@ -48,9 +48,11 @@ describe('i18n language switching', () => {
     initLanguageSwitchers();
     const ruBtn = document.querySelector('.language-switcher[data-lang="ru"]');
     const ukBtn = document.querySelector('.language-switcher[data-lang="uk"]');
-    expect(ruBtn.getAttribute('aria-pressed')).toBe('true');
-    switchLanguage('uk');
-    initLanguageSwitchers();
+    // По умолчанию теперь активен украинский
     expect(ukBtn.getAttribute('aria-pressed')).toBe('true');
+    // Переключаемся на русский и проверяем активное состояние
+    switchLanguage('ru');
+    initLanguageSwitchers();
+    expect(ruBtn.getAttribute('aria-pressed')).toBe('true');
   });
 });

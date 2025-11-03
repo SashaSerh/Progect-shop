@@ -501,7 +501,7 @@ function updateCategoryFilters(updates = {}) {
     window.location.hash = newUrl;
 
     // Перерендериваем товары
-    const lang = localStorage.getItem('selectedLanguage') || 'ru';
+    const lang = localStorage.getItem('language') || localStorage.getItem('selectedLanguage') || 'uk';
     renderCategoryProducts(categorySlug, lang, translations, newSort, newPriceFilter, newPage);
 }
 
@@ -591,8 +591,8 @@ function getCartAddedMessage(lang) {
     const storedLang = (() => {
         try { return localStorage.getItem('language'); } catch (_) { return null; }
     })();
-    const fallback = ['ru', 'uk'].includes(lang) ? lang : (['ru', 'uk'].includes(storedLang) ? storedLang : 'ru');
-    return (translations?.[fallback]?.['cart-added']) || (translations?.ru?.['cart-added']) || 'Добавлено в корзину';
+    const fallback = ['ru', 'uk'].includes(lang) ? lang : (['ru', 'uk'].includes(storedLang) ? storedLang : 'uk');
+    return (translations?.[fallback]?.['cart-added']) || (translations?.uk?.['cart-added']) || 'Додано до кошика';
 }
 
 const MAX_TOAST_STACK = 3;
@@ -1655,8 +1655,8 @@ document.addEventListener('change', (e) => {
 
 // ====== Product detail: rendering and routing ======
 function getLangSafe() {
-    const l = (typeof localStorage !== 'undefined' && localStorage.getItem('language')) || 'ru';
-    return ['ru','uk'].includes(l) ? l : 'ru';
+    const l = (typeof localStorage !== 'undefined' && localStorage.getItem('language')) || 'uk';
+    return ['ru','uk'].includes(l) ? l : 'uk';
 }
 
 function renderProductDetail(productId) {
@@ -2802,7 +2802,7 @@ function initMobileToggles() {
     const compactThemeToggle = document.getElementById('mobileThemeToggle');
     const compactCartButton = document.getElementById('mobileCartButton');
     const compactLangChips = document.querySelectorAll('.mobile-settings__lang .lang-chip');
-    const savedLang = localStorage.getItem('language') || 'ru';
+    const savedLang = localStorage.getItem('language') || 'uk';
 
     // Тема
     if (compactThemeToggle) {
@@ -2857,7 +2857,7 @@ function initMobileToggles() {
     });
 
     window.addEventListener('languagechange', (e) => {
-        const lang = e.detail?.lang || localStorage.getItem('language') || 'ru';
+    const lang = e.detail?.lang || localStorage.getItem('language') || 'uk';
         compactLangChips.forEach(chip => {
             const isActive = chip.getAttribute('data-lang') === lang;
             chip.classList.toggle('active', isActive);

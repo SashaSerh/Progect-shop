@@ -133,7 +133,7 @@ export function openModal(translations, lang) {
     // Слушатель смены языка: если модалка открыта — переинициализируем её контент.
     const langHandler = (e) => {
         if (profileModal.style.display === 'flex') {
-            const newLang = e.detail?.lang || localStorage.getItem('language') || 'ru';
+            const newLang = e.detail?.lang || localStorage.getItem('language') || 'uk';
             // Перерисуем исходя из текущего статуса (логин/профиль)
             openModal(window.translations || translations, newLang);
         }

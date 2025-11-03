@@ -70,7 +70,7 @@ export function attachCTAs() {
       e.preventDefault();
       const id = orderBtn.dataset.id || 'general';
       const name = orderBtn.dataset.name || orderBtn.getAttribute('aria-label') || 'консультация';
-      const lang = localStorage.getItem('language') || 'ru';
+  const lang = localStorage.getItem('language') || 'uk';
       const message = lang === 'uk'
         ? `Доброго дня! Хочу замовити: ${name} (ID: ${id}).`
         : `Здравствуйте! Хочу заказать: ${name} (ID: ${id}).`;
@@ -82,7 +82,7 @@ export function attachCTAs() {
     const waBtn = target.closest('.btn--wa');
     if (waBtn) {
       e.preventDefault();
-      const lang = localStorage.getItem('language') || 'ru';
+  const lang = localStorage.getItem('language') || 'uk';
       const msg = lang === 'uk' ? 'Доброго дня! Потрібна консультація.' : 'Здравствуйте! Нужна консультация.';
       safeOpen(buildWhatsAppLink(msg + ' #utm_source=site&utm_medium=cta&utm_campaign=whatsapp'));
       return;
@@ -92,7 +92,7 @@ export function attachCTAs() {
     const tgBtn = target.closest('.btn--tg');
     if (tgBtn) {
       e.preventDefault();
-      const lang = localStorage.getItem('language') || 'ru';
+  const lang = localStorage.getItem('language') || 'uk';
       const msg = lang === 'uk' ? 'Доброго дня! Потрібна консультація.' : 'Здравствуйте! Нужна консультация.';
       safeOpen(buildTelegramLink(msg + ' #utm_source=site&utm_medium=cta&utm_campaign=telegram'));
       return;
@@ -150,7 +150,7 @@ export function attachContactForm() {
   const form = document.getElementById('contactForm');
   if (!form) return;
   const statusEl = form.querySelector('.form-status');
-  const lang = localStorage.getItem('language') || 'ru';
+  const lang = localStorage.getItem('language') || 'uk';
   const t = (k) => (window.translations?.[lang]?.[k]) || k;
   // Утилита: найти .form-field по контролу
   const fieldOf = (input) => input?.closest?.('.form-field');

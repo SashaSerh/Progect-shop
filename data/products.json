@@ -1,151 +1,6 @@
 [
   {
-    "id": "p_demo_001",
-    "sku": "AC-DEMO-001",
-    "categories": [
-      "conditioners"
-    ],
-    "name": {
-      "uk": "ÐÐ¾Ð½Ð´Ð¸ÑÑÐ¾Ð½ÐµÑ DemoCool",
-      "ru": "ÐÐ¾Ð½Ð´Ð¸ÑÐ¸Ð¾Ð½ÐµÑ DemoCool",
-      "en": ""
-    },
-    "shortDesc": {
-      "uk": "Ð¢Ð¸ÑÐ° ÑÐ¾Ð±Ð¾ÑÐ°, A++",
-      "ru": "Ð¢Ð¸ÑÐ°Ñ ÑÐ°Ð±Ð¾ÑÐ°, A++",
-      "en": ""
-    },
-    "fullDesc": {
-      "uk": "",
-      "ru": "",
-      "en": ""
-    },
-    "price": 19999,
-    "oldPrice": 0,
-    "inStock": true,
-    "stockCount": 10,
-    "flags": {
-      "isNew": true,
-      "isHit": false,
-      "isPromo": false,
-      "isBestseller": false
-    },
-    "images": [
-      {
-        "src": "https://picsum.photos/600?random=5001",
-        "alt": {
-          "uk": "DemoCool",
-          "ru": "DemoCool",
-          "en": ""
-        },
-        "featured": true
-      }
-    ],
-    "specs": [
-      {
-        "key": "power",
-        "label": {
-          "uk": "ÐÐ¾ÑÑÐ¶Ð½ÑÑÑÑ",
-          "ru": "ÐÐ¾ÑÐ½Ð¾ÑÑÑ",
-          "en": "Power"
-        },
-        "value": {
-          "uk": "2,6 ÐºÐÑ",
-          "ru": "2,6 ÐºÐÑ",
-          "en": "2.6 kW"
-        }
-      },
-      {
-        "key": "noise",
-        "label": {
-          "uk": "Ð¨ÑÐ¼",
-          "ru": "Ð¨ÑÐ¼",
-          "en": "Noise"
-        },
-        "value": {
-          "uk": "19 Ð´Ð",
-          "ru": "19 Ð´Ð",
-          "en": "19 dB"
-        }
-      }
-    ],
-    "attributes": {},
-    "seo": {
-      "slug": "democool-ac-demo-001",
-      "title": {
-        "uk": "",
-        "ru": "",
-        "en": ""
-      },
-      "metaDesc": {
-        "uk": "",
-        "ru": "",
-        "en": ""
-      }
-    },
-    "createdAt": "2025-01-01T00:00:00.000Z",
-    "updatedAt": "2025-11-03T12:26:43.246Z"
-  },
-  {
-    "id": "p_demo_002",
-    "sku": "REC-DEMO-002",
-    "categories": [
-      "air-purifiers"
-    ],
-    "name": {
-      "uk": "ÐÑÐ¸ÑÑÐ²Ð°Ñ DemoAir",
-      "ru": "ÐÑÐ¸ÑÑÐ¸ÑÐµÐ»Ñ DemoAir",
-      "en": ""
-    },
-    "shortDesc": {
-      "uk": "HEPA ÑÑÐ»ÑÑÑ, Ð½Ð¸Ð·ÑÐºÐ¸Ð¹ ÑÑÐ¼",
-      "ru": "HEPA ÑÐ¸Ð»ÑÑÑ, Ð½Ð¸Ð·ÐºÐ¸Ð¹ ÑÑÐ¼",
-      "en": ""
-    },
-    "fullDesc": {
-      "uk": "",
-      "ru": "",
-      "en": ""
-    },
-    "price": 12999,
-    "inStock": false,
-    "flags": {
-      "isNew": false,
-      "isHit": true,
-      "isPromo": false,
-      "isBestseller": false
-    },
-    "images": [
-      {
-        "src": "https://picsum.photos/600?random=5002",
-        "alt": {
-          "uk": "DemoAir",
-          "ru": "DemoAir",
-          "en": ""
-        },
-        "featured": true
-      }
-    ],
-    "specs": [],
-    "attributes": {},
-    "seo": {
-      "slug": "demoair-rec-demo-002",
-      "title": {
-        "uk": "",
-        "ru": "",
-        "en": ""
-      },
-      "metaDesc": {
-        "uk": "",
-        "ru": "",
-        "en": ""
-      }
-    },
-    "createdAt": "2025-01-01T00:00:00.000Z",
-    "updatedAt": "2025-11-03T12:26:43.247Z"
-  },
-  {
-    "id": "p_4glc2av",
+    "id": "p_ed8e6y5",
     "name": {
       "ru": "Кондиционер Cooper&Hunter Vital Inverter CH-S07FTXF2-NG R32 Wi-Fi",
       "uk": "Кондиціонер Cooper&Hunter Vital Inverter CH-S07FTXF2-NG R32 Wi-Fi 6 6 Акція ТОП Популярний"
@@ -177,7 +32,7 @@
     "originalId": "p_h9bwt0n"
   },
   {
-    "id": "p_uolis8t",
+    "id": "p_5f5ytdb",
     "name": {
       "ru": "Кондиционер Cooper&Hunter Vital Inverter CH-S07FTXF2-NaИнверторный кондиционер (тепловой насос) Cooper&Hunter Daytona (Black) CH-S09FTXD2-BLG R32 Wi-Fi",
       "uk": "Інверторний кондиціонер (тепловий насос) Cooper&Hunter Daytona (Black) CH-S09FTXD2-BL"

@@ -156,7 +156,18 @@
   class SupabaseProvider {
     constructor(opts = {}) {
       this.kind = 'supabase';
-      this.url = opts.url || localStorage.getItem('admin:supabase:url') || '';
+      // Normalize URL to prevent common typos like 'ttps://'
+      const rawUrl = opts.url || localStorage.getItem('admin:supabase:url') || '';
+      this.url = (function normalizeUrl(u) {
+        let s = String(u || '').trim();
+        if (!s) return s;
+        if (s.startsWith('ttps://')) s = 'h' + s; // fix missing 'h'
+        if (s.startsWith('tps://')) s = 'ht' + s; // extra safety
+        if (!/^https?:\/\//i.test(s)) s = 'https://' + s; // default to https
+        // collapse duplicate slashes after protocol and trim trailing slashes
+        s = s.replace(/^(https?:)\/{2,}/i, '$1//').replace(/\/+$/, '');
+        return s;
+      })(rawUrl);
       this.key = opts.key || localStorage.getItem('admin:supabase:key') || '';
       this.table = opts.table || localStorage.getItem('admin:supabase:table') || 'products';
       this.schema = opts.schema || localStorage.getItem('admin:supabase:schema') || 'public';
@@ -276,7 +287,18 @@
   // configureSupabase({ url, key, table })
   window.configureSupabase = function configureSupabase(opts = {}) {
     try {
-      if (opts.url) localStorage.setItem('admin:supabase:url', String(opts.url).trim());
+      if (opts.url) {
+        const norm = (function normalizeUrl(u) {
+          let s = String(u || '').trim();
+          if (!s) return s;
+          if (s.startsWith('ttps://')) s = 'h' + s;
+          if (s.startsWith('tps://')) s = 'ht' + s;
+          if (!/^https?:\/\//i.test(s)) s = 'https://' + s;
+          s = s.replace(/^(https?:)\/{2,}/i, '$1//').replace(/\/+$/, '');
+          return s;
+        })(opts.url);
+        localStorage.setItem('admin:supabase:url', norm);
+      }
       if (opts.key) localStorage.setItem('admin:supabase:key', String(opts.key).trim());
       if (opts.table) localStorage.setItem('admin:supabase:table', String(opts.table).trim() || 'products');
       if (opts.schema) localStorage.setItem('admin:supabase:schema', String(opts.schema).trim() || 'public');

@@ -417,7 +417,20 @@ export async function initAdminPage(translations, lang = 'ru') {
 
   // Prefill Supabase
   try {
-    if (supabaseUrlInp) supabaseUrlInp.value = localStorage.getItem('admin:supabase:url') || '';
+    if (supabaseUrlInp) {
+      const cur = localStorage.getItem('admin:supabase:url') || '';
+      const norm = (function normalizeUrl(u){
+        let s = String(u || '').trim();
+        if (!s) return s;
+        if (s.startsWith('ttps://')) s = 'h' + s;
+        if (s.startsWith('tps://')) s = 'ht' + s;
+        if (!/^https?:\/\//i.test(s)) s = 'https://' + s;
+        s = s.replace(/^(https?:)\/{2,}/i, '$1//').replace(/\/+$/, '');
+        return s;
+      })(cur);
+      if (norm !== cur) { try { localStorage.setItem('admin:supabase:url', norm); } catch {} }
+      supabaseUrlInp.value = norm;
+    }
     if (supabaseKeyInp) supabaseKeyInp.value = localStorage.getItem('admin:supabase:key') || '';
     if (supabaseTableInp) supabaseTableInp.value = localStorage.getItem('admin:supabase:table') || 'products';
     if (supabaseSchemaInp) supabaseSchemaInp.value = localStorage.getItem('admin:supabase:schema') || 'public';
@@ -439,7 +452,18 @@ export async function initAdminPage(translations, lang = 'ru') {
     try {
       const prov = (providerSelect && providerSelect.value) || (localStorage.getItem('admin:dataProvider') || 'localStorage');
       if (prov === 'supabase') {
-        if (supabaseUrlInp) localStorage.setItem('admin:supabase:url', (supabaseUrlInp.value || '').trim());
+        if (supabaseUrlInp) {
+          const norm = (function normalizeUrl(u){
+            let s = String(u || '').trim();
+            if (!s) return s;
+            if (s.startsWith('ttps://')) s = 'h' + s;
+            if (s.startsWith('tps://')) s = 'ht' + s;
+            if (!/^https?:\/\//i.test(s)) s = 'https://' + s;
+            s = s.replace(/^(https?:)\/{2,}/i, '$1//').replace(/\/+$/, '');
+            return s;
+          })(supabaseUrlInp.value);
+          localStorage.setItem('admin:supabase:url', norm);
+        }
         if (supabaseKeyInp) localStorage.setItem('admin:supabase:key', (supabaseKeyInp.value || '').trim());
         if (supabaseTableInp) localStorage.setItem('admin:supabase:table', (supabaseTableInp.value || 'products').trim());
         if (supabaseSchemaInp) localStorage.setItem('admin:supabase:schema', (supabaseSchemaInp.value || 'public').trim() || 'public');
@@ -463,8 +487,19 @@ export async function initAdminPage(translations, lang = 'ru') {
       try {
         const p = (typeof window !== 'undefined' && window.getDataProvider) ? window.getDataProvider() : null;
         if (!p || p.kind === 'localStorage' || typeof p.isConfigured !== 'function' || !p.isConfigured()) {
-          setGitStatus('Удалённый провайдер не настроен', true);
-          showToast('Удалённый провайдер не настроен');
+          // Provide more actionable hint for Supabase
+          const need = [];
+          try {
+            const url = (localStorage.getItem('admin:supabase:url') || '').trim();
+            const key = (localStorage.getItem('admin:supabase:key') || '').trim();
+            const table = (localStorage.getItem('admin:supabase:table') || '').trim();
+            if (!url) need.push('URL');
+            if (!key) need.push('Key');
+            if (!table) need.push('Table');
+          } catch {}
+          const msg = need.length ? `Удалённый провайдер не настроен: заполните ${need.join(', ')}` : 'Удалённый провайдер не настроен';
+          setGitStatus(msg, true);
+          showToast(msg);
           return;
         }
         setGitStatus('Загрузка…');
@@ -549,8 +584,18 @@ export async function initAdminPage(translations, lang = 'ru') {
       try {
         const p = (typeof window !== 'undefined' && window.getDataProvider) ? window.getDataProvider() : null;
         if (!p || p.kind === 'localStorage' || typeof p.isConfigured !== 'function' || !p.isConfigured()) {
-          setGitStatus('Удалённый провайдер не настроен', true);
-          showToast('Удалённый провайдер не настроен');
+          const need = [];
+          try {
+            const url = (localStorage.getItem('admin:supabase:url') || '').trim();
+            const key = (localStorage.getItem('admin:supabase:key') || '').trim();
+            const table = (localStorage.getItem('admin:supabase:table') || '').trim();
+            if (!url) need.push('URL');
+            if (!key) need.push('Key');
+            if (!table) need.push('Table');
+          } catch {}
+          const msg = need.length ? `Удалённый провайдер не настроен: заполните ${need.join(', ')}` : 'Удалённый провайдер не настроен';
+          setGitStatus(msg, true);
+          showToast(msg);
           return;
         }
         setGitStatus('Загрузка…');

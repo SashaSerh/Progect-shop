@@ -244,14 +244,59 @@ export async function initAdminPage(translations, lang = 'ru') {
   });
 
   // Image preview
-  form?.querySelector('input[name="image"]').addEventListener('change', (e) => {
+  form?.querySelector('input[name="image"]').addEventListener('change', async (e) => {
     const f = e.target.files && e.target.files[0]; if (!f) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-  preview.innerHTML = `<img src="${ev.target.result}" alt="${t('admin-preview-alt')}" style="max-width:200px;max-height:120px;"/>`;
+    const useProxy = (localStorage.getItem('admin:push:useProxy') === 'true');
+    const proxyUrl = (localStorage.getItem('admin:push:proxyUrl') || '').trim();
+    const proxyToken = (localStorage.getItem('admin:push:proxyToken') || '').trim();
+    const setUrlHidden = (url) => {
+      // prefer URL storage
+      let urlHidden = form.querySelector('input[name="_image_url"]');
+      if (!urlHidden) { urlHidden = document.createElement('input'); urlHidden.type = 'hidden'; urlHidden.name = '_image_url'; form.appendChild(urlHidden); }
+      urlHidden.value = url;
+      // clear base64 hidden
+      const b64 = form.querySelector('input[name="_image_data"]'); if (b64) b64.value = '';
+    };
+    const setBase64Hidden = (dataUrl) => {
       let hidden = form.querySelector('input[name="_image_data"]');
       if (!hidden) { hidden = document.createElement('input'); hidden.type = 'hidden'; hidden.name = '_image_data'; form.appendChild(hidden); }
-      hidden.value = ev.target.result;
+      hidden.value = dataUrl;
+      const urlHidden = form.querySelector('input[name="_image_url"]'); if (urlHidden) urlHidden.value = '';
+    };
+    if (useProxy && proxyUrl) {
+      try {
+        const fd = new FormData();
+        fd.append('file', f, f.name || 'image');
+        // optionally pass folder, defaults handled by function
+        const res = await fetch(proxyUrl.replace(/\/$/, '') + '/upload-image', {
+          method: 'POST',
+          headers: { ...(proxyToken ? { 'X-Admin-Sync-Token': proxyToken } : {}) },
+          body: fd
+        });
+        if (!res.ok) {
+          let msg = res.status + '';
+          try { const j = await res.json(); msg += ' ' + (j.error || j.message || ''); } catch {}
+          throw new Error(msg);
+        }
+        const data = await res.json();
+        const url = data?.url;
+        if (url) {
+          preview.innerHTML = `<img src="${url}" alt="${t('admin-preview-alt')}" style="max-width:200px;max-height:120px;"/>`;
+          setUrlHidden(url);
+          showToast('Изображение загружено');
+          return;
+        }
+      } catch (err) {
+        console.error('Image upload error', err);
+        showToast('Ошибка загрузки изображения, используем локальное превью');
+        // fall through to base64 preview
+      }
+    }
+    // Fallback: base64 local preview
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      preview.innerHTML = `<img src="${ev.target.result}" alt="${t('admin-preview-alt')}" style="max-width:200px;max-height:120px;"/>`;
+      setBase64Hidden(ev.target.result);
     };
     reader.readAsDataURL(f);
   });
@@ -314,15 +359,15 @@ export async function initAdminPage(translations, lang = 'ru') {
     const data = new FormData(form);
     let flags = [];
     try { flags = JSON.parse(data.get('_flags') || '[]'); } catch {}
-    const product = {
+      const product = {
       id: data.get('id') || `p_${Math.random().toString(36).slice(2,9)}`,
       name: { ru: data.get('title_ru') || '', uk: data.get('title_uk') || '' },
       description: { ru: data.get('description_ru') || '', uk: data.get('description_uk') || '' },
       price: Number(data.get('price') || 0),
       sku: data.get('sku') || '',
       category: data.get('category') || 'service',
-      image: data.get('_image_data') || '',
-      images: data.get('_image_data') ? [data.get('_image_data')] : [],
+      image: data.get('_image_url') || data.get('_image_data') || '',
+      images: (data.get('_image_url') || data.get('_image_data')) ? [data.get('_image_url') || data.get('_image_data')] : [],
       inStock: data.get('inStock') === 'true',
       flags,
       updatedAt: new Date().toISOString()

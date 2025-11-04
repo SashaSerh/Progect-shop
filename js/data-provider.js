@@ -175,11 +175,13 @@
     isConfigured() { return Boolean(this.url && this.key && this.table); }
     // Remove fields that are not present in our ProductSchema to avoid DB column errors
     _sanitizeProduct(obj, { allowId = true } = {}) {
-      const allowedKeys = (typeof window !== 'undefined' && window.ProductSchema)
+  const allowedKeys = (typeof window !== 'undefined' && window.ProductSchema)
         ? Object.keys(window.ProductSchema)
         : [
-            'id','sku','categories','name','shortDesc','fullDesc','price','oldPrice','inStock','stockCount',
-            'flags','images','specs','attributes','seo','createdAt','updatedAt'
+    'id','sku','categories','name','shortDesc','fullDesc','price','oldPrice','inStock','stockCount',
+    // keep both 'image' (legacy single) and 'images' (array)
+    'image','images',
+    'flags','specs','attributes','seo','createdAt','updatedAt'
           ];
       const out = {};
       for (const k of allowedKeys) {

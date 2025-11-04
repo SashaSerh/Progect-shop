@@ -14,31 +14,42 @@
         <button id="clearConflictsBtn" type="button" class="btn btn--ghost" title="Сбросить конфликты" data-i18n="admin-clear-conflicts">Очистить конфликты</button>
       </div>
       <details class="admin-gitcms" id="gitcmsSettingsAdmin">
-        <summary>Git‑CMS</summary>
+        <summary data-i18n="admin-remote-title">Удалённые данные</summary>
         <div class="gitcms-form">
-          <label>Провайдер
+          <label data-i18n="admin-remote-provider">Провайдер
             <select id="dataProviderSelect">
               <option value="localStorage">LocalStorage</option>
-              <option value="gitcms">Git‑CMS</option>
+              <option value="supabase">Supabase</option>
             </select>
           </label>
-          <label>Repo (owner/repo)
-            <input id="gitcmsRepo" placeholder="owner/repo">
+          <!-- Supabase settings only -->
+          <label data-i18n="admin-remote-supabase-url">Supabase URL
+            <input id="supabaseUrl" placeholder="https://xyzcompany.supabase.co">
           </label>
-          <label>Branch
-            <input id="gitcmsBranch" placeholder="main">
+          <label data-i18n="admin-remote-supabase-key">Supabase Key
+            <input id="supabaseKey" type="password" placeholder="anon or service key">
           </label>
-          <label>Path
-            <input id="gitcmsPath" placeholder="data/products.json">
+          <label data-i18n="admin-remote-supabase-table">Supabase Table
+            <input id="supabaseTable" placeholder="products">
           </label>
-          <label>Token
-            <input id="gitcmsToken" type="password" placeholder="ghp_...">
+          <label data-i18n="admin-remote-supabase-schema">Supabase Schema
+            <input id="supabaseSchema" placeholder="public" value="public">
+          </label>
+          <!-- Optional proxy settings for secure push -->
+          <label data-i18n="admin-remote-proxy-use" title="Отправлять запись через ваш API-прокси">
+            <input id="proxyUse" type="checkbox"> Использовать прокси для Push
+          </label>
+          <label data-i18n="admin-remote-proxy-url">Proxy URL
+            <input id="proxyUrl" placeholder="https://api.example.com/products/sync" data-i18n-placeholder="admin-remote-proxy-url-ph">
+          </label>
+          <label data-i18n="admin-remote-proxy-token">Proxy Token (опц.)
+            <input id="proxyToken" type="password" placeholder="секрет для X-Admin-Sync-Token" data-i18n-placeholder="admin-remote-proxy-token-ph">
           </label>
           <div class="gitcms-actions">
-            <button type="button" id="gitcmsSaveBtn">Сохранить</button>
-            <button type="button" id="gitcmsLoadBtn" title="Загрузить товары из Git в локальные">Загрузить из Git</button>
-            <button type="button" id="gitcmsMergeBtn" title="Загрузить из Git и слить с текущими" data-i18n="git-merge">Загрузить и слить</button>
-            <button type="button" id="gitcmsPushBtn" title="Записать локальные товары в Git">Записать в Git</button>
+            <button type="button" id="gitcmsSaveBtn" data-i18n="admin-remote-save">Сохранить</button>
+            <button type="button" id="gitcmsLoadBtn" title="Загрузить товары из удалённого провайдера в локальные" data-i18n="admin-remote-load">Загрузить</button>
+            <button type="button" id="gitcmsMergeBtn" title="Загрузить из удалённого провайдера и слить с текущими" data-i18n="admin-remote-merge">Загрузить и слить</button>
+            <button type="button" id="gitcmsPushBtn" title="Записать локальные товары в удалённый провайдер" data-i18n="admin-remote-push">Записать</button>
             <span id="gitcmsStatus" aria-live="polite" style="margin-left:8px; font-size:12px;"></span>
           </div>
         </div>

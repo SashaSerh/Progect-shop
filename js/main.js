@@ -869,35 +869,32 @@ async function initApp() {
     if (typeof switchLanguage === 'function') {
         switchLanguage(savedLanguage);
     }
-    // Строгий remote-first режим: если Git‑CMS настроен, не показываем локальные вовсе,
-    // а показываем скелетоны, пока не загрузим удалённый список. Иначе — обычный локальный рендер.
+    // Гидратируем товары локальными (LocalStorage) перед первым рендером,
+    // чтобы локальные карточки не пропадали после перезагрузки
     try {
-        const provider = (typeof window !== 'undefined' && typeof window.getDataProvider === 'function') ? window.getDataProvider() : null;
-        if (provider && provider.kind === 'gitcms' && typeof provider.isConfigured === 'function' && provider.isConfigured()) {
-            // Показать скелетоны и ждать удалённые товары
-            try { showProductsSkeleton(); } catch(_) {}
-            try {
-                const remoteList = await provider.loadAll();
-                if (Array.isArray(remoteList)) {
-                    setProducts(remoteList);
-                    renderProducts(savedLanguage, translations, remoteList);
-                } else {
-                    // Некорректный ответ — безопасный фоллбек: базовый рендер без локальных
-                    renderProducts(savedLanguage, translations);
-                }
-            } catch (e) {
-                // Сеть/доступ недоступны — показываем базовые, но не локальные
-                renderProducts(savedLanguage, translations);
-            }
-        } else {
-            // Провайдер не настроен → оставляем прежнее локальное поведение
-            const merged = getMergedProducts();
-            setProducts(merged);
-            renderProducts(savedLanguage, translations, merged);
-        }
+        const merged = getMergedProducts();
+        setProducts(merged);
+        renderProducts(savedLanguage, translations, merged);
     } catch (_) {
-        // Если что-то пошло не так, рисуем базовые товары как безопасный фоллбек
+        // Фоллбек — рендер по базовым, если что-то пошло не так
         renderProducts(savedLanguage, translations);
+    }
+
+    // Remote-first: если настроен удалённый провайдер (Git‑CMS / Supabase), загружаем и перерисовываем
+    try {
+        const getProvider = (typeof window !== 'undefined' && window.getDataProvider) ? window.getDataProvider : null;
+        const p = typeof getProvider === 'function' ? getProvider() : null;
+        if (p && p.kind !== 'localStorage' && typeof p.isConfigured === 'function' && p.isConfigured()) {
+            // Показать скелетоны, затем рендерить удалённые товары
+            showProductsSkeleton();
+            const remoteList = await p.loadAll();
+            if (Array.isArray(remoteList) && remoteList.length >= 0) {
+                setProducts(remoteList);
+                renderProducts(savedLanguage, translations, remoteList);
+            }
+        }
+    } catch (e) {
+        console.warn('Remote provider load failed, keeping local/merged products', e);
     }
     initCompareBar(savedLanguage);
     initCompareModal(savedLanguage);

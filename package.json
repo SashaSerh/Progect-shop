@@ -4,6 +4,7 @@
     "test": "vitest",
     "export:pictures": "node scripts/export-to-pictures.js",
     "images:gen": "node scripts/generate-responsive-images.js --dir picture",
+    "images:watch": "chokidar \"picture/**/*.{jpg,jpeg,png,webp,avif}\" -c \"node scripts/generate-responsive-images.js --dir picture\"",
     "images:cleanup:dry": "node scripts/cleanup-pictures.js --dir picture --json data/products.local.json,data/products.json --dry-run",
     "images:cleanup": "node scripts/cleanup-pictures.js --dir picture --json data/products.local.json,data/products.json --yes",
     "images:create-demo": "node scripts/create-demo-image.js"
@@ -12,9 +13,9 @@
     "@supabase/supabase-js": "^2.57.4"
   },
   "devDependencies": {
-    "vitest": "^1.6.0",
+    "chokidar-cli": "^3.0.0",
     "jsdom": "^24.0.0",
-    "sharp": "^0.33.4"
+    "sharp": "^0.33.4",
+    "vitest": "^1.6.0"
   }
 }
-

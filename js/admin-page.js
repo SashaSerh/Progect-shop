@@ -22,6 +22,7 @@ export async function initAdminPage(translations, lang = 'ru') {
   const selectedFlagsContainer = document.getElementById('selectedFlags');
   const flagsHiddenInput = form?.querySelector('input[name="_flags"]');
   const exportBtn = document.getElementById('adminExportBtn');
+  const saveImageBtn = document.getElementById('adminSaveImageBtn');
   const exportToProductsBtn = document.getElementById('adminExportToProductsBtn');
   const importInput = document.getElementById('adminImportInput');
   const clearConflictsBtn = document.getElementById('clearConflictsBtn');
@@ -336,31 +337,22 @@ export async function initAdminPage(translations, lang = 'ru') {
     const v = Math.max(0, Math.floor(Number(inp.value || 0)));
     if (String(inp.value) !== String(v)) inp.value = String(v);
   }
-  // Simple SKU suggestion from title
-  function slugify(str) {
-    try {
-      const from = 'абвгдезиклмнопрстуфхцчшщыэюяїієґАБВГДЕЗИКЛМНОПРСТУФХЦЧШЩЫЭЮЯЇІЄҐ';
-      const to   = 'abvgdeziklmnoprstufhccssyeyuya yiie gABVGDEZIKLMNOPRSTUFHCCSSYEYUYA YIIE G';
-      const map = new Map();
-      for (let i = 0; i < Math.min(from.length, to.length); i++) map.set(from[i], to[i].trim());
-      const tr = (s) => s.split('').map(ch => map.get(ch) ?? ch).join('');
-      const s = tr(String(str || ''))
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/^-+|-+$/g, '')
-        .replace(/-{2,}/g, '-');
-      return s;
-    } catch { return String(str || '').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,''); }
-  }
-  function ensureSkuUnique(baseSku, currentId) {
-    let sku = baseSku || '';
-    let counter = 0;
-    while (!isUnique('sku', sku, currentId) || !sku) {
-      counter++;
-      sku = `${baseSku || 'item'}-${Math.random().toString(36).slice(2,6)}`;
-      if (counter > 5) break;
+  // Numeric SKU generator (article-like): берём max из числовых SKU и +1, 8-значный
+  function generateNumericSku(currentId) {
+    const merged = getMergedProducts();
+    const nums = merged
+      .map(p => String(p.sku || '').trim())
+      .filter(s => /^\d+$/.test(s))
+      .map(s => Number(s))
+      .filter(n => Number.isFinite(n));
+    let next = nums.length ? Math.max(...nums) + 1 : 1;
+    // Гарантировать уникальность: если занято — инкрементировать
+    let guard = 0;
+    while (!isUnique('sku', String(next).padStart(8, '0'), currentId) && guard < 1000) {
+      next++;
+      guard++;
     }
-    return sku;
+    return String(next).padStart(8, '0');
   }
   function isUnique(field, value, currentId) {
     if (!value) return true;
@@ -372,9 +364,10 @@ export async function initAdminPage(translations, lang = 'ru') {
     if (e.target?.name === 'price') sanitizePriceInput();
     if (e.target?.name === 'title_ru') {
       const skuInp = form.querySelector('[name="sku"]');
-      if (skuInp && !skuInp.value.trim()) {
-        const base = slugify(e.target.value).slice(0, 32);
-        skuInp.value = base;
+      if (skuInp && !skuInp.value.trim() && !skuInp.dataset.autofilled) {
+        const num = generateNumericSku(form.querySelector('[name="id"]').value);
+        skuInp.value = num;
+        skuInp.dataset.autofilled = 'true';
       }
     }
   });
@@ -398,10 +391,9 @@ export async function initAdminPage(translations, lang = 'ru') {
   if (idVal && !isUnique('id', idVal, idVal)) { setError('id', t('admin-error-id-unique')); ok = false; }
     if (!ok) return;
     const data = new FormData(form);
-    // If SKU is empty, auto-generate from title
+    // If SKU is empty, auto-generate numeric
     if (!(data.get('sku') || '').trim()) {
-      const base = slugify(data.get('title_ru') || data.get('title_uk') || 'item');
-      const suggested = ensureSkuUnique(base.slice(0,32), data.get('id'));
+      const suggested = generateNumericSku(data.get('id'));
       form.querySelector('[name="sku"]').value = suggested;
       data.set('sku', suggested);
     }
@@ -476,10 +468,9 @@ export async function initAdminPage(translations, lang = 'ru') {
     if (!skuVal) { setError('sku', t('admin-error-sku-required')); ok = false; }
     if (!categoryVal) { setError('category', t('admin-error-category')); ok = false; }
     if (!ok) return;
-    // Ensure SKU if empty
+    // Ensure SKU if empty (numeric)
     if (!skuVal) {
-      const base = slugify(titleRu || form.querySelector('[name="title_uk"]').value.trim());
-      const generated = ensureSkuUnique(base.slice(0,32), idVal);
+      const generated = generateNumericSku(idVal);
       form.querySelector('[name="sku"]').value = generated;
     }
     const data = new FormData(form);
@@ -509,6 +500,7 @@ export async function initAdminPage(translations, lang = 'ru') {
           product.images = [relPath];
         }
       } else {
+        const fileInputEl = form.querySelector('input[name="image"]');
         // Try auto-attach existing file by SKU in chosen directory
         if (window.showDirectoryPicker && product.sku) {
           const wantFind = confirm('Изображение не выбрано. Попробовать найти файл по SKU в picture/conditioners?');
@@ -533,14 +525,14 @@ export async function initAdminPage(translations, lang = 'ru') {
               }
             } catch {}
           }
-        }
-        if (!product.image) {
-          const wantPick = confirm('Выбрать и сохранить файл сейчас?');
-          if (wantPick && fileInputEl) { fileInputEl.click(); return; }
-        }
+          }
+          if (!product.image) {
+            const wantPick = confirm('Выбрать и сохранить файл сейчас?');
+            if (wantPick && fileInputEl) { fileInputEl.click(); return; }
+          }
       }
       await appendProductToProductsJsonFS(product);
-      showToast('Добавлено в products.json');
+      showToast(t('admin-products-append-success'));
     } catch (err) {
       // Fallback: GitHub per-item upsert if configured
       try {
@@ -559,7 +551,43 @@ export async function initAdminPage(translations, lang = 'ru') {
         console.error('Git fallback error', e);
       }
       console.error('Append to products.json error', err);
-      showToast('Не удалось записать в products.json');
+      showToast(t('admin-products-append-failed'));
+    }
+  });
+
+  // Save image only (to picture/conditioners) and link it into hidden input for future save
+  saveImageBtn?.addEventListener('click', async () => {
+    if (!form) return;
+    const fileInputEl = form.querySelector('input[name="image"]');
+    const f = fileInputEl?.files?.[0];
+    if (!f) {
+      const wantPick = confirm(t('admin-image-pick-prompt'));
+      if (wantPick && fileInputEl) fileInputEl.click();
+      return;
+    }
+    try {
+      // Prefer using SKU for filename; fallback to ID
+      let sku = (form.querySelector('[name="sku"]').value || '').trim();
+      if (!sku) { sku = generateNumericSku(form.querySelector('[name="id"]').value); form.querySelector('[name="sku"]').value = sku; }
+      const relPath = await saveMainImageToPictureConditionersFS(f, sku);
+      if (relPath) {
+        // set hidden _image_url
+        let urlHidden = form.querySelector('input[name="_image_url"]');
+        if (!urlHidden) { urlHidden = document.createElement('input'); urlHidden.type = 'hidden'; urlHidden.name = '_image_url'; form.appendChild(urlHidden); }
+        urlHidden.value = relPath;
+        // clear base64 hidden if any
+        const b64 = form.querySelector('input[name="_image_data"]'); if (b64) b64.value = '';
+        // update preview
+        const prev = document.getElementById('adminImagePreview');
+        if (prev) prev.innerHTML = `<img src="${relPath}" alt="preview" style="max-width:200px;max-height:120px;"/>`;
+        // notify
+        const toast = (txt) => { const host = document.getElementById('toast-container'); if (!host) return; const n = document.createElement('div'); n.className='toast toast--success'; n.textContent=txt; host.appendChild(n); requestAnimationFrame(()=>n.classList.add('is-visible')); setTimeout(()=>{n.classList.remove('is-visible'); setTimeout(()=>n.remove(),280);},2200); };
+        toast(t('admin-image-saved'));
+      }
+    } catch (e) {
+      console.error('Save image error', e);
+      const host = document.getElementById('toast-container');
+      if (host) { const n = document.createElement('div'); n.className='toast toast--error'; n.textContent=t('admin-image-save-error'); host.appendChild(n); requestAnimationFrame(()=>n.classList.add('is-visible')); setTimeout(()=>{n.classList.remove('is-visible'); setTimeout(()=>n.remove(),280);},2200); }
     }
   });
   importInput?.addEventListener('change', async (e) => {

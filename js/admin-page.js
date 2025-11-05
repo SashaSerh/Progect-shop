@@ -47,6 +47,7 @@ export async function initAdminPage(translations, lang = 'ru') {
   const gitPathInp = document.getElementById('gitPath');
   const gitTokenInp = document.getElementById('gitToken');
   const gitAutoCommitChk = document.getElementById('gitAutoCommit');
+  const gitExportCommitChk = document.getElementById('gitExportCommit');
 
   function showToast(text) {
     const host = document.getElementById('toast-container');
@@ -408,6 +409,21 @@ export async function initAdminPage(translations, lang = 'ru') {
   exportBtn?.addEventListener('click', () => {
     exportLocalProducts();
     showToast(t('admin-export-done'));
+    // Optional: also commit to GitHub products.json
+    try {
+      const exportCommit = (localStorage.getItem('admin:gitcms:exportCommit') === 'true');
+      const repo = (localStorage.getItem('admin:gitcms:repo') || '').trim();
+      const branch = (localStorage.getItem('admin:gitcms:branch') || 'main').trim();
+      const path = (localStorage.getItem('admin:gitcms:path') || 'data/products.json').trim();
+      const token = (localStorage.getItem('admin:gitcms:token') || '').trim();
+      if (exportCommit && repo && branch && path && token && window.DataProviders && window.DataProviders.GitCMSProvider) {
+        const git = new window.DataProviders.GitCMSProvider({ repo, branch, path, token });
+        const list = getLocalProducts();
+        git.upsertMany(list, 'feat(admin): export local products -> products.json')
+          .then(() => showToast('Экспортирован и записан в GitHub: products.json'))
+          .catch((err) => { console.error('Git export commit error', err); showToast('Ошибка записи экспорта в GitHub'); });
+      }
+    } catch (e) { console.error('Export auto-commit error', e); }
   });
   importInput?.addEventListener('change', async (e) => {
     const file = e.target.files?.[0];
@@ -521,6 +537,7 @@ export async function initAdminPage(translations, lang = 'ru') {
     if (gitPathInp) gitPathInp.value = localStorage.getItem('admin:gitcms:path') || 'data/products.json';
     if (gitTokenInp) gitTokenInp.value = localStorage.getItem('admin:gitcms:token') || '';
     if (gitAutoCommitChk) gitAutoCommitChk.checked = (localStorage.getItem('admin:gitcms:autoCommit') === 'true');
+    if (gitExportCommitChk) gitExportCommitChk.checked = (localStorage.getItem('admin:gitcms:exportCommit') === 'true');
   } catch {}
 
   updateGitButtonsEnabled();
@@ -566,6 +583,7 @@ export async function initAdminPage(translations, lang = 'ru') {
       if (gitPathInp) localStorage.setItem('admin:gitcms:path', (gitPathInp.value || 'data/products.json').trim() || 'data/products.json');
       if (gitTokenInp) localStorage.setItem('admin:gitcms:token', (gitTokenInp.value || '').trim());
       if (gitAutoCommitChk) localStorage.setItem('admin:gitcms:autoCommit', gitAutoCommitChk.checked ? 'true' : 'false');
+      if (gitExportCommitChk) localStorage.setItem('admin:gitcms:exportCommit', gitExportCommitChk.checked ? 'true' : 'false');
     } catch (e) {
       console.error('Save remote settings error', e);
       showToast('Ошибка сохранения настроек удалённого провайдера');

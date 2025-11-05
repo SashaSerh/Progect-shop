@@ -1,14 +1,17 @@
 {
   "type": "module",
   "scripts": {
-    "test": "vitest"
+    "test": "vitest",
+    "export:pictures": "node scripts/export-to-pictures.js",
+    "images:gen": "node scripts/generate-responsive-images.js --dir picture"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.57.4"
   },
   "devDependencies": {
     "vitest": "^1.6.0",
-    "jsdom": "^24.0.0"
+    "jsdom": "^24.0.0",
+    "sharp": "^0.33.4"
   }
 }
 

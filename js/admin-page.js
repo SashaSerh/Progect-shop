@@ -499,37 +499,6 @@ export async function initAdminPage(translations, lang = 'ru') {
           product.image = relPath;
           product.images = [relPath];
         }
-      } else {
-        const fileInputEl = form.querySelector('input[name="image"]');
-        // Try auto-attach existing file by SKU in chosen directory
-        if (window.showDirectoryPicker && product.sku) {
-          const wantFind = confirm('Изображение не выбрано. Попробовать найти файл по SKU в picture/conditioners?');
-          if (wantFind) {
-            try {
-              const dir = await window.showDirectoryPicker({ id: 'pick-picture-conditioners-dir' });
-              const lower = String(product.sku).toLowerCase();
-              const allowed = ['.jpg','.jpeg','.png','.webp','.avif'];
-              // iterate entries
-              for await (const entry of dir.values()) {
-                if (entry.kind === 'file') {
-                  const name = entry.name;
-                  const dot = name.lastIndexOf('.');
-                  const base = dot >= 0 ? name.slice(0,dot) : name;
-                  const ext = dot >= 0 ? name.slice(dot).toLowerCase() : '';
-                  if (base.toLowerCase() === lower && allowed.includes(ext)) {
-                    product.image = `picture/conditioners/${name}`;
-                    product.images = [product.image];
-                    break;
-                  }
-                }
-              }
-            } catch {}
-          }
-          }
-          if (!product.image) {
-            const wantPick = confirm('Выбрать и сохранить файл сейчас?');
-            if (wantPick && fileInputEl) { fileInputEl.click(); return; }
-          }
       }
       await appendProductToProductsJsonFS(product);
       showToast(t('admin-products-append-success'));

@@ -194,10 +194,11 @@ export async function saveMainImageToPictureConditionersFS(file, filenameSuggest
     .replace(/^[-\.]+|[-\.]+$/g, '')
     .toLowerCase();
   const origName = file.name || 'image.jpg';
-  const ext = (origName.includes('.') ? origName.split('.').pop() : 'jpg') || 'jpg';
+  const extNoDot = (origName.includes('.') ? origName.split('.').pop() : 'jpg')?.replace(/[^a-z0-9]/gi, '').toLowerCase() || 'jpg';
+  const extWithDot = `.${extNoDot}`;
   const base = filenameSuggestion || origName.slice(0, Math.max(0, origName.lastIndexOf('.')));
   let fn = safe(base) || `img-${Date.now()}`;
-  fn = `${fn}.${ext.replace(/[^a-z0-9]/gi,'').toLowerCase() || 'jpg'}`;
+  fn = `${fn}${extWithDot}`;
   // Write original file
   const origHandle = await dirHandle.getFileHandle(fn, { create: true });
   const origWritable = await origHandle.createWritable();
@@ -210,7 +211,6 @@ export async function saveMainImageToPictureConditionersFS(file, filenameSuggest
   // Try to generate responsive variants (orig format + webp + avif) and LQIP in-browser
   try {
     const sizes = [320, 480, 768, 1200];
-    const extLower = ext.toLowerCase();
     const mimeForExt = (e) => {
       if (e === '.jpg' || e === '.jpeg') return 'image/jpeg';
       if (e === '.png') return 'image/png';
@@ -218,7 +218,7 @@ export async function saveMainImageToPictureConditionersFS(file, filenameSuggest
       if (e === '.avif') return 'image/avif';
       return 'image/jpeg';
     };
-    const srcMime = mimeForExt(extLower);
+    const srcMime = mimeForExt(extWithDot);
     const blob = file;
     let bitmap = null;
     try {
@@ -247,24 +247,28 @@ export async function saveMainImageToPictureConditionersFS(file, filenameSuggest
         return canvas;
       };
       const toBlob = (canvas, type, quality) => new Promise((res, rej) => canvas.toBlob(b => b ? res(b) : rej(new Error('encode failed')), type, quality));
+      // Derive name base and extension from final filename
+      const dotPos = fn.lastIndexOf('.');
+      const nameBase = dotPos >= 0 ? fn.slice(0, dotPos) : fn;
+      const extDot = dotPos >= 0 ? fn.slice(dotPos) : extWithDot;
       // Generate per-size variants
       for (const w of sizes) {
         const canvas = drawToCanvas(w);
         // original format suffix
-        const outOrigName = `${fn.replace(extLower,'')}-${w}w${extLower}`;
+        const outOrigName = `${nameBase}-${w}w${extDot}`;
         const outOrigBlob = await toBlob(canvas, srcMime, 0.9);
         const h1 = await dirHandle.getFileHandle(outOrigName, { create: true });
         const w1 = await h1.createWritable(); await w1.write(outOrigBlob); await w1.close();
         // webp
         try {
           const outWebp = await toBlob(canvas, 'image/webp', 0.82);
-          const h2 = await dirHandle.getFileHandle(`${fn.replace(extLower,'')}-${w}w.webp`, { create: true });
+          const h2 = await dirHandle.getFileHandle(`${nameBase}-${w}w.webp`, { create: true });
           const w2 = await h2.createWritable(); await w2.write(outWebp); await w2.close();
         } catch {}
         // avif (may fail if encoder unsupported)
         try {
           const outAvif = await toBlob(canvas, 'image/avif', 0.5);
-          const h3 = await dirHandle.getFileHandle(`${fn.replace(extLower,'')}-${w}w.avif`, { create: true });
+          const h3 = await dirHandle.getFileHandle(`${nameBase}-${w}w.avif`, { create: true });
           const w3 = await h3.createWritable(); await w3.write(outAvif); await w3.close();
         } catch {}
       }
@@ -272,12 +276,12 @@ export async function saveMainImageToPictureConditionersFS(file, filenameSuggest
       const lqCanvas = drawToCanvas(24);
       try {
         const lqWebp = await toBlob(lqCanvas, 'image/webp', 0.45);
-        const h4 = await dirHandle.getFileHandle(`${fn.replace(extLower,'')}-lqip.webp`, { create: true });
+        const h4 = await dirHandle.getFileHandle(`${nameBase}-lqip.webp`, { create: true });
         const w4 = await h4.createWritable(); await w4.write(lqWebp); await w4.close();
       } catch {}
       try {
         const lqOrig = await toBlob(lqCanvas, srcMime, 0.7);
-        const h5 = await dirHandle.getFileHandle(`${fn.replace(extLower,'')}-lqip${extLower}`, { create: true });
+        const h5 = await dirHandle.getFileHandle(`${nameBase}-lqip${extDot}`, { create: true });
         const w5 = await h5.createWritable(); await w5.write(lqOrig); await w5.close();
       } catch {}
     } else {
@@ -303,20 +307,23 @@ export async function saveMainImageToPictureConditionersFS(file, filenameSuggest
           try { canvas.toBlob(b => b ? res(b) : rej(new Error('encode failed')), type, quality); } catch (e) { rej(e); }
         }
       });
+      const dotPos = fn.lastIndexOf('.');
+      const nameBase = dotPos >= 0 ? fn.slice(0, dotPos) : fn;
+      const extDot = dotPos >= 0 ? fn.slice(dotPos) : extWithDot;
       for (const w of sizes) {
         const canvas = drawBitmap(bitmap, w);
-        const outOrigName = `${fn.replace(extLower,'')}-${w}w${extLower}`;
+        const outOrigName = `${nameBase}-${w}w${extDot}`;
         const outOrigBlob = await toBlob(canvas, srcMime, 0.9);
         const h1 = await dirHandle.getFileHandle(outOrigName, { create: true });
         const w1 = await h1.createWritable(); await w1.write(outOrigBlob); await w1.close();
         try {
           const outWebp = await toBlob(canvas, 'image/webp', 0.82);
-          const h2 = await dirHandle.getFileHandle(`${fn.replace(extLower,'')}-${w}w.webp`, { create: true });
+          const h2 = await dirHandle.getFileHandle(`${nameBase}-${w}w.webp`, { create: true });
           const w2 = await h2.createWritable(); await w2.write(outWebp); await w2.close();
         } catch {}
         try {
           const outAvif = await toBlob(canvas, 'image/avif', 0.5);
-          const h3 = await dirHandle.getFileHandle(`${fn.replace(extLower,'')}-${w}w.avif`, { create: true });
+          const h3 = await dirHandle.getFileHandle(`${nameBase}-${w}w.avif`, { create: true });
           const w3 = await h3.createWritable(); await w3.write(outAvif); await w3.close();
         } catch {}
       }
@@ -324,12 +331,12 @@ export async function saveMainImageToPictureConditionersFS(file, filenameSuggest
       const lqCanvas = drawBitmap(bitmap, 24);
       try {
         const lqWebp = await toBlob(lqCanvas, 'image/webp', 0.45);
-        const h4 = await dirHandle.getFileHandle(`${fn.replace(extLower,'')}-lqip.webp`, { create: true });
+        const h4 = await dirHandle.getFileHandle(`${nameBase}-lqip.webp`, { create: true });
         const w4 = await h4.createWritable(); await w4.write(lqWebp); await w4.close();
       } catch {}
       try {
         const lqOrig = await toBlob(lqCanvas, srcMime, 0.7);
-        const h5 = await dirHandle.getFileHandle(`${fn.replace(extLower,'')}-lqip${extLower}`, { create: true });
+        const h5 = await dirHandle.getFileHandle(`${nameBase}-lqip${extDot}`, { create: true });
         const w5 = await h5.createWritable(); await w5.write(lqOrig); await w5.close();
       } catch {}
       try { bitmap.close && bitmap.close(); } catch {}

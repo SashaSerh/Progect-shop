@@ -173,6 +173,8 @@ export async function appendProductToProductsJsonFS(product) {
 }
 
 // Save selected image file into picture/conditioners via File System Access API and return relative path
+// Save selected image file into picture/conditioners via File System Access API and return
+// { path: string, warnings?: Array<{ format: 'webp'|'avif' }> }
 export async function saveMainImageToPictureConditionersFS(file, filenameSuggestion = '') {
   if (!(file instanceof File)) throw new Error('Файл изображения не найден');
   if (!('showDirectoryPicker' in window)) throw new Error('File System Access API не поддерживается');
@@ -210,6 +212,8 @@ export async function saveMainImageToPictureConditionersFS(file, filenameSuggest
 
   // Try to generate responsive variants (orig format + webp + avif) and LQIP in-browser
   try {
+    let hadWebpError = false;
+    let hadAvifError = false;
     const sizes = [320, 480, 768, 1200];
     const mimeForExt = (e) => {
       if (e === '.jpg' || e === '.jpeg') return 'image/jpeg';
@@ -264,13 +268,13 @@ export async function saveMainImageToPictureConditionersFS(file, filenameSuggest
           const outWebp = await toBlob(canvas, 'image/webp', 0.82);
           const h2 = await dirHandle.getFileHandle(`${nameBase}-${w}w.webp`, { create: true });
           const w2 = await h2.createWritable(); await w2.write(outWebp); await w2.close();
-        } catch {}
+        } catch { hadWebpError = true; }
         // avif (may fail if encoder unsupported)
         try {
           const outAvif = await toBlob(canvas, 'image/avif', 0.5);
           const h3 = await dirHandle.getFileHandle(`${nameBase}-${w}w.avif`, { create: true });
           const w3 = await h3.createWritable(); await w3.write(outAvif); await w3.close();
-        } catch {}
+        } catch { hadAvifError = true; }
       }
       // LQIP 24px width, webp + original
       const lqCanvas = drawToCanvas(24);
@@ -278,7 +282,7 @@ export async function saveMainImageToPictureConditionersFS(file, filenameSuggest
         const lqWebp = await toBlob(lqCanvas, 'image/webp', 0.45);
         const h4 = await dirHandle.getFileHandle(`${nameBase}-lqip.webp`, { create: true });
         const w4 = await h4.createWritable(); await w4.write(lqWebp); await w4.close();
-      } catch {}
+      } catch { hadWebpError = true; }
       try {
         const lqOrig = await toBlob(lqCanvas, srcMime, 0.7);
         const h5 = await dirHandle.getFileHandle(`${nameBase}-lqip${extDot}`, { create: true });
@@ -320,12 +324,12 @@ export async function saveMainImageToPictureConditionersFS(file, filenameSuggest
           const outWebp = await toBlob(canvas, 'image/webp', 0.82);
           const h2 = await dirHandle.getFileHandle(`${nameBase}-${w}w.webp`, { create: true });
           const w2 = await h2.createWritable(); await w2.write(outWebp); await w2.close();
-        } catch {}
+        } catch { hadWebpError = true; }
         try {
           const outAvif = await toBlob(canvas, 'image/avif', 0.5);
           const h3 = await dirHandle.getFileHandle(`${nameBase}-${w}w.avif`, { create: true });
           const w3 = await h3.createWritable(); await w3.write(outAvif); await w3.close();
-        } catch {}
+        } catch { hadAvifError = true; }
       }
       // LQIP 24px
       const lqCanvas = drawBitmap(bitmap, 24);
@@ -333,7 +337,7 @@ export async function saveMainImageToPictureConditionersFS(file, filenameSuggest
         const lqWebp = await toBlob(lqCanvas, 'image/webp', 0.45);
         const h4 = await dirHandle.getFileHandle(`${nameBase}-lqip.webp`, { create: true });
         const w4 = await h4.createWritable(); await w4.write(lqWebp); await w4.close();
-      } catch {}
+      } catch { hadWebpError = true; }
       try {
         const lqOrig = await toBlob(lqCanvas, srcMime, 0.7);
         const h5 = await dirHandle.getFileHandle(`${nameBase}-lqip${extDot}`, { create: true });
@@ -341,12 +345,16 @@ export async function saveMainImageToPictureConditionersFS(file, filenameSuggest
       } catch {}
       try { bitmap.close && bitmap.close(); } catch {}
     }
+    const warnings = [];
+    if (hadWebpError) warnings.push({ format: 'webp' });
+    if (hadAvifError) warnings.push({ format: 'avif' });
+    return { path: `picture/conditioners/${fn}`, warnings };
   } catch (e) {
     console.warn('Responsive generation failed, you can run npm run images:gen later', e);
   }
 
-  // Return relative repo path expectation (base file path)
-  return `picture/conditioners/${fn}`;
+  // Return relative repo path expectation (base file path) without warnings
+  return { path: `picture/conditioners/${fn}`, warnings: [] };
 }
 
 export function importLocalProducts(file) {

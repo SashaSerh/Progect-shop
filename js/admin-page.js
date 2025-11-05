@@ -511,7 +511,13 @@ export async function initAdminPage(translations, lang = 'ru') {
       const inputFile = form.querySelector('input[name="image"]').files?.[0] || null;
       if (inputFile) {
         const suggested = (product.sku && String(product.sku).trim()) || (product.id) || 'image';
-        const relPath = await saveMainImageToPictureConditionersFS(inputFile, suggested);
+        const out = await saveMainImageToPictureConditionersFS(inputFile, suggested);
+        const relPath = typeof out === 'string' ? out : out?.path;
+        const warns = typeof out === 'object' && out?.warnings ? out.warnings : [];
+        if (Array.isArray(warns) && warns.length) {
+          if (warns.some(w => w.format === 'avif')) showToast(t('admin-image-warn-avif-unsupported'));
+          if (warns.some(w => w.format === 'webp')) showToast(t('admin-image-warn-webp-unsupported'));
+        }
         if (relPath) {
           product.image = relPath;
           product.images = [relPath];
@@ -529,7 +535,13 @@ export async function initAdminPage(translations, lang = 'ru') {
           const suggested = (product.sku && String(product.sku).trim()) || (product.id) || 'image';
           const fileFromB64 = dataURLtoFile(b64, suggested);
           if (fileFromB64) {
-            const relPath = await saveMainImageToPictureConditionersFS(fileFromB64, suggested);
+            const out = await saveMainImageToPictureConditionersFS(fileFromB64, suggested);
+            const relPath = typeof out === 'string' ? out : out?.path;
+            const warns = typeof out === 'object' && out?.warnings ? out.warnings : [];
+            if (Array.isArray(warns) && warns.length) {
+              if (warns.some(w => w.format === 'avif')) showToast(t('admin-image-warn-avif-unsupported'));
+              if (warns.some(w => w.format === 'webp')) showToast(t('admin-image-warn-webp-unsupported'));
+            }
             if (relPath) {
               product.image = relPath;
               product.images = [relPath];
@@ -579,7 +591,13 @@ export async function initAdminPage(translations, lang = 'ru') {
       // Prefer using SKU for filename; fallback to ID
       let sku = (form.querySelector('[name="sku"]').value || '').trim();
       if (!sku) { sku = generateNumericSku(form.querySelector('[name="id"]').value); form.querySelector('[name="sku"]').value = sku; }
-      const relPath = await saveMainImageToPictureConditionersFS(f, sku);
+      const out = await saveMainImageToPictureConditionersFS(f, sku);
+      const relPath = typeof out === 'string' ? out : out?.path;
+      const warns = typeof out === 'object' && out?.warnings ? out.warnings : [];
+      if (Array.isArray(warns) && warns.length) {
+        if (warns.some(w => w.format === 'avif')) showToast(t('admin-image-warn-avif-unsupported'));
+        if (warns.some(w => w.format === 'webp')) showToast(t('admin-image-warn-webp-unsupported'));
+      }
       if (relPath) {
         // set hidden _image_url
         let urlHidden = form.querySelector('input[name="_image_url"]');
@@ -589,7 +607,7 @@ export async function initAdminPage(translations, lang = 'ru') {
         const b64 = form.querySelector('input[name="_image_data"]'); if (b64) b64.value = '';
         // update preview
         const prev = document.getElementById('adminImagePreview');
-        if (prev) prev.innerHTML = `<img src="${relPath}" alt="preview" style="max-width:200px;max-height:120px;"/>`;
+        if (prev) prev.innerHTML = `<img src="${relPath}" alt="${t('admin-preview-alt')}" style="max-width:200px;max-height:120px;"/>`;
         // notify
         const toast = (txt) => { const host = document.getElementById('toast-container'); if (!host) return; const n = document.createElement('div'); n.className='toast toast--success'; n.textContent=txt; host.appendChild(n); requestAnimationFrame(()=>n.classList.add('is-visible')); setTimeout(()=>{n.classList.remove('is-visible'); setTimeout(()=>n.remove(),280);},2200); };
         toast(t('admin-image-saved'));

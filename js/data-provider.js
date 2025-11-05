@@ -82,13 +82,28 @@
       if (!res.ok) throw new Error('Network error ' + res.status);
       return res.json();
     }
+    async _getFileMeta() {
+      const url = `https://api.github.com/repos/${this.repo}/contents/${this.path}?ref=${encodeURIComponent(this.branch)}`;
+      const headers = { 'Authorization': `Bearer ${this.token}`, 'Accept': 'application/vnd.github+json' };
+      const res = await fetch(url, { headers });
+      if (res.status === 404) return null;
+      if (!res.ok) throw new Error('Network error ' + res.status);
+      return res.json();
+    }
+    _decodeContent(contentB64) {
+      try { return decodeURIComponent(escape(atob(String(contentB64 || '').replace(/\n/g, '')))); } catch {
+        try { return atob(String(contentB64 || '').replace(/\n/g, '')); } catch { return '[]'; }
+      }
+    }
+    _encodeContent(str) {
+      try { return btoa(unescape(encodeURIComponent(str))); } catch { return btoa(str); }
+    }
     // Reads products.json from repo (GitHub API format)
     async loadAll() {
       if (!this.isConfigured()) throw new Error('GitCMS is not configured');
-      const url = `https://api.github.com/repos/${this.repo}/contents/${this.path}?ref=${encodeURIComponent(this.branch)}`;
-      const json = await this._fetchJson(url, { headers: { 'Authorization': `Bearer ${this.token}`, 'Accept': 'application/vnd.github+json' } });
+      const json = await this._getFileMeta();
       if (!json || !json.content) return [];
-      const decoded = atob(json.content.replace(/\n/g, ''));
+      const decoded = this._decodeContent(json.content);
       const arr = safeParse(decoded, []);
       return Array.isArray(arr) ? arr : [];
     }
@@ -97,18 +112,50 @@
       if (!this.isConfigured()) throw new Error('GitCMS is not configured');
       // Get current SHA (optional). If file doesn't exist, we'll create it (no sha required)
       let sha = undefined;
-      const metaUrl = `https://api.github.com/repos/${this.repo}/contents/${this.path}?ref=${encodeURIComponent(this.branch)}`;
-      try {
-        const meta = await this._fetchJson(metaUrl, { headers: { 'Authorization': `Bearer ${this.token}`, 'Accept': 'application/vnd.github+json' } });
-        sha = meta?.sha;
-      } catch (e) {
-        // If not found (404), we will create a new file by omitting sha
-        // Other errors should still propagate on PUT if any
-      }
+      try { const meta = await this._getFileMeta(); sha = meta?.sha; } catch (e) {}
       const putUrl = `https://api.github.com/repos/${this.repo}/contents/${this.path}`;
       const body = {
         message: commitMessage,
-        content: btoa(unescape(encodeURIComponent(JSON.stringify(products, null, 2)))),
+        content: this._encodeContent(JSON.stringify(products, null, 2)),
+        branch: this.branch,
+      };
+      if (sha) body.sha = sha;
+      const res = await this._fetchJson(putUrl, {
+        method: 'PUT',
+        headers: { 'Authorization': `Bearer ${this.token}`, 'Accept': 'application/vnd.github+json', 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      return { ok: true, commit: res?.commit?.sha };
+    }
+    // Upsert a single product into products.json on GitHub without relying on the current local full array.
+    // Matching by id first; if missing, by case-insensitive sku; otherwise append. Keeps other items intact.
+    async upsertOne(product, commitMessage = 'feat(admin): upsert product in products.json') {
+      if (!this.isConfigured()) throw new Error('GitCMS is not configured');
+      // Load current file (or start with empty list if not exists)
+      let sha = undefined; let current = [];
+      try {
+        const meta = await this._getFileMeta();
+        if (meta && meta.content) {
+          sha = meta.sha;
+          const decoded = this._decodeContent(meta.content);
+          current = safeParse(decoded, []);
+          if (!Array.isArray(current)) current = [];
+        }
+      } catch (_) { /* treat as empty */ }
+      // Merge/replace
+      const id = product && product.id != null ? String(product.id) : '';
+      const sku = product && product.sku ? String(product.sku).toLowerCase() : '';
+      const byId = id ? current.findIndex(p => String(p?.id) === id) : -1;
+      let idx = byId;
+      if (idx < 0 && sku) idx = current.findIndex(p => String(p?.sku || '').toLowerCase() === sku);
+      const next = [...current];
+      const stamped = Object.assign({}, product, { updatedAt: new Date().toISOString() });
+      if (idx >= 0) next[idx] = stamped; else next.push(stamped);
+      // Commit back
+      const putUrl = `https://api.github.com/repos/${this.repo}/contents/${this.path}`;
+      const body = {
+        message: commitMessage,
+        content: this._encodeContent(JSON.stringify(next, null, 2)),
         branch: this.branch,
       };
       if (sha) body.sha = sha;

@@ -40,6 +40,12 @@ export async function initAdminPage(translations, lang = 'ru') {
   const proxyUseChk = document.getElementById('proxyUse');
   const proxyUrlInp = document.getElementById('proxyUrl');
   const proxyTokenInp = document.getElementById('proxyToken');
+  // GitHub (Git-CMS) settings
+  const gitRepoInp = document.getElementById('gitRepo');
+  const gitBranchInp = document.getElementById('gitBranch');
+  const gitPathInp = document.getElementById('gitPath');
+  const gitTokenInp = document.getElementById('gitToken');
+  const gitAutoCommitChk = document.getElementById('gitAutoCommit');
 
   function showToast(text) {
     const host = document.getElementById('toast-container');
@@ -379,6 +385,22 @@ export async function initAdminPage(translations, lang = 'ru') {
       const merged = getMergedProducts(); setProducts(merged); window.products = merged; renderProducts(lang, translations, merged);
     } catch {}
     showToast(t('admin-toast-saved'));
+    // Optional auto-commit (per-item upsert) to GitHub products.json
+    try {
+      const autoCommit = (localStorage.getItem('admin:gitcms:autoCommit') === 'true');
+      const repo = (localStorage.getItem('admin:gitcms:repo') || '').trim();
+      const branch = (localStorage.getItem('admin:gitcms:branch') || 'main').trim();
+      const path = (localStorage.getItem('admin:gitcms:path') || 'data/products.json').trim();
+      const token = (localStorage.getItem('admin:gitcms:token') || '').trim();
+      if (autoCommit && repo && branch && path && token && window.DataProviders && window.DataProviders.GitCMSProvider) {
+        const git = new window.DataProviders.GitCMSProvider({ repo, branch, path, token });
+        git.upsertOne(product, 'feat(admin): upsert product in products.json')
+          .then(() => showToast('Сохранено в GitHub: products.json (1 запись)'))
+          .catch((err) => { console.error('Git commit error', err); showToast('Ошибка записи в GitHub'); });
+      }
+    } catch (e) {
+      console.error('Auto-commit error', e);
+    }
   });
 
   // Export/Import bindings
@@ -482,6 +504,12 @@ export async function initAdminPage(translations, lang = 'ru') {
     if (proxyUseChk) proxyUseChk.checked = (localStorage.getItem('admin:push:useProxy') === 'true');
     if (proxyUrlInp) proxyUrlInp.value = localStorage.getItem('admin:push:proxyUrl') || '';
     if (proxyTokenInp) proxyTokenInp.value = localStorage.getItem('admin:push:proxyToken') || '';
+    // Prefill GitHub (Git-CMS)
+    if (gitRepoInp) gitRepoInp.value = localStorage.getItem('admin:gitcms:repo') || '';
+    if (gitBranchInp) gitBranchInp.value = localStorage.getItem('admin:gitcms:branch') || 'main';
+    if (gitPathInp) gitPathInp.value = localStorage.getItem('admin:gitcms:path') || 'data/products.json';
+    if (gitTokenInp) gitTokenInp.value = localStorage.getItem('admin:gitcms:token') || '';
+    if (gitAutoCommitChk) gitAutoCommitChk.checked = (localStorage.getItem('admin:gitcms:autoCommit') === 'true');
   } catch {}
 
   updateGitButtonsEnabled();
@@ -521,6 +549,12 @@ export async function initAdminPage(translations, lang = 'ru') {
         localStorage.setItem('admin:dataProvider', 'localStorage');
         showToast('Провайдер: LocalStorage');
       }
+      // Save GitHub (Git-CMS) settings regardless of provider
+      if (gitRepoInp) localStorage.setItem('admin:gitcms:repo', (gitRepoInp.value || '').trim());
+      if (gitBranchInp) localStorage.setItem('admin:gitcms:branch', (gitBranchInp.value || 'main').trim() || 'main');
+      if (gitPathInp) localStorage.setItem('admin:gitcms:path', (gitPathInp.value || 'data/products.json').trim() || 'data/products.json');
+      if (gitTokenInp) localStorage.setItem('admin:gitcms:token', (gitTokenInp.value || '').trim());
+      if (gitAutoCommitChk) localStorage.setItem('admin:gitcms:autoCommit', gitAutoCommitChk.checked ? 'true' : 'false');
     } catch (e) {
       console.error('Save remote settings error', e);
       showToast('Ошибка сохранения настроек удалённого провайдера');

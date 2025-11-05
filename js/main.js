@@ -875,27 +875,6 @@ async function initApp() {
         const merged = getMergedProducts();
         setProducts(merged);
         renderProducts(savedLanguage, translations, merged);
-        // Если товаров нет (мы убрали демо-заглушки), попробуем подгрузить локальный JSON из репозитория
-        if ((Array.isArray(window.products) ? window.products.length : 0) === 0 && typeof fetch === 'function') {
-            try {
-                const tryFetch = async (url) => {
-                    try {
-                        const r = await fetch(url, { cache: 'no-store' });
-                        if (r && r.ok) return await r.json();
-                    } catch (_) { /* ignore */ }
-                    return null;
-                };
-                // Сначала пытаемся взять очищенный набор (без заглушек), затем обычный products.json
-                let arr = await tryFetch('data/products.clean.json');
-                if (!Array.isArray(arr) || arr.length === 0) {
-                    arr = await tryFetch('data/products.json');
-                }
-                if (Array.isArray(arr) && arr.length) {
-                    setProducts(arr);
-                    renderProducts(savedLanguage, translations, arr);
-                }
-            } catch (_) { /* ignore fetch issues in non-browser env */ }
-        }
     } catch (_) {
         // Фоллбек — рендер по базовым, если что-то пошло не так
         renderProducts(savedLanguage, translations);

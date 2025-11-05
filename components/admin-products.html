@@ -45,6 +45,25 @@
           <label data-i18n="admin-remote-proxy-token">Proxy Token (опц.)
             <input id="proxyToken" type="password" placeholder="секрет для X-Admin-Sync-Token" data-i18n-placeholder="admin-remote-proxy-token-ph">
           </label>
+          <!-- GitHub (Git-CMS) settings -->
+          <fieldset class="gitcms-github">
+            <legend>GitHub (products.json)</legend>
+            <label data-i18n="admin-remote-git-repo">Repo (owner/repo)
+              <input id="gitRepo" placeholder="owner/name">
+            </label>
+            <label data-i18n="admin-remote-git-branch">Ветка
+              <input id="gitBranch" placeholder="main" value="main">
+            </label>
+            <label data-i18n="admin-remote-git-path">Путь
+              <input id="gitPath" placeholder="data/products.json" value="data/products.json">
+            </label>
+            <label data-i18n="admin-remote-git-token">Токен
+              <input id="gitToken" type="password" placeholder="ghp_...">
+            </label>
+            <label title="После сохранения товара локально, дополнительно выполнится коммит products.json в GitHub">
+              <input id="gitAutoCommit" type="checkbox"> Автозапись в GitHub при «Сохранить»
+            </label>
+          </fieldset>
           <div class="gitcms-actions">
             <button type="button" id="gitcmsSaveBtn" data-i18n="admin-remote-save">Сохранить</button>
             <button type="button" id="gitcmsLoadBtn" title="Загрузить товары из удалённого провайдера в локальные" data-i18n="admin-remote-load">Загрузить</button>

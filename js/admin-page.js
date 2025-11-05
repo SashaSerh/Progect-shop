@@ -1,4 +1,4 @@
-import { getLocalProducts, saveLocalProducts, upsertLocalProduct, exportLocalProducts, importLocalProducts, appendProductToProductsJsonFS } from './admin-products.js';
+import { getLocalProducts, saveLocalProducts, upsertLocalProduct, exportLocalProducts, importLocalProducts, appendProductToProductsJsonFS, saveMainImageToPictureConditionersFS } from './admin-products.js';
 import { autoFlagColor } from './flags-color.js';
 import { getMergedProducts, setProducts, renderProducts } from './products.js';
 import { mergeProduct, computeDiff } from './merge-utils.js';
@@ -443,6 +443,16 @@ export async function initAdminPage(translations, lang = 'ru') {
       updatedAt: new Date().toISOString()
     };
     try {
+      // If user selected a file in input[name="image"], write it to picture/conditioners and use that path
+      const inputFile = form.querySelector('input[name="image"]').files?.[0] || null;
+      if (inputFile) {
+        const suggested = (product.sku && String(product.sku).trim()) || (product.id) || 'image';
+        const relPath = await saveMainImageToPictureConditionersFS(inputFile, suggested);
+        if (relPath) {
+          product.image = relPath;
+          product.images = [relPath];
+        }
+      }
       await appendProductToProductsJsonFS(product);
       showToast('Добавлено в products.json');
     } catch (err) {
@@ -453,6 +463,7 @@ export async function initAdminPage(translations, lang = 'ru') {
         const path = (localStorage.getItem('admin:gitcms:path') || 'data/products.json').trim();
         const token = (localStorage.getItem('admin:gitcms:token') || '').trim();
         if (repo && branch && path && token && window.DataProviders && window.DataProviders.GitCMSProvider) {
+          // For GitHub fallback, we cannot write local image file. Keep URL if uploaded via proxy; else keep base64 or empty.
           const git = new window.DataProviders.GitCMSProvider({ repo, branch, path, token });
           await git.upsertOne(product, 'feat(admin): append product via admin button');
           showToast('Сохранено в GitHub: products.json (1 запись)');

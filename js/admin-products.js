@@ -172,6 +172,43 @@ export async function appendProductToProductsJsonFS(product) {
   return { ok: true, count: merged.length };
 }
 
+// Save selected image file into picture/conditioners via File System Access API and return relative path
+export async function saveMainImageToPictureConditionersFS(file, filenameSuggestion = '') {
+  if (!(file instanceof File)) throw new Error('Файл изображения не найден');
+  if (!('showDirectoryPicker' in window)) throw new Error('File System Access API не поддерживается');
+  // Ask user to pick the target directory (recommend picking the repo's picture/conditioners)
+  const dirHandle = await window.showDirectoryPicker({
+    // startIn is a hint; may be ignored by browser
+    id: 'pick-picture-conditioners-dir'
+  });
+  // Optionally ensure directory name ends with 'conditioners'
+  try {
+    // We cannot read real path, so we warn by file name suggestion instead
+    // noop
+  } catch {}
+  // Sanitize filename
+  const safe = (name) => name
+    .normalize('NFKD')
+    .replace(/[^\w\-\.]+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^[-\.]+|[-\.]+$/g, '')
+    .toLowerCase();
+  const origName = file.name || 'image.jpg';
+  const ext = (origName.includes('.') ? origName.split('.').pop() : 'jpg') || 'jpg';
+  const base = filenameSuggestion || origName.slice(0, Math.max(0, origName.lastIndexOf('.')));
+  let fn = safe(base) || `img-${Date.now()}`;
+  fn = `${fn}.${ext.replace(/[^a-z0-9]/gi,'').toLowerCase() || 'jpg'}`;
+  const fileHandle = await dirHandle.getFileHandle(fn, { create: true });
+  const writable = await fileHandle.createWritable();
+  try {
+    await writable.write(await file.arrayBuffer());
+  } finally {
+    await writable.close();
+  }
+  // Return relative repo path expectation
+  return `picture/conditioners/${fn}`;
+}
+
 export function importLocalProducts(file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();

@@ -11,7 +11,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import sharp from 'sharp';
 
-const SUPPORTED = new Set(['.jpg', '.jpeg', '.png', '.webp']);
+const SUPPORTED = new Set(['.jpg', '.jpeg', '.png', '.webp', '.avif']);
 const SIZES = [320, 480, 768, 1200];
 
 function parseArgs(argv) {
@@ -39,15 +39,31 @@ async function processFile(filePath) {
   const meta = await image.metadata();
   const srcWidth = meta.width || 0;
   for (const w of SIZES) {
-    if (srcWidth && w >= srcWidth) {
-      // upscale not needed; still write a copy at target name to ease srcset
-      const outPath = `${base}-${w}w${ext}`;
-      if (!fs.existsSync(outPath)) fs.copyFileSync(filePath, outPath);
-      continue;
+    // original format variant
+    const outOrig = `${base}-${w}w${ext}`;
+    if (!fs.existsSync(outOrig)) {
+      if (srcWidth && w >= srcWidth) {
+        fs.copyFileSync(filePath, outOrig);
+      } else {
+        await sharp(buf).resize({ width: w, withoutEnlargement: true }).toFile(outOrig);
+      }
     }
-    const outPath = `${base}-${w}w${ext}`;
-    await sharp(buf).resize({ width: w, withoutEnlargement: true }).toFile(outPath);
-    // Optionally adjust quality for JPEG/WebP
+    // webp variant
+    const outWebp = `${base}-${w}w.webp`;
+    if (!fs.existsSync(outWebp)) {
+      await sharp(buf)
+        .resize({ width: w, withoutEnlargement: true })
+        .webp({ quality: 82 })
+        .toFile(outWebp);
+    }
+    // avif variant
+    const outAvif = `${base}-${w}w.avif`;
+    if (!fs.existsSync(outAvif)) {
+      await sharp(buf)
+        .resize({ width: w, withoutEnlargement: true })
+        .avif({ quality: 50 })
+        .toFile(outAvif);
+    }
   }
 }
 

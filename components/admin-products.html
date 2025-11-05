@@ -63,9 +63,6 @@
             <label title="После сохранения товара локально, дополнительно выполнится коммит products.json в GitHub">
               <input id="gitAutoCommit" type="checkbox"> Автозапись в GitHub при «Сохранить»
             </label>
-            <label title="При экспорте локальных товаров будет выполнен коммит products.json в GitHub (если настроено)">
-              <input id="gitExportCommit" type="checkbox"> Экспорт JSON также обновляет products.json (GitHub)
-            </label>
           </fieldset>
           <div class="gitcms-actions">
             <button type="button" id="gitcmsSaveBtn" data-i18n="admin-remote-save">Сохранить</button>
@@ -146,6 +143,7 @@
           </div>
           <div class="form-actions">
             <button type="submit" id="adminProductSave" class="btn btn--primary" data-i18n="admin-save">Сохранить</button>
+            <button type="button" id="adminExportToProductsBtn" class="btn" data-i18n="admin-export-to-productsjson" title="Добавить текущий товар в data/products.json (локально, через доступ к файлам)">Добавить в products.json</button>
             <button type="reset" id="adminProductCancel" class="btn btn--secondary" data-i18n="admin-reset">Сброс</button>
           </div>
         </form>

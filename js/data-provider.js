@@ -166,56 +166,6 @@
       });
       return { ok: true, commit: res?.commit?.sha };
     }
-
-    // Upsert multiple products in a single commit to reduce API calls.
-    async upsertMany(products, commitMessage = 'feat(admin): upsert products in products.json') {
-      if (!this.isConfigured()) throw new Error('GitCMS is not configured');
-      const items = Array.isArray(products) ? products : [];
-      // Load current file
-      let sha = undefined; let current = [];
-      try {
-        const meta = await this._getFileMeta();
-        if (meta && meta.content) {
-          sha = meta.sha;
-          const decoded = this._decodeContent(meta.content);
-          current = safeParse(decoded, []);
-          if (!Array.isArray(current)) current = [];
-        }
-      } catch (_) { /* treat as empty */ }
-      const next = [...current];
-      const indexById = new Map(next.map((p, i) => [String(p?.id), i]));
-      const indexBySku = new Map(next.filter(p => p && p.sku).map((p, i) => [String(p.sku).toLowerCase(), i]));
-      for (const prod of items) {
-        if (!prod || typeof prod !== 'object') continue;
-        const id = prod.id != null ? String(prod.id) : '';
-        const sku = prod.sku ? String(prod.sku).toLowerCase() : '';
-        let idx = id && indexById.has(id) ? indexById.get(id) : -1;
-        if (idx < 0 && sku && indexBySku.has(sku)) idx = indexBySku.get(sku);
-        const stamped = Object.assign({}, prod, { updatedAt: new Date().toISOString() });
-        if (idx >= 0) {
-          next[idx] = stamped;
-        } else {
-          next.push(stamped);
-          const newIndex = next.length - 1;
-          if (id) indexById.set(id, newIndex);
-          if (sku) indexBySku.set(sku, newIndex);
-        }
-      }
-      // Commit
-      const putUrl = `https://api.github.com/repos/${this.repo}/contents/${this.path}`;
-      const body = {
-        message: commitMessage,
-        content: this._encodeContent(JSON.stringify(next, null, 2)),
-        branch: this.branch,
-      };
-      if (sha) body.sha = sha;
-      const res = await this._fetchJson(putUrl, {
-        method: 'PUT',
-        headers: { 'Authorization': `Bearer ${this.token}`, 'Accept': 'application/vnd.github+json', 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
-      });
-      return { ok: true, commit: res?.commit?.sha };
-    }
     // Convenience CRUD using loadAll + replaceAll (simple, but O(n))
     async create(p) {
       const all = await this.loadAll();

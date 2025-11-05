@@ -1,4 +1,4 @@
-import { getLocalProducts, saveLocalProducts, upsertLocalProduct, exportLocalProducts, importLocalProducts } from './admin-products.js';
+import { getLocalProducts, saveLocalProducts, upsertLocalProduct, exportLocalProducts, importLocalProducts, appendProductToProductsJsonFS } from './admin-products.js';
 import { autoFlagColor } from './flags-color.js';
 import { getMergedProducts, setProducts, renderProducts } from './products.js';
 import { mergeProduct, computeDiff } from './merge-utils.js';
@@ -22,6 +22,7 @@ export async function initAdminPage(translations, lang = 'ru') {
   const selectedFlagsContainer = document.getElementById('selectedFlags');
   const flagsHiddenInput = form?.querySelector('input[name="_flags"]');
   const exportBtn = document.getElementById('adminExportBtn');
+  const exportToProductsBtn = document.getElementById('adminExportToProductsBtn');
   const importInput = document.getElementById('adminImportInput');
   const clearConflictsBtn = document.getElementById('clearConflictsBtn');
   // Remote provider controls
@@ -47,7 +48,6 @@ export async function initAdminPage(translations, lang = 'ru') {
   const gitPathInp = document.getElementById('gitPath');
   const gitTokenInp = document.getElementById('gitToken');
   const gitAutoCommitChk = document.getElementById('gitAutoCommit');
-  const gitExportCommitChk = document.getElementById('gitExportCommit');
 
   function showToast(text) {
     const host = document.getElementById('toast-container');
@@ -409,21 +409,61 @@ export async function initAdminPage(translations, lang = 'ru') {
   exportBtn?.addEventListener('click', () => {
     exportLocalProducts();
     showToast(t('admin-export-done'));
-    // Optional: also commit to GitHub products.json
+  });
+  // Append current form product to data/products.json via File System Access API (fallbacks to GitHub upsert)
+  exportToProductsBtn?.addEventListener('click', async () => {
+    if (!form) return;
+    clearErrors();
+    sanitizePriceInput();
+    const titleRu = form.querySelector('[name="title_ru"]').value.trim();
+    const priceVal = Number(form.querySelector('[name="price"]').value || 0);
+    const categoryVal = form.querySelector('[name="category"]').value.trim();
+    const skuVal = form.querySelector('[name="sku"]').value.trim();
+    const idVal = form.querySelector('[name="id"]').value.trim() || `p_${Math.random().toString(36).slice(2,9)}`;
+    let ok = true;
+    if (!titleRu) { setError('title_ru', t('admin-error-title-ru')); ok = false; }
+    if (!Number.isFinite(priceVal) || priceVal < 0) { setError('price', t('admin-error-price')); ok = false; }
+    if (!skuVal) { setError('sku', t('admin-error-sku-required')); ok = false; }
+    if (!categoryVal) { setError('category', t('admin-error-category')); ok = false; }
+    if (!ok) return;
+    const data = new FormData(form);
+    let flags = [];
+    try { flags = JSON.parse(data.get('_flags') || '[]'); } catch {}
+    const product = {
+      id: idVal,
+      name: { ru: data.get('title_ru') || '', uk: data.get('title_uk') || '' },
+      description: { ru: data.get('description_ru') || '', uk: data.get('description_uk') || '' },
+      price: Number(data.get('price') || 0),
+      sku: data.get('sku') || '',
+      category: data.get('category') || 'service',
+      image: data.get('_image_url') || data.get('_image_data') || '',
+      images: (data.get('_image_url') || data.get('_image_data')) ? [data.get('_image_url') || data.get('_image_data')] : [],
+      inStock: data.get('inStock') === 'true',
+      flags,
+      updatedAt: new Date().toISOString()
+    };
     try {
-      const exportCommit = (localStorage.getItem('admin:gitcms:exportCommit') === 'true');
-      const repo = (localStorage.getItem('admin:gitcms:repo') || '').trim();
-      const branch = (localStorage.getItem('admin:gitcms:branch') || 'main').trim();
-      const path = (localStorage.getItem('admin:gitcms:path') || 'data/products.json').trim();
-      const token = (localStorage.getItem('admin:gitcms:token') || '').trim();
-      if (exportCommit && repo && branch && path && token && window.DataProviders && window.DataProviders.GitCMSProvider) {
-        const git = new window.DataProviders.GitCMSProvider({ repo, branch, path, token });
-        const list = getLocalProducts();
-        git.upsertMany(list, 'feat(admin): export local products -> products.json')
-          .then(() => showToast('Экспортирован и записан в GitHub: products.json'))
-          .catch((err) => { console.error('Git export commit error', err); showToast('Ошибка записи экспорта в GitHub'); });
+      await appendProductToProductsJsonFS(product);
+      showToast('Добавлено в products.json');
+    } catch (err) {
+      // Fallback: GitHub per-item upsert if configured
+      try {
+        const repo = (localStorage.getItem('admin:gitcms:repo') || '').trim();
+        const branch = (localStorage.getItem('admin:gitcms:branch') || 'main').trim();
+        const path = (localStorage.getItem('admin:gitcms:path') || 'data/products.json').trim();
+        const token = (localStorage.getItem('admin:gitcms:token') || '').trim();
+        if (repo && branch && path && token && window.DataProviders && window.DataProviders.GitCMSProvider) {
+          const git = new window.DataProviders.GitCMSProvider({ repo, branch, path, token });
+          await git.upsertOne(product, 'feat(admin): append product via admin button');
+          showToast('Сохранено в GitHub: products.json (1 запись)');
+          return;
+        }
+      } catch (e) {
+        console.error('Git fallback error', e);
       }
-    } catch (e) { console.error('Export auto-commit error', e); }
+      console.error('Append to products.json error', err);
+      showToast('Не удалось записать в products.json');
+    }
   });
   importInput?.addEventListener('change', async (e) => {
     const file = e.target.files?.[0];
@@ -537,7 +577,6 @@ export async function initAdminPage(translations, lang = 'ru') {
     if (gitPathInp) gitPathInp.value = localStorage.getItem('admin:gitcms:path') || 'data/products.json';
     if (gitTokenInp) gitTokenInp.value = localStorage.getItem('admin:gitcms:token') || '';
     if (gitAutoCommitChk) gitAutoCommitChk.checked = (localStorage.getItem('admin:gitcms:autoCommit') === 'true');
-    if (gitExportCommitChk) gitExportCommitChk.checked = (localStorage.getItem('admin:gitcms:exportCommit') === 'true');
   } catch {}
 
   updateGitButtonsEnabled();
@@ -583,7 +622,6 @@ export async function initAdminPage(translations, lang = 'ru') {
       if (gitPathInp) localStorage.setItem('admin:gitcms:path', (gitPathInp.value || 'data/products.json').trim() || 'data/products.json');
       if (gitTokenInp) localStorage.setItem('admin:gitcms:token', (gitTokenInp.value || '').trim());
       if (gitAutoCommitChk) localStorage.setItem('admin:gitcms:autoCommit', gitAutoCommitChk.checked ? 'true' : 'false');
-      if (gitExportCommitChk) localStorage.setItem('admin:gitcms:exportCommit', gitExportCommitChk.checked ? 'true' : 'false');
     } catch (e) {
       console.error('Save remote settings error', e);
       showToast('Ошибка сохранения настроек удалённого провайдера');

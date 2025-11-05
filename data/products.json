@@ -1,0 +1,31 @@
+[
+  {
+    "id": "p_isi1fqr",
+    "name": {
+      "ru": "Кондиционер Cooper&Hunter Vital Inverter CH-S07FTXF2-NG R32 Wi-Fi",
+      "uk": "Кондиціонер Cooper&Hunter Vital Inverter CH-S07FTXF2-NG R32 Wi-Fi 6 6 Акція ТОП Популярний"
+    },
+    "description": {
+      "ru": "Инверторный кондиционер Cooper&Hunter Vital Inverter CH-S07FTXF2-NG R32 Wi-Fi для осушения, вентилирования, охлаждения и обогрева помещений площадью до 20 м2. Энергоэффективность класса А++. Модуль WiFi. Автоматическая разморозка и защита от обледенения наружного блока. Компрессор Gree/Daikin.",
+      "uk": "Інверторний кондиціонер Cooper&Hunter Vital Inverter CH-S07FTXF2-NG R32 Wi-Fi​ для осушення, вентилювання, охолодження і обігріву приміщень площею до 20 м2. Енергоефективність класу А++. Модуль Wi-Fi. Автоматичне розморожування і захист від обмерзання зовнішнього блоку. Компрессор Gree/Daikin."
+    },
+    "price": 18999,
+    "sku": "1",
+    "category": "Кондиционер",
+    "image": "",
+    "images": [],
+    "inStock": true,
+    "flags": [
+      {
+        "key": "sale",
+        "color": "#c37522"
+      },
+      {
+        "key": "top",
+        "color": "#22abc3"
+      }
+    ],
+    "updatedAt": "2025-11-05T19:52:18.754Z",
+    "createdAt": "2025-11-05T19:52:18.754Z"
+  }
+]

@@ -102,6 +102,76 @@ export function exportLocalProducts() {
 }
 
 // Import local products from JSON file
+// Append or update a single product into data/products.json using File System Access API (Chromium-based browsers)
+export async function appendProductToProductsJsonFS(product) {
+  if (!product || typeof product !== 'object') throw new Error('Нет данных товара');
+  const hasOpenPicker = typeof window !== 'undefined' && (window.showOpenFilePicker || window.showDirectoryPicker);
+  if (!hasOpenPicker) throw new Error('File System Access API не поддерживается');
+
+  async function pickProductsJsonFile() {
+    // Try file picker first
+    if (window.showOpenFilePicker) {
+      const handles = await window.showOpenFilePicker({
+        multiple: false,
+        types: [{ description: 'JSON', accept: { 'application/json': ['.json'] } }]
+      });
+      const handle = Array.isArray(handles) ? handles[0] : handles;
+      if (!handle) throw new Error('Файл не выбран');
+      // Optional: warn if not products.json
+      try { if (handle.name && !/products\.json$/i.test(handle.name)) {
+        const ok = confirm('Вы выбрали не products.json. Продолжить запись в выбранный файл?');
+        if (!ok) throw new Error('Отменено пользователем');
+      } } catch {}
+      return handle;
+    }
+    // Fallback: pick directory and create/get products.json inside
+    const dir = await window.showDirectoryPicker();
+    const fileHandle = await dir.getFileHandle('products.json', { create: true });
+    return fileHandle;
+  }
+
+  function mergeOne(list, item) {
+    const arr = Array.isArray(list) ? [...list] : [];
+    const idKey = String(item.id || '').trim();
+    const skuKey = String(item.sku || '').trim().toLowerCase();
+    const byId = idKey ? arr.findIndex(p => String(p.id) === idKey) : -1;
+    const bySku = skuKey ? arr.findIndex(p => String(p.sku || '').toLowerCase() === skuKey) : -1;
+    const now = new Date().toISOString();
+    const normalized = { ...item, updatedAt: now };
+    if (byId >= 0) {
+      arr[byId] = { ...arr[byId], ...normalized, updatedAt: now };
+      return arr;
+    }
+    if (bySku >= 0) {
+      arr[bySku] = { ...arr[bySku], ...normalized, updatedAt: now };
+      return arr;
+    }
+    arr.push({ ...normalized, createdAt: item.createdAt || now });
+    return arr;
+  }
+
+  const fileHandle = await pickProductsJsonFile();
+  // Request write permission
+  if (fileHandle.requestPermission) {
+    const perm = await fileHandle.requestPermission({ mode: 'readwrite' });
+    if (perm !== 'granted') throw new Error('Нет разрешения на запись файла');
+  }
+  const file = await fileHandle.getFile();
+  let text = '';
+  try { text = await file.text(); } catch {}
+  let data;
+  try { data = JSON.parse(text || '[]'); } catch { data = []; }
+  const merged = mergeOne(data, product);
+  const pretty = JSON.stringify(merged, null, 2) + '\n';
+  const writable = await fileHandle.createWritable();
+  try {
+    await writable.write(new Blob([pretty], { type: 'application/json' }));
+  } finally {
+    await writable.close();
+  }
+  return { ok: true, count: merged.length };
+}
+
 export function importLocalProducts(file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();

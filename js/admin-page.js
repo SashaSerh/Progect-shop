@@ -336,6 +336,32 @@ export async function initAdminPage(translations, lang = 'ru') {
     const v = Math.max(0, Math.floor(Number(inp.value || 0)));
     if (String(inp.value) !== String(v)) inp.value = String(v);
   }
+  // Simple SKU suggestion from title
+  function slugify(str) {
+    try {
+      const from = 'абвгдезиклмнопрстуфхцчшщыэюяїієґАБВГДЕЗИКЛМНОПРСТУФХЦЧШЩЫЭЮЯЇІЄҐ';
+      const to   = 'abvgdeziklmnoprstufhccssyeyuya yiie gABVGDEZIKLMNOPRSTUFHCCSSYEYUYA YIIE G';
+      const map = new Map();
+      for (let i = 0; i < Math.min(from.length, to.length); i++) map.set(from[i], to[i].trim());
+      const tr = (s) => s.split('').map(ch => map.get(ch) ?? ch).join('');
+      const s = tr(String(str || ''))
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '')
+        .replace(/-{2,}/g, '-');
+      return s;
+    } catch { return String(str || '').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,''); }
+  }
+  function ensureSkuUnique(baseSku, currentId) {
+    let sku = baseSku || '';
+    let counter = 0;
+    while (!isUnique('sku', sku, currentId) || !sku) {
+      counter++;
+      sku = `${baseSku || 'item'}-${Math.random().toString(36).slice(2,6)}`;
+      if (counter > 5) break;
+    }
+    return sku;
+  }
   function isUnique(field, value, currentId) {
     if (!value) return true;
     const merged = getMergedProducts();
@@ -344,6 +370,13 @@ export async function initAdminPage(translations, lang = 'ru') {
 
   form?.addEventListener('input', (e) => {
     if (e.target?.name === 'price') sanitizePriceInput();
+    if (e.target?.name === 'title_ru') {
+      const skuInp = form.querySelector('[name="sku"]');
+      if (skuInp && !skuInp.value.trim()) {
+        const base = slugify(e.target.value).slice(0, 32);
+        skuInp.value = base;
+      }
+    }
   });
 
   form?.addEventListener('submit', (evt) => {
@@ -365,6 +398,23 @@ export async function initAdminPage(translations, lang = 'ru') {
   if (idVal && !isUnique('id', idVal, idVal)) { setError('id', t('admin-error-id-unique')); ok = false; }
     if (!ok) return;
     const data = new FormData(form);
+    // If SKU is empty, auto-generate from title
+    if (!(data.get('sku') || '').trim()) {
+      const base = slugify(data.get('title_ru') || data.get('title_uk') || 'item');
+      const suggested = ensureSkuUnique(base.slice(0,32), data.get('id'));
+      form.querySelector('[name="sku"]').value = suggested;
+      data.set('sku', suggested);
+    }
+    // If image is empty, prompt to pick or continue
+    const imgUrl = (data.get('_image_url') || '').trim();
+    const imgB64 = (data.get('_image_data') || '').trim();
+    const fileInputEl = form.querySelector('input[name="image"]');
+    if (!imgUrl && !imgB64 && (!fileInputEl || !fileInputEl.files || !fileInputEl.files[0])) {
+      setError('image', t('admin-error-image-required'));
+      const wantPick = confirm('Изображение не выбрано. Хотите выбрать файл сейчас?');
+      if (wantPick && fileInputEl) { fileInputEl.click(); }
+      return; // stop submit until user selects image and нажмёт сохранить ещё раз
+    }
     let flags = [];
     try { flags = JSON.parse(data.get('_flags') || '[]'); } catch {}
       const product = {
@@ -426,6 +476,12 @@ export async function initAdminPage(translations, lang = 'ru') {
     if (!skuVal) { setError('sku', t('admin-error-sku-required')); ok = false; }
     if (!categoryVal) { setError('category', t('admin-error-category')); ok = false; }
     if (!ok) return;
+    // Ensure SKU if empty
+    if (!skuVal) {
+      const base = slugify(titleRu || form.querySelector('[name="title_uk"]').value.trim());
+      const generated = ensureSkuUnique(base.slice(0,32), idVal);
+      form.querySelector('[name="sku"]').value = generated;
+    }
     const data = new FormData(form);
     let flags = [];
     try { flags = JSON.parse(data.get('_flags') || '[]'); } catch {}
@@ -451,6 +507,36 @@ export async function initAdminPage(translations, lang = 'ru') {
         if (relPath) {
           product.image = relPath;
           product.images = [relPath];
+        }
+      } else {
+        // Try auto-attach existing file by SKU in chosen directory
+        if (window.showDirectoryPicker && product.sku) {
+          const wantFind = confirm('Изображение не выбрано. Попробовать найти файл по SKU в picture/conditioners?');
+          if (wantFind) {
+            try {
+              const dir = await window.showDirectoryPicker({ id: 'pick-picture-conditioners-dir' });
+              const lower = String(product.sku).toLowerCase();
+              const allowed = ['.jpg','.jpeg','.png','.webp','.avif'];
+              // iterate entries
+              for await (const entry of dir.values()) {
+                if (entry.kind === 'file') {
+                  const name = entry.name;
+                  const dot = name.lastIndexOf('.');
+                  const base = dot >= 0 ? name.slice(0,dot) : name;
+                  const ext = dot >= 0 ? name.slice(dot).toLowerCase() : '';
+                  if (base.toLowerCase() === lower && allowed.includes(ext)) {
+                    product.image = `picture/conditioners/${name}`;
+                    product.images = [product.image];
+                    break;
+                  }
+                }
+              }
+            } catch {}
+          }
+        }
+        if (!product.image) {
+          const wantPick = confirm('Выбрать и сохранить файл сейчас?');
+          if (wantPick && fileInputEl) { fileInputEl.click(); return; }
         }
       }
       await appendProductToProductsJsonFS(product);

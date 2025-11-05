@@ -490,6 +490,23 @@ export async function initAdminPage(translations, lang = 'ru') {
       updatedAt: new Date().toISOString()
     };
     try {
+      // Helper: convert data URL to File
+      const dataURLtoFile = (dataUrl, fileName) => {
+        const m = String(dataUrl).match(/^data:([^;]+);base64,(.*)$/);
+        if (!m) return null;
+        const mime = m[1];
+        const binStr = atob(m[2]);
+        const len = binStr.length;
+        const arr = new Uint8Array(len);
+        for (let i = 0; i < len; i++) arr[i] = binStr.charCodeAt(i);
+        let ext = 'jpg';
+        if (/png/i.test(mime)) ext = 'png';
+        else if (/webp/i.test(mime)) ext = 'webp';
+        else if (/avif/i.test(mime)) ext = 'avif';
+        else if (/jpeg/i.test(mime)) ext = 'jpg';
+        const fn = `${fileName}.${ext}`;
+        return new File([arr], fn, { type: mime });
+      };
       // If user selected a file in input[name="image"], write it to picture/conditioners and use that path
       const inputFile = form.querySelector('input[name="image"]').files?.[0] || null;
       if (inputFile) {
@@ -498,6 +515,30 @@ export async function initAdminPage(translations, lang = 'ru') {
         if (relPath) {
           product.image = relPath;
           product.images = [relPath];
+          // persist into hidden field and preview
+          let urlHidden = form.querySelector('input[name="_image_url"]');
+          if (!urlHidden) { urlHidden = document.createElement('input'); urlHidden.type = 'hidden'; urlHidden.name = '_image_url'; form.appendChild(urlHidden); }
+          urlHidden.value = relPath;
+          const b64 = form.querySelector('input[name="_image_data"]'); if (b64) b64.value = '';
+          const prev = document.getElementById('adminImagePreview'); if (prev) prev.innerHTML = `<img src="${relPath}" alt="${t('admin-preview-alt')}" style="max-width:200px;max-height:120px;"/>`;
+        }
+      } else {
+        // If we have base64 data from preview, save it as a real file now
+        const b64 = (form.querySelector('input[name="_image_data"]').value || '').trim();
+        if (b64) {
+          const suggested = (product.sku && String(product.sku).trim()) || (product.id) || 'image';
+          const fileFromB64 = dataURLtoFile(b64, suggested);
+          if (fileFromB64) {
+            const relPath = await saveMainImageToPictureConditionersFS(fileFromB64, suggested);
+            if (relPath) {
+              product.image = relPath;
+              product.images = [relPath];
+              let urlHidden = form.querySelector('input[name="_image_url"]');
+              if (!urlHidden) { urlHidden = document.createElement('input'); urlHidden.type = 'hidden'; urlHidden.name = '_image_url'; form.appendChild(urlHidden); }
+              urlHidden.value = relPath;
+              const prev = document.getElementById('adminImagePreview'); if (prev) prev.innerHTML = `<img src="${relPath}" alt="${t('admin-preview-alt')}" style="max-width:200px;max-height:120px;"/>`;
+            }
+          }
         }
       }
       await appendProductToProductsJsonFS(product);

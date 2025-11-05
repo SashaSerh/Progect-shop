@@ -217,6 +217,8 @@ export const translations = {
         "admin-remote-load": "Загрузить",
         "admin-remote-push": "Записать",
         "admin-remote-merge": "Загрузить и слить",
+    "admin-remote-github-load": "Загрузить из GitHub",
+    "admin-remote-github-load-title": "Загрузить products.json из GitHub в локальные (без смены провайдера)",
         "admin-remote-git-repo": "Repo (owner/repo)",
         "admin-remote-git-branch": "Ветка",
         "admin-remote-git-path": "Путь",
@@ -472,6 +474,8 @@ export const translations = {
         "admin-remote-load": "Завантажити",
         "admin-remote-push": "Записати",
         "admin-remote-merge": "Завантажити і злити",
+    "admin-remote-github-load": "Завантажити з GitHub",
+    "admin-remote-github-load-title": "Завантажити products.json з GitHub у локальні (без зміни провайдера)",
         "admin-remote-git-repo": "Repo (власник/репозиторій)",
         "admin-remote-git-branch": "Гілка",
         "admin-remote-git-path": "Шлях",
@@ -518,6 +522,12 @@ export function switchLanguage(lang) {
         const key = element.getAttribute('data-i18n-placeholder');
         const value = translations[safeLang][key] || translations.ru[key];
         if (value) element.placeholder = value;
+    });
+    // Titles (tooltips)
+    document.querySelectorAll('[data-i18n-title]').forEach(element => {
+        const key = element.getAttribute('data-i18n-title');
+        const value = translations[safeLang][key] || translations.ru[key];
+        if (value) element.title = value;
     });
 
     document.querySelectorAll('option[data-i18n]').forEach(option => {

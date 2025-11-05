@@ -28,6 +28,7 @@ export async function initAdminPage(translations, lang = 'ru') {
   const providerSelect = document.getElementById('dataProviderSelect');
   const saveBtn = document.getElementById('gitcmsSaveBtn');
   const loadBtn = document.getElementById('gitcmsLoadBtn');
+  const loadFromGitBtn = document.getElementById('gitcmsLoadFromGitBtn');
   const pushBtn = document.getElementById('gitcmsPushBtn');
   const mergeBtn = document.getElementById('gitcmsMergeBtn');
   const statusEl = document.getElementById('gitcmsStatus');
@@ -455,6 +456,10 @@ export async function initAdminPage(translations, lang = 'ru') {
     const useProxy = (localStorage.getItem('admin:push:useProxy') === 'true');
     const proxyUrl = (localStorage.getItem('admin:push:proxyUrl') || '').trim();
     const canPushViaProxy = useProxy && !!proxyUrl;
+    const gitRepo = (localStorage.getItem('admin:gitcms:repo') || '').trim();
+    const gitToken = (localStorage.getItem('admin:gitcms:token') || '').trim();
+    const gitPath = (localStorage.getItem('admin:gitcms:path') || '').trim();
+    const gitBranch = (localStorage.getItem('admin:gitcms:branch') || 'main').trim();
     // load/merge требуют удалённый провайдер (для чтения)
     [loadBtn, mergeBtn].forEach(btn => { if (btn) { btn.disabled = !isRemote; btn.title = isRemote ? '' : 'Доступно только при выборе удалённого провайдера'; } });
     // push можно разрешить через прокси даже без провайдера
@@ -465,6 +470,12 @@ export async function initAdminPage(translations, lang = 'ru') {
       } else {
         pushBtn.title = isRemote ? '' : 'Доступно только при выборе удалённого провайдера';
       }
+    }
+    // GitHub direct load availability
+    if (loadFromGitBtn) {
+      const ok = !!(gitRepo && gitToken && gitPath && gitBranch);
+      loadFromGitBtn.disabled = !ok;
+      loadFromGitBtn.title = ok ? 'Загрузить products.json из GitHub' : 'Укажите Repo/Branch/Path/Token';
     }
     if (statusEl) statusEl.textContent = '';
   }
@@ -599,6 +610,39 @@ export async function initAdminPage(translations, lang = 'ru') {
         console.error('Remote load error', e);
         setGitStatus(`Ошибка: ${e?.message || e}`, true);
         showToast('Ошибка загрузки из удалённого провайдера');
+      }
+    });
+  });
+
+  // Direct GitHub -> LocalStorage load (without switching provider)
+  loadFromGitBtn?.addEventListener('click', async () => {
+    await withLoading(loadFromGitBtn, async () => {
+      try {
+        if (!(window.DataProviders && window.DataProviders.GitCMSProvider)) {
+          setGitStatus('GitCMS недоступен', true); return;
+        }
+        const repo = (localStorage.getItem('admin:gitcms:repo') || '').trim();
+        const token = (localStorage.getItem('admin:gitcms:token') || '').trim();
+        const branch = (localStorage.getItem('admin:gitcms:branch') || 'main').trim();
+        const path = (localStorage.getItem('admin:gitcms:path') || 'data/products.json').trim();
+        if (!(repo && token && branch && path)) {
+          const msg = 'Укажите Repo/Branch/Path/Token'; setGitStatus(msg, true); showToast(msg); return;
+        }
+        setGitStatus('Загрузка из GitHub…');
+        const git = new window.DataProviders.GitCMSProvider({ repo, branch, path, token });
+        const list = await git.loadAll();
+        if (!Array.isArray(list)) { setGitStatus('Не удалось загрузить products.json', true); return; }
+        saveLocalProducts(list);
+        try {
+          const merged = getMergedProducts(); setProducts(merged); window.products = merged; renderProducts(lang, translations, merged);
+        } catch {}
+        setGitStatus(`Загружено из GitHub: ${list.length}`);
+        showToast(`Загружено из GitHub: ${list.length}`);
+        renderList();
+      } catch (e) {
+        console.error('GitHub load error', e);
+        setGitStatus(`Ошибка GitHub: ${e?.message || e}`, true);
+        showToast('Ошибка загрузки из GitHub');
       }
     });
   });

@@ -65,6 +65,15 @@ async function processFile(filePath) {
         .toFile(outAvif);
     }
   }
+  // LQIP (very small preview): generate 24px width webp and original format copy
+  const lqipWebp = `${base}-lqip.webp`;
+  if (!fs.existsSync(lqipWebp)) {
+    await sharp(buf).resize({ width: 24, withoutEnlargement: true }).webp({ quality: 45 }).toFile(lqipWebp);
+  }
+  const lqipOrig = `${base}-lqip${ext}`;
+  if (!fs.existsSync(lqipOrig)) {
+    await sharp(buf).resize({ width: 24, withoutEnlargement: true }).toFile(lqipOrig);
+  }
 }
 
 async function* walk(dir) {

@@ -3,7 +3,10 @@
   "scripts": {
     "test": "vitest",
     "export:pictures": "node scripts/export-to-pictures.js",
-    "images:gen": "node scripts/generate-responsive-images.js --dir picture"
+    "images:gen": "node scripts/generate-responsive-images.js --dir picture",
+    "images:cleanup:dry": "node scripts/cleanup-pictures.js --dir picture --json data/products.local.json,data/products.json --dry-run",
+    "images:cleanup": "node scripts/cleanup-pictures.js --dir picture --json data/products.local.json,data/products.json --yes",
+    "images:create-demo": "node scripts/create-demo-image.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.57.4"

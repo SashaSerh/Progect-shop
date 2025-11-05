@@ -695,13 +695,15 @@ export function renderProductCard(product, lang, translations) {
                 const orig1200 = `${base}-1200w${ext}`;
                 const webp = `${base}-320w.webp 320w, ${base}-480w.webp 480w, ${base}-768w.webp 768w, ${base}-1200w.webp 1200w`;
                 const avif = `${base}-320w.avif 320w, ${base}-480w.avif 480w, ${base}-768w.avif 768w, ${base}-1200w.avif 1200w`;
-                srcsetAttr = `${orig320} 320w, ${orig480} 480w, ${orig768} 768w, ${orig1200} 1200w`;
-                const fallbackSrc = orig480; // разумный дефолт
-                pictureHtml = `
+                                srcsetAttr = `${orig320} 320w, ${orig480} 480w, ${orig768} 768w, ${orig1200} 1200w`;
+                                const fallbackSrc = orig480; // разумный дефолт
+                                const lqipBg = `${base}-lqip.webp`;
+                                const imgInlineStyle = `background-image:url('${lqipBg}');background-size:cover;background-position:center;`;
+                                pictureHtml = `
 <picture>
-  <source type="image/avif" srcset="${avif}" sizes="(max-width: 480px) 45vw, (max-width: 768px) 30vw, 240px">
-  <source type="image/webp" srcset="${webp}" sizes="(max-width: 480px) 45vw, (max-width: 768px) 30vw, 240px">
-  <img src="${fallbackSrc}" alt="${product.name[lang]}" class="product-card__image lqip" loading="${loadingAttr}" decoding="async" fetchpriority="${fetchPrio}" srcset="${srcsetAttr}" sizes="(max-width: 480px) 45vw, (max-width: 768px) 30vw, 240px" onerror="this.src='https://placehold.co/150x150/blue/white?text=Image+Not+Found'">
+    <source type="image/avif" srcset="${avif}" sizes="(max-width: 480px) 45vw, (max-width: 768px) 30vw, 240px">
+    <source type="image/webp" srcset="${webp}" sizes="(max-width: 480px) 45vw, (max-width: 768px) 30vw, 240px">
+    <img src="${fallbackSrc}" alt="${product.name[lang]}" class="product-card__image lqip" style="${imgInlineStyle}" loading="${loadingAttr}" decoding="async" fetchpriority="${fetchPrio}" srcset="${srcsetAttr}" sizes="(max-width: 480px) 45vw, (max-width: 768px) 30vw, 240px" onerror="this.src='https://placehold.co/150x150/blue/white?text=Image+Not+Found'">
 </picture>`;
             } else {
                 srcsetAttr = `${baseSrc} 600w`;

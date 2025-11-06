@@ -672,6 +672,7 @@ export function renderProductCard(product, lang, translations) {
     const baseSrc = (product.image && String(product.image).trim().length) ? product.image : placeholder;
     let srcsetAttr = '';
     let pictureHtml = '';
+    let imgInlineStyle = '';
     try {
         const isPicsum600 = /^https?:\/\/picsum\.photos\/600/i.test(baseSrc);
         if (isPicsum600) {
@@ -685,7 +686,7 @@ export function renderProductCard(product, lang, translations) {
         } else if (baseSrc.startsWith('data:')) {
             srcsetAttr = '';
         } else {
-            // Local image path (e.g., picture/name.jpg). Build <picture> with avif/webp + fallback srcset.
+            // Local image path (e.g., picture/name.jpg). Use source-format-only variants (-320w/-480w/-768w/-1200w)
             const m = baseSrc.match(/^(.*)(\.[a-zA-Z0-9]+)$/);
             if (m) {
                 const base = m[1]; const ext = m[2];
@@ -693,18 +694,9 @@ export function renderProductCard(product, lang, translations) {
                 const orig480 = `${base}-480w${ext}`;
                 const orig768 = `${base}-768w${ext}`;
                 const orig1200 = `${base}-1200w${ext}`;
-                const webp = `${base}-320w.webp 320w, ${base}-480w.webp 480w, ${base}-768w.webp 768w, ${base}-1200w.webp 1200w`;
-                const avif = `${base}-320w.avif 320w, ${base}-480w.avif 480w, ${base}-768w.avif 768w, ${base}-1200w.avif 1200w`;
-                                srcsetAttr = `${orig320} 320w, ${orig480} 480w, ${orig768} 768w, ${orig1200} 1200w`;
-                                const fallbackSrc = orig480; // разумный дефолт
-                                const lqipBg = `${base}-lqip.webp`;
-                                const imgInlineStyle = `background-image:url('${lqipBg}');background-size:cover;background-position:center;`;
-                                pictureHtml = `
-<picture>
-    <source type="image/avif" srcset="${avif}" sizes="(max-width: 480px) 45vw, (max-width: 768px) 30vw, 240px">
-    <source type="image/webp" srcset="${webp}" sizes="(max-width: 480px) 45vw, (max-width: 768px) 30vw, 240px">
-    <img src="${fallbackSrc}" alt="${product.name[lang]}" class="product-card__image lqip" style="${imgInlineStyle}" loading="${loadingAttr}" decoding="async" fetchpriority="${fetchPrio}" srcset="${srcsetAttr}" sizes="(max-width: 480px) 45vw, (max-width: 768px) 30vw, 240px" onerror="this.src='https://placehold.co/150x150/blue/white?text=Image+Not+Found'">
-</picture>`;
+                srcsetAttr = `${orig320} 320w, ${orig480} 480w, ${orig768} 768w, ${orig1200} 1200w`;
+                // Keep simple <img> (no AVIF/WEBP sources) to avoid 404s when only original-format variants exist
+                pictureHtml = '';
             } else {
                 srcsetAttr = `${baseSrc} 600w`;
             }

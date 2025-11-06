@@ -12,7 +12,7 @@ import path from 'node:path';
 import sharp from 'sharp';
 
 const SUPPORTED = new Set(['.jpg', '.jpeg', '.png', '.webp', '.avif']);
-const SIZES = [320, 480, 768, 1200];
+const SIZES = [320, 480, 768, 1200]; // only these sizes
 
 function parseArgs(argv) {
   const out = {}; let key = null;
@@ -39,16 +39,7 @@ async function processFile(filePath) {
   const meta = await image.metadata();
   const srcWidth = meta.width || 0;
   for (const w of SIZES) {
-    // original format variant
-    const outOrig = `${base}-${w}w${ext}`;
-    if (!fs.existsSync(outOrig)) {
-      if (srcWidth && w >= srcWidth) {
-        fs.copyFileSync(filePath, outOrig);
-      } else {
-        await sharp(buf).resize({ width: w, withoutEnlargement: true }).toFile(outOrig);
-      }
-    }
-    // webp variant
+    // ONLY webp variant for the size
     const outWebp = `${base}-${w}w.webp`;
     if (!fs.existsSync(outWebp)) {
       await sharp(buf)
@@ -56,23 +47,6 @@ async function processFile(filePath) {
         .webp({ quality: 82 })
         .toFile(outWebp);
     }
-    // avif variant
-    const outAvif = `${base}-${w}w.avif`;
-    if (!fs.existsSync(outAvif)) {
-      await sharp(buf)
-        .resize({ width: w, withoutEnlargement: true })
-        .avif({ quality: 50 })
-        .toFile(outAvif);
-    }
-  }
-  // LQIP (very small preview): generate 24px width webp and original format copy
-  const lqipWebp = `${base}-lqip.webp`;
-  if (!fs.existsSync(lqipWebp)) {
-    await sharp(buf).resize({ width: 24, withoutEnlargement: true }).webp({ quality: 45 }).toFile(lqipWebp);
-  }
-  const lqipOrig = `${base}-lqip${ext}`;
-  if (!fs.existsSync(lqipOrig)) {
-    await sharp(buf).resize({ width: 24, withoutEnlargement: true }).toFile(lqipOrig);
   }
 }
 
@@ -88,36 +62,19 @@ async function* walk(dir) {
 
 async function main() {
   const args = parseArgs(process.argv);
-  const singleFile = args.file || args.path; // allow --file or --path
-  if (singleFile) {
-    const fp = path.resolve(singleFile);
-    if (!fs.existsSync(fp)) {
-      console.error(`File not found: ${fp}`);
-      process.exit(1);
-    }
-    const ext = path.extname(fp).toLowerCase();
-    if (!SUPPORTED.has(ext)) {
-      console.log(`Skip (unsupported): ${fp}`);
-      return;
-    }
-    await processFile(fp).catch(err => console.error('Error processing', fp, err?.message || err));
-    console.log(`Responsive variants generated for 1 image: ${path.basename(fp)}`);
-    return;
-  } else {
-    const dir = args.dir || 'picture';
-    if (!fs.existsSync(dir)) {
-      console.error(`Directory not found: ${dir}`);
-      process.exit(1);
-    }
-    let count = 0;
-    for await (const fp of walk(dir)) {
-      const ext = path.extname(fp).toLowerCase();
-      if (!SUPPORTED.has(ext)) continue;
-      await processFile(fp).catch(err => console.error('Error processing', fp, err?.message || err));
-      count++;
-    }
-    console.log(`Responsive variants generated for ~${count} original images in ${dir}/`);
+  const dir = args.dir || 'picture';
+  if (!fs.existsSync(dir)) {
+    console.error(`Directory not found: ${dir}`);
+    process.exit(1);
   }
+  let count = 0;
+  for await (const fp of walk(dir)) {
+    const ext = path.extname(fp).toLowerCase();
+    if (!SUPPORTED.has(ext)) continue;
+    await processFile(fp).catch(err => console.error('Error processing', fp, err?.message || err));
+    count++;
+  }
+  console.log(`Responsive variants generated for ~${count} original images in ${dir}/`);
 }
 
 main().catch(e => { console.error(e); process.exit(1); });

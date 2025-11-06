@@ -490,47 +490,7 @@ export async function initAdminPage(translations, lang = 'ru') {
       updatedAt: new Date().toISOString()
     };
     try {
-      // If user selected a file in input[name="image"], write it to picture/conditioners and use that path
-      const fileInputEl = form.querySelector('input[name="image"]');
-      const inputFile = fileInputEl?.files?.[0] || null;
-      if (inputFile) {
-        const suggested = (product.sku && String(product.sku).trim()) || (product.id) || 'image';
-        const relPath = await saveMainImageToPictureConditionersFS(inputFile, suggested);
-        if (relPath) {
-          product.image = relPath;
-          product.images = [relPath];
-        }
-      } else {
-        // Try auto-attach existing file by SKU in chosen directory
-        if (window.showDirectoryPicker && product.sku) {
-          const wantFind = confirm('Изображение не выбрано. Попробовать найти файл по SKU в picture/conditioners?');
-          if (wantFind) {
-            try {
-              const dir = await window.showDirectoryPicker({ id: 'pick-picture-conditioners-dir' });
-              const lower = String(product.sku).toLowerCase();
-              const allowed = ['.jpg','.jpeg','.png','.webp','.avif'];
-              // iterate entries
-              for await (const entry of dir.values()) {
-                if (entry.kind === 'file') {
-                  const name = entry.name;
-                  const dot = name.lastIndexOf('.');
-                  const base = dot >= 0 ? name.slice(0,dot) : name;
-                  const ext = dot >= 0 ? name.slice(dot).toLowerCase() : '';
-                  if (base.toLowerCase() === lower && allowed.includes(ext)) {
-                    product.image = `picture/conditioners/${name}`;
-                    product.images = [product.image];
-                    break;
-                  }
-                }
-              }
-            } catch {}
-          }
-        }
-        if (!product.image) {
-          const wantPick = confirm('Выбрать и сохранить файл сейчас?');
-          if (wantPick && fileInputEl) { fileInputEl.click(); return; }
-        }
-      }
+      // Экспорт без обязательного изображения: просто записываем объект как есть
       await appendProductToProductsJsonFS(product);
       showToast('Добавлено в products.json');
     } catch (err) {

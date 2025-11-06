@@ -309,15 +309,40 @@
     }
   }
 
+  // Static JSON provider to load products from a local JSON file (e.g., /data/products.json)
+  class StaticJsonProvider {
+    constructor(opts = {}) {
+      this.kind = 'staticJson';
+      this.path = opts.path || localStorage.getItem('admin:staticjson:path') || 'data/products.json';
+    }
+    isConfigured() { return Boolean(this.path); }
+    async loadAll() {
+      const url = this.path;
+      const res = await fetch(url);
+      if (!res.ok) throw new Error('Network error ' + res.status);
+      const json = await res.json();
+      return Array.isArray(json) ? json : [];
+    }
+    // read-only provider
+    async create() { throw new Error('StaticJsonProvider is read-only'); }
+    async update() { throw new Error('StaticJsonProvider is read-only'); }
+    async remove() { throw new Error('StaticJsonProvider is read-only'); }
+    async replaceAll() { throw new Error('StaticJsonProvider is read-only'); }
+  }
+
   function getConfiguredProvider() {
-    const pref = (localStorage.getItem('admin:dataProvider') || 'localStorage').toLowerCase();
+    // If no explicit provider is selected, default to Static JSON so real products.json renders on homepage
+    // Fallbacks: GitCMS/Supabase when explicitly chosen; LocalStorage as legacy/manual mode
+    const stored = localStorage.getItem('admin:dataProvider');
+    const pref = (stored ? stored : 'staticjson').toLowerCase();
+    if (pref === 'staticjson') return new StaticJsonProvider();
     if (pref === 'gitcms') return new GitCMSProvider();
     if (pref === 'supabase') return new SupabaseProvider();
     return new LocalStorageProvider();
   }
 
   // Public API
-  window.DataProviders = { LocalStorageProvider, GitCMSProvider, SupabaseProvider };
+  window.DataProviders = { LocalStorageProvider, GitCMSProvider, SupabaseProvider, StaticJsonProvider };
   window.getDataProvider = getConfiguredProvider;
 
   // Utility helpers to simplify Git‑CMS setup from console or scripts
@@ -364,6 +389,18 @@
   // Switch back to LocalStorage provider
   window.switchToLocalProvider = function switchToLocalProvider() {
     try { localStorage.setItem('admin:dataProvider', 'localStorage'); return true; } catch(_) { return false; }
+  };
+
+  // configureStaticJson({ path: 'data/products.json' }) and switch helper
+  window.configureStaticJson = function configureStaticJson(opts = {}) {
+    try {
+      if (opts.path) localStorage.setItem('admin:staticjson:path', String(opts.path).trim() || 'data/products.json');
+      localStorage.setItem('admin:dataProvider', 'staticjson');
+      return true;
+    } catch (_) { return false; }
+  };
+  window.switchToStaticJson = function switchToStaticJson() {
+    try { localStorage.setItem('admin:dataProvider', 'staticjson'); return true; } catch(_) { return false; }
   };
 
   // Dump locally saved products (admin local storage) normalized to ProductSchema JSON

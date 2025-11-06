@@ -88,19 +88,36 @@ async function* walk(dir) {
 
 async function main() {
   const args = parseArgs(process.argv);
-  const dir = args.dir || 'picture';
-  if (!fs.existsSync(dir)) {
-    console.error(`Directory not found: ${dir}`);
-    process.exit(1);
-  }
-  let count = 0;
-  for await (const fp of walk(dir)) {
+  const singleFile = args.file || args.path; // allow --file or --path
+  if (singleFile) {
+    const fp = path.resolve(singleFile);
+    if (!fs.existsSync(fp)) {
+      console.error(`File not found: ${fp}`);
+      process.exit(1);
+    }
     const ext = path.extname(fp).toLowerCase();
-    if (!SUPPORTED.has(ext)) continue;
+    if (!SUPPORTED.has(ext)) {
+      console.log(`Skip (unsupported): ${fp}`);
+      return;
+    }
     await processFile(fp).catch(err => console.error('Error processing', fp, err?.message || err));
-    count++;
+    console.log(`Responsive variants generated for 1 image: ${path.basename(fp)}`);
+    return;
+  } else {
+    const dir = args.dir || 'picture';
+    if (!fs.existsSync(dir)) {
+      console.error(`Directory not found: ${dir}`);
+      process.exit(1);
+    }
+    let count = 0;
+    for await (const fp of walk(dir)) {
+      const ext = path.extname(fp).toLowerCase();
+      if (!SUPPORTED.has(ext)) continue;
+      await processFile(fp).catch(err => console.error('Error processing', fp, err?.message || err));
+      count++;
+    }
+    console.log(`Responsive variants generated for ~${count} original images in ${dir}/`);
   }
-  console.log(`Responsive variants generated for ~${count} original images in ${dir}/`);
 }
 
 main().catch(e => { console.error(e); process.exit(1); });

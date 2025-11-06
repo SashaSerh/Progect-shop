@@ -5,7 +5,7 @@
     "export:pictures": "node scripts/export-to-pictures.js",
     "images:gen": "node scripts/generate-responsive-images.js --dir picture",
   "images:fix-missing": "node scripts/fix-missing-images.js",
-    "images:watch": "chokidar \"picture/**/*.{jpg,jpeg,png,webp,avif}\" -c \"node scripts/generate-responsive-images.js --dir picture\"",
+  "images:watch": "chokidar \"picture/**/*.{jpg,jpeg,png,webp,avif}\" --ignore \"**/*-lqip.*\" --ignore \"**/*-[0-9]*w.*\" --initial false --await-write-finish 200 -c \"node scripts/generate-responsive-images.js --file {path}\"",
     "images:cleanup:dry": "node scripts/cleanup-pictures.js --dir picture --json data/products.local.json,data/products.json --dry-run",
     "images:cleanup": "node scripts/cleanup-pictures.js --dir picture --json data/products.local.json,data/products.json --yes",
     "images:create-demo": "node scripts/create-demo-image.js"

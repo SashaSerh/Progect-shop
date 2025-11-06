@@ -1,3 +1,9 @@
+/* Admin gallery sizing variables */
+:root {
+    --admin-gallery-gap: 12px;
+    --admin-gallery-thumb-w: 128px;
+    --admin-gallery-thumb-h: 96px;
+}
 /* Catalog dropdown: visibility and animations */
 .catalog-dropdown {
     position: absolute;
@@ -165,11 +171,13 @@
 .is-invalid { border-color: #c62828 !important; outline-color: #c62828 !important; }
 
 /* Admin gallery preview */
-.images-preview { display:flex; gap:8px; flex-wrap:wrap; align-items:flex-start; padding:4px; border: 1px dashed transparent; border-radius:8px; }
+#adminImagesPreview.images-preview { display:flex; gap: var(--admin-gallery-gap, 12px); flex-wrap:wrap; align-items:flex-start; justify-content:flex-start; align-content:flex-start; padding:4px; border: 1px dashed transparent; border-radius:8px; }
 .images-preview.is-dragover { border-color: var(--accent-color, #007aff); background: rgba(0,122,255,0.06); }
+#adminImagesPreview .images-preview__item { position: relative !important; display:inline-flex !important; padding:6px; border:1px solid var(--border, #ddd); border-radius:10px; background: var(--surface, #fff); flex: 0 0 auto; float: none !important; }
+#adminImagesPreview .images-preview__item img { display:block; position: static !important; width: var(--admin-gallery-thumb-w, 128px); height: var(--admin-gallery-thumb-h, 96px); border-radius:8px; object-fit: cover; }
 .images-preview__item.gallery-item { position: relative; padding:4px; border:1px solid var(--border, #ddd); border-radius:8px; background: var(--surface, #fff); }
 .images-preview__item.gallery-item.dragging { opacity:.7; transform: scale(0.98); }
-.images-preview__item.gallery-item img { display:block; max-width:120px; max-height:90px; border-radius:6px; object-fit: cover; }
+.images-preview__item.gallery-item img { display:block; width: var(--admin-gallery-thumb-w, 128px); height: var(--admin-gallery-thumb-h, 96px); border-radius:8px; object-fit: cover; }
 .gallery-item__ctrls { position:absolute; left:4px; right:4px; bottom:4px; display:flex; justify-content:space-between; gap:6px; }
 .gallery-item__primary { position:absolute; top:4px; left:4px; background: var(--accent-color, #007aff); color:#fff; font-size:10px; line-height:1; padding:3px 6px; border-radius:4px; }
 .images-preview__hint { width:100%; text-align:center; font-size:12px; color: var(--muted, #777); padding:8px; border:1px dashed var(--border, #ccc); border-radius:6px; margin-top:6px; }

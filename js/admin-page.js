@@ -66,11 +66,12 @@ export async function initAdminPage(translations, lang = 'ru') {
     }
   }
 
-  function thumbTemplate(url, idx, isPrimary = false) {
+  function thumbTemplate(url, idx, isPrimary = false, source = 'files') {
     const wrap = document.createElement('div');
     wrap.className = 'images-preview__item gallery-item';
     wrap.setAttribute('draggable', 'true');
     wrap.setAttribute('data-index', String(idx));
+    wrap.setAttribute('data-source', String(source));
     const img = document.createElement('img');
     img.src = url; img.alt = t('admin-preview-alt');
     img.loading = 'lazy';
@@ -139,7 +140,7 @@ export async function initAdminPage(translations, lang = 'ru') {
     galleryPreview.innerHTML = '';
     galleryFiles.slice(0, 48).forEach((f, i) => {
       const url = URL.createObjectURL(f);
-      galleryPreview.appendChild(thumbTemplate(url, i, i === 0));
+      galleryPreview.appendChild(thumbTemplate(url, i, (i === 0 && gallerySaved.length === 0), 'files'));
     });
     bindGalleryDnD(galleryPreview, 'files');
     renderDropHintIfEmpty();
@@ -148,9 +149,32 @@ export async function initAdminPage(translations, lang = 'ru') {
     if (!galleryPreview) return;
     galleryPreview.innerHTML = '';
     gallerySaved.slice(0, 96).forEach((p, i) => {
-      galleryPreview.appendChild(thumbTemplate(p, i, i === 0));
+      galleryPreview.appendChild(thumbTemplate(p, i, i === 0, 'saved'));
     });
     bindGalleryDnD(galleryPreview, 'saved');
+    renderDropHintIfEmpty();
+  }
+
+  // Visual renderer that shows both saved and files (saved first), without cross-list DnD
+  function renderGalleryVisual() {
+    if (!galleryPreview) return;
+    galleryPreview.innerHTML = '';
+    const hasSaved = gallerySaved.length > 0;
+    // Saved first
+    gallerySaved.slice(0, 96).forEach((p, i) => {
+      galleryPreview.appendChild(thumbTemplate(p, i, i === 0, 'saved'));
+    });
+    // Then files
+    galleryFiles.slice(0, 48).forEach((f, i) => {
+      const url = URL.createObjectURL(f);
+      const isPrimary = !hasSaved && i === 0; // primary only if no saved yet
+      galleryPreview.appendChild(thumbTemplate(url, i, isPrimary, 'files'));
+    });
+    // Bind DnD only when single source is present to avoid cross-list complications
+    if (hasSaved && galleryFiles.length) {
+      // no DnD in mixed mode
+    } else if (hasSaved) bindGalleryDnD(galleryPreview, 'saved');
+    else bindGalleryDnD(galleryPreview, 'files');
     renderDropHintIfEmpty();
   }
 
@@ -416,9 +440,10 @@ export async function initAdminPage(translations, lang = 'ru') {
 
   // Gallery preview (multiple images) + state
   form?.querySelector('input[name="images"]').addEventListener('change', (e) => {
-    galleryFiles = Array.from(e.target.files || []);
-    gallerySaved = [];
-    renderGalleryFromFiles();
+    const picked = Array.from(e.target.files || []);
+    // Append to current list instead of replacing; keep saved paths intact
+    galleryFiles = [...galleryFiles, ...picked];
+    renderGalleryVisual();
   });
 
   // Gallery controls delegation: make primary
@@ -427,13 +452,15 @@ export async function initAdminPage(translations, lang = 'ru') {
     if (!btn) return;
     const item = btn.closest('.gallery-item'); if (!item) return;
     const idx = Number(item.getAttribute('data-index')) || 0;
-    if (galleryFiles.length) {
-      const arr = galleryFiles.slice(); const [sp] = arr.splice(idx, 1); if (sp) arr.unshift(sp); galleryFiles = arr; renderGalleryFromFiles();
-    } else if (gallerySaved.length) {
-      const arr = gallerySaved.slice(); const [sp] = arr.splice(idx, 1); if (sp) arr.unshift(sp); gallerySaved = arr; renderGalleryFromSaved();
+    const source = item.getAttribute('data-source') || (galleryFiles.length ? 'files' : 'saved');
+    if (source === 'files') {
+      const arr = galleryFiles.slice(); const [sp] = arr.splice(idx, 1); if (sp) arr.unshift(sp); galleryFiles = arr;
+    } else {
+      const arr = gallerySaved.slice(); const [sp] = arr.splice(idx, 1); if (sp) arr.unshift(sp); gallerySaved = arr;
       const imagesHidden = form?.querySelector('input[name="_images_urls"]');
       if (imagesHidden) imagesHidden.value = JSON.stringify(gallerySaved);
     }
+    renderGalleryVisual();
     showToast(t('admin-reordered'));
   });
 
@@ -446,8 +473,7 @@ export async function initAdminPage(translations, lang = 'ru') {
       const files = Array.from(dt.files || []).filter(f => /^image\//.test(f.type));
       if (!files.length) return;
       galleryFiles = [...galleryFiles, ...files].slice(0, 48);
-      gallerySaved = [];
-      renderGalleryFromFiles();
+      renderGalleryVisual();
       try { showToast(t('admin-files-added', { count: files.length })); } catch { showToast('+ изображения'); }
     });
   }

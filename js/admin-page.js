@@ -62,13 +62,6 @@ export async function initAdminPage(translations, lang = 'ru') {
       const hint = document.createElement('div');
       hint.className = 'images-preview__hint';
       hint.textContent = t('admin-drop-here');
-      hint.style.fontSize = '12px';
-      hint.style.color = 'var(--muted, #777)';
-      hint.style.padding = '8px';
-      hint.style.border = '1px dashed var(--border, #ccc)';
-      hint.style.borderRadius = '6px';
-      hint.style.textAlign = 'center';
-      hint.style.marginTop = '6px';
       galleryPreview.appendChild(hint);
     }
   }
@@ -78,15 +71,12 @@ export async function initAdminPage(translations, lang = 'ru') {
     wrap.className = 'images-preview__item gallery-item';
     wrap.setAttribute('draggable', 'true');
     wrap.setAttribute('data-index', String(idx));
-    wrap.style.position = 'relative';
     const img = document.createElement('img');
     img.src = url; img.alt = t('admin-preview-alt');
-    img.style.maxWidth = '120px'; img.style.maxHeight = '90px'; img.loading = 'lazy';
+    img.loading = 'lazy';
     wrap.appendChild(img);
     const ctr = document.createElement('div');
     ctr.className = 'gallery-item__ctrls';
-    ctr.style.position = 'absolute'; ctr.style.left = '4px'; ctr.style.right = '4px'; ctr.style.bottom = '4px';
-    ctr.style.display = 'flex'; ctr.style.justifyContent = 'space-between'; ctr.style.gap = '6px';
     const btn = document.createElement('button');
     btn.type = 'button'; btn.className = 'btn btn--tiny'; btn.textContent = t('admin-make-primary');
     btn.setAttribute('data-act', 'make-primary');
@@ -96,10 +86,6 @@ export async function initAdminPage(translations, lang = 'ru') {
       const badge = document.createElement('span');
       badge.textContent = t('admin-primary-badge');
       badge.className = 'gallery-item__primary';
-      badge.style.position = 'absolute'; badge.style.top = '4px'; badge.style.left = '4px';
-      badge.style.background = 'var(--color-accent, #007aff)'; badge.style.color = '#fff';
-      badge.style.fontSize = '10px'; badge.style.lineHeight = '1';
-      badge.style.padding = '3px 6px'; badge.style.borderRadius = '4px';
       wrap.appendChild(badge);
     }
     return wrap;

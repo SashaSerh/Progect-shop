@@ -1,4 +1,4 @@
-import { getLocalProducts, saveLocalProducts, upsertLocalProduct, exportLocalProducts, importLocalProducts, appendProductToProductsJsonFS, saveMainImageToPictureConditionersFS } from './admin-products.js';
+import { getLocalProducts, saveLocalProducts, upsertLocalProduct, exportLocalProducts, importLocalProducts, appendProductToProductsJsonFS, saveMainImageToPictureConditionersFS, saveImagesSetToPictureConditionersFS } from './admin-products.js';
 import { autoFlagColor } from './flags-color.js';
 import { getMergedProducts, setProducts, renderProducts } from './products.js';
 import { mergeProduct, computeDiff } from './merge-utils.js';
@@ -18,11 +18,13 @@ export async function initAdminPage(translations, lang = 'ru') {
   const listEl = document.getElementById('adminLocalProductsList');
   const form = document.getElementById('adminProductForm');
   const preview = document.getElementById('adminImagePreview');
+  const galleryPreview = document.getElementById('adminImagesPreview');
   const availableFlagsContainer = document.getElementById('availableFlags');
   const selectedFlagsContainer = document.getElementById('selectedFlags');
   const flagsHiddenInput = form?.querySelector('input[name="_flags"]');
   const exportBtn = document.getElementById('adminExportBtn');
   const saveImageBtn = document.getElementById('adminSaveImageBtn');
+  const saveImagesBtn = document.getElementById('adminSaveImagesBtn');
   const exportToProductsBtn = document.getElementById('adminExportToProductsBtn');
   const importInput = document.getElementById('adminImportInput');
   const clearConflictsBtn = document.getElementById('clearConflictsBtn');
@@ -49,6 +51,122 @@ export async function initAdminPage(translations, lang = 'ru') {
   const gitPathInp = document.getElementById('gitPath');
   const gitTokenInp = document.getElementById('gitToken');
   const gitAutoCommitChk = document.getElementById('gitAutoCommit');
+
+  // In-memory state for gallery (ordering, DnD, primary)
+  let galleryFiles = []; // Array<File>
+  let gallerySaved = []; // Array<string>
+
+  function renderDropHintIfEmpty() {
+    if (!galleryPreview) return;
+    if (galleryPreview.children.length === 0) {
+      const hint = document.createElement('div');
+      hint.className = 'images-preview__hint';
+      hint.textContent = t('admin-drop-here');
+      hint.style.fontSize = '12px';
+      hint.style.color = 'var(--muted, #777)';
+      hint.style.padding = '8px';
+      hint.style.border = '1px dashed var(--border, #ccc)';
+      hint.style.borderRadius = '6px';
+      hint.style.textAlign = 'center';
+      hint.style.marginTop = '6px';
+      galleryPreview.appendChild(hint);
+    }
+  }
+
+  function thumbTemplate(url, idx, isPrimary = false) {
+    const wrap = document.createElement('div');
+    wrap.className = 'images-preview__item gallery-item';
+    wrap.setAttribute('draggable', 'true');
+    wrap.setAttribute('data-index', String(idx));
+    wrap.style.position = 'relative';
+    const img = document.createElement('img');
+    img.src = url; img.alt = t('admin-preview-alt');
+    img.style.maxWidth = '120px'; img.style.maxHeight = '90px'; img.loading = 'lazy';
+    wrap.appendChild(img);
+    const ctr = document.createElement('div');
+    ctr.className = 'gallery-item__ctrls';
+    ctr.style.position = 'absolute'; ctr.style.left = '4px'; ctr.style.right = '4px'; ctr.style.bottom = '4px';
+    ctr.style.display = 'flex'; ctr.style.justifyContent = 'space-between'; ctr.style.gap = '6px';
+    const btn = document.createElement('button');
+    btn.type = 'button'; btn.className = 'btn btn--tiny'; btn.textContent = t('admin-make-primary');
+    btn.setAttribute('data-act', 'make-primary');
+    ctr.appendChild(btn);
+    wrap.appendChild(ctr);
+    if (isPrimary) {
+      const badge = document.createElement('span');
+      badge.textContent = t('admin-primary-badge');
+      badge.className = 'gallery-item__primary';
+      badge.style.position = 'absolute'; badge.style.top = '4px'; badge.style.left = '4px';
+      badge.style.background = 'var(--color-accent, #007aff)'; badge.style.color = '#fff';
+      badge.style.fontSize = '10px'; badge.style.lineHeight = '1';
+      badge.style.padding = '3px 6px'; badge.style.borderRadius = '4px';
+      wrap.appendChild(badge);
+    }
+    return wrap;
+  }
+
+  function bindGalleryDnD(container, source) {
+    if (!container) return;
+    const getList = () => (source === 'files' ? galleryFiles : gallerySaved);
+    const setList = (arr) => { if (source === 'files') galleryFiles = arr; else gallerySaved = arr; };
+    container.addEventListener('dragstart', (e) => {
+      const el = e.target?.closest('.gallery-item');
+      if (!el) return; el.classList.add('dragging');
+      try { e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', el.getAttribute('data-index') || ''); } catch {}
+    });
+    container.addEventListener('dragend', (e) => {
+      const el = e.target?.closest('.gallery-item'); if (el) el.classList.remove('dragging');
+    });
+    function getAfterElement(container, y) {
+      const els = [...container.querySelectorAll('.gallery-item:not(.dragging)')];
+      return els.reduce((closest, child) => {
+        const box = child.getBoundingClientRect();
+        const offset = y - box.top - box.height / 2;
+        if (offset < 0 && offset > (closest.offset || -Infinity)) { return { offset, element: child }; }
+        else return closest;
+      }, { offset: -Infinity }).element;
+    }
+    container.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      const dragging = container.querySelector('.dragging'); if (!dragging) return;
+      const after = getAfterElement(container, e.clientY);
+      if (!after) container.appendChild(dragging); else container.insertBefore(dragging, after);
+    });
+    container.addEventListener('drop', () => {
+      const items = [...container.querySelectorAll('.gallery-item')];
+      const before = getList().slice();
+      const reordered = items.map(it => before[Number(it.getAttribute('data-index')) || 0]).filter(Boolean);
+      setList(reordered);
+      if (source === 'files') {
+        renderGalleryFromFiles();
+      } else {
+        renderGalleryFromSaved();
+        const imagesHidden = form?.querySelector('input[name="_images_urls"]');
+        if (imagesHidden) imagesHidden.value = JSON.stringify(reordered);
+      }
+      showToast(t('admin-reordered'));
+    });
+  }
+
+  function renderGalleryFromFiles() {
+    if (!galleryPreview) return;
+    galleryPreview.innerHTML = '';
+    galleryFiles.slice(0, 48).forEach((f, i) => {
+      const url = URL.createObjectURL(f);
+      galleryPreview.appendChild(thumbTemplate(url, i, i === 0));
+    });
+    bindGalleryDnD(galleryPreview, 'files');
+    renderDropHintIfEmpty();
+  }
+  function renderGalleryFromSaved() {
+    if (!galleryPreview) return;
+    galleryPreview.innerHTML = '';
+    gallerySaved.slice(0, 96).forEach((p, i) => {
+      galleryPreview.appendChild(thumbTemplate(p, i, i === 0));
+    });
+    bindGalleryDnD(galleryPreview, 'saved');
+    renderDropHintIfEmpty();
+  }
 
   function showToast(text) {
     const host = document.getElementById('toast-container');
@@ -310,6 +428,44 @@ export async function initAdminPage(translations, lang = 'ru') {
     reader.readAsDataURL(f);
   });
 
+  // Gallery preview (multiple images) + state
+  form?.querySelector('input[name="images"]').addEventListener('change', (e) => {
+    galleryFiles = Array.from(e.target.files || []);
+    gallerySaved = [];
+    renderGalleryFromFiles();
+  });
+
+  // Gallery controls delegation: make primary
+  galleryPreview?.addEventListener('click', (e) => {
+    const btn = e.target.closest('button[data-act="make-primary"]');
+    if (!btn) return;
+    const item = btn.closest('.gallery-item'); if (!item) return;
+    const idx = Number(item.getAttribute('data-index')) || 0;
+    if (galleryFiles.length) {
+      const arr = galleryFiles.slice(); const [sp] = arr.splice(idx, 1); if (sp) arr.unshift(sp); galleryFiles = arr; renderGalleryFromFiles();
+    } else if (gallerySaved.length) {
+      const arr = gallerySaved.slice(); const [sp] = arr.splice(idx, 1); if (sp) arr.unshift(sp); gallerySaved = arr; renderGalleryFromSaved();
+      const imagesHidden = form?.querySelector('input[name="_images_urls"]');
+      if (imagesHidden) imagesHidden.value = JSON.stringify(gallerySaved);
+    }
+    showToast(t('admin-reordered'));
+  });
+
+  // Drag & drop upload onto gallery area
+  if (galleryPreview) {
+    ['dragenter','dragover'].forEach(evt => galleryPreview.addEventListener(evt, (e) => { e.preventDefault(); e.stopPropagation(); galleryPreview.classList.add('is-dragover'); }));
+    ['dragleave','dragend','drop'].forEach(evt => galleryPreview.addEventListener(evt, (e) => { e.preventDefault(); e.stopPropagation(); galleryPreview.classList.remove('is-dragover'); }));
+    galleryPreview.addEventListener('drop', (e) => {
+      const dt = e.dataTransfer; if (!dt) return;
+      const files = Array.from(dt.files || []).filter(f => /^image\//.test(f.type));
+      if (!files.length) return;
+      galleryFiles = [...galleryFiles, ...files].slice(0, 48);
+      gallerySaved = [];
+      renderGalleryFromFiles();
+      try { showToast(t('admin-files-added', { count: files.length })); } catch { showToast('+ изображения'); }
+    });
+  }
+
   // Draft autosave
   function writeDraft() {
     if (!form) return;
@@ -319,6 +475,27 @@ export async function initAdminPage(translations, lang = 'ru') {
   }
   form?.addEventListener('input', () => setTimeout(writeDraft, 200));
   form?.addEventListener('change', () => setTimeout(writeDraft, 100));
+  // Reset: очистить флаги и превью изображения, скрытые поля, file input
+  form?.addEventListener('reset', () => {
+    setTimeout(() => {
+      try { clearErrors(); } catch {}
+      try { renderSelectedFlags([]); } catch {}
+      if (flagsHiddenInput) flagsHiddenInput.value = '[]';
+      if (preview) preview.innerHTML = '';
+  if (galleryPreview) galleryPreview.innerHTML = '';
+  galleryFiles = []; gallerySaved = [];
+      const fileInputEl = form.querySelector('input[name="image"]');
+      if (fileInputEl) fileInputEl.value = '';
+      const filesInp = form.querySelector('input[name="images"]');
+      if (filesInp) filesInp.value = '';
+      const urlHidden = form.querySelector('input[name="_image_url"]');
+      if (urlHidden) urlHidden.value = '';
+      const b64 = form.querySelector('input[name="_image_data"]');
+      if (b64) b64.value = '';
+      const imagesHidden = form.querySelector('input[name="_images_urls"]');
+      if (imagesHidden) imagesHidden.value = '[]';
+    }, 0);
+  });
 
   // Submit
   function clearErrors() {
@@ -476,6 +653,10 @@ export async function initAdminPage(translations, lang = 'ru') {
     const data = new FormData(form);
     let flags = [];
     try { flags = JSON.parse(data.get('_flags') || '[]'); } catch {}
+    // gather gallery images from hidden field and main
+    let gallery = [];
+    try { gallery = JSON.parse(data.get('_images_urls') || '[]'); if (!Array.isArray(gallery)) gallery = []; } catch {}
+    const mainImg = (data.get('_image_url') || data.get('_image_data') || '').trim();
     const product = {
       id: idVal,
       name: { ru: data.get('title_ru') || '', uk: data.get('title_uk') || '' },
@@ -483,8 +664,8 @@ export async function initAdminPage(translations, lang = 'ru') {
       price: Number(data.get('price') || 0),
       sku: data.get('sku') || '',
       category: data.get('category') || 'service',
-      image: data.get('_image_url') || data.get('_image_data') || '',
-      images: (data.get('_image_url') || data.get('_image_data')) ? [data.get('_image_url') || data.get('_image_data')] : [],
+      image: mainImg || (gallery[0] || ''),
+      images: (mainImg ? [mainImg, ...gallery.filter(x => x !== mainImg)] : gallery),
       inStock: data.get('inStock') === 'true',
       flags,
       updatedAt: new Date().toISOString()
@@ -535,6 +716,10 @@ export async function initAdminPage(translations, lang = 'ru') {
         let urlHidden = form.querySelector('input[name="_image_url"]');
         if (!urlHidden) { urlHidden = document.createElement('input'); urlHidden.type = 'hidden'; urlHidden.name = '_image_url'; form.appendChild(urlHidden); }
         urlHidden.value = relPath;
+  // also add to gallery hidden list
+  let imagesHidden = form.querySelector('input[name="_images_urls"]');
+  if (!imagesHidden) { imagesHidden = document.createElement('input'); imagesHidden.type = 'hidden'; imagesHidden.name = '_images_urls'; imagesHidden.value = '[]'; form.appendChild(imagesHidden); }
+  try { const arr = JSON.parse(imagesHidden.value || '[]'); if (!arr.includes(relPath)) { arr.unshift(relPath); imagesHidden.value = JSON.stringify(arr); } } catch { imagesHidden.value = JSON.stringify([relPath]); }
         // clear base64 hidden if any
         const b64 = form.querySelector('input[name="_image_data"]'); if (b64) b64.value = '';
         // update preview
@@ -560,6 +745,32 @@ export async function initAdminPage(translations, lang = 'ru') {
       showToast(t('admin-import-error', { message: err?.message || 'неизвестная ошибка' }));
     } finally {
       e.target.value = '';
+    }
+  });
+
+  // Save images set (gallery)
+  saveImagesBtn?.addEventListener('click', async () => {
+    if (!form) return;
+    const input = form.querySelector('input[name="images"]');
+    let files = galleryFiles.length ? galleryFiles : (input?.files ? Array.from(input.files) : []);
+    if (!files.length) { const wantPick = confirm('Выберите файлы изображений для сохранения'); if (wantPick && input) input.click(); return; }
+    try {
+      let sku = (form.querySelector('[name="sku"]').value || '').trim();
+      if (!sku) { sku = generateNumericSku(form.querySelector('[name="id"]').value); form.querySelector('[name="sku"]').value = sku; }
+      const relPaths = await saveImagesSetToPictureConditionersFS(files, sku);
+      if (relPaths && relPaths.length) {
+        let imagesHidden = form.querySelector('input[name="_images_urls"]');
+        if (!imagesHidden) { imagesHidden = document.createElement('input'); imagesHidden.type = 'hidden'; imagesHidden.name = '_images_urls'; form.appendChild(imagesHidden); }
+        try { const prev = JSON.parse(imagesHidden.value || '[]'); const merged = [...relPaths, ...prev.filter(x => !relPaths.includes(x))]; imagesHidden.value = JSON.stringify(merged); gallerySaved = merged; }
+        catch { imagesHidden.value = JSON.stringify(relPaths); gallerySaved = relPaths; }
+        // Reset file buffer and render saved items with controls
+        galleryFiles = [];
+        renderGalleryFromSaved();
+        showToast(t('admin-images-saved'));
+      }
+    } catch (e) {
+      console.error('Save images set error', e);
+      showToast(t('admin-images-save-error'));
     }
   });
 

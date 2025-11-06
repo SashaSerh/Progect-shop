@@ -196,7 +196,8 @@ export async function saveMainImageToPictureConditionersFS(file, filenameSuggest
   const origName = file.name || 'image.jpg';
   const extNoDot = (origName.includes('.') ? origName.split('.').pop() : 'jpg')?.replace(/[^a-z0-9]/gi, '').toLowerCase() || 'jpg';
   const extWithDot = `.${extNoDot}`;
-  const base = filenameSuggestion || origName.slice(0, Math.max(0, origName.lastIndexOf('.')));
+  // Имя файла оставляем как у источника (sanitize), без принудительного переименования по SKU
+  const base = origName.slice(0, Math.max(0, origName.lastIndexOf('.')));
   let fn = safe(base) || `img-${Date.now()}`;
   fn = `${fn}${extWithDot}`;
   // Write original file
@@ -208,7 +209,7 @@ export async function saveMainImageToPictureConditionersFS(file, filenameSuggest
     await origWritable.close();
   }
 
-  // Try to generate responsive variants: только webp (320,480,768,1200)
+  // Try to generate responsive variants: только оригинальный формат (320,480,768,1200)
   try {
     const sizes = [320, 480, 768, 1200];
     const mimeForExt = (e) => {
@@ -251,13 +252,13 @@ export async function saveMainImageToPictureConditionersFS(file, filenameSuggest
       const dotPos = fn.lastIndexOf('.');
       const nameBase = dotPos >= 0 ? fn.slice(0, dotPos) : fn;
       const extDot = dotPos >= 0 ? fn.slice(dotPos) : extWithDot;
-      // Generate per-size variants: webp only
+      // Generate per-size variants: оригинальный формат
       for (const w of sizes) {
         const canvas = drawToCanvas(w);
         try {
-          const outWebp = await toBlob(canvas, 'image/webp', 0.82);
-          const h2 = await dirHandle.getFileHandle(`${nameBase}-${w}w.webp`, { create: true });
-          const w2 = await h2.createWritable(); await w2.write(outWebp); await w2.close();
+          const outBlob = await toBlob(canvas, srcMime, 0.9);
+          const h = await dirHandle.getFileHandle(`${nameBase}-${w}w${extDot}`, { create: true });
+          const wr = await h.createWritable(); await wr.write(outBlob); await wr.close();
         } catch {}
       }
       // LQIP отключён
@@ -290,9 +291,9 @@ export async function saveMainImageToPictureConditionersFS(file, filenameSuggest
       for (const w of sizes) {
         const canvas = drawBitmap(bitmap, w);
         try {
-          const outWebp = await toBlob(canvas, 'image/webp', 0.82);
-          const h2 = await dirHandle.getFileHandle(`${nameBase}-${w}w.webp`, { create: true });
-          const w2 = await h2.createWritable(); await w2.write(outWebp); await w2.close();
+          const outBlob = await toBlob(canvas, srcMime, 0.9);
+          const h = await dirHandle.getFileHandle(`${nameBase}-${w}w${extDot}`, { create: true });
+          const wr = await h.createWritable(); await wr.write(outBlob); await wr.close();
         } catch {}
       }
       // LQIP отключён
@@ -304,6 +305,60 @@ export async function saveMainImageToPictureConditionersFS(file, filenameSuggest
 
   // Return relative repo path expectation (base file path)
   return `picture/conditioners/${fn}`;
+}
+
+// Save a set of images (FileList or Array<File>) into picture/conditioners with one directory pick
+export async function saveImagesSetToPictureConditionersFS(files, baseSuggestion = '') {
+  const arr = Array.from(files || []).filter(f => f instanceof File);
+  if (!arr.length) throw new Error('Файлы изображений не выбраны');
+  if (!('showDirectoryPicker' in window)) throw new Error('File System Access API не поддерживается');
+  const dirHandle = await window.showDirectoryPicker({ id: 'pick-picture-conditioners-dir' });
+
+  const safe = (name) => String(name || '')
+    .normalize('NFKD')
+    .replace(/[^\w\-\.]+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^[\-\.]+|[\-\.]+$/g, '')
+    .toLowerCase();
+
+  const results = [];
+  for (let i = 0; i < arr.length; i++) {
+    const file = arr[i];
+    const origName = file.name || `image-${i+1}.jpg`;
+    const extNoDot = (origName.includes('.') ? origName.split('.').pop() : 'jpg')?.replace(/[^a-z0-9]/gi,'').toLowerCase() || 'jpg';
+    const extWithDot = `.${extNoDot}`;
+    // Сохраняем оригинальное имя (sanitize), без переименования по SKU
+    const base = origName.slice(0, Math.max(0, origName.lastIndexOf('.')));
+    let fn = `${safe(base)}${extWithDot}`;
+
+    // write original
+    const fileHandle = await dirHandle.getFileHandle(fn, { create: true });
+    const writable = await fileHandle.createWritable();
+    try { await writable.write(await file.arrayBuffer()); } finally { await writable.close(); }
+
+    // generate variants в оригинальном формате
+    try {
+      const imgUrl = URL.createObjectURL(file);
+      const image = await new Promise((resolve, reject) => { const im = new Image(); im.onload = () => resolve(im); im.onerror = reject; im.src = imgUrl; });
+      const sizes = [320, 480, 768, 1200];
+      const draw = (w) => { const scale = Math.min(1, w / image.naturalWidth); const cw = Math.round(image.naturalWidth * scale); const ch = Math.round(image.naturalHeight * scale); const c = document.createElement('canvas'); c.width=cw; c.height=ch; const ctx=c.getContext('2d'); ctx.imageSmoothingQuality='high'; ctx.drawImage(image,0,0,cw,ch); return c; };
+      const toBlob = (canvas, type, quality) => new Promise((res, rej) => canvas.toBlob(b => b?res(b):rej(new Error('encode failed')), type, quality));
+      const dot = fn.lastIndexOf('.'); const nameBase = dot >= 0 ? fn.slice(0,dot) : fn;
+      const srcMime = (extWithDot === '.png') ? 'image/png' : (extWithDot === '.webp' ? 'image/webp' : 'image/jpeg');
+      for (const w of sizes) {
+        try {
+          const canvas = draw(w);
+          const blob = await toBlob(canvas, srcMime, 0.9);
+          const h = await dirHandle.getFileHandle(`${nameBase}-${w}w${extWithDot}`, { create: true });
+          const wr = await h.createWritable(); await wr.write(blob); await wr.close();
+        } catch {}
+      }
+    } catch {}
+
+    results.push(`picture/conditioners/${fn}`);
+  }
+
+  return results;
 }
 
 export function importLocalProducts(file) {

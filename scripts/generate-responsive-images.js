@@ -11,7 +11,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import sharp from 'sharp';
 
-const SUPPORTED = new Set(['.jpg', '.jpeg', '.png', '.webp', '.avif']);
+const SUPPORTED = new Set(['.jpg', '.jpeg', '.png', '.webp']);
 const SIZES = [320, 480, 768, 1200];
 
 function parseArgs(argv) {
@@ -39,13 +39,17 @@ async function processFile(filePath) {
   const meta = await image.metadata();
   const srcWidth = meta.width || 0;
   for (const w of SIZES) {
-    // webp variant only
-    const outWebp = `${base}-${w}w.webp`;
-    if (!fs.existsSync(outWebp)) {
-      await sharp(buf)
-        .resize({ width: w, withoutEnlargement: true })
-        .webp({ quality: 82 })
-        .toFile(outWebp);
+    // variant in original format only
+    const outOrig = `${base}-${w}w${ext}`;
+    if (!fs.existsSync(outOrig)) {
+      if (srcWidth && w >= srcWidth) {
+        fs.copyFileSync(filePath, outOrig);
+      } else {
+        const pipeline = sharp(buf).resize({ width: w, withoutEnlargement: true });
+        if (ext === '.png') await pipeline.png({ compressionLevel: 9 }).toFile(outOrig);
+        else if (ext === '.webp') await pipeline.webp({ quality: 82 }).toFile(outOrig);
+        else await pipeline.jpeg({ quality: 82 }).toFile(outOrig);
+      }
     }
   }
 }

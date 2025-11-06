@@ -1,15 +1,15 @@
 [
   {
-    "id": "p_0tojo4d",
+    "id": "p_48wpibm",
     "name": {
-      "ru": "Кондиционер Cooper&Hunter Vital Inverter CH-S07FTXF2-NG R32 Wi-Fi",
-      "uk": "Кондиціонер Cooper&Hunter Vital Inverter CH-S07FTXF2-NG R32 Wi-Fi 6 6 Акція ТОП Популярний"
+      "ru": "Внутренний блок Cooper&Hunter Supreme (Gold) CH-S09FTXAM2S-GD(I)",
+      "uk": "Внутрішній блок Cooper&Hunter Supreme (Gold) CH-S09FTXAM2S-GD(I)"
     },
     "description": {
-      "ru": "Кондиционер Cooper&Hunter Vital Inverter CH-S07FTXF2-NG R32 Wi-Fi",
-      "uk": "Кондиционер Cooper&Hunter Vital Inverter CH-S07FTXF2-NG R32 Wi-Fi"
+      "ru": "Внутренний блок инверторного кондиционера Cooper&Hunter Supreme CH-S09FTXAM2S-GD(I) с фильтром Smart-Ion. Модуль WiFi. Функции самоочистки и самодиагностики.\n\n Внутренний блок инверторного кондиционера Cooper&Hunter Supreme CH-S09FTXAM2S-GD(I) с фильтром Smart-Ion. Модуль WiFi. Функции самоочистки и самодиагностики.\n\n\n\nВнутрішній блок Cooper&Hunter Supreme (Gold) CH-S09FTXAM2S-GD(I)Внутрішній блок інверторного кондиціонера Cooper&Hunter Supreme CH-S09FTXAM2S-GD(I) із фільтром Smart-Ion. Модуль WiFi. Функції самоочищення та самодіагностики.",
+      "uk": "Внутрішній блок Cooper&Hunter Supreme (Gold) CH-S09FTXAM2S-GD(I)Внутрішній блок інверторного кондиціонера Cooper&Hunter Supreme CH-S09FTXAM2S-GD(I) із фільтром Smart-Ion. Модуль WiFi. Функції самоочищення та самодіагностики."
     },
-    "price": 23457,
+    "price": 11089,
     "sku": "1",
     "category": "Кондиционер",
     "image": "picture/conditioners/1.jpg",
@@ -17,52 +17,8 @@
       "picture/conditioners/1.jpg"
     ],
     "inStock": true,
-    "flags": [
-      {
-        "key": "sale",
-        "color": "#c37522"
-      },
-      {
-        "key": "new",
-        "color": "#2222c3"
-      },
-      {
-        "key": "popular",
-        "color": "#22bbc3"
-      }
-    ],
-    "updatedAt": "2025-11-06T07:24:14.259Z",
-    "createdAt": "2025-11-06T07:24:14.259Z"
-  },
-  {
-    "id": "p_rui06y8",
-    "name": {
-      "ru": "1234",
-      "uk": "Маська (Турецький ван)"
-    },
-    "description": {
-      "ru": "loremipsum",
-      "uk": "loremipsum"
-    },
-    "price": 123,
-    "sku": "123",
-    "category": "Кондиционер",
-    "image": "picture/conditioners/123.png",
-    "images": [
-      "picture/conditioners/123.png"
-    ],
-    "inStock": true,
-    "flags": [
-      {
-        "key": "sale",
-        "color": "#007aff"
-      },
-      {
-        "key": "hit",
-        "color": "#ff0000"
-      }
-    ],
-    "updatedAt": "2025-11-06T07:25:53.931Z",
-    "createdAt": "2025-11-06T07:25:53.931Z"
+    "flags": [],
+    "updatedAt": "2025-11-06T15:17:33.216Z",
+    "createdAt": "2025-11-06T15:17:33.216Z"
   }
 ]

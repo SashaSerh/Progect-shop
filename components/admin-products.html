@@ -133,6 +133,13 @@
             <div id="adminImagePreview" aria-hidden="true"></div>
           </div>
           <div class="form-row">
+            <label><span data-i18n="admin-field-gallery">Галерея изображений</span>
+              <input name="images" type="file" accept="image/*" multiple>
+            </label>
+            <div id="adminImagesPreview" class="images-preview" aria-hidden="true"></div>
+            <input type="hidden" name="_images_urls" value="[]">
+          </div>
+          <div class="form-row">
             <label><span data-i18n="admin-field-flags">Флаги</span>
               <div id="flagSelector" class="flag-selector">
                 <div id="availableFlags" class="available-flags" aria-live="polite"></div>
@@ -144,6 +151,7 @@
           <div class="form-actions">
             <button type="submit" id="adminProductSave" class="btn btn--primary" data-i18n="admin-save">Сохранить</button>
             <button type="button" id="adminSaveImageBtn" class="btn btn--secondary" data-i18n="admin-save-image" title="Сохранить выбранное изображение в picture/conditioners">Сохранить изображение</button>
+            <button type="button" id="adminSaveImagesBtn" class="btn btn--secondary" data-i18n="admin-save-images" title="Сохранить выбранные изображения (галерею) в picture/conditioners">Сохранить изображения</button>
             <button type="button" id="adminExportToProductsBtn" class="btn" data-i18n="admin-export-to-productsjson" title="Добавить текущий товар в data/products.json (локально, через доступ к файлам)">Добавить в products.json</button>
             <button type="reset" id="adminProductCancel" class="btn btn--secondary" data-i18n="admin-reset">Сброс</button>
           </div>

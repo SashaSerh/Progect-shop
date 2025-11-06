@@ -12,7 +12,7 @@ import path from 'node:path';
 import sharp from 'sharp';
 
 const SUPPORTED = new Set(['.jpg', '.jpeg', '.png', '.webp', '.avif']);
-const SIZES = [320, 480, 768, 1200]; // only these sizes
+const SIZES = [320, 480, 768, 1200];
 
 function parseArgs(argv) {
   const out = {}; let key = null;
@@ -39,7 +39,7 @@ async function processFile(filePath) {
   const meta = await image.metadata();
   const srcWidth = meta.width || 0;
   for (const w of SIZES) {
-    // ONLY webp variant for the size
+    // webp variant only
     const outWebp = `${base}-${w}w.webp`;
     if (!fs.existsSync(outWebp)) {
       await sharp(buf)

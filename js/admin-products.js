@@ -208,7 +208,7 @@ export async function saveMainImageToPictureConditionersFS(file, filenameSuggest
     await origWritable.close();
   }
 
-  // Try to generate responsive variants: ONLY webp (320,480,768,1200); keep single original; no AVIF, no per-size original, no LQIP
+  // Try to generate responsive variants: только webp (320,480,768,1200)
   try {
     const sizes = [320, 480, 768, 1200];
     const mimeForExt = (e) => {
@@ -250,7 +250,8 @@ export async function saveMainImageToPictureConditionersFS(file, filenameSuggest
       // Derive name base and extension from final filename
       const dotPos = fn.lastIndexOf('.');
       const nameBase = dotPos >= 0 ? fn.slice(0, dotPos) : fn;
-      // Generate per-size variants: only webp
+      const extDot = dotPos >= 0 ? fn.slice(dotPos) : extWithDot;
+      // Generate per-size variants: webp only
       for (const w of sizes) {
         const canvas = drawToCanvas(w);
         try {
@@ -259,6 +260,7 @@ export async function saveMainImageToPictureConditionersFS(file, filenameSuggest
           const w2 = await h2.createWritable(); await w2.write(outWebp); await w2.close();
         } catch {}
       }
+      // LQIP отключён
     } else {
       // createImageBitmap path using OffscreenCanvas if available
       const drawBitmap = (bm, w) => {
@@ -284,6 +286,7 @@ export async function saveMainImageToPictureConditionersFS(file, filenameSuggest
       });
       const dotPos = fn.lastIndexOf('.');
       const nameBase = dotPos >= 0 ? fn.slice(0, dotPos) : fn;
+      const extDot = dotPos >= 0 ? fn.slice(dotPos) : extWithDot;
       for (const w of sizes) {
         const canvas = drawBitmap(bitmap, w);
         try {
@@ -292,6 +295,7 @@ export async function saveMainImageToPictureConditionersFS(file, filenameSuggest
           const w2 = await h2.createWritable(); await w2.write(outWebp); await w2.close();
         } catch {}
       }
+      // LQIP отключён
       try { bitmap.close && bitmap.close(); } catch {}
     }
   } catch (e) {

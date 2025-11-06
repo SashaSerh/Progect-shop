@@ -337,22 +337,21 @@ export async function initAdminPage(translations, lang = 'ru') {
     const v = Math.max(0, Math.floor(Number(inp.value || 0)));
     if (String(inp.value) !== String(v)) inp.value = String(v);
   }
-  // Numeric SKU generator (article-like): берём max из числовых SKU и +1, 8-значный
+  // Numeric SKU generator: берём максимальный числовой SKU из каталога и +1
   function generateNumericSku(currentId) {
-    const merged = getMergedProducts();
-    const nums = merged
-      .map(p => String(p.sku || '').trim())
-      .filter(s => /^\d+$/.test(s))
-      .map(s => Number(s))
-      .filter(n => Number.isFinite(n));
-    let next = nums.length ? Math.max(...nums) + 1 : 1;
-    // Гарантировать уникальность: если занято — инкрементировать
-    let guard = 0;
-    while (!isUnique('sku', String(next).padStart(8, '0'), currentId) && guard < 1000) {
-      next++;
-      guard++;
+    const merged = getMergedProducts() || [];
+    let max = 0;
+    for (const p of merged) {
+      const s = String(p?.sku ?? '');
+      if (/^\d+$/.test(s)) {
+        const n = parseInt(s, 10);
+        if (Number.isFinite(n) && n > max) max = n;
+      }
     }
-    return String(next).padStart(8, '0');
+    let next = max + 1;
+    // гарантируем уникальность: если занято, инкрементируем
+    while (!isUnique('sku', String(next), currentId)) next++;
+    return String(next);
   }
   function isUnique(field, value, currentId) {
     if (!value) return true;
@@ -491,7 +490,8 @@ export async function initAdminPage(translations, lang = 'ru') {
     };
     try {
       // If user selected a file in input[name="image"], write it to picture/conditioners and use that path
-      const inputFile = form.querySelector('input[name="image"]').files?.[0] || null;
+      const fileInputEl = form.querySelector('input[name="image"]');
+      const inputFile = fileInputEl?.files?.[0] || null;
       if (inputFile) {
         const suggested = (product.sku && String(product.sku).trim()) || (product.id) || 'image';
         const relPath = await saveMainImageToPictureConditionersFS(inputFile, suggested);
@@ -499,9 +499,39 @@ export async function initAdminPage(translations, lang = 'ru') {
           product.image = relPath;
           product.images = [relPath];
         }
+      } else {
+        // Try auto-attach existing file by SKU in chosen directory
+        if (window.showDirectoryPicker && product.sku) {
+          const wantFind = confirm('Изображение не выбрано. Попробовать найти файл по SKU в picture/conditioners?');
+          if (wantFind) {
+            try {
+              const dir = await window.showDirectoryPicker({ id: 'pick-picture-conditioners-dir' });
+              const lower = String(product.sku).toLowerCase();
+              const allowed = ['.jpg','.jpeg','.png','.webp','.avif'];
+              // iterate entries
+              for await (const entry of dir.values()) {
+                if (entry.kind === 'file') {
+                  const name = entry.name;
+                  const dot = name.lastIndexOf('.');
+                  const base = dot >= 0 ? name.slice(0,dot) : name;
+                  const ext = dot >= 0 ? name.slice(dot).toLowerCase() : '';
+                  if (base.toLowerCase() === lower && allowed.includes(ext)) {
+                    product.image = `picture/conditioners/${name}`;
+                    product.images = [product.image];
+                    break;
+                  }
+                }
+              }
+            } catch {}
+          }
+        }
+        if (!product.image) {
+          const wantPick = confirm('Выбрать и сохранить файл сейчас?');
+          if (wantPick && fileInputEl) { fileInputEl.click(); return; }
+        }
       }
       await appendProductToProductsJsonFS(product);
-      showToast(t('admin-products-append-success'));
+      showToast('Добавлено в products.json');
     } catch (err) {
       // Fallback: GitHub per-item upsert if configured
       try {
@@ -520,7 +550,7 @@ export async function initAdminPage(translations, lang = 'ru') {
         console.error('Git fallback error', e);
       }
       console.error('Append to products.json error', err);
-      showToast(t('admin-products-append-failed'));
+      showToast('Не удалось записать в products.json');
     }
   });
 
@@ -530,7 +560,7 @@ export async function initAdminPage(translations, lang = 'ru') {
     const fileInputEl = form.querySelector('input[name="image"]');
     const f = fileInputEl?.files?.[0];
     if (!f) {
-      const wantPick = confirm(t('admin-image-pick-prompt'));
+      const wantPick = confirm('Выберите файл изображения для сохранения');
       if (wantPick && fileInputEl) fileInputEl.click();
       return;
     }
@@ -550,13 +580,11 @@ export async function initAdminPage(translations, lang = 'ru') {
         const prev = document.getElementById('adminImagePreview');
         if (prev) prev.innerHTML = `<img src="${relPath}" alt="preview" style="max-width:200px;max-height:120px;"/>`;
         // notify
-        const toast = (txt) => { const host = document.getElementById('toast-container'); if (!host) return; const n = document.createElement('div'); n.className='toast toast--success'; n.textContent=txt; host.appendChild(n); requestAnimationFrame(()=>n.classList.add('is-visible')); setTimeout(()=>{n.classList.remove('is-visible'); setTimeout(()=>n.remove(),280);},2200); };
-        toast(t('admin-image-saved'));
+        showToast(t('admin-image-saved'));
       }
     } catch (e) {
       console.error('Save image error', e);
-      const host = document.getElementById('toast-container');
-      if (host) { const n = document.createElement('div'); n.className='toast toast--error'; n.textContent=t('admin-image-save-error'); host.appendChild(n); requestAnimationFrame(()=>n.classList.add('is-visible')); setTimeout(()=>{n.classList.remove('is-visible'); setTimeout(()=>n.remove(),280);},2200); }
+      showToast(t('admin-image-save-error'));
     }
   });
   importInput?.addEventListener('change', async (e) => {

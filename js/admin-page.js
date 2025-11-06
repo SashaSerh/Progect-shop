@@ -459,19 +459,20 @@ export async function initAdminPage(translations, lang = 'ru') {
     const titleRu = form.querySelector('[name="title_ru"]').value.trim();
     const priceVal = Number(form.querySelector('[name="price"]').value || 0);
     const categoryVal = form.querySelector('[name="category"]').value.trim();
-    const skuVal = form.querySelector('[name="sku"]').value.trim();
+    let skuVal = form.querySelector('[name="sku"]').value.trim();
     const idVal = form.querySelector('[name="id"]').value.trim() || `p_${Math.random().toString(36).slice(2,9)}`;
+    // Ensure SKU exists before validation
+    if (!skuVal) {
+      const generated = generateNumericSku(idVal);
+      form.querySelector('[name="sku"]').value = generated;
+      skuVal = generated;
+    }
     let ok = true;
     if (!titleRu) { setError('title_ru', t('admin-error-title-ru')); ok = false; }
     if (!Number.isFinite(priceVal) || priceVal < 0) { setError('price', t('admin-error-price')); ok = false; }
     if (!skuVal) { setError('sku', t('admin-error-sku-required')); ok = false; }
     if (!categoryVal) { setError('category', t('admin-error-category')); ok = false; }
     if (!ok) return;
-    // Ensure SKU if empty (numeric)
-    if (!skuVal) {
-      const generated = generateNumericSku(idVal);
-      form.querySelector('[name="sku"]').value = generated;
-    }
     const data = new FormData(form);
     let flags = [];
     try { flags = JSON.parse(data.get('_flags') || '[]'); } catch {}

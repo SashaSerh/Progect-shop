@@ -668,7 +668,57 @@ export async function initAdminPage(translations, lang = 'ru') {
     // gather gallery images from hidden field and main
     let gallery = [];
     try { gallery = JSON.parse(data.get('_images_urls') || '[]'); if (!Array.isArray(gallery)) gallery = []; } catch {}
-    const mainImg = (data.get('_image_url') || data.get('_image_data') || '').trim();
+    let mainImg = (data.get('_image_url') || data.get('_image_data') || '').trim();
+
+    // If no main image provided yet, try to auto-derive it from current UI state:
+    // 1) Use saved gallery paths (gallerySaved) if present
+    // 2) Otherwise, if there are picked files (galleryFiles or single image input), save the first to picture/conditioners and use its relative path
+    try {
+      if (!mainImg) {
+        // Prefer already saved gallery paths rendered in UI
+        if (Array.isArray(gallery) && gallery.length === 0 && Array.isArray(gallerySaved) && gallerySaved.length) {
+          gallery = [...gallerySaved];
+        }
+        if (!mainImg && Array.isArray(gallery) && gallery.length) {
+          mainImg = gallery[0];
+        }
+        if (!mainImg) {
+          // Try to persist first available picked file to picture/conditioners
+          const singleInp = form.querySelector('input[name="image"]');
+          const singleFile = singleInp?.files?.[0] || null;
+          const firstGalleryFile = (Array.isArray(galleryFiles) && galleryFiles.length) ? galleryFiles[0] : null;
+          const fileToSave = singleFile || firstGalleryFile;
+          if (fileToSave) {
+            // Ensure SKU exists for naming consistency downstream
+            let ensureSku = (form.querySelector('[name="sku"]').value || '').trim();
+            if (!ensureSku) { ensureSku = generateNumericSku(idVal); form.querySelector('[name="sku"]').value = ensureSku; }
+            const relPath = await saveMainImageToPictureConditionersFS(fileToSave, ensureSku);
+            if (relPath) {
+              mainImg = relPath;
+              // Reflect in hidden inputs for consistency
+              let urlHidden = form.querySelector('input[name="_image_url"]');
+              if (!urlHidden) { urlHidden = document.createElement('input'); urlHidden.type = 'hidden'; urlHidden.name = '_image_url'; form.appendChild(urlHidden); }
+              urlHidden.value = relPath;
+              // Update gallery hidden
+              let imagesHidden = form.querySelector('input[name="_images_urls"]');
+              if (!imagesHidden) { imagesHidden = document.createElement('input'); imagesHidden.type = 'hidden'; imagesHidden.name = '_images_urls'; imagesHidden.value = '[]'; form.appendChild(imagesHidden); }
+              try {
+                const prev = JSON.parse(imagesHidden.value || '[]');
+                const next = [relPath, ...prev.filter(x => x !== relPath)];
+                imagesHidden.value = JSON.stringify(next);
+                gallery = next;
+              } catch { imagesHidden.value = JSON.stringify([relPath]); gallery = [relPath]; }
+              // Update preview
+              const prevEl = document.getElementById('adminImagePreview');
+              if (prevEl) prevEl.innerHTML = `<img src="${relPath}" alt="preview" style="max-width:200px;max-height:120px;"/>`;
+              showToast('Главное изображение сохранено и привязано');
+            }
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('Auto-select/save main image failed (export)', e);
+    }
     const product = {
       id: idVal,
       name: { ru: data.get('title_ru') || '', uk: data.get('title_uk') || '' },

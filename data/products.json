@@ -1,24 +1,46 @@
 [
   {
-    "id": "p_48wpibm",
+    "id": "p_rwhfjy6",
     "name": {
-      "ru": "Внутренний блок Cooper&Hunter Supreme (Gold) CH-S09FTXAM2S-GD(I)",
-      "uk": "Внутрішній блок Cooper&Hunter Supreme (Gold) CH-S09FTXAM2S-GD(I)"
+      "ru": "Кондиционер Cooper&Hunter Vital Inverter CH-S07FTXF2-NaИнверторный кондиционер (тепловой насос) Cooper&Hunter Daytona (Black) CH-S09FTXD2-BLG R32 Wi-Fi",
+      "uk": "Інверторний кондиціонер (тепловий насос) Cooper&Hunter Daytona (Black) CH-S09FTXD2-BL"
     },
     "description": {
-      "ru": "Внутренний блок инверторного кондиционера Cooper&Hunter Supreme CH-S09FTXAM2S-GD(I) с фильтром Smart-Ion. Модуль WiFi. Функции самоочистки и самодиагностики.\n\n Внутренний блок инверторного кондиционера Cooper&Hunter Supreme CH-S09FTXAM2S-GD(I) с фильтром Smart-Ion. Модуль WiFi. Функции самоочистки и самодиагностики.\n\n\n\nВнутрішній блок Cooper&Hunter Supreme (Gold) CH-S09FTXAM2S-GD(I)Внутрішній блок інверторного кондиціонера Cooper&Hunter Supreme CH-S09FTXAM2S-GD(I) із фільтром Smart-Ion. Модуль WiFi. Функції самоочищення та самодіагностики.",
-      "uk": "Внутрішній блок Cooper&Hunter Supreme (Gold) CH-S09FTXAM2S-GD(I)Внутрішній блок інверторного кондиціонера Cooper&Hunter Supreme CH-S09FTXAM2S-GD(I) із фільтром Smart-Ion. Модуль WiFi. Функції самоочищення та самодіагностики."
+      "ru": "Кондиционер тепловой насос Cooper&Hunter Daytona CH-S09FTXD2-BL – ультрасовременная дизайнерская модель, рассчитанная на работу в регионах с холодным климатом. Работает на обогрев при температуре от -25 до 24 градусов, на охлаждение -15-43 градуса. Мощность при работе в режиме охлаждения 2,7 кВт, обогрева – 3,0 кВт. Класс энергоэффективности А при охлаждении, А при нагревании. Кондиционер Daytona CH-S09FTXD2-BL идеально подходит для площади до 25 м2. Фреон R32 безопасен для окружающей среды. WiFi модуль. Кроме охлаждения и обогрева, есть функция вентилирования, ионизации и осушки воздуха.",
+      "uk": "Кондиціонер тепловий насос Cooper&Hunter Daytona CH-S09FTXD2-BL— ультрасучасна дизайнерська модель, розрахована на роботу в регіонах з холодним кліматом. Працює на обігрів при температурі від -25 до 24 градусів, на охолодження — -15-43 градуси. Потужність при роботі в режимі охолодження 2,7 кВт, обігріву — 3,0 кВт. Клас енергоефективності А ++ при охолодженні, А +++ при нагріванні. Кондиціонер Daytona CH-S09FTXD2-BL ідеально підходить для площі до 25 м2. Фреон R32 безпечний для навколишнього середовища. WiFi модуль. Крім охолодження й обігріву, є функція вентилювання, іонізації та осушення повітря.\n\n"
     },
-    "price": 11089,
-    "sku": "1",
+    "price": 30699,
+    "sku": "2",
     "category": "Кондиционер",
-    "image": "picture/conditioners/1.jpg",
+    "image": "picture/conditioners/ch-s09ftxd2-bl800x800.jpg",
     "images": [
-      "picture/conditioners/1.jpg"
+      "picture/conditioners/ch-s09ftxd2-bl800x800.jpg"
     ],
     "inStock": true,
     "flags": [],
-    "updatedAt": "2025-11-06T15:17:33.216Z",
-    "createdAt": "2025-11-06T15:17:33.216Z"
+    "updatedAt": "2025-11-06T20:26:54.790Z",
+    "createdAt": "2025-11-06T20:26:54.790Z"
+  },
+  {
+    "id": "p_2xrk0mp",
+    "name": {
+      "ru": "Кондиционер Cooper&Hunter Vital Inverter CH-S07FTXF2-NG R32 Wi-Fi",
+      "uk": "Кондиціонер Cooper&Hunter Vital Inverter CH-S07FTXF2-NG R32 Wi-Fi 6 6 Акція ТОП Популярний"
+    },
+    "description": {
+      "ru": "Инверторный кондиционер Cooper&Hunter Vital Inverter CH-S07FTXF2-NG R32 Wi-Fi для осушения, вентилирования, охлаждения и обогрева помещений площадью до 20 м2. Энергоэффективность класса А++. Модуль WiFi. Автоматическая разморозка и защита от обледенения наружного блока. Компрессор Gree/Daikin.",
+      "uk": "Інверторний кондиціонер Cooper&Hunter Vital Inverter CH-S07FTXF2-NG R32 Wi-Fi​ для осушення, вентилювання, охолодження і обігріву приміщень площею до 20 м2. Енергоефективність класу А++. Модуль Wi-Fi. Автоматичне розморожування і захист від обмерзання зовнішнього блоку. Компрессор Gree/Daikin."
+    },
+    "price": 18999,
+    "sku": "12",
+    "category": "Кондиционер",
+    "image": "picture/conditioners/catalog2ffoto2ftermotehnica2fteplovue-nasosu2fch-hp050lbirk-800x800.jpg",
+    "images": [
+      "picture/conditioners/catalog2ffoto2ftermotehnica2fteplovue-nasosu2fch-hp050lbirk-800x800.jpg"
+    ],
+    "inStock": true,
+    "flags": [],
+    "updatedAt": "2025-11-07T15:48:03.100Z",
+    "createdAt": "2025-11-07T15:48:03.100Z"
   }
 ]

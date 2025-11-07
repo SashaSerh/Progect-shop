@@ -8,7 +8,9 @@
     "images:watch": "chokidar \"picture/**/*.{jpg,jpeg,png,webp,avif}\" -c \"node scripts/generate-responsive-images.js --dir picture\"",
     "images:cleanup:dry": "node scripts/cleanup-pictures.js --dir picture --json data/products.local.json,data/products.json --dry-run",
     "images:cleanup": "node scripts/cleanup-pictures.js --dir picture --json data/products.local.json,data/products.json --yes",
-    "images:create-demo": "node scripts/create-demo-image.js"
+    "images:create-demo": "node scripts/create-demo-image.js",
+    "cleanup:base64": "node scripts/cleanup-base64-in-products.js",
+    "cleanup:base64:dry": "node scripts/cleanup-base64-in-products.js --dry"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.57.4"

@@ -668,7 +668,9 @@ export async function initAdminPage(translations, lang = 'ru') {
     // gather gallery images from hidden field and main
     let gallery = [];
     try { gallery = JSON.parse(data.get('_images_urls') || '[]'); if (!Array.isArray(gallery)) gallery = []; } catch {}
-    let mainImg = (data.get('_image_url') || data.get('_image_data') || '').trim();
+  let mainImg = (data.get('_image_url') || data.get('_image_data') || '').trim();
+  const hadImageUrl = Boolean((data.get('_image_url') || '').trim());
+  const hadImageB64 = Boolean((data.get('_image_data') || '').trim());
 
     // If no main image provided yet, try to auto-derive it from current UI state:
     // 1) Use saved gallery paths (gallerySaved) if present
@@ -718,6 +720,43 @@ export async function initAdminPage(translations, lang = 'ru') {
       }
     } catch (e) {
       console.warn('Auto-select/save main image failed (export)', e);
+    }
+
+    // If only base64 is present (picked file preview) and no URL was set, prefer saving to picture/conditioners and use relative path
+    try {
+      if (!hadImageUrl && hadImageB64 && mainImg && mainImg.startsWith('data:')) {
+        const singleInp = form.querySelector('input[name="image"]');
+        const singleFile = singleInp?.files?.[0] || null;
+        const firstGalleryFile = (Array.isArray(galleryFiles) && galleryFiles.length) ? galleryFiles[0] : null;
+        const fileToSave = singleFile || firstGalleryFile;
+        if (fileToSave) {
+          let ensureSku = (form.querySelector('[name="sku"]').value || '').trim();
+          if (!ensureSku) { ensureSku = generateNumericSku(idVal); form.querySelector('[name="sku"]').value = ensureSku; }
+          const relPath = await saveMainImageToPictureConditionersFS(fileToSave, ensureSku);
+          if (relPath) {
+            mainImg = relPath;
+            let urlHidden = form.querySelector('input[name="_image_url"]');
+            if (!urlHidden) { urlHidden = document.createElement('input'); urlHidden.type = 'hidden'; urlHidden.name = '_image_url'; form.appendChild(urlHidden); }
+            urlHidden.value = relPath;
+            // Clear base64 to keep JSON slim
+            const b64Hidden = form.querySelector('input[name="_image_data"]'); if (b64Hidden) b64Hidden.value = '';
+            // Update gallery hidden
+            let imagesHidden = form.querySelector('input[name="_images_urls"]');
+            if (!imagesHidden) { imagesHidden = document.createElement('input'); imagesHidden.type = 'hidden'; imagesHidden.name = '_images_urls'; imagesHidden.value = '[]'; form.appendChild(imagesHidden); }
+            try {
+              const prev = JSON.parse(imagesHidden.value || '[]');
+              const next = [relPath, ...prev.filter(x => x !== relPath)];
+              imagesHidden.value = JSON.stringify(next);
+              gallery = next;
+            } catch { imagesHidden.value = JSON.stringify([relPath]); gallery = [relPath]; }
+            const prevEl = document.getElementById('adminImagePreview');
+            if (prevEl) prevEl.innerHTML = `<img src="${relPath}" alt="preview" style="max-width:200px;max-height:120px;"/>`;
+            showToast('Изображение сохранено локально и привязано к товару');
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('Prefer-url-over-base64 save failed', e);
     }
     const product = {
       id: idVal,

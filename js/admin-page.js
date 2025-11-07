@@ -335,6 +335,13 @@ export async function initAdminPage(translations, lang = 'ru') {
     form.querySelector('[name="title_uk"]').value = p.name?.uk || '';
     form.querySelector('[name="description_ru"]').value = p.description?.ru || '';
     form.querySelector('[name="description_uk"]').value = p.description?.uk || '';
+    // Full description (optional)
+    const fullRu = p.fullDesc?.ru || p.fullDescription?.ru || '';
+    const fullUk = p.fullDesc?.uk || p.fullDescription?.uk || '';
+    const fullRuEl = form.querySelector('[name="full_ru"]');
+    const fullUkEl = form.querySelector('[name="full_uk"]');
+    if (fullRuEl) fullRuEl.value = fullRu;
+    if (fullUkEl) fullUkEl.value = fullUk;
     form.querySelector('[name="price"]').value = Number(p.price||0) || 0;
     form.querySelector('[name="sku"]').value = p.sku || '';
     form.querySelector('[name="category"]').value = p.category || 'service';
@@ -348,6 +355,8 @@ export async function initAdminPage(translations, lang = 'ru') {
         title_uk: p.name?.uk || '',
         description_ru: p.description?.ru || '',
         description_uk: p.description?.uk || '',
+        full_ru: fullRu,
+        full_uk: fullUk,
         price: String(p.price || 0),
         sku: p.sku || '',
         category: p.category || 'service',
@@ -601,6 +610,8 @@ export async function initAdminPage(translations, lang = 'ru') {
       id: data.get('id') || `p_${Math.random().toString(36).slice(2,9)}`,
       name: { ru: data.get('title_ru') || '', uk: data.get('title_uk') || '' },
       description: { ru: data.get('description_ru') || '', uk: data.get('description_uk') || '' },
+      // full description separate (schema fullDesc)
+      fullDesc: { ru: data.get('full_ru') || '', uk: data.get('full_uk') || '', en: '' },
       price: Number(data.get('price') || 0),
       sku: data.get('sku') || '',
       category: data.get('category') || 'service',
@@ -762,6 +773,7 @@ export async function initAdminPage(translations, lang = 'ru') {
       id: idVal,
       name: { ru: data.get('title_ru') || '', uk: data.get('title_uk') || '' },
       description: { ru: data.get('description_ru') || '', uk: data.get('description_uk') || '' },
+      fullDesc: { ru: data.get('full_ru') || '', uk: data.get('full_uk') || '', en: '' },
       price: Number(data.get('price') || 0),
       sku: data.get('sku') || '',
       category: data.get('category') || 'service',

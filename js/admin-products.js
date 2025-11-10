@@ -810,6 +810,19 @@ export function initAdminProducts(translations, lang = 'ru') {
     // parse flags
     let flags = [];
     try { flags = JSON.parse(data.get('_flags') || '[]'); } catch(_) { flags = []; }
+    // parse specs from textarea(s)
+    function parseSpecs(textRu = '', textUk = '') {
+      const lines = String(textRu || '').split(/\r?\n/).map(s => s.trim()).filter(Boolean);
+      const arr = lines.map(line => {
+        const m = line.split(/\s*[:\-–—]\s*/);
+        const key = (m.shift() || '').trim();
+        const valRu = (m.join(' - ').trim()) || '';
+        const valUk = (String(textUk).split(/\r?\n/).find(l => l.trim().startsWith(key + ':')) || '').split(/\s*[:\-–—]\s*/).slice(1).join(' - ').trim();
+        return key && (valRu || valUk) ? { key, value: { ru: valRu || valUk, uk: valUk || valRu } } : null;
+      }).filter(Boolean);
+      return arr;
+    }
+    const specs = parseSpecs(data.get('specs_ru') || '', data.get('specs_uk') || '');
     const product = {
       id: data.get('id') || uid('p'),
       name: { ru: data.get('title_ru') || '', uk: data.get('title_uk') || '' },
@@ -821,6 +834,7 @@ export function initAdminProducts(translations, lang = 'ru') {
       images: data.get('_image_data') ? [data.get('_image_data')] : [],
       inStock: data.get('inStock') === 'true',
       flags,
+      specs,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
@@ -913,6 +927,16 @@ export function initAdminProducts(translations, lang = 'ru') {
     form.querySelector('input[name="sku"]').value = product.sku || '';
     form.querySelector('input[name="category"]').value = product.category || '';
     form.querySelector('select[name="inStock"]').value = product.inStock ? 'true' : 'false';
+    // specs backfill
+    try {
+      const list = Array.isArray(product.specs) ? product.specs : [];
+      const ru = list.map(s => `${s.key}: ${(s.value && (s.value.ru || s.value.uk || ''))}`).join('\n');
+      const uk = list.map(s => `${s.key}: ${(s.value && (s.value.uk || s.value.ru || ''))}`).join('\n');
+      const ruEl = form.querySelector('textarea[name="specs_ru"]');
+      const ukEl = form.querySelector('textarea[name="specs_uk"]');
+      if (ruEl) ruEl.value = ru;
+      if (ukEl) ukEl.value = uk;
+    } catch {}
     const preview = document.getElementById('adminImagePreview');
     preview.innerHTML = '';
     if (product.image) preview.innerHTML = `<img src="${product.image}" style="max-width:200px;max-height:120px;"/>`;
@@ -945,6 +969,8 @@ export function initAdminProducts(translations, lang = 'ru') {
             sku: prod.sku || '',
             category: prod.category || 'service',
             inStock: prod.inStock ? 'true' : 'false',
+            specs_ru: (Array.isArray(prod.specs) ? prod.specs.map(s => `${s.key}: ${(s.value && (s.value.ru || s.value.uk || ''))}`).join('\n') : ''),
+            specs_uk: (Array.isArray(prod.specs) ? prod.specs.map(s => `${s.key}: ${(s.value && (s.value.uk || s.value.ru || ''))}`).join('\n') : ''),
             _flags: JSON.stringify(Array.isArray(prod.flags) ? prod.flags : [])
           };
           localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));

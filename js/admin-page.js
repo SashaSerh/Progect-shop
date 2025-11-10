@@ -346,6 +346,16 @@ export async function initAdminPage(translations, lang = 'ru') {
     form.querySelector('[name="sku"]').value = p.sku || '';
     form.querySelector('[name="category"]').value = p.category || 'service';
     form.querySelector('[name="inStock"]').value = p.inStock ? 'true' : 'false';
+    // specs backfill
+    try {
+      const specs = Array.isArray(p.specs) ? p.specs : [];
+      const ruLines = specs.map(s => `${s.key}: ${(s.value && (s.value.ru || s.value.uk || ''))}`).join('\n');
+      const ukLines = specs.map(s => `${s.key}: ${(s.value && (s.value.uk || s.value.ru || ''))}`).join('\n');
+      const ruEl = form.querySelector('[name="specs_ru"]');
+      const ukEl = form.querySelector('[name="specs_uk"]');
+      if (ruEl) ruEl.value = ruLines;
+      if (ukEl) ukEl.value = ukLines;
+    } catch {}
     const flags = Array.isArray(p.flags) ? p.flags : [];
     renderSelectedFlags(flags);
     try {
@@ -361,6 +371,8 @@ export async function initAdminPage(translations, lang = 'ru') {
         sku: p.sku || '',
         category: p.category || 'service',
         inStock: p.inStock ? 'true' : 'false',
+        specs_ru: (Array.isArray(p.specs) ? p.specs.map(s => `${s.key}: ${(s.value && (s.value.ru || s.value.uk || ''))}`).join('\n') : ''),
+        specs_uk: (Array.isArray(p.specs) ? p.specs.map(s => `${s.key}: ${(s.value && (s.value.uk || s.value.ru || ''))}`).join('\n') : ''),
         _flags: JSON.stringify(flags)
       }));
     } catch {}

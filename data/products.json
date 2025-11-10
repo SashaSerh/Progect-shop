@@ -16,6 +16,12 @@
     "images": [
       "picture/conditioners/ch-s09ftxd2-bl800x800.jpg"
     ],
+    "oldPrice": 32999,
+    "energyClass": "A++",
+    "summary": { "ru": "Дизайнерская модель с обогревом до −25°C, Wi‑Fi.", "uk": "Дизайнерська модель з обігрівом до −25°C, Wi‑Fi." },
+    "creditProviders": [ { "name": "Mono", "url": "https://monobank.ua/" }, { "name": "Privat", "url": "https://privatbank.ua/" } ],
+    "deliveryInfoUrl": "https://cooperhunter-centre.com.ua/ru-delivery-and-payment",
+    "warrantyInfoUrl": "https://cooperhunter-centre.com.ua/ru-warranty-and-return",
     "inStock": true,
     "flags": [],
     "updatedAt": "2025-11-06T20:26:54.790Z",
@@ -38,6 +44,12 @@
     "images": [
       "picture/conditioners/catalog2ffoto2ftermotehnica2fteplovue-nasosu2fch-hp050lbirk-800x800.jpg"
     ],
+    "oldPrice": 20899,
+    "energyClass": "A++",
+    "summary": { "ru": "Wi‑Fi модуль, 7‑Sky фильтрация, до 20 м².", "uk": "Wi‑Fi модуль, 7‑Sky фільтрація, до 20 м²." },
+    "creditProviders": [ "Mono", "Privat" ],
+    "deliveryInfoUrl": "https://cooperhunter-centre.com.ua/ru-delivery-and-payment",
+    "warrantyInfoUrl": "https://cooperhunter-centre.com.ua/ru-warranty-and-return",
     "inStock": true,
     "flags": [],
     "updatedAt": "2025-11-07T15:48:03.100Z",
@@ -65,6 +77,12 @@
     "images": [
       "picture/conditioners/nvertorniy-kondits-oner-cooper-hunter-veritas-ch-s09ftxq2-ng-3-800x800.jpg"
     ],
+    "oldPrice": 28999,
+    "energyClass": "A++",
+    "summary": { "ru": "I‑Action, SMART‑ION, Wi‑Fi, до 25 м².", "uk": "I‑Action, SMART‑ION, Wi‑Fi, до 25 м²." },
+    "creditProviders": [ "Mono" ],
+    "deliveryInfoUrl": "https://cooperhunter-centre.com.ua/ru-delivery-and-payment",
+    "warrantyInfoUrl": "https://cooperhunter-centre.com.ua/ru-warranty-and-return",
     "inStock": true,
     "flags": [
       {
@@ -93,8 +111,14 @@
     "price": 24199,
     "sku": "4",
     "category": "Кондиционер",
-    "image": "picture/conditioners/catalog2ffoto2ftermotehnica2fkondicioneru2fch-s07ftxf-ng-800x800.jpg",
-    "images": ["picture/conditioners/catalog2ffoto2ftermotehnica2fkondicioneru2fch-s07ftxf-ng-800x800.jpg"],
+  "image": "picture/conditioners/catalog2ffoto2ftermotehnica2fkondicioneru2fch-s07ftxf-ng-800x800.jpg",
+  "images": ["picture/conditioners/catalog2ffoto2ftermotehnica2fkondicioneru2fch-s07ftxf-ng-800x800.jpg"],
+  "oldPrice": 25999,
+  "energyClass": "A++",
+  "summary": { "ru": "До 35 м², Wi‑Fi, 7‑Sky.", "uk": "До 35 м², Wi‑Fi, 7‑Sky." },
+  "creditProviders": [ "Privat" ],
+  "deliveryInfoUrl": "https://cooperhunter-centre.com.ua/ru-delivery-and-payment",
+  "warrantyInfoUrl": "https://cooperhunter-centre.com.ua/ru-warranty-and-return",
     "inStock": true,
     "flags": [],
     "updatedAt": "2025-11-09T19:51:23.024Z",

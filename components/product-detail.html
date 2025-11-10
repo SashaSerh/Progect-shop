@@ -13,6 +13,7 @@
     <!-- Header / Title & Price basic -->
     <header class="product-detail__header">
       <h1 class="product-detail__title" data-role="title">&nbsp;</h1>
+      <div class="product-detail__summary" data-role="summary" hidden></div>
       <div class="product-detail__price" data-role="price"></div>
     </header>
 
@@ -31,6 +32,8 @@
       <aside class="product-detail__buy" aria-label="Блок покупки">
         <div class="product-buy__price-row">
           <span class="product-buy__price" data-role="buy-price">&nbsp;</span>
+          <span class="product-buy__old-price" data-role="old-price" hidden></span>
+          <span class="product-buy__discount badge badge--discount" data-role="discount" hidden></span>
           <span class="product-buy__stock" data-role="stock"></span>
         </div>
         <div class="product-buy__rating" data-role="rating" aria-label="Рейтинг" hidden>
@@ -38,9 +41,20 @@
           <span class="rating-value" data-role="rating-value"></span>
           <span class="rating-count" data-role="rating-count"></span>
         </div>
+        <div class="product-buy__qty" data-role="qty">
+          <label class="quantity-stepper" aria-label="Количество">
+            <button class="quantity-stepper__btn" type="button" data-act="qty-dec" aria-label="Уменьшить">−</button>
+            <input class="quantity-stepper__input" type="number" min="1" max="99" value="1" inputmode="numeric" />
+            <button class="quantity-stepper__btn" type="button" data-act="qty-inc" aria-label="Увеличить">+</button>
+          </label>
+        </div>
         <div class="product-buy__actions">
           <button class="btn btn--primary" type="button" data-act="add-to-cart" disabled aria-disabled="true" data-i18n="add-to-cart">Добавить в корзину</button>
           <button class="btn btn--secondary" type="button" disabled aria-disabled="true" data-i18n="discount-request">Запрос скидки</button>
+        </div>
+        <div class="product-buy__credit" data-role="credit" hidden>
+          <button class="btn btn--tertiary" type="button" data-act="buy-credit" data-i18n="buy-in-credit">Купить в кредит</button>
+          <div class="credit-providers" data-role="credit-providers" aria-label="Партнёры рассрочки" role="list"></div>
         </div>
         <div class="product-buy__share" data-role="share">
           <div class="share-buttons" role="group" aria-label="Поделиться">
@@ -54,6 +68,10 @@
           <li class="badge badge--accent" data-role="badge-popular">Популярный</li>
           <li class="badge badge--neutral" data-role="badge-guarantee">Гарантия 5 лет</li>
         </ul>
+        <div class="product-buy__links" data-role="links" hidden>
+          <a data-role="delivery-link" href="#" target="_blank" rel="noopener" class="product-buy__link" data-i18n="delivery-and-payment">Доставка и оплата</a>
+          <a data-role="warranty-link" href="#" target="_blank" rel="noopener" class="product-buy__link" data-i18n="warranty-5y">Гарантия 5 лет</a>
+        </div>
         <div class="product-buy__meta" data-role="meta"></div>
       </aside>
       <!-- Legacy right column for compatibility with existing JS (meta/specs/actions) -->

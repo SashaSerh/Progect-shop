@@ -1749,6 +1749,36 @@ function renderProductDetail(productId, productsList) {
     if (priceElLegacy) priceElLegacy.textContent = priceText;
     const priceElBuy = section.querySelector('.product-buy__price');
     if (priceElBuy) priceElBuy.textContent = priceText;
+    // Summary (optional short text)
+    try {
+        const summaryEl = section.querySelector('[data-role="summary"]');
+        const summary = (product.summary && (product.summary[lang] || product.summary.ru)) || '';
+        if (summaryEl) {
+            if (summary && summary.trim().length > 0) {
+                summaryEl.textContent = summary.trim();
+                summaryEl.hidden = false;
+            } else {
+                summaryEl.hidden = true;
+                summaryEl.textContent = '';
+            }
+        }
+    } catch {}
+    // Old price / discount
+    try {
+        const oldPriceEl = section.querySelector('[data-role="old-price"]');
+        const discountEl = section.querySelector('[data-role="discount"]');
+        const oldPrice = Number(product.oldPrice);
+        if (oldPrice && oldPrice > Number(product.price)) {
+            const oldText = `${Math.round(oldPrice).toLocaleString('uk-UA', { maximumFractionDigits: 0 })} грн`;
+            if (oldPriceEl) { oldPriceEl.textContent = oldText; oldPriceEl.hidden = false; }
+            // compute discount percent either from field or derived
+            const pct = Math.max(1, Math.round(100 - (Number(product.price) / oldPrice) * 100));
+            if (discountEl) { discountEl.textContent = `−${pct}%`; discountEl.hidden = false; }
+        } else {
+            if (oldPriceEl) oldPriceEl.hidden = true;
+            if (discountEl) discountEl.hidden = true;
+        }
+    } catch {}
     const stockEl = section.querySelector('.product-buy__stock');
     if (stockEl) {
         stockEl.textContent = product.inStock ? (translations?.[lang]?.['in-stock'] || 'В наличии') : (translations?.[lang]?.['on-order'] || 'Под заказ');
@@ -1986,11 +2016,27 @@ function renderProductDetail(productId, productsList) {
         buyBtn.removeAttribute('disabled');
         buyBtn.setAttribute('aria-disabled','false');
         buyBtn.onclick = () => {
-            addToCart(product.id, products);
+            // Read quantity if present
+            const qtyInput = section.querySelector('.quantity-stepper__input');
+            const qty = qtyInput ? Math.max(1, Math.min(99, Number(qtyInput.value) || 1)) : 1;
+            addToCart(product.id, products, qty);
             updateCartUI(translations, lang);
             showActionToast({ type: 'cart', message: getCartAddedMessage(lang) });
         };
     }
+    // Enable discount request and credit actions (basic UX)
+    try {
+        const discountBtn = section.querySelector('[data-i18n="discount-request"]');
+        if (discountBtn) { discountBtn.removeAttribute('disabled'); discountBtn.setAttribute('aria-disabled','false'); discountBtn.addEventListener('click', () => {
+            location.hash = '#contacts';
+            const el = document.getElementById('contacts'); if (el) el.scrollIntoView({ behavior: 'smooth' });
+        }, { once: true }); }
+        const qtyDec = section.querySelector('[data-act="qty-dec"]');
+        const qtyInc = section.querySelector('[data-act="qty-inc"]');
+        const qtyInput = section.querySelector('.quantity-stepper__input');
+        if (qtyDec && qtyInput) qtyDec.addEventListener('click', () => { qtyInput.value = String(Math.max(1, (Number(qtyInput.value)||1) - 1)); });
+        if (qtyInc && qtyInput) qtyInc.addEventListener('click', () => { qtyInput.value = String(Math.min(99, (Number(qtyInput.value)||1) + 1)); });
+    } catch {}
     // Set document title
     try { document.title = `${product.name?.[lang] || ''} — ${translations?.[lang]?.['site-title'] || ''}`; } catch {}
     // Update meta/OG/Twitter for product page
@@ -2027,6 +2073,14 @@ function renderProductDetail(productId, productsList) {
             const ratingEl = section.querySelector('[data-role="rating"]');
             if (ratingEl) ratingEl.hidden = true;
         }
+        // Update Reviews tab label with count
+        try {
+            const tabReviews = section.parentElement?.querySelector('.product-tabs .product-tabs__tab[data-tab="reviews"]');
+            if (tabReviews) {
+                const base = (translations?.[lang]?.['tab-reviews']) || tabReviews.getAttribute('data-i18n') ? tabReviews.textContent.replace(/\s*\(.*\)$/, '') : 'Отзывы';
+                tabReviews.textContent = `${base} ${reviews.length}`;
+            }
+        } catch {}
     } catch {}
 
     // JSON-LD structured data (Product/Service)
@@ -2047,13 +2101,14 @@ function renderProductDetail(productId, productsList) {
                     priceCurrency: 'UAH',
                     price: String(product.price),
                     availability: product.inStock ? 'https://schema.org/InStock' : 'https://schema.org/PreOrder'
-                }
+                },
+                ...(product.energyClass ? { additionalProperty: [{ '@type':'PropertyValue', name:'energyClass', value: product.energyClass }] } : {})
             } : {
                 '@context': 'https://schema.org',
                 '@type': 'Product',
                 name: product.name?.[lang] || product.name?.ru || '',
                 sku: product.sku || undefined,
-                brand: product.brand ? { '@type': 'Brand', name: product.brand } : undefined,
+                brand: product.brand ? { '@type': 'Brand', name: product.brand, ...(product.brandUrl ? { url: product.brandUrl } : {}) } : undefined,
                 image: images,
                 description: product.description?.[lang] || product.description?.ru || '',
                 offers: {
@@ -2062,6 +2117,8 @@ function renderProductDetail(productId, productsList) {
                     price: String(product.price),
                     availability: product.inStock ? 'https://schema.org/InStock' : 'https://schema.org/PreOrder'
                 },
+                ...(product.oldPrice && product.oldPrice > product.price ? { offers: { '@type':'Offer', priceCurrency:'UAH', price:String(product.price), availability: product.inStock ? 'https://schema.org/InStock':'https://schema.org/PreOrder', priceValidUntil: new Date(Date.now() + 1000*60*60*24*30).toISOString().split('T')[0] } } : {}),
+                ...(product.energyClass ? { additionalProperty: [{ '@type':'PropertyValue', name:'energyClass', value: product.energyClass }] } : {}),
                 ...(agg ? { aggregateRating: { '@type': 'AggregateRating', ratingValue: String(agg.value), ratingCount: String(agg.count), bestRating: '5', worstRating: '1' } } : {})
             };
             const s = document.createElement('script');
@@ -2135,7 +2192,67 @@ function renderProductDetail(productId, productsList) {
                     if (color) li.style.background = color;
                     badgesHost.appendChild(li);
                 });
+                // Energy class badge
+                if (product.energyClass) {
+                    const li = document.createElement('li');
+                    li.className = 'badge badge--neutral';
+                    li.textContent = `${(translations?.[lang]?.['energy-class']||'Класс энергосбережения')}: ${product.energyClass}`;
+                    li.setAttribute('role','listitem');
+                    badgesHost.appendChild(li);
+                }
             }
+        }
+    } catch {}
+
+    // Credit providers and info links
+    try {
+        const creditHost = section.querySelector('[data-role="credit"]');
+        const providersHost = section.querySelector('[data-role="credit-providers"]');
+        const providers = Array.isArray(product.creditProviders) ? product.creditProviders : [];
+        if (creditHost) {
+            if (providers.length) {
+                creditHost.hidden = false;
+                providersHost.innerHTML = '';
+                providers.forEach((p) => {
+                    const item = document.createElement('span');
+                    item.className = 'credit-provider';
+                    item.setAttribute('role','listitem');
+                    const name = typeof p === 'string' ? p : (p.name || '');
+                    const url = (typeof p === 'object' && p.url) ? p.url : '';
+                    // Mini logo placeholder (initial badge with brand color)
+                    const logo = document.createElement('span');
+                    logo.className = 'credit-provider__logo';
+                    const initial = (name||'')[0]?.toUpperCase() || '?';
+                    const color = (name||'').toLowerCase().includes('mono') ? '#111' : ( (name||'').toLowerCase().includes('priv') ? '#23a455' : '#6b7280');
+                    logo.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="${color}"/><text x="12" y="16" text-anchor="middle" font-size="12" fill="#fff" font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial" font-weight="700">${initial}</text></svg>`;
+                    item.appendChild(logo);
+                    if (url) { const a = document.createElement('a'); a.href = url; a.target = '_blank'; a.rel = 'noopener'; a.textContent = name; item.appendChild(a); }
+                    else { item.textContent = name; }
+                    providersHost.appendChild(item);
+                });
+                const btn = section.querySelector('[data-act="buy-credit"]');
+                btn?.addEventListener('click', () => { location.hash = '#contacts'; document.getElementById('contacts')?.scrollIntoView({ behavior: 'smooth' }); }, { once: true });
+            } else {
+                creditHost.hidden = true;
+            }
+        }
+        const linksHost = section.querySelector('[data-role="links"]');
+        const deliveryA = section.querySelector('[data-role="delivery-link"]');
+        const warrantyA = section.querySelector('[data-role="warranty-link"]');
+        let visible = false;
+        if (product.deliveryInfoUrl && deliveryA) { deliveryA.href = product.deliveryInfoUrl; visible = true; }
+        if (product.warrantyInfoUrl && warrantyA) { warrantyA.href = product.warrantyInfoUrl; visible = true; }
+        if (linksHost) linksHost.hidden = !visible;
+    } catch {}
+
+    // Update Q&A tab counter from storage
+    try {
+        const storageKeyQ = `qna:${product.id}`;
+        const q = JSON.parse(localStorage.getItem(storageKeyQ) || '[]') || [];
+        const tabQa = section.parentElement?.querySelector('.product-tabs .product-tabs__tab[data-tab="qa"]');
+        if (tabQa) {
+            const base = tabQa.textContent.replace(/\s*\(.*\)$/, '');
+            tabQa.textContent = `${base} ${q.length}`;
         }
     } catch {}
 }

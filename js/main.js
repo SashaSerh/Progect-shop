@@ -1448,15 +1448,16 @@ async function initApp() {
         });
     }
 
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('visible');
-            }
-        });
-    }, { threshold: 0.1 });
-
-    document.querySelectorAll('.fade-in-section').forEach(el => observer.observe(el));
+    if ('IntersectionObserver' in window) {
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.1 });
+        document.querySelectorAll('.fade-in-section').forEach(el => observer.observe(el));
+    }
 
     document.addEventListener('error', (e) => {
         if (e.target.tagName === 'IMG') {
@@ -1687,14 +1688,15 @@ function getLangSafe() {
     return ['ru','uk'].includes(l) ? l : 'uk';
 }
 
-function renderProductDetail(productId) {
+function renderProductDetail(productId, productsList) {
     const lang = getLangSafe();
     const container = document.getElementById('product-detail-container');
     if (!container) return;
     // Ensure template is present; if not loaded yet, bail.
     const section = container.querySelector('.product-detail');
     if (!section) return;
-    const product = Array.isArray(products) ? products.find(p => String(p.id) === String(productId)) : null;
+    const source = Array.isArray(productsList) ? productsList : (Array.isArray(products) ? products : []);
+    const product = source.find(p => String(p.id) === String(productId));
     if (!product) {
         container.innerHTML = `<section class="product-detail"><div class="container"><button class="product-detail__back" type="button">← ${translations?.[lang]?.['nav-products'] || 'Товары'}</button><p style="margin-top:8px">Товар не найден</p></div></section>`;
         bindProductDetailEvents();
@@ -1742,45 +1744,204 @@ function renderProductDetail(productId) {
 
         // Fill basic fields
     section.querySelector('.product-detail__title').textContent = product.name?.[lang] || product.name?.ru || '';
-    section.querySelector('.product-detail__price').textContent = `${Math.round(Number(product.price)).toLocaleString('uk-UA', { maximumFractionDigits: 0 })} грн`;
-    // Main image and thumbs
-    const imgEl = section.querySelector('.product-detail__image');
+    const priceText = `${Math.round(Number(product.price)).toLocaleString('uk-UA', { maximumFractionDigits: 0 })} грн`;
+    const priceElLegacy = section.querySelector('.product-detail__price');
+    if (priceElLegacy) priceElLegacy.textContent = priceText;
+    const priceElBuy = section.querySelector('.product-buy__price');
+    if (priceElBuy) priceElBuy.textContent = priceText;
+    const stockEl = section.querySelector('.product-buy__stock');
+    if (stockEl) {
+        stockEl.textContent = product.inStock ? (translations?.[lang]?.['in-stock'] || 'В наличии') : (translations?.[lang]?.['on-order'] || 'Под заказ');
+        stockEl.style.background = product.inStock ? 'var(--stock-bg, #e8f5e9)' : '#fff3e0';
+        stockEl.style.color = product.inStock ? 'var(--stock-color, #1b5e20)' : '#e65100';
+    }
+    // Main image and thumbnails (responsive variants using local naming convention: -320w/-480w/-768w/-1200w)
+    const imgEl = section.querySelector('.product-gallery__image, .product-detail__image');
+    const imagesRaw = (Array.isArray(product.images) && product.images.length ? product.images : [product.image]).filter(Boolean);
+    const images = imagesRaw.map(src => {
+        // If local path in picture/conditioners, build srcset variants (only same extension)
+        if (typeof src === 'string' && src.startsWith('picture/conditioners/')) {
+            const dot = src.lastIndexOf('.');
+            if (dot > 0) {
+                const base = src.slice(0, dot); const ext = src.slice(dot);
+                const candidateWidths = [320,480,768,1200];
+                const existing = candidateWidths.map(w => `${base}-${w}w${ext}`).filter(path => {
+                    // Heuristic: if a preload <link> or cached image element already exists, assume available.
+                    // In pure SPA runtime we can't sync fs existence; rely on assumption or feature-detect via Image().
+                    // Optional: mark all as existing for now; later can refine by HEAD request.
+                    return true;
+                });
+                return { original: src, variants: existing };
+            }
+        }
+        return { original: src, variants: [] };
+    });
     if (imgEl) {
         imgEl.classList.add('lqip');
         imgEl.setAttribute('loading','eager');
         imgEl.setAttribute('decoding','async');
         imgEl.setAttribute('fetchpriority','high');
-        // sizes hint: image container roughly half of content area on desktop, full width on mobile
-        imgEl.setAttribute('sizes','(max-width: 640px) 90vw, (max-width: 1024px) 50vw, 600px');
-    }
-    const images = (Array.isArray(product.images) && product.images.length ? product.images : [product.image]).filter(Boolean);
-    let currentImgIdx = 0;
-        if (imgEl) {
-            // lazy + preloader
-            ensureImagePreloader(section);
-            loadLargeImage(imgEl, images[0] || '', product.name?.[lang] || '');
+        imgEl.setAttribute('sizes','(max-width:640px) 94vw, (max-width:1024px) 56vw, 720px');
+        ensureImagePreloader(section);
+        const first = images[0];
+        if (first) {
+            const srcset = first.variants.length ? first.variants.map((v,i)=>{
+                const w = [320,480,768,1200][i]; return `${v} ${w}w`; }).join(', ') : '';
+            if (srcset) imgEl.setAttribute('srcset', srcset);
+            loadLargeImage(imgEl, first.original, product.name?.[lang] || '');
         }
-    const thumbs = section.querySelector('.product-detail__thumbs');
-    if (thumbs) {
-        thumbs.innerHTML = '';
-        images.forEach((src, i) => {
-            const t = document.createElement('img');
-            t.src = src;
-            t.alt = product.name?.[lang] || '';
-            t.loading = 'lazy';
-            t.decoding = 'async';
-            t.sizes = '(max-width: 640px) 20vw, 96px';
-            t.srcset = `${src} 1x, ${src} 2x`;
-            if (i === 0) t.classList.add('is-active');
-            t.addEventListener('click', () => {
-                currentImgIdx = i;
-                    if (imgEl) { loadLargeImage(imgEl, src, product.name?.[lang] || ''); }
-                thumbs.querySelectorAll('img').forEach(el => el.classList.remove('is-active'));
-                t.classList.add('is-active');
-            });
-            thumbs.appendChild(t);
+    }
+    const thumbsHost = section.querySelector('.product-gallery__thumbs, .product-detail__thumbs');
+    if (thumbsHost) {
+        // Reset scroll position smoothly when rendering a product (new or same)
+        try { thumbsHost.scrollTo({ left: 0, behavior: 'smooth' }); } catch { thumbsHost.scrollLeft = 0; }
+        // Ensure proper semantics for a gallery thumbnails list
+        thumbsHost.setAttribute('role','listbox');
+        thumbsHost.setAttribute('aria-orientation','horizontal');
+        thumbsHost.innerHTML = '';
+        images.forEach((info, i) => {
+            const thumb = document.createElement('div');
+            thumb.className = 'product-gallery__thumb' + (i === 0 ? ' is-active' : '');
+            // Use background-image for simplicity; JS will replace with optimized tag later if needed
+            thumb.style.backgroundImage = `url(${info.original})`;
+            thumb.setAttribute('data-idx', String(i));
+            thumb.setAttribute('role','option');
+            thumb.setAttribute('aria-label', (product.name?.[lang] || 'Изображение') + ' #' + (i+1));
+            thumb.setAttribute('aria-selected', i === 0 ? 'true' : 'false');
+            thumb.tabIndex = i === 0 ? 0 : -1; // roving tabindex pattern
+            const activate = () => {
+                thumbsHost.querySelectorAll('.product-gallery__thumb').forEach(el => el.classList.remove('is-active'));
+                thumb.classList.add('is-active');
+                // Update selection a11y
+                thumbsHost.querySelectorAll('.product-gallery__thumb').forEach(el => {
+                    el.setAttribute('aria-selected','false');
+                });
+                thumb.setAttribute('aria-selected','true');
+                // Ensure active thumb visible (autoscroll)
+                try {
+                    // Smooth autoscroll with graceful fallback
+                    thumb.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+                } catch {
+                    // Fallback: manual scrollLeft to bring thumb into view
+                    try {
+                        const hostRect = thumbsHost.getBoundingClientRect();
+                        const thRect = thumb.getBoundingClientRect();
+                        if (thRect.left < hostRect.left) {
+                            thumbsHost.scrollLeft += (thRect.left - hostRect.left) - 12;
+                        } else if (thRect.right > hostRect.right) {
+                            thumbsHost.scrollLeft += (thRect.right - hostRect.right) + 12;
+                        }
+                    } catch {}
+                }
+                if (imgEl) {
+                    const srcset = info.variants.length ? info.variants.map((v,j)=>{
+                        const m = v.match(/-(\d+)w\./); const w = m ? m[1] : [320,480,768,1200][j]; return `${v} ${w}w`; }).join(', ') : '';
+                    if (srcset) imgEl.setAttribute('srcset', srcset); else imgEl.removeAttribute('srcset');
+                    loadLargeImage(imgEl, info.original, product.name?.[lang] || '');
+                    try {
+                        const announce = section.querySelector('[data-role="gallery-announce"]');
+                        if (announce) announce.textContent = `${translations?.[lang]?.['image-changed'] || 'Изображение обновлено'}: ${(product.name?.[lang] || product.name?.ru || '').trim()} #${i+1}`;
+                    } catch {}
+                }
+            };
+            thumb.addEventListener('click', activate);
+            thumb.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); activate(); } });
+            thumbsHost.appendChild(thumb);
+        });
+        // Keyboard arrow navigation between thumbs
+        thumbsHost.addEventListener('keydown', (e) => {
+            if (!['ArrowRight','ArrowLeft','Home','End'].includes(e.key)) return;
+            const items = Array.from(thumbsHost.querySelectorAll('.product-gallery__thumb'));
+            const currentIndex = items.indexOf(document.activeElement);
+            let targetIndex = currentIndex;
+            if (e.key === 'ArrowRight') targetIndex = Math.min(items.length - 1, currentIndex + 1);
+            else if (e.key === 'ArrowLeft') targetIndex = Math.max(0, currentIndex - 1);
+            else if (e.key === 'Home') targetIndex = 0;
+            else if (e.key === 'End') targetIndex = items.length - 1;
+            if (targetIndex !== currentIndex && items[targetIndex]) {
+                e.preventDefault();
+                // Roving tabindex update on focus move
+                items.forEach((el, idx) => el.tabIndex = (idx === targetIndex ? 0 : -1));
+                items[targetIndex].focus();
+                // Autoscroll to newly focused thumb
+                try { items[targetIndex].scrollIntoView({ behavior:'smooth', block:'nearest', inline:'nearest' }); } catch {
+                    try {
+                        const hostRect = thumbsHost.getBoundingClientRect();
+                        const tr = items[targetIndex].getBoundingClientRect();
+                        if (tr.left < hostRect.left) {
+                            thumbsHost.scrollLeft += (tr.left - hostRect.left) - 12;
+                        } else if (tr.right > hostRect.right) {
+                            thumbsHost.scrollLeft += (tr.right - hostRect.right) + 12;
+                        }
+                    } catch {}
+                }
+            }
         });
     }
+    // Full description (fullDesc) integration into description panel
+    try {
+        const descPanel = section.querySelector('.product-panel[data-panel="description"] [data-role="full-desc"]');
+        if (descPanel) {
+            const fullDesc = (product.fullDesc && (product.fullDesc[lang] || product.fullDesc.ru)) || (product.description && (product.description[lang] || product.description.ru)) || '';
+            // Basic sanitization: allow a subset or plain text fallback
+            if (fullDesc) {
+                if (/</.test(fullDesc)) {
+                    // Minimal whitelist replace: strip script/style tags
+                    const safe = fullDesc
+                      .replace(/<\/(script|style)>/gi,'')
+                      .replace(/<(script|style)[^>]*>.*?<\/\1>/gis,'')
+                      .replace(/on[a-z]+\s*=\s*"[^"]*"/gi,'')
+                      .replace(/on[a-z]+\s*=\s*'[^']*'/gi,'')
+                      .replace(/javascript:/gi,'');
+                    descPanel.innerHTML = safe;
+                } else {
+                    descPanel.textContent = fullDesc;
+                }
+                // Setup collapsible if content is too long
+                try {
+                    // Reset previous state
+                    descPanel.classList.remove('is-collapsed','collapsible');
+                    const existingBtn = descPanel.parentElement?.querySelector('.collapsible__toggle');
+                    existingBtn?.remove();
+                    // Measure after paint
+                    requestAnimationFrame(() => {
+                        const threshold = 320; // px, matches CSS var default
+                        if (descPanel.scrollHeight > threshold * 1.05) {
+                            descPanel.classList.add('collapsible','is-collapsed');
+                            const btn = document.createElement('button');
+                            btn.type = 'button';
+                            btn.className = 'collapsible__toggle';
+                            const readMore = (translations?.[lang]?.['read-more']) || (lang === 'uk' ? 'Читати далі' : 'Читать далее');
+                            const readLess = (translations?.[lang]?.['read-less']) || (lang === 'uk' ? 'Згорнути' : 'Свернуть');
+                            btn.textContent = readMore;
+                            btn.setAttribute('aria-expanded','false');
+                            btn.addEventListener('click', () => {
+                                const collapsed = descPanel.classList.toggle('is-collapsed');
+                                btn.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+                                btn.textContent = collapsed ? readMore : readLess;
+                            });
+                            // Insert after panel text container
+                            const host = descPanel.parentElement || section.querySelector('.product-panel[data-panel="description"]');
+                            host?.appendChild(btn);
+                        }
+                    });
+                } catch {}
+            }
+        }
+    } catch {}
+
+    // Specs table into specs panel (if present). Keep legacy list intact.
+    try {
+        const specsPanel = section.querySelector('.product-panel[data-panel="specs"] [data-role="specs-table"]');
+        if (specsPanel && Array.isArray(product.specs) && product.specs.length) {
+            const rows = product.specs.map(spec => {
+                const keyLabel = translations?.[lang]?.[`spec-${spec.key}`] || spec.key;
+                const valueText = (spec.value && (spec.value[lang] || spec.value.ru)) || '';
+                return `<tr><th>${keyLabel}</th><td>${valueText}</td></tr>`;
+            }).join('');
+            specsPanel.innerHTML = `<table class="product-specs-table"><tbody>${rows}</tbody></table>`;
+        }
+    } catch {}
     // Meta badges
     const meta = section.querySelector('.product-detail__meta');
     if (meta) {
@@ -1819,10 +1980,12 @@ function renderProductDetail(productId) {
             specsList.appendChild(li);
         });
     }
-    // Actions
-    const btn = section.querySelector('.product-detail__addtocart');
-    if (btn) {
-        btn.onclick = () => {
+    // Actions: bind new primary buy button in purchase block
+    const buyBtn = section.querySelector('[data-act="add-to-cart"], .product-detail__addtocart');
+    if (buyBtn) {
+        buyBtn.removeAttribute('disabled');
+        buyBtn.setAttribute('aria-disabled','false');
+        buyBtn.onclick = () => {
             addToCart(product.id, products);
             updateCartUI(translations, lang);
             showActionToast({ type: 'cart', message: getCartAddedMessage(lang) });
@@ -1841,6 +2004,29 @@ function renderProductDetail(productId) {
         setOgUrl(url);
         setOgImage(image); setTwitterImage(image);
         setMetaDescription(desc);
+    } catch {}
+
+    // Aggregate rating from local reviews
+    let agg = null;
+    try {
+        const storageKey = `reviews:${product.id}`;
+        const reviews = JSON.parse(localStorage.getItem(storageKey) || '[]') || [];
+        if (reviews.length) {
+            const sum = reviews.reduce((a, r) => a + (Number(r.rating) || 0), 0);
+            const value = Math.round((sum / reviews.length) * 10) / 10;
+            agg = { count: reviews.length, value };
+            const ratingEl = section.querySelector('[data-role="rating"]');
+            const starsEl = section.querySelector('[data-role="rating-stars"]');
+            const valueEl = section.querySelector('[data-role="rating-value"]');
+            const countEl = section.querySelector('[data-role="rating-count"]');
+            if (ratingEl) ratingEl.hidden = false;
+            if (starsEl) starsEl.innerHTML = renderStarsHTML(value);
+            if (valueEl) valueEl.textContent = `${value} / 5`;
+            if (countEl) countEl.textContent = `(${reviews.length})`;
+        } else {
+            const ratingEl = section.querySelector('[data-role="rating"]');
+            if (ratingEl) ratingEl.hidden = true;
+        }
     } catch {}
 
     // JSON-LD structured data (Product/Service)
@@ -1875,7 +2061,8 @@ function renderProductDetail(productId) {
                     priceCurrency: 'UAH',
                     price: String(product.price),
                     availability: product.inStock ? 'https://schema.org/InStock' : 'https://schema.org/PreOrder'
-                }
+                },
+                ...(agg ? { aggregateRating: { '@type': 'AggregateRating', ratingValue: String(agg.value), ratingCount: String(agg.count), bestRating: '5', worstRating: '1' } } : {})
             };
             const s = document.createElement('script');
             s.type = 'application/ld+json';
@@ -1905,6 +2092,82 @@ function renderProductDetail(productId) {
                 document.head.appendChild(bcs);
             }
         } catch {}
+
+    // Share buttons populate
+    try {
+        const shareHost = section.querySelector('[data-role="share"]');
+        if (shareHost) {
+            const url = location.href.split('#')[0];
+            const title = product.name?.[lang] || product.name?.ru || '';
+            const tg = shareHost.querySelector('[data-role="share-tg"]');
+            const wa = shareHost.querySelector('[data-role="share-wa"]');
+            const encodedUrl = encodeURIComponent(url);
+            const encodedText = encodeURIComponent(`${title} — ${url}`);
+            if (tg) tg.setAttribute('href', `https://t.me/share/url?url=${encodedUrl}&text=${encodedText}`);
+            if (wa) wa.setAttribute('href', `https://wa.me/?text=${encodedText}`);
+        }
+    } catch {}
+
+    // Render flags badges (product.flags: array of {key,color} or strings)
+    try {
+        const flags = Array.isArray(product.flags) ? product.flags : [];
+        if (flags.length) {
+            const badgesHost = section.querySelector('.product-buy__badges');
+            if (badgesHost) {
+                // Clear existing static badges (keep if we want fallback?)
+                badgesHost.innerHTML = '';
+                badgesHost.setAttribute('role','list');
+                flags.forEach(f => {
+                    const key = typeof f === 'string' ? f : (f.key || '');
+                    if (!key) return;
+                    let color = (typeof f === 'object' && f.color) ? f.color : '';
+                    if (!color && typeof window?.autoFlagColor === 'function') {
+                        try { color = window.autoFlagColor(key); } catch {}
+                    }
+                    const li = document.createElement('li');
+                    li.className = 'badge badge--flag';
+                    li.setAttribute('data-flag', key);
+                    li.setAttribute('role','listitem');
+                    const label = flagLabel(key, translations, lang);
+                    li.textContent = label;
+                    li.setAttribute('aria-label', label);
+                    li.setAttribute('title', label);
+                    if (color) li.style.background = color;
+                    badgesHost.appendChild(li);
+                });
+            }
+        }
+    } catch {}
+}
+
+// Render static 5-star HTML based on value (0..5) with halves
+function renderStarsHTML(value){
+// Map flag key to localized label
+function flagLabel(key, translations, lang) {
+    // attempt i18n flags.* lookup
+    try {
+        const dict = translations?.[lang]?.flags || translations?.ru?.flags || {};
+        if (dict && dict[key]) return dict[key];
+    } catch {}
+    // fallback generic mapping
+    const generic = {
+        isNew: { ru: 'Новинка', uk: 'Новинка' },
+        isHit: { ru: 'Хит', uk: 'Хіт' },
+        isPromo: { ru: 'Акция', uk: 'Акція' },
+        isBestseller: { ru: 'Бестселлер', uk: 'Бестселлер' }
+    };
+    const langObj = generic[key];
+    if (langObj) return langObj[lang] || langObj.ru || key;
+    return key;
+}
+    const v = Math.max(0, Math.min(5, Number(value) || 0));
+    const full = Math.floor(v);
+    const half = v - full >= 0.5 ? 1 : 0;
+    const empty = 5 - full - half;
+    const star = '<span class="star star--full" aria-hidden="true">★</span>';
+    const halfStar = '<span class="star star--half" aria-hidden="true">☆</span>';
+    const emptyStar = '<span class="star star--empty" aria-hidden="true">☆</span>';
+    return star.repeat(full) + (half ? halfStar : '') + emptyStar.repeat(empty);
 }
 
 function bindProductDetailEvents() {
@@ -1912,7 +2175,291 @@ function bindProductDetailEvents() {
     if (!container) return;
     const back = container.querySelector('.product-detail__back');
     if (back) back.onclick = () => { history.back(); };
+
+    // Tabs logic (Stage 3)
+    const tabsHost = container.querySelector('.product-tabs');
+    const panelsHost = container.querySelector('.product-panels');
+    if (!tabsHost || !panelsHost) return;
+    const tabs = Array.from(tabsHost.querySelectorAll('.product-tabs__tab'));
+    const panels = Array.from(panelsHost.querySelectorAll('.product-panel'));
+
+    // Sticky tabs (CSS sticky + JS class for shadow)
+    try {
+        const headerEl = document.querySelector('.header');
+        const computeStickyTop = () => {
+            if (!headerEl) return 0; // если хедера нет — прилипание от самого верха
+            // При сжатом хедере используем меньшую высоту для более раннего прилипания
+            const isCondensed = headerEl.classList.contains('header--condensed');
+            const rawH = headerEl.offsetHeight || 0;
+            // Эвристика: если condensed, уменьшаем stickyTop на 20% чтобы табы визуально смещались корректно
+            const h = isCondensed ? Math.round(rawH * 0.8) : rawH;
+            return h > 0 ? h : 72;
+        };
+        // Динамический порог появления тени: когда нижняя граница хедера пересекает верх вкладок
+        const computeShadowThreshold = () => {
+            if (!headerEl) return 0;
+            const isCondensed = headerEl.classList.contains('header--condensed');
+            const base = headerEl.offsetHeight || 0;
+            // Порог тени немного ниже при condensed, чтобы плавный переход
+            return isCondensed ? Math.max(0, base - 8) : base;
+        };
+        let stickyTop = computeStickyTop();
+        let shadowThreshold = computeShadowThreshold();
+        tabsHost.classList.add('is-sticky');
+        tabsHost.style.setProperty('--tabs-sticky-top', stickyTop + 'px');
+        // Track stick state to toggle shadow class
+        let startTop = tabsHost.getBoundingClientRect().top + window.scrollY;
+        let ticking = false;
+        const onScroll = () => {
+            if (ticking) return;
+            ticking = true;
+            requestAnimationFrame(() => {
+                const y = window.scrollY || document.documentElement.scrollTop || 0;
+                const stuck = y + stickyTop >= startTop - 1;
+                // Появление тени — только если фактически пересекли нижнюю границу хедера
+                const addShadow = stuck && (y >= shadowThreshold - 4);
+                tabsHost.classList.toggle('is-stuck', addShadow);
+                ticking = false;
+            });
+        };
+        const onResize = () => {
+            // recalc header height and starting top
+            stickyTop = computeStickyTop();
+            shadowThreshold = computeShadowThreshold();
+            tabsHost.style.setProperty('--tabs-sticky-top', stickyTop + 'px');
+            startTop = tabsHost.getBoundingClientRect().top + window.scrollY;
+            onScroll();
+        };
+        window.addEventListener('scroll', onScroll, { passive: true });
+        window.addEventListener('resize', () => { clearTimeout(onResize.__t); onResize.__t = setTimeout(onResize, 120); }, { passive: true });
+        // also react on potential header condense changes via mutation observer minimal
+        if (headerEl && 'MutationObserver' in window) {
+            const mo = new MutationObserver(() => onResize());
+            mo.observe(headerEl, { attributes: true, attributeFilter: ['class','style'] });
+        }
+        // If navigating within same page, ensure calc is up to date after panels render
+        setTimeout(onResize, 0);
+    } catch {}
+
+    // Map tab -> panel
+    const panelByTab = new Map();
+    tabs.forEach(tab => {
+        const key = tab.getAttribute('data-tab');
+        const panel = panels.find(p => p.getAttribute('data-panel') === key);
+        if (panel) panelByTab.set(tab, panel);
+    });
+
+    function activateTab(tab, opts = { focus: false }) {
+        if (!panelByTab.has(tab)) return;
+        tabs.forEach(t => {
+            const sel = t === tab;
+            t.classList.toggle('is-active', sel);
+            t.setAttribute('aria-selected', sel ? 'true' : 'false');
+            t.setAttribute('tabindex', sel ? '0' : '-1');
+        });
+        panels.forEach(p => p.classList.remove('is-active'));
+        const panel = panelByTab.get(tab);
+        panel.classList.add('is-active');
+        // Update hash without scrolling jump (#tab-description etc.)
+        try {
+            const hash = `#tab-${tab.getAttribute('data-tab')}`;
+            if (location.hash !== hash) history.replaceState(null, '', hash);
+        } catch {}
+        if (opts.focus) tab.focus();
+    }
+
+    // Initial activation from hash
+    function initFromHash() {
+        const m = (location.hash || '').match(/^#tab-(.+)$/);
+        if (m) {
+            const target = tabs.find(t => t.getAttribute('data-tab') === m[1]);
+            if (target) { activateTab(target); return; }
+        }
+        // Fallback: first tab
+        if (tabs.length) activateTab(tabs[0]);
+    }
+
+    tabs.forEach(tab => {
+        tab.setAttribute('role','tab');
+        tab.setAttribute('aria-selected', tab.classList.contains('is-active') ? 'true' : 'false');
+        tab.setAttribute('tabindex', tab.classList.contains('is-active') ? '0' : '-1');
+        tab.addEventListener('click', () => activateTab(tab));
+        tab.addEventListener('keydown', (e) => {
+            const idx = tabs.indexOf(tab);
+            if (e.key === 'ArrowRight') {
+                e.preventDefault();
+                const next = tabs[(idx + 1) % tabs.length];
+                activateTab(next, { focus: true });
+            } else if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                const prev = tabs[(idx - 1 + tabs.length) % tabs.length];
+                activateTab(prev, { focus: true });
+            } else if (e.key === 'Home') {
+                e.preventDefault(); activateTab(tabs[0], { focus: true });
+            } else if (e.key === 'End') {
+                e.preventDefault(); activateTab(tabs[tabs.length - 1], { focus: true });
+            } else if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault(); activateTab(tab, { focus: true });
+            }
+        });
+    });
+
+    initFromHash();
+    window.addEventListener('hashchange', () => {
+        const h = location.hash || '';
+        if (/^#tab-/.test(h)) initFromHash();
+    });
+
+    // Reviews form logic (localStorage based)
+    try {
+        const reviewsHost = container.querySelector('[data-role="reviews"]');
+        if (reviewsHost) {
+            const form = reviewsHost.querySelector('[data-role="reviews-form"]');
+            const list = reviewsHost.querySelector('[data-role="reviews-list"]');
+            const empty = reviewsHost.querySelector('[data-role="reviews-empty"]');
+            const status = reviewsHost.querySelector('[data-role="reviews-status"]');
+            const productId = (container.querySelector('.product-detail')?.getAttribute('data-product-id')) || (location.hash.match(/^#product-(.+)$/)?.[1]) || 'unknown';
+            const storageKey = `reviews:${productId}`;
+
+            function getReviews(){
+                try { return JSON.parse(localStorage.getItem(storageKey) || '[]') || []; } catch { return []; }
+            }
+            function saveReviews(items){
+                try { localStorage.setItem(storageKey, JSON.stringify(items)); } catch {}
+            }
+            function renderReviews(){
+                const items = getReviews();
+                if (!items.length) {
+                    empty?.removeAttribute('hidden');
+                    if (list) { list.hidden = true; list.innerHTML = ''; }
+                    return;
+                }
+                empty?.setAttribute('hidden','');
+                if (list) {
+                    list.hidden = false;
+                    list.innerHTML = items.map(it => `
+                        <li class="reviews__item">
+                          <div class="reviews__item-header">
+                            <div class="reviews__author">${it.author || 'Гость'}</div>
+                            <div class="reviews__rating">★ ${Number(it.rating)||5}/5</div>
+                          </div>
+                          <div class="reviews__text">${(it.text||'').replace(/[<>]/g, '')}</div>
+                        </li>`).join('');
+                }
+            }
+
+            renderReviews();
+            if (form) {
+                form.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const fd = new FormData(form);
+                    const author = String(fd.get('author')||'').trim();
+                    const rating = Number(fd.get('rating')||5);
+                    const text = String(fd.get('text')||'').trim();
+                    if (author.length < 2 || text.length < 4) {
+                        if (status) status.textContent = 'Заполните имя и комментарий';
+                        return;
+                    }
+                    const items = getReviews();
+                    items.unshift({ id: Date.now(), author, rating, text, createdAt: new Date().toISOString() });
+                    saveReviews(items);
+                    const textInput = form.querySelector('[name="text"]');
+                    if (textInput) textInput.value = '';
+                    renderReviews();
+                    if (status) { status.textContent = 'Отзыв опубликован'; setTimeout(()=> status.textContent = '', 1800); }
+                });
+            }
+        }
+    } catch {}
+
+    // Q&A form logic (localStorage based)
+    try {
+        const qaHost = container.querySelector('[data-role="qa"]');
+        if (qaHost) {
+            const form = qaHost.querySelector('[data-role="qa-form"]');
+            const list = qaHost.querySelector('[data-role="qa-list"]');
+            const empty = qaHost.querySelector('[data-role="qa-empty"]');
+            const status = qaHost.querySelector('[data-role="qa-status"]');
+            const productId = (container.querySelector('.product-detail')?.getAttribute('data-product-id')) || (location.hash.match(/^#product-(.+)$/)?.[1]) || 'unknown';
+            const storageKey = `qna:${productId}`;
+
+            function getQna(){
+                try { return JSON.parse(localStorage.getItem(storageKey) || '[]') || []; } catch { return []; }
+            }
+            function saveQna(items){
+                try { localStorage.setItem(storageKey, JSON.stringify(items)); } catch {}
+            }
+            function renderQna(){
+                const items = getQna();
+                if (!items.length) {
+                    empty?.removeAttribute('hidden');
+                    if (list) { list.hidden = true; list.innerHTML = ''; }
+                    return;
+                }
+                empty?.setAttribute('hidden','');
+                if (list) {
+                    list.hidden = false;
+                    list.innerHTML = items.map(it => `
+                        <li class="qa__item">
+                          <div class="qa__item-header">
+                            <div class="qa__author">${it.author || 'Гость'}</div>
+                            <div class="qa__date">${new Date(it.createdAt).toLocaleDateString?.() || ''}</div>
+                          </div>
+                          <div class="qa__text">${(it.text||'').replace(/[<>]/g, '')}</div>
+                        </li>`).join('');
+                }
+            }
+
+            renderQna();
+            if (form) {
+                form.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const fd = new FormData(form);
+                    const author = String(fd.get('author')||'').trim();
+                    const text = String(fd.get('text')||'').trim();
+                    if (author.length < 2 || text.length < 4) {
+                        if (status) status.textContent = 'Заполните имя и вопрос';
+                        return;
+                    }
+                    const items = getQna();
+                    items.unshift({ id: Date.now(), author, text, createdAt: new Date().toISOString() });
+                    saveQna(items);
+                    const textInput = form.querySelector('[name="text"]');
+                    if (textInput) textInput.value = '';
+                    renderQna();
+                    if (status) { status.textContent = 'Вопрос отправлен'; setTimeout(()=> status.textContent = '', 1800); }
+                });
+            }
+        }
+    } catch {}
 }
+
+// Delegated events for share copy
+document.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-act="share-copy"]');
+    if (!btn) return;
+    const url = location.href.split('#')[0];
+    const toCopy = url;
+    const attempt = async () => {
+        try {
+            if (navigator.clipboard?.writeText) {
+                await navigator.clipboard.writeText(toCopy);
+                showActionToast?.({ type:'share', message:'Ссылка скопирована' });
+                return true;
+            }
+        } catch {}
+        return false;
+    };
+    attempt().then(ok => {
+        if (!ok) {
+            try {
+                const ta = document.createElement('textarea'); ta.value = toCopy; ta.style.position='fixed'; ta.style.top='-2000px'; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove();
+                showActionToast?.({ type:'share', message:'Ссылка скопирована' });
+            } catch {}
+        }
+    });
+});
+
 
 function ensureProductDetailLoaded() {
     const container = document.getElementById('product-detail-container');
@@ -2164,23 +2711,24 @@ function ensureImagePreloader(section) {
 }
 
 function loadLargeImage(imgEl, src, alt) {
-    const wrap = imgEl.closest('.product-detail__image-wrap');
+    const wrap = imgEl.closest('.product-detail__image-wrap, .product-gallery__image-wrap');
     const spinner = wrap && wrap.querySelector('.image-spinner');
     if (spinner) spinner.style.display = 'block';
     imgEl.style.opacity = '0';
     const pre = new Image();
     pre.onload = () => {
         imgEl.src = src;
-        // Responsive hints
-        try {
-            const url = new URL(src, location.href);
-            // crude alternative sizes from known picsum pattern
-            const alt1200 = src;
-            const alt800 = src.replace('/1200/800','/800/533');
-            const alt600 = src.replace('/1200/800','/600/400');
-            imgEl.srcset = `${alt600} 600w, ${alt800} 800w, ${alt1200} 1200w`;
-            imgEl.sizes = '(max-width: 640px) 90vw, (max-width: 1024px) 60vw, 800px';
-        } catch {}
+        // If srcset already provided (local variants) — don't overwrite.
+        if (!imgEl.getAttribute('srcset')) {
+            // Fallback responsive hints for remote/demo images (picsum pattern)
+            try {
+                const alt1200 = src;
+                const alt800 = src.replace('/1200/800','/800/533');
+                const alt600 = src.replace('/1200/800','/600/400');
+                imgEl.srcset = `${alt600} 600w, ${alt800} 800w, ${alt1200} 1200w`;
+                imgEl.sizes = '(max-width:640px) 94vw, (max-width:1024px) 56vw, 720px';
+            } catch {}
+        }
         imgEl.alt = alt || '';
         imgEl.decode?.().catch(()=>{}).finally(() => {
             requestAnimationFrame(() => {
@@ -2192,7 +2740,7 @@ function loadLargeImage(imgEl, src, alt) {
         });
     };
     pre.onerror = () => {
-        imgEl.src = src; // fallback to broken src (onerror in global may replace)
+        imgEl.src = src;
         imgEl.alt = alt || '';
         if (spinner) spinner.style.display = 'none';
         imgEl.style.opacity = '1';
@@ -2238,24 +2786,24 @@ function initModernMobileEffects() {
         });
     });
     
-    // Intersection Observer для fade-in анимаций
-    const observerOptions = {
-        threshold: 0.1,
-        rootMargin: '0px 0px -50px 0px'
-    };
-    
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('micro-fade-in');
-            }
+    // Intersection Observer для fade-in анимаций (пропускаем в средах без него)
+    if ('IntersectionObserver' in window) {
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('micro-fade-in');
+                }
+            });
+        }, observerOptions);
+        // Наблюдаем за карточками
+        document.querySelectorAll('.glass-card, .soft-card').forEach(el => {
+            observer.observe(el);
         });
-    }, observerOptions);
-    
-    // Наблюдаем за карточками
-    document.querySelectorAll('.glass-card, .soft-card').forEach(el => {
-        observer.observe(el);
-    });
+    }
     
     // Активная навигация для мобильных
     const mobileNavItems = document.querySelectorAll('.mobile-nav-item[href]');
@@ -2900,6 +3448,21 @@ function initMobileToggles() {
 window.initModernMobileEffects = initModernMobileEffects;
 window.initMobileHeader = initMobileHeader;
 window.initMobileToggles = initMobileToggles;
+// Экспортируем ключевые функции product-detail для тестов и внешнего использования
+try {
+    if (typeof window !== 'undefined') {
+        window.renderProductDetail = renderProductDetail;
+        window.bindProductDetailEvents = bindProductDetailEvents;
+    }
+    if (typeof globalThis !== 'undefined') {
+        globalThis.renderProductDetail = renderProductDetail;
+        globalThis.bindProductDetailEvents = bindProductDetailEvents;
+    }
+    if (typeof module !== 'undefined' && module.exports) {
+        module.exports.renderProductDetail = renderProductDetail;
+        module.exports.bindProductDetailEvents = bindProductDetailEvents;
+    }
+} catch {}
 
 // Десктопный хедер: прячем верхнюю полосу при прокрутке
 function initDesktopHeaderCondense() {

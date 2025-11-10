@@ -1,5 +1,6 @@
-<section class="product-detail fade-in-section" id="product-detail">
+<section class="product-detail fade-in-section" id="product-detail" data-component="product-detail">
   <div class="container">
+    <!-- Breadcrumbs -->
     <nav class="breadcrumbs" aria-label="breadcrumb">
       <a href="#" class="breadcrumbs__link" data-crumb="catalog" data-i18n="catalog">Каталог</a>
       <span class="breadcrumbs__sep">›</span>
@@ -8,27 +9,155 @@
       <span class="breadcrumbs__current" data-crumb="current">Товар</span>
     </nav>
     <button class="product-detail__back" type="button" aria-label="Назад к товарам">← <span data-i18n="nav-products">Товары</span></button>
-    <div class="product-detail__header">
-      <h2 class="product-detail__title"></h2>
-      <div class="product-detail__price"></div>
-    </div>
-    <div class="product-detail__content">
-      <div class="product-detail__media">
-        <div class="product-detail__image-wrap">
-          <img class="product-detail__image" alt="" loading="lazy">
-        </div>
-        <div class="product-detail__thumbs" aria-label="Галерея"></div>
+
+    <!-- Header / Title & Price basic -->
+    <header class="product-detail__header">
+      <h1 class="product-detail__title" data-role="title">&nbsp;</h1>
+      <div class="product-detail__price" data-role="price"></div>
+    </header>
+
+    <!-- Two-column layout skeleton (keep legacy classes for compatibility) -->
+    <div class="product-detail__content product-detail__layout" aria-label="Информация о товаре" role="group">
+      <div class="product-detail__media" aria-label="Галерея изображений">
+        <figure class="product-gallery__figure">
+          <div class="product-gallery__image-wrap product-detail__image-wrap">
+            <img class="product-gallery__image product-detail__image" alt="" loading="lazy">
+            <div class="visually-hidden" aria-live="polite" data-role="gallery-announce"></div>
+          </div>
+          <figcaption class="visually-hidden" data-i18n="main-image">Главное изображение</figcaption>
+        </figure>
+  <div class="product-gallery__thumbs product-detail__thumbs" aria-label="Превью" role="listbox" aria-orientation="horizontal"></div>
       </div>
-      <div class="product-detail__info">
-        <div class="product-detail__meta"></div>
-        <div class="product-detail__specs">
+      <aside class="product-detail__buy" aria-label="Блок покупки">
+        <div class="product-buy__price-row">
+          <span class="product-buy__price" data-role="buy-price">&nbsp;</span>
+          <span class="product-buy__stock" data-role="stock"></span>
+        </div>
+        <div class="product-buy__rating" data-role="rating" aria-label="Рейтинг" hidden>
+          <div class="rating-stars" data-role="rating-stars" aria-hidden="true"></div>
+          <span class="rating-value" data-role="rating-value"></span>
+          <span class="rating-count" data-role="rating-count"></span>
+        </div>
+        <div class="product-buy__actions">
+          <button class="btn btn--primary" type="button" data-act="add-to-cart" disabled aria-disabled="true" data-i18n="add-to-cart">Добавить в корзину</button>
+          <button class="btn btn--secondary" type="button" disabled aria-disabled="true" data-i18n="discount-request">Запрос скидки</button>
+        </div>
+        <div class="product-buy__share" data-role="share">
+          <div class="share-buttons" role="group" aria-label="Поделиться">
+            <button type="button" class="share-btn share-btn--copy" data-act="share-copy" data-i18n="share-copy" aria-label="Скопировать ссылку">🔗</button>
+            <a href="#" target="_blank" rel="noopener" class="share-btn share-btn--tg" data-role="share-tg" aria-label="Telegram">📨</a>
+            <a href="#" target="_blank" rel="noopener" class="share-btn share-btn--wa" data-role="share-wa" aria-label="WhatsApp">💬</a>
+          </div>
+        </div>
+  <ul class="product-buy__badges" aria-label="Бейджи" role="list">
+          <li class="badge badge--accent" data-role="badge-top">ТОП</li>
+          <li class="badge badge--accent" data-role="badge-popular">Популярный</li>
+          <li class="badge badge--neutral" data-role="badge-guarantee">Гарантия 5 лет</li>
+        </ul>
+        <div class="product-buy__meta" data-role="meta"></div>
+      </aside>
+      <!-- Legacy right column for compatibility with existing JS (meta/specs/actions) -->
+      <div class="product-detail__info" aria-hidden="true">
+        <div class="product-detail__meta" data-legacy="meta"></div>
+        <div class="product-detail__specs" data-legacy="specs">
           <div class="product-detail__specs-title" data-i18n="specs">Характеристики</div>
           <ul class="product-detail__specs-list"></ul>
         </div>
-        <div class="product-detail__actions">
-          <button class="product-detail__addtocart" type="button" data-i18n="add-to-cart">Добавить в корзину</button>
-        </div>
+        <!-- Legacy actions removed: single source of truth is product-buy__actions -->
       </div>
     </div>
+
+    <!-- Tabs skeleton -->
+    <div class="product-tabs" role="tablist" aria-label="Информация о товаре вкладки">
+      <button role="tab" aria-selected="true" class="product-tabs__tab is-active" data-tab="description" data-i18n="tab-description">Описание</button>
+      <button role="tab" aria-selected="false" class="product-tabs__tab" data-tab="specs" data-i18n="tab-specs">Характеристики</button>
+      <button role="tab" aria-selected="false" class="product-tabs__tab" data-tab="reviews" data-i18n="tab-reviews">Отзывы</button>
+      <button role="tab" aria-selected="false" class="product-tabs__tab" data-tab="qa" data-i18n="tab-qa">Вопрос‑ответ</button>
+    </div>
+
+    <section class="product-panels">
+      <div class="product-panel is-active" data-panel="description">
+        <h2 class="panel-title" data-i18n="tab-description">Описание</h2>
+        <div class="panel-text" data-role="full-desc">Текст описания будет загружен.</div>
+      </div>
+      <div class="product-panel" data-panel="specs">
+        <h2 class="panel-title" data-i18n="tab-specs">Характеристики</h2>
+        <div class="panel-text" data-role="specs-table">—</div>
+      </div>
+      <div class="product-panel" data-panel="reviews">
+        <h2 class="panel-title" data-i18n="tab-reviews">Отзывы</h2>
+        <div class="reviews" data-role="reviews">
+          <p class="reviews__empty" data-role="reviews-empty">Пока нет отзывов.</p>
+          <ul class="reviews__list" data-role="reviews-list" hidden></ul>
+          <form class="reviews__form" data-role="reviews-form" novalidate>
+            <div class="reviews__row">
+              <label class="reviews__label">Имя
+                <input type="text" name="author" required minlength="2" class="reviews__input" />
+              </label>
+              <label class="reviews__label">Оценка
+                <select name="rating" required class="reviews__input">
+                  <option value="5">5</option>
+                  <option value="4">4</option>
+                  <option value="3">3</option>
+                  <option value="2">2</option>
+                  <option value="1">1</option>
+                </select>
+              </label>
+            </div>
+            <label class="reviews__label">Комментарий
+              <textarea name="text" required minlength="4" rows="4" class="reviews__textarea"></textarea>
+            </label>
+            <div class="reviews__actions">
+              <button type="submit" class="btn btn--primary reviews__submit">Отправить</button>
+            </div>
+            <div class="reviews__status" data-role="reviews-status" aria-live="polite"></div>
+          </form>
+        </div>
+      </div>
+      <div class="product-panel" data-panel="qa">
+        <h2 class="panel-title" data-i18n="tab-qa">Вопрос‑ответ</h2>
+        <div class="qa" data-role="qa">
+          <p class="qa__empty" data-role="qa-empty">Пока нет вопросов.</p>
+          <ul class="qa__list" data-role="qa-list" hidden></ul>
+          <form class="qa__form" data-role="qa-form" novalidate>
+            <div class="qa__row">
+              <label class="qa__label">Имя
+                <input type="text" name="author" required minlength="2" class="qa__input" />
+              </label>
+            </div>
+            <label class="qa__label">Вопрос
+              <textarea name="text" required minlength="4" rows="4" class="qa__textarea"></textarea>
+            </label>
+            <div class="qa__actions">
+              <button type="submit" class="btn btn--primary qa__submit">Отправить вопрос</button>
+            </div>
+            <div class="qa__status" data-role="qa-status" aria-live="polite"></div>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- Advantages / Trust block -->
+    <section class="product-trust" aria-label="Преимущества">
+      <h2 class="trust-title" data-i18n="why-choose-us">Почему выбирают нас</h2>
+      <ul class="trust-list">
+        <li class="trust-item">
+          <svg class="icon" aria-hidden="true"><use href="icons/icons-sprite.svg#icon-delivery" /></svg>
+          <div class="trust-item__text" data-i18n="adv-delivery">Быстрая доставка</div>
+        </li>
+        <li class="trust-item">
+          <svg class="icon" aria-hidden="true"><use href="icons/icons-sprite.svg#icon-guarantee" /></svg>
+          <div class="trust-item__text" data-i18n="adv-guarantee">Гарантия 5 лет</div>
+        </li>
+        <li class="trust-item">
+          <svg class="icon" aria-hidden="true"><use href="icons/icons-sprite.svg#icon-service" /></svg>
+          <div class="trust-item__text" data-i18n="adv-service">Профессиональный сервис</div>
+        </li>
+        <li class="trust-item">
+          <svg class="icon" aria-hidden="true"><use href="icons/icons-sprite.svg#icon-support" /></svg>
+          <div class="trust-item__text" data-i18n="adv-support">Поддержка и консультации</div>
+        </li>
+      </ul>
+    </section>
   </div>
 </section>

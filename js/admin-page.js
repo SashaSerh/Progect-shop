@@ -448,7 +448,8 @@ export async function initAdminPage(translations, lang = 'ru') {
   });
 
   // Gallery preview (multiple images) + state
-  form?.querySelector('input[name="images"]').addEventListener('change', (e) => {
+  const imagesInput = form?.querySelector('input[name="images"]');
+  if (imagesInput) imagesInput.addEventListener('change', (e) => {
     const picked = Array.from(e.target.files || []);
     // Append to current list instead of replacing; keep saved paths intact
     galleryFiles = [...galleryFiles, ...picked];

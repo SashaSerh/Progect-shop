@@ -139,6 +139,9 @@ export const translations = {
     "reviews-many": "отзывов",
         "details": "Подробнее"
         ,
+    "read-more": "Читать далее",
+    "read-less": "Свернуть",
+    "image-changed": "Изображение обновлено",
         "welcome-greeting": "Добро пожаловать на ClimaTech",
         "welcome-choose-language": "Выберите язык интерфейса",
         "welcome-current-language": "Текущий язык",
@@ -410,6 +413,9 @@ export const translations = {
     "reviews-many": "відгуків",
         "details": "Докладніше"
         ,
+    "read-more": "Читати далі",
+    "read-less": "Згорнути",
+    "image-changed": "Зображення оновлено",
         "welcome-greeting": "Ласкаво просимо до ClimaTech",
         "welcome-choose-language": "Оберіть мову інтерфейсу",
         "welcome-current-language": "Поточна мова",

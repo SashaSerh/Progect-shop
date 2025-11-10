@@ -2,6 +2,23 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 
+// NOTE: Vitest static mocking prefers a literal module id. The previous version
+// used a dynamically constructed absolute path and failed with ReferenceError
+// under ESM transform because the variable wasn't hoisted for the mock call.
+// We replace it with a stable relative path from this test file to the module.
+
+let capturedProduct = null;
+vi.mock('../js/admin-products.js', () => ({
+  appendProductToProductsJsonFS: vi.fn(async (product) => { capturedProduct = product; return { ok: true, count: 1 }; }),
+  saveMainImageToPictureConditionersFS: vi.fn(async () => 'picture/conditioners/test.jpg'),
+  saveImagesSetToPictureConditionersFS: vi.fn(async () => []),
+  getLocalProducts: vi.fn(() => []),
+  saveLocalProducts: vi.fn(() => {}),
+  upsertLocalProduct: vi.fn(() => {}),
+  exportLocalProducts: vi.fn(() => {}),
+  importLocalProducts: vi.fn(() => 0),
+}));
+
 // Helper to sleep for async DOM handlers
 const wait = (ms = 0) => new Promise(res => setTimeout(res, ms));
 
@@ -30,21 +47,7 @@ describe('admin export: image path normalization', () => {
   });
 
   it('replaces base64 image with picture/ path on export', async () => {
-    // Mock admin-products module used by admin-page.js
-    const adminProductsPath = path.resolve(process.cwd(), 'js/admin-products.js');
-    let capturedProduct = null;
-    vi.mock(adminProductsPath, () => ({
-      appendProductToProductsJsonFS: vi.fn(async (product) => { capturedProduct = product; return { ok: true, count: 1 }; }),
-      saveMainImageToPictureConditionersFS: vi.fn(async () => 'picture/conditioners/test.jpg'),
-      saveImagesSetToPictureConditionersFS: vi.fn(async () => []),
-      getLocalProducts: vi.fn(() => []),
-      saveLocalProducts: vi.fn(() => {}),
-      upsertLocalProduct: vi.fn(() => {}),
-      exportLocalProducts: vi.fn(() => {}),
-      importLocalProducts: vi.fn(() => 0),
-    }));
-
-    // Import admin-page after mocking dependencies
+    // Import admin-page after static mock registration
     const adminPagePath = path.resolve(process.cwd(), 'js/admin-page.js');
     const { initAdminPage } = await import(pathToFileURL(adminPagePath).href);
 
@@ -58,7 +61,7 @@ describe('admin export: image path normalization', () => {
     document.getElementById('adminExportToProductsBtn').click();
     await wait(10);
 
-    expect(capturedProduct).toBeTruthy();
+  expect(capturedProduct).toBeTruthy();
     expect(typeof capturedProduct.image).toBe('string');
     expect(capturedProduct.image.startsWith('picture/')).toBe(true);
     expect(capturedProduct.image.startsWith('data:')).toBe(false);

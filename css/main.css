@@ -125,6 +125,8 @@
 .product-gallery__thumb:focus-visible { outline:2px solid var(--accent-color, #007aff); outline-offset:2px; }
 
 .product-detail__buy { display:grid; gap:18px; align-content:start; }
+.product-buy__summary { font-size:14px; line-height:1.5; color: var(--muted, #555); background: var(--surface, #fff); border:1px solid var(--border, #e5e5e5); border-radius:12px; padding:10px 12px; }
+.product-buy__summary[hidden] { display:none !important; }
 .product-buy__price-row { display:flex; flex-wrap:wrap; align-items:center; gap:12px; }
 .product-buy__price { font-size: clamp(20px, 4vw, 30px); font-weight:700; color: var(--accent-color, #1e63d0); letter-spacing: .5px; }
 .product-buy__old-price { font-size:14px; color: var(--muted,#888); text-decoration: line-through; }

@@ -1749,10 +1749,17 @@ function renderProductDetail(productId, productsList) {
     if (priceElLegacy) priceElLegacy.textContent = priceText;
     const priceElBuy = section.querySelector('.product-buy__price');
     if (priceElBuy) priceElBuy.textContent = priceText;
-    // Summary (optional short text)
+    // Summary (optional short text). If not provided, derive from the first sentence of description
     try {
         const summaryEl = section.querySelector('[data-role="summary"]');
-        const summary = (product.summary && (product.summary[lang] || product.summary.ru)) || '';
+        let summary = (product.summary && (product.summary[lang] || product.summary.ru)) || '';
+        if ((!summary || !summary.trim()) && product.description) {
+            const raw = (product.description[lang] || product.description.ru || '').replace(/\s+/g, ' ').trim();
+            // take first sentence up to 180 chars as fallback
+            const m = raw.match(/([^.!?]{20,}?[.!?])/);
+            const firstSentence = m ? m[1] : raw.slice(0, 180);
+            summary = firstSentence.length > 200 ? (firstSentence.slice(0, 197) + '…') : firstSentence;
+        }
         if (summaryEl) {
             if (summary && summary.trim().length > 0) {
                 summaryEl.textContent = summary.trim();

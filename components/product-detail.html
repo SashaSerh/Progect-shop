@@ -1,3 +1,4 @@
+
 <section class="product-detail fade-in-section" id="product-detail" data-component="product-detail">
   <div class="container">
     <!-- Breadcrumbs -->
@@ -42,16 +43,18 @@
           <span class="rating-count" data-role="rating-count"></span>
         </div>
         <div class="product-buy__qty" data-role="qty">
-          <label class="quantity-stepper" aria-label="Количество">
-            <button class="quantity-stepper__btn" type="button" data-act="qty-dec" aria-label="Уменьшить">−</button>
-            <input class="quantity-stepper__input" type="number" min="1" max="99" value="1" inputmode="numeric" />
-            <button class="quantity-stepper__btn" type="button" data-act="qty-inc" aria-label="Увеличить">+</button>
-          </label>
+          <div class="quantity-stepper quantity-stepper--vertical" role="group" aria-label="Количество">
+            <button type="button" class="quantity-stepper__btn quantity-stepper__btn--increment" data-act="qty-inc" aria-label="Увеличить">▲</button>
+            <input type="number" class="quantity-stepper__input" min="1" max="99" value="1" inputmode="numeric" aria-label="Количество" />
+            <button type="button" class="quantity-stepper__btn quantity-stepper__btn--decrement" data-act="qty-dec" aria-label="Уменьшить">▼</button>
+          </div>
         </div>
         <div class="product-buy__actions">
           <button class="btn btn--primary" type="button" data-act="add-to-cart" disabled aria-disabled="true" data-i18n="add-to-cart">Добавить в корзину</button>
           <button class="btn btn--secondary" type="button" disabled aria-disabled="true" data-i18n="discount-request">Запрос скидки</button>
         </div>
+        <!-- Favorite / Compare moved from product card into detail page -->
+        <div class="product-buy__collections" data-role="collections" aria-label="Избранное и сравнение" role="group"></div>
         <div class="product-buy__credit" data-role="credit" hidden>
           <button class="btn btn--tertiary" type="button" data-act="buy-credit" data-i18n="buy-in-credit">Купить в кредит</button>
           <div class="credit-providers" data-role="credit-providers" aria-label="Партнёры рассрочки" role="list"></div>

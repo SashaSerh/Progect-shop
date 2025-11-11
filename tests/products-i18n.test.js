@@ -14,19 +14,18 @@ describe('Products i18n re-render', () => {
     renderProducts('ru', translations);
   });
 
-  it('updates product titles after switchLanguage to uk', () => {
-    const firstTitleRu = document.querySelector('.product-card__title').textContent;
-    expect(firstTitleRu).toBe(products[0].name.ru);
-    switchLanguage('uk'); // triggers languagechange event, products listener will re-filter
-    // listener in products.js should re-render
-    const firstTitleUk = document.querySelector('.product-card__title').textContent;
-    expect(firstTitleUk).toBe(products[0].name.uk);
+  it('updates product descriptions after switchLanguage to uk', () => {
+    const firstDescRu = document.querySelector('.product-card__description').textContent;
+    expect(firstDescRu).toBe(products[0].description.ru);
+    switchLanguage('uk');
+    const firstDescUk = document.querySelector('.product-card__description').textContent;
+    expect(firstDescUk).toBe(products[0].description.uk);
   });
 
   it('falls back gracefully when switching to unsupported lang', () => {
     switchLanguage('de');
-    const titleAfter = document.querySelector('.product-card__title').textContent;
-    // remains Russian fallback
-    expect(titleAfter).toBe(products[0].name.ru);
+    const descAfter = document.querySelector('.product-card__description').textContent;
+    // remains Russian fallback for description
+    expect(descAfter).toBe(products[0].description.ru);
   });
 });

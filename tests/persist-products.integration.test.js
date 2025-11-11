@@ -29,8 +29,8 @@ describe('integration: persist products across reload', () => {
 
     // рендерим и убеждаемся, что карточка есть
     renderProducts('ru', window.translations || {}, merged);
-    const grid = document.querySelector('.products__grid');
-    const titles = Array.from(grid.querySelectorAll('.product-card__title')).map(el => el.textContent.trim());
-    expect(titles.join(' ')).toContain('Товар после перезагрузки');
+  const grid = document.querySelector('.products__grid');
+  const descriptions = Array.from(grid.querySelectorAll('.product-card__description')).map(el => el.textContent.trim());
+  expect(descriptions.join(' ')).toContain('описание');
   });
 });

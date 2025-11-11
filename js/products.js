@@ -609,12 +609,21 @@ export function renderProductCard(product, lang, translations) {
     try {
         const locals = JSON.parse(localStorage.getItem('products_local_v1') || '[]');
         isLocal = String(product.id).startsWith('p_') || (Array.isArray(locals) && locals.some(lp => String(lp.id) === String(product.id)));
-        if (isLocal) {
-            // Always show admin actions for local items to allow quick edit/delete in tests and UX
-            adminHtml = `<div class="product-card__admin-actions"><button class="product-card__button" data-edit data-id="${product.id}">Редактировать</button><button class="product-card__button" data-delete data-id="${product.id}">Удалить</button></div>`;
-            // Local badge (text is not asserted in tests, only presence of class)
-            localBadgeHtml = `<span class="badge badge--local" title="Сохранено только в вашем браузере">Локально</span>`;
-        }
+                if (isLocal) {
+                        // Admin actions as kebab popover to avoid layout shifts
+                        adminHtml = `
+                        <div class="product-card__admin-actions" aria-hidden="false">
+                            <button type="button" class="product-card__admin-kebab" data-admin-kebab aria-haspopup="menu" aria-expanded="false" title="Администрирование">
+                                ⋮
+                            </button>
+                            <div class="product-card__admin-menu" role="menu" hidden>
+                                <button type="button" role="menuitem" class="product-card__admin-item" data-edit data-id="${product.id}">Редактировать</button>
+                                <button type="button" role="menuitem" class="product-card__admin-item" data-delete data-id="${product.id}">Удалить</button>
+                            </div>
+                        </div>`;
+                        // Local badge (text is not asserted in tests, only presence of class)
+                        localBadgeHtml = `<span class="badge badge--local" title="Сохранено только в вашем браузере">Локально</span>`;
+                }
     } catch (err) { adminHtml = ''; isLocal = false; localBadgeHtml = ''; }
 
     // Badges
@@ -730,13 +739,7 @@ export function renderProductCard(product, lang, translations) {
         const brandAria = escapeHtml(`${brandChipLabel}: ${brandNameRaw}`);
         chips.push(`<span class="product-card__chip product-card__chip--brand" role="listitem" aria-label="${brandAria}" itemprop="brand">${brandNameSafe}</span>`);
     }
-    if (categoryNameRaw) {
-        const normalizedCategory = typeof categoryNameRaw === 'string' ? categoryNameRaw.trim() : String(categoryNameRaw);
-        const categoryText = normalizedCategory.charAt(0).toUpperCase() + normalizedCategory.slice(1);
-        const categorySafe = escapeHtml(categoryText);
-        const categoryAria = escapeHtml(`${categoryChipLabel}: ${categoryText}`);
-        chips.push(`<span class="product-card__chip product-card__chip--category" role="listitem" aria-label="${categoryAria}">${categorySafe}</span>`);
-    }
+    // Категорию больше не показываем как chip на карточке (по требованию). Оставляем бренд.
     const metaHtml = chips.length ? `<div class="product-card__meta" role="list">${chips.join('')}</div>` : '';
 
     // Rating
@@ -817,8 +820,8 @@ export function renderProductCard(product, lang, translations) {
          ${flagBadgesHtml}
          ${badgesHtml}
   ${pictureHtml || `<img src="${baseSrc}"
-      alt="${product.name[lang]}" class="product-card__image lqip" loading="${loadingAttr}" decoding="async" fetchpriority="${fetchPrio}" ${srcsetLine} sizes="(max-width: 480px) 45vw, (max-width: 768px) 30vw, 240px" onerror="this.src='https://placehold.co/150x150/blue/white?text=Image+Not+Found'">`}
-    <h3 class="product-card__title"><a href="#product-${product.id}" class="product-card__title-link" aria-label="${viewDetailsLabel} ${product.name[lang]}" itemprop="name">${product.name[lang]}</a></h3>
+      alt="${product.name[lang]}" title="${viewDetailsLabel}" class="product-card__image lqip" loading="${loadingAttr}" decoding="async" fetchpriority="${fetchPrio}" ${srcsetLine} sizes="(max-width: 480px) 45vw, (max-width: 768px) 30vw, 240px" onerror="this.src='https://placehold.co/150x150/blue/white?text=Image+Not+Found'">`}
+        <meta itemprop="name" content="${escapeHtml(product.name[lang])}">
     ${metaHtml}
                 ${ratingHtml}
     <p class="product-card__description">${product.description[lang]}</p>
@@ -829,24 +832,8 @@ export function renderProductCard(product, lang, translations) {
             <span class="sr-only">${orderLabel}</span>
             <img src="icons/shopping-bag-icon.svg" alt="" aria-hidden="true" class="product-card__button-icon">
         </button>
-        <div class="quantity-stepper quantity-stepper--vertical" role="group" aria-label="${quantityLabel}">
-            <button type="button" class="quantity-stepper__btn quantity-stepper__btn--increment" data-action="increment" data-id="${product.id}" aria-label="${quantityIncreaseLabel}" aria-controls="qty-${product.id}">▲</button>
-            <input type="number" id="qty-${product.id}" class="quantity-stepper__input" value="1" min="1" max="99" data-id="${product.id}" inputmode="numeric" pattern="\\d*" aria-label="${quantityLabel}">
-            <button type="button" class="quantity-stepper__btn quantity-stepper__btn--decrement" data-action="decrement" data-id="${product.id}" aria-label="${quantityDecreaseLabel}" aria-controls="qty-${product.id}">▼</button>
-        </div>
     </div>
-    <div class="product-card__quick-actions" role="group" aria-label="${quickActionsLabel}">
-        <button type="button" class="product-card__quick-btn${favoriteActive ? ' is-active' : ''}" data-action="favorite" data-id="${product.id}" aria-label="${favoriteLabel}" aria-pressed="${favoriteActive}" title="${favoriteLabel}">
-            <svg class="product-card__quick-icon" aria-hidden="true" focusable="false">
-                <use href="icons/icons-sprite.svg#icon-heart"></use>
-            </svg>
-        </button>
-        <button type="button" class="product-card__quick-btn${compareActive ? ' is-active' : ''}" data-action="compare" data-id="${product.id}" aria-label="${compareLabel}" aria-pressed="${compareActive}" title="${compareLabel}">
-            <svg class="product-card__quick-icon" aria-hidden="true" focusable="false">
-                <use href="icons/icons-sprite.svg#icon-compare"></use>
-            </svg>
-        </button>
-    </div>
+    <!-- Быстрые действия перемещены на страницу детального описания -->
     ${adminHtml}
 `;
 
@@ -875,6 +862,136 @@ export function renderProductCard(product, lang, translations) {
             markLoaded();
         }
     }
+
+    // Admin kebab popover wiring (scoped to this card) with keyboard nav and confirm modal
+    try {
+        const kebab = productCard.querySelector('[data-admin-kebab]');
+        const menu = productCard.querySelector('.product-card__admin-menu');
+        if (kebab && menu) {
+            const closeMenu = () => { menu.hidden = true; kebab.setAttribute('aria-expanded','false'); };
+            const openMenu = () => { menu.hidden = false; kebab.setAttribute('aria-expanded','true'); };
+            const items = Array.from(menu.querySelectorAll('.product-card__admin-item'));
+            const focusItem = (idx) => { items.forEach((btn,i) => btn.tabIndex = i === idx ? 0 : -1); if (items[idx]) items[idx].focus(); };
+            kebab.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (menu.hidden) { openMenu(); focusItem(0); } else closeMenu();
+            });
+            document.addEventListener('click', function onDocClick(ev){
+                if (!productCard.isConnected) { document.removeEventListener('click', onDocClick); return; }
+                if (!menu.hidden && !productCard.contains(ev.target)) closeMenu();
+            });
+            productCard.addEventListener('keydown', (ev) => {
+                if (ev.key === 'Escape' && !menu.hidden) { ev.stopPropagation(); closeMenu(); kebab.focus?.(); }
+            });
+            menu.addEventListener('keydown', (ev) => {
+                if (menu.hidden) return;
+                const currentIndex = items.indexOf(document.activeElement);
+                if (['ArrowDown','ArrowUp','Home','End'].includes(ev.key)) ev.preventDefault();
+                if (ev.key === 'ArrowDown') {
+                    const next = currentIndex < 0 ? 0 : (currentIndex + 1) % items.length; focusItem(next);
+                } else if (ev.key === 'ArrowUp') {
+                    const prev = currentIndex < 0 ? items.length - 1 : (currentIndex - 1 + items.length) % items.length; focusItem(prev);
+                } else if (ev.key === 'Home') { focusItem(0); }
+                else if (ev.key === 'End') { focusItem(items.length - 1); }
+            });
+            kebab.addEventListener('keydown', (ev) => {
+                if ((ev.key === 'Enter' || ev.key === ' ') && menu.hidden) { ev.preventDefault(); openMenu(); focusItem(0); }
+            });
+            items.forEach(btn => btn.addEventListener('keydown', (ev) => {
+                if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); btn.click(); }
+            }));
+
+            // Confirm deletion modal helpers
+            const ensureConfirmModal = () => {
+                let modal = document.getElementById('adminDeleteConfirmModal');
+                if (modal) return modal;
+                modal = document.createElement('div');
+                modal.id = 'adminDeleteConfirmModal';
+                modal.className = 'confirm-modal';
+                modal.setAttribute('role','dialog');
+                modal.setAttribute('aria-modal','true');
+                modal.setAttribute('aria-labelledby','confirmDeleteTitle');
+                modal.innerHTML = `
+                  <div class="confirm-modal__backdrop" data-confirm-backdrop></div>
+                  <div class="confirm-modal__panel" role="document">
+                    <h2 id="confirmDeleteTitle" class="confirm-modal__title">Удалить товар?</h2>
+                    <p class="confirm-modal__text">Действие необратимо. Вы уверены?</p>
+                    <div class="confirm-modal__actions">
+                      <button type="button" class="btn btn--secondary" data-confirm-cancel>Отмена</button>
+                      <button type="button" class="btn btn--danger" data-confirm-ok>Удалить</button>
+                    </div>
+                  </div>`;
+                document.body.appendChild(modal);
+                return modal;
+            };
+            const openConfirm = (onOk) => {
+                const modal = ensureConfirmModal();
+                modal.classList.add('is-open');
+                const okBtn = modal.querySelector('[data-confirm-ok]');
+                const cancelBtn = modal.querySelector('[data-confirm-cancel]');
+                const backdrop = modal.querySelector('[data-confirm-backdrop]');
+                const panel = modal.querySelector('.confirm-modal__panel');
+                const focusables = [okBtn, cancelBtn];
+                let lastFocused = document.activeElement;
+                let isClosing = false;
+                const trap = (e) => {
+                    if (!modal.classList.contains('is-open')) return;
+                    if (e.key === 'Tab') { e.preventDefault(); const idx = focusables.indexOf(document.activeElement); const dir = e.shiftKey ? -1 : 1; const next = (idx + dir + focusables.length) % focusables.length; focusables[next].focus(); }
+                    else if (e.key === 'Escape') closeConfirm();
+                };
+                const finalizeClose = () => {
+                    modal.classList.remove('is-closing');
+                };
+                const closeConfirm = () => {
+                    if (isClosing) return;
+                    isClosing = true;
+                    // start closing animation: keep displayed via is-closing
+                    modal.classList.remove('is-open');
+                    modal.classList.add('is-closing');
+                    document.removeEventListener('keydown', trap);
+                    // restore focus immediately as per UX requirement
+                    if (lastFocused && lastFocused.focus) { try { lastFocused.focus(); } catch {} }
+                    const onEnd = (ev) => {
+                        if (ev.target !== panel) return;
+                        panel.removeEventListener('transitionend', onEnd);
+                        finalizeClose();
+                    };
+                    // Fallback in case transitionend doesn't fire
+                    setTimeout(finalizeClose, 350);
+                    panel.addEventListener('transitionend', onEnd);
+                };
+                document.addEventListener('keydown', trap);
+                cancelBtn.addEventListener('click', () => closeConfirm(), { once:true });
+                backdrop.addEventListener('click', () => closeConfirm(), { once:true });
+                okBtn.addEventListener('click', () => { try { onOk?.(); } finally { closeConfirm(); } }, { once:true });
+                setTimeout(() => okBtn.focus(), 30);
+            };
+            const deleteBtn = menu.querySelector('[data-delete][data-id="' + product.id + '"]');
+            if (deleteBtn) {
+                deleteBtn.addEventListener('click', (ev) => {
+                    ev.preventDefault(); ev.stopPropagation();
+                    const pid = product.id;
+                    openConfirm(() => {
+                        try {
+                            const raw = localStorage.getItem('products_local_v1');
+                            const list = raw ? JSON.parse(raw) : [];
+                            const filtered = Array.isArray(list) ? list.filter(p => String(p.id) !== String(pid)) : [];
+                            localStorage.setItem('products_local_v1', JSON.stringify(filtered));
+                        } catch {}
+                        try {
+                            const merged = (typeof getMergedProducts === 'function') ? getMergedProducts() : (window.products || []);
+                            if (typeof setProducts === 'function') setProducts(merged);
+                            if (typeof renderProducts === 'function') {
+                                const langCode = (localStorage.getItem('language') || 'ru');
+                                renderProducts(langCode, (window.translations || translations), merged);
+                            }
+                            if (typeof window.showToast === 'function') window.showToast('Товар удалён');
+                        } catch {}
+                    });
+                }, { capture:true });
+            }
+        }
+    } catch {}
 
     return productCard;
 }

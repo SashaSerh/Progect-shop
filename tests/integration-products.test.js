@@ -84,21 +84,15 @@ describe('Products integration: карточки и флаги', () => {
 		expect(card.style.getPropertyValue('--flag-hit-color')).toBe('#fff');
 	});
 
-	it('отмечает быстрые действия как активные на основе localStorage', () => {
+	it('на карточках товаров больше нет кнопок избранного/сравнения — они доступны на детальной странице', () => {
 		localStorage.setItem('products_favorites_v1', JSON.stringify(['1']));
 		localStorage.setItem('products_compare_v1', JSON.stringify(['1']));
 		renderProducts('ru', translations);
 
 		const card = document.querySelector('.product-card');
 		expect(card).toBeTruthy();
-
-		const favoriteBtn = card.querySelector('.product-card__quick-btn[data-action="favorite"]');
-		const compareBtn = card.querySelector('.product-card__quick-btn[data-action="compare"]');
-		expect(favoriteBtn).toBeTruthy();
-		expect(compareBtn).toBeTruthy();
-		expect(favoriteBtn.classList.contains('is-active')).toBe(true);
-		expect(favoriteBtn.getAttribute('aria-pressed')).toBe('true');
-		expect(compareBtn.classList.contains('is-active')).toBe(true);
-		expect(compareBtn.getAttribute('aria-pressed')).toBe('true');
+		// Быстрые действия удалены с карточек
+		expect(card.querySelector('.product-card__quick-btn[data-action="favorite"]')).toBeFalsy();
+		expect(card.querySelector('.product-card__quick-btn[data-action="compare"]')).toBeFalsy();
 	});
 });

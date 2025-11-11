@@ -1349,6 +1349,46 @@ async function initApp() {
         });
     }
 
+    // Глобальный (ленивый) обработчик кнопки редактирования локального товара на карточке.
+    // Проблема: logic сохранения черновика раньше находилась только в admin-products.js,
+    // который подгружается ТОЛЬКО после перехода в #admin/products. Поэтому на главной
+    // странице клик по "Редактировать" не делал ничего. Здесь дублируем минимально
+    // необходимую логику: кладём черновик в localStorage и переводим hash на админ-маршрут.
+    // Полное редактирование инициализируется уже внутри admin-page.js.
+    document.addEventListener('click', (e) => {
+        const btn = e.target instanceof HTMLElement ? e.target.closest('.product-card__button[data-edit]') : null;
+        if (!btn) return;
+        // Если уже на админ-странице — пусть штатная логика модуля сработает (не мешаем)
+        if (location.hash === '#admin/products') return;
+        try {
+            const id = btn.getAttribute('data-id');
+            if (!id) return;
+            const localsRaw = localStorage.getItem('products_local_v1');
+            if (!localsRaw) return;
+            const locals = JSON.parse(localsRaw || '[]');
+            const prod = Array.isArray(locals) ? locals.find(p => String(p.id) === String(id)) : null;
+            if (!prod) return;
+            const draft = {
+                id: prod.id || '',
+                title_ru: prod.name?.ru || '',
+                title_uk: prod.name?.uk || '',
+                description_ru: prod.description?.ru || '',
+                description_uk: prod.description?.uk || '',
+                price: String(prod.price || 0),
+                sku: prod.sku || '',
+                category: prod.category || 'service',
+                inStock: prod.inStock ? 'true' : 'false',
+                specs_ru: (Array.isArray(prod.specs) ? prod.specs.map(s => `${s.key}: ${(s.value && (s.value.ru || s.value.uk || ''))}`).join('\n') : ''),
+                specs_uk: (Array.isArray(prod.specs) ? prod.specs.map(s => `${s.key}: ${(s.value && (s.value.uk || s.value.ru || ''))}`).join('\n') : ''),
+                _flags: JSON.stringify(Array.isArray(prod.flags) ? prod.flags : [])
+            };
+            localStorage.setItem('admin:product:draft:v1', JSON.stringify(draft));
+            location.hash = '#admin/products';
+        } catch (_) {
+            // Fail silent — не критично для UX
+        }
+    });
+
     const checkoutButton = document.querySelector('.cart-button--checkout');
     if (checkoutButton) checkoutButton.addEventListener('click', openCartModal);
 
@@ -1632,11 +1672,11 @@ document.addEventListener('click', (e) => {
 
 // Global handlers for product card interactions (quantity, cart, navigation)
 document.addEventListener('click', (e) => {
-    const target = e.target;
-    if (!(target instanceof Element)) return;
-    
-    // Quantity stepper buttons
-    const quantityBtn = target.closest('.quantity-stepper__btn');
+    const rawTarget = e.target;
+    if (!(rawTarget instanceof Element)) return;
+
+    // Quantity stepper buttons (support clicks on child icon/svg)
+    const quantityBtn = rawTarget.closest('.quantity-stepper__btn');
     if (quantityBtn) {
         const card = quantityBtn.closest('.product-card');
         const input = card?.querySelector('.quantity-stepper__input');
@@ -1646,12 +1686,13 @@ document.addEventListener('click', (e) => {
         input.value = String(next);
         return;
     }
-    
-    // Main product card button (add to cart)
-    if (target.classList.contains('product-card__button') && !target.hasAttribute('data-edit') && !target.hasAttribute('data-delete')) {
-        const productId = target.dataset.id;
+
+    // Main product card add-to-cart button (delegated; allow click on inner img/span)
+    const cartBtn = rawTarget.closest('.product-card__button');
+    if (cartBtn && !cartBtn.hasAttribute('data-edit') && !cartBtn.hasAttribute('data-delete')) {
+        const productId = cartBtn.dataset.id;
         if (!productId) return;
-        const card = target.closest('.product-card');
+        const card = cartBtn.closest('.product-card');
         const input = card?.querySelector('.quantity-stepper__input');
         const qty = clampQuantity(input ? Number(input.value) : 1);
         if (input) input.value = String(qty);
@@ -1660,10 +1701,10 @@ document.addEventListener('click', (e) => {
         showActionToast({ type: 'cart', message: getCartAddedMessage(savedLanguage) });
         return;
     }
-    
-    // Product card image or title click (navigate to product detail)
-    if (target.classList.contains('product-card__image') || target.classList.contains('product-card__title') || target.classList.contains('product-card__title-link')) {
-        const card = target.closest('.product-card');
+
+    // Product card image click (navigate to product detail). Title no longer clickable.
+    if (rawTarget.classList.contains('product-card__image')) {
+        const card = rawTarget.closest('.product-card');
         const id = card?.dataset.id;
         if (id) {
             location.hash = `#product-${id}`;
@@ -1767,6 +1808,60 @@ function renderProductDetail(productId, productsList) {
             } else {
                 summaryEl.hidden = true;
                 summaryEl.textContent = '';
+            }
+        }
+    } catch {}
+    // Favorite / Compare buttons (moved from product card)
+    try {
+        const collHost = section.querySelector('[data-role="collections"]');
+        if (collHost) {
+            const favActive = typeof isFavorite === 'function' ? isFavorite(product.id) : false;
+            const cmpActive = typeof isCompared === 'function' ? isCompared(product.id) : false;
+            const favAdd = translations?.[lang]?.['favorite-add'] || 'В избранное';
+            const favRemove = translations?.[lang]?.['favorite-remove'] || 'Убрать из избранного';
+            const cmpAdd = translations?.[lang]?.['compare-add'] || 'В сравнение';
+            const cmpRemove = translations?.[lang]?.['compare-remove'] || 'Убрать из сравнения';
+            collHost.innerHTML = `
+              <button type="button" class="product-card__quick-btn product-card__quick-btn--detail${favActive ? ' is-active' : ''}" data-action="favorite" data-id="${product.id}" aria-pressed="${favActive}" aria-label="${favActive ? favRemove : favAdd}" title="${favActive ? favRemove : favAdd}">
+                <svg class="product-card__quick-icon" aria-hidden="true" focusable="false"><use href="icons/icons-sprite.svg#icon-heart"></use></svg>
+              </button>
+              <button type="button" class="product-card__quick-btn product-card__quick-btn--detail${cmpActive ? ' is-active' : ''}" data-action="compare" data-id="${product.id}" aria-pressed="${cmpActive}" aria-label="${cmpActive ? cmpRemove : cmpAdd}" title="${cmpActive ? cmpRemove : cmpAdd}">
+                <svg class="product-card__quick-icon" aria-hidden="true" focusable="false"><use href="icons/icons-sprite.svg#icon-compare"></use></svg>
+              </button>`;
+            // Handlers (scoped so they don't rely on global delegation)
+            const favBtn = collHost.querySelector('[data-action="favorite"]');
+            const cmpBtn = collHost.querySelector('[data-action="compare"]');
+            if (favBtn) {
+                favBtn.addEventListener('click', () => {
+                    try { if (typeof toggleFavorite === 'function') toggleFavorite(String(product.id)); } catch {}
+                    const active = typeof isFavorite === 'function' ? isFavorite(product.id) : false;
+                    favBtn.classList.toggle('is-active', active);
+                    favBtn.setAttribute('aria-pressed', String(active));
+                    favBtn.setAttribute('aria-label', active ? favRemove : favAdd);
+                    favBtn.setAttribute('title', active ? favRemove : favAdd);
+                    try { updateBadgeGroup && updateBadgeGroup('favorite'); updateQuickActionButtons && updateQuickActionButtons('favorite'); } catch {}
+                    try {
+                        const name = product.name?.[lang] || product.name?.ru || '';
+                        const msg = formatCollectionToastMessage ? formatCollectionToastMessage(active ? 'favorite-add' : 'favorite-remove', name, lang) : (active ? favAdd : favRemove) + ': ' + name;
+                        showActionToast({ message: msg, type: 'favorite' });
+                    } catch {}
+                });
+            }
+            if (cmpBtn) {
+                cmpBtn.addEventListener('click', () => {
+                    try { if (typeof toggleCompare === 'function') toggleCompare(String(product.id)); } catch {}
+                    const active = typeof isCompared === 'function' ? isCompared(product.id) : false;
+                    cmpBtn.classList.toggle('is-active', active);
+                    cmpBtn.setAttribute('aria-pressed', String(active));
+                    cmpBtn.setAttribute('aria-label', active ? cmpRemove : cmpAdd);
+                    cmpBtn.setAttribute('title', active ? cmpRemove : cmpAdd);
+                    try { updateBadgeGroup && updateBadgeGroup('compare'); updateQuickActionButtons && updateQuickActionButtons('compare'); } catch {}
+                    try {
+                        const name = product.name?.[lang] || product.name?.ru || '';
+                        const msg = formatCollectionToastMessage ? formatCollectionToastMessage(active ? 'compare-add' : 'compare-remove', name, lang) : (active ? cmpAdd : cmpRemove) + ': ' + name;
+                        showActionToast({ message: msg, type: 'compare' });
+                    } catch {}
+                });
             }
         }
     } catch {}
@@ -2718,6 +2813,22 @@ function setupHashRouting(initialLang) {
                         const lang = getLangSafe();
                         await mod.initAdminPage(translations, lang);
                     }
+                    // Автоскролл и фокус на форму, если редактируем существующий (есть черновик)
+                    try {
+                        const hasDraft = !!localStorage.getItem('admin:product:draft:v1');
+                        if (hasDraft) {
+                            setTimeout(() => {
+                                const form = document.querySelector('#adminProductForm') || document.querySelector('form.admin-product-form');
+                                if (form) {
+                                    form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                    const firstField = form.querySelector('input[name="title_ru"], input, textarea, select');
+                                    if (firstField && typeof firstField.focus === 'function') {
+                                        try { firstField.focus(); } catch {}
+                                    }
+                                }
+                            }, 60);
+                        }
+                    } catch {}
                 } catch (e) { console.error('Admin page init error', e); }
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             }).catch(err => console.error('Error loading admin page component:', err));

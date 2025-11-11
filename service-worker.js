@@ -1,4 +1,4 @@
-const CACHE_NAME = 'climat-control-v68';
+const CACHE_NAME = 'climat-control-v76'; // ensure removal of visible card title propagates
 const urlsToCache = [
     '/',
     '/index.html',

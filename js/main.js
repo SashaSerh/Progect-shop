@@ -1702,9 +1702,13 @@ document.addEventListener('click', (e) => {
         return;
     }
 
-    // Product card image click (navigate to product detail). Title no longer clickable.
-    if (rawTarget.classList.contains('product-card__image')) {
-        const card = rawTarget.closest('.product-card');
+    // Product card click anywhere (except controls) navigates to detail
+    const cardClickArea = rawTarget.closest('.product-card');
+    if (cardClickArea) {
+        // Ignore clicks on interactive controls inside the card
+        const interactive = rawTarget.closest('button, a, input, select, textarea, [role="menu"], [role="menuitem"]');
+        if (interactive) return;
+        const card = cardClickArea;
         const id = card?.dataset.id;
         if (id) {
             location.hash = `#product-${id}`;
@@ -2779,6 +2783,16 @@ function setupHashRouting(initialLang) {
                 showSection('product-detail-container', true);
                 renderProductDetail(pid);
                 bindProductDetailEvents();
+                // Автоскролл к началу деталки (с учётом возможного фиксированного header)
+                try {
+                    const detailRoot = document.getElementById('product-detail-container');
+                    if (detailRoot) {
+                        const top = detailRoot.getBoundingClientRect().top + window.scrollY - 60; // offset for sticky header
+                        window.scrollTo({ top: top < 0 ? 0 : top, behavior: 'smooth' });
+                    } else {
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }
+                } catch { window.scrollTo({ top: 0, behavior: 'smooth' }); }
             });
     } else if (hash === '#products') {
             // Show products section

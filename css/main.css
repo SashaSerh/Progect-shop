@@ -116,8 +116,8 @@
 .product-gallery__image-wrap { border:1px solid var(--glass-border, rgba(0,0,0,0.08)); border-radius: 18px; background: var(--glass-bg, linear-gradient(145deg,#f8f8f8,#f1f1f1)); position:relative; overflow:hidden; min-height: clamp(260px, 42vw, 480px); display:flex; align-items:center; justify-content:center; }
 .product-gallery__image { width:100%; height:100%; object-fit:contain; display:block; }
 /* Hint that product card image is clickable */
-.product-card__image { cursor: pointer; transition: transform .15s ease, box-shadow .15s ease; }
-.product-card__image:hover { transform: scale(1.01); box-shadow: 0 6px 16px rgba(0,0,0,0.08); }
+/* Image inherits cursor from the whole clickable card; no separate hover highlight */
+/* removed: .product-card__image { cursor: pointer } and image hover shadow */
 
 .product-gallery__thumbs { display:flex; gap:10px; margin-top:14px; overflow-x:auto; padding-bottom:4px; scrollbar-width: thin; }
 .product-gallery__thumbs::-webkit-scrollbar { height:6px; }
@@ -2434,11 +2434,10 @@ body {
     text-align: center;
     box-shadow: var(--shadow);
     border: none;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    cursor: pointer;
 }
 
 .product-card:hover {
-    transform: scale(1.05);
     box-shadow: var(--glow-shadow);
 }
 
@@ -2446,6 +2445,7 @@ body {
     max-width: 100%;
     height: auto;
     border-radius: 10px;
+    cursor: inherit;
 }
     /* LQIP blur for product images */
     .product-card__image.lqip {

@@ -867,6 +867,16 @@ export function renderProductCard(product, lang, translations) {
     try {
         const kebab = productCard.querySelector('[data-admin-kebab]');
         const menu = productCard.querySelector('.product-card__admin-menu');
+        // Make whole card focusable & keyboard-navigable to details
+        productCard.setAttribute('tabindex','0');
+        productCard.setAttribute('role','link');
+        productCard.setAttribute('aria-label', `${viewDetailsLabel} ${product.name[lang]}`);
+        productCard.addEventListener('keydown', (ev) => {
+            if ((ev.key === 'Enter' || ev.key === ' ') && !menu?.contains(document.activeElement)) {
+                ev.preventDefault();
+                location.hash = `#product-${product.id}`;
+            }
+        });
         if (kebab && menu) {
             const closeMenu = () => { menu.hidden = true; kebab.setAttribute('aria-expanded','false'); };
             const openMenu = () => { menu.hidden = false; kebab.setAttribute('aria-expanded','true'); };

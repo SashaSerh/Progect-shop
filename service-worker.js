@@ -1,4 +1,4 @@
-const CACHE_NAME = 'climat-control-v76'; // ensure removal of visible card title propagates
+const CACHE_NAME = 'climat-control-v78'; // whole-card clickable UX, remove image hover
 const urlsToCache = [
     '/',
     '/index.html',

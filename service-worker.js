@@ -1,4 +1,4 @@
-const CACHE_NAME = 'climat-control-v78'; // whole-card clickable UX, remove image hover
+const CACHE_NAME = 'climat-control-v79'; // catalog: click-open, header dropdown content refresh
 const urlsToCache = [
     '/',
     '/index.html',

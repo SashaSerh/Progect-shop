@@ -66,10 +66,57 @@ function getFocusableElements(container) {
     ));
 }
 
+// Ensure catalog dropdown item labels match current language
+function updateCatalogDropdownLabels(lang) {
+    try {
+        const dd = document.querySelector('#catalogDropdown');
+        if (!dd) return;
+        const links = dd.querySelectorAll('.catalog-dropdown__list a');
+        if (!links.length || typeof window.getCategoryBySlug !== 'function') return;
+        links.forEach(a => {
+            const href = a.getAttribute('href') || '';
+            const m = href.match(/#category-([^?#]+)/);
+            const slug = m && m[1];
+            if (!slug) return;
+            const cat = window.getCategoryBySlug(slug);
+            if (!cat || !cat.name) return;
+            const name = cat.name[lang] || cat.name.uk || cat.name.ru || slug;
+            a.textContent = name;
+        });
+    } catch(_) { /* noop */ }
+}
+
 function openCatalogDropdown({ withTrap = false } = {}) {
     const catalogDropdown = document.querySelector('#catalogDropdown');
     const catalogButton = document.querySelector('#catalogButton');
     if (!catalogDropdown || !catalogButton) return;
+
+    // Defensive: hydrate catalog list if template was empty or stale-cached
+    try {
+        let ul = catalogDropdown.querySelector('.catalog-dropdown__list');
+        if (!ul) {
+            ul = document.createElement('ul');
+            ul.className = 'catalog-dropdown__list';
+            catalogDropdown.appendChild(ul);
+        }
+        if (!ul.children.length && typeof window.listCategories === 'function') {
+            const cats = window.listCategories();
+            const lang = (typeof savedLanguage === 'string' && savedLanguage) || 'uk';
+            const frag = document.createDocumentFragment();
+            cats.forEach(cat => {
+                const li = document.createElement('li');
+                const a = document.createElement('a');
+                a.href = `#category-${cat.slug}`;
+                const name = (cat.name && (cat.name[lang] || cat.name.uk || cat.name.ru || cat.slug)) || cat.slug;
+                a.textContent = name;
+                li.appendChild(a);
+                frag.appendChild(li);
+            });
+            ul.appendChild(frag);
+        }
+        // Always align labels to current language even if template had static UA text
+        updateCatalogDropdownLabels((typeof savedLanguage === 'string' && savedLanguage) || 'uk');
+    } catch (_) { /* no-op: optional hydration */ }
 
     // Cancel pending close animation if any
     if (catalogDropdown.classList.contains('catalog-dropdown--closing')) {
@@ -88,7 +135,12 @@ function openCatalogDropdown({ withTrap = false } = {}) {
 
     catalogDropdown.classList.add('catalog-dropdown--open');
     catalogDropdown.classList.remove('catalog-dropdown--closing');
-    catalogButton.setAttribute('aria-expanded', 'true');
+    try {
+        const btns = document.querySelectorAll('#catalogButton');
+        btns.forEach(b => b.setAttribute('aria-expanded', 'true'));
+    } catch(_) {
+        catalogButton.setAttribute('aria-expanded', 'true');
+    }
     catalogDropdown.setAttribute('aria-hidden', 'false');
 
     // Setup menu semantics and roving tabindex
@@ -211,7 +263,12 @@ function closeCatalogAnimated({ restoreFocus = false } = {}) {
     const done = () => {
         catalogDropdown.classList.remove('catalog-dropdown--open');
         catalogDropdown.classList.remove('catalog-dropdown--closing');
-        catalogButton.setAttribute('aria-expanded', 'false');
+        try {
+            const btns = document.querySelectorAll('#catalogButton');
+            btns.forEach(b => b.setAttribute('aria-expanded', 'false'));
+        } catch(_) {
+            catalogButton.setAttribute('aria-expanded', 'false');
+        }
         catalogDropdown.setAttribute('aria-hidden', 'true');
         // cleanup roving tabindex state
         catalogMenuItems.forEach(a => a.setAttribute('tabindex', '-1'));
@@ -1235,37 +1292,7 @@ async function initApp() {
     const catalogButton = document.querySelector('#catalogButton');
     const catalogDropdown = document.querySelector('#catalogDropdown');
     if (catalogButton && catalogDropdown) {
-        // Open dropdown on hover (no focus trap)
-        catalogButton.addEventListener('mouseenter', () => {
-            openCatalogDropdown({ withTrap: false });
-        });
-        
-        // Close dropdown when mouse leaves both button and dropdown
-        const closeDropdown = () => {
-            if (typeof closeCatalogAnimated === 'function') {
-                closeCatalogAnimated({ restoreFocus: false });
-            }
-        };
-        
-        catalogButton.addEventListener('mouseleave', (e) => {
-            // Check if mouse is moving to dropdown
-            setTimeout(() => {
-                if (!catalogDropdown.matches(':hover') && !catalogButton.matches(':hover')) {
-                    closeDropdown();
-                }
-            }, 100);
-        });
-        
-        catalogDropdown.addEventListener('mouseleave', (e) => {
-            // Check if mouse is moving to button
-            setTimeout(() => {
-                if (!catalogDropdown.matches(':hover') && !catalogButton.matches(':hover')) {
-                    closeDropdown();
-                }
-            }, 100);
-        });
-        
-        // Click toggles with focus trap only if configured
+        // Click toggles dropdown (hover disabled per UX change)
         catalogButton.addEventListener('click', (e) => {
             const useTrap = catalogA11yConfig.tabBehavior === 'trap';
             // For toggleCatalogDropdown we decide inside based on config
@@ -1273,7 +1300,8 @@ async function initApp() {
         });
         
         document.addEventListener('click', (e) => {
-            if (!catalogDropdown.contains(e.target) && !catalogButton.contains(e.target)) {
+            const isOnButton = e && e.target && e.target.closest ? e.target.closest('#catalogButton') : null;
+            if (!catalogDropdown.contains(e.target) && !isOnButton) {
                 if (typeof closeCatalogAnimated === 'function') {
                     closeCatalogAnimated({ restoreFocus: false });
                 }
@@ -2874,6 +2902,11 @@ function setupHashRouting(initialLang) {
             // обновим OG title под текущий заголовок сайта
             try { setOgTitle(document.title); setTwitterTitle(document.title); } catch {}
         }
+        // Обновим подписи пунктов каталога под выбранный язык
+        try {
+            const lang = (typeof localStorage !== 'undefined' && localStorage.getItem('language')) || savedLanguage || 'uk';
+            updateCatalogDropdownLabels(lang);
+        } catch {}
         try { initMarketing(); } catch {}
     });
     // initial route

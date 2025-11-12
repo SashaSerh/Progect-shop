@@ -1677,7 +1677,7 @@ body {
     transition: background var(--transition);
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
     margin-right: 16px;
     position: relative;
 }
@@ -1690,6 +1690,12 @@ body {
     font-size: 20px;
     
 }
+
+/* Catalog button label and chevron */
+.catalog-button__label { line-height: 1; }
+.catalog-button__chevron { display:inline-flex; align-items:center; margin-left: 4px; opacity: .9; }
+.catalog-button[aria-expanded="true"] .catalog-button__chevron { transform: rotate(180deg); transition: transform 160ms ease; }
+.catalog-button:not([aria-expanded="true"]) .catalog-button__chevron { transform: rotate(0deg); transition: transform 160ms ease; }
 
 .search-container {
     display: flex;

@@ -112,8 +112,9 @@
                     <span class="visually-hidden">ClimaTech</span>
                 </div>
             <button class="catalog-button" id="catalogButton" aria-haspopup="true" aria-controls="catalogDropdown" aria-expanded="false" aria-label="Открыть меню каталога">
-                <span class="catalog-icon"><img src="icons/squares-button-of-view-options.svg" alt="Каталог" style="width: 24px; height: 24px; vertical-align:middle; fill: currentColor;" /></span>
-                <!-- <span data-i18n="catalog">Каталог</span> -->
+                <span class="catalog-icon"><img src="icons/squares-button-of-view-options.svg" alt="" aria-hidden="true" style="width:24px;height:24px;vertical-align:middle;fill:currentColor;" /></span>
+                <span class="catalog-button__label" data-i18n="catalog">Каталог</span>
+                <span class="catalog-button__chevron" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span>
             </button>
             <div class="search-container">
                 <input type="search" id="site-search" data-i18n-placeholder="search-placeholder" placeholder="Поиск по сайту" aria-label="Поиск по сайту">

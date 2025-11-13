@@ -1,4 +1,4 @@
-const CACHE_NAME = 'climat-control-v79'; // catalog: click-open, header dropdown content refresh
+const CACHE_NAME = 'climat-control-v80'; // hero images disabled + UI updates
 const urlsToCache = [
     '/',
     '/index.html',

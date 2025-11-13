@@ -2210,11 +2210,9 @@ body {
     background: var(--background-color-secondary-hover);
 }
 
-/* Hero media with LQIP blur */
+/* Hero media */
 .hero__media { margin-top: 16px; overflow: hidden; border-radius: 16px; }
 .hero__image { display: block; width: 100%; height: auto; }
-.hero__image.lqip { filter: blur(14px); transform: scale(1.01); transition: filter .45s ease, transform .45s ease; }
-.hero__image.lqip.lqip--loaded { filter: blur(0); transform: none; }
 
 @media (max-width: 768px) {
     .hero__title {

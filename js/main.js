@@ -1512,7 +1512,7 @@ async function initApp() {
     // Обновляем базовый JSON-LD WebSite/Organization (url + SearchAction) после загрузки
     try { updateBaseJsonLd(); } catch {}
 
-    // Hero LQIP handling disabled: no blur/loaded toggling for hero image
+    // Hero image loading is disabled; no LQIP handling needed
 };
 
 

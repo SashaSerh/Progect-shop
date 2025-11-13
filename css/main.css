@@ -2210,9 +2210,7 @@ body {
     background: var(--background-color-secondary-hover);
 }
 
-/* Hero media */
-.hero__media { margin-top: 16px; overflow: hidden; border-radius: 16px; }
-.hero__image { display: block; width: 100%; height: auto; }
+/* Hero image removed: no media block or LQIP needed */
 
 @media (max-width: 768px) {
     .hero__title {

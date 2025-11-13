@@ -602,52 +602,26 @@ export function renderProductCard(product, lang, translations) {
     const loadingAttr = 'lazy';
     const fetchPrio = 'low';
 
-    // Local marker and admin actions for locally saved products
+    // Local marker (удалено по требованию: не показывать бейдж "Локально")
     let adminHtml = '';
     let isLocal = false;
     let localBadgeHtml = '';
     try {
         const locals = JSON.parse(localStorage.getItem('products_local_v1') || '[]');
         isLocal = String(product.id).startsWith('p_') || (Array.isArray(locals) && locals.some(lp => String(lp.id) === String(product.id)));
-                if (isLocal) {
-                        // Admin actions as kebab popover to avoid layout shifts
-                        adminHtml = `
-                        <div class="product-card__admin-actions" aria-hidden="false">
-                            <button type="button" class="product-card__admin-kebab" data-admin-kebab aria-haspopup="menu" aria-expanded="false" title="Администрирование">
-                                ⋮
-                            </button>
-                            <div class="product-card__admin-menu" role="menu" hidden>
-                                <button type="button" role="menuitem" class="product-card__admin-item" data-edit data-id="${product.id}">Редактировать</button>
-                                <button type="button" role="menuitem" class="product-card__admin-item" data-delete data-id="${product.id}">Удалить</button>
-                            </div>
-                        </div>`;
-                        // Local badge (text is not asserted in tests, only presence of class)
-                        localBadgeHtml = `<span class="badge badge--local" title="Сохранено только в вашем браузере">Локально</span>`;
-                }
+        // Не добавляем локальный бейдж в UI
+        localBadgeHtml = '';
     } catch (err) { adminHtml = ''; isLocal = false; localBadgeHtml = ''; }
 
     // Badges
     let badgesHtml = '';
     try {
         const inStock = !!product.inStock;
-        const stockLabel = inStock
-            ? ((translations && translations[lang] && translations[lang]['in-stock']) || 'В наличии')
-            : ((translations && translations[lang] && translations[lang]['on-order']) || 'Под заказ');
-        const stockClass = inStock ? 'badge--ok' : 'badge--warn';
-        const hasOld = typeof product.oldPrice === 'number' && product.oldPrice > (product.price || 0);
-        const hasDiscount = typeof product.discountPercent === 'number' && product.discountPercent > 0;
-        let saleBadge = '';
-        if (hasOld || hasDiscount) {
-            const lbl = (lang === 'uk') ? 'Знижка' : 'Скидка';
-            const pct = hasDiscount ? ` −${Math.round(product.discountPercent)}%` : '';
-            saleBadge = `<span class="badge badge--sale" aria-label="${lbl}${pct}">${lbl}${pct}</span>`;
-        }
-        badgesHtml = `
-            <div class="product-card__badges product-card__badges--top-right">
-                <span class="badge ${stockClass}">${stockLabel}</span>
-                ${saleBadge}
-            </div>
-            <meta itemprop="availability" content="${inStock ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock'}" />`;
+        // Бейдж наличия скрыт (не показываем на карточках)
+        badgesHtml = '';
+        // Микроданные наличия оставляем через meta
+        const availabilityMeta = `<meta itemprop="availability" content="${inStock ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock'}" />`;
+        badgesHtml += availabilityMeta;
     } catch(_) { /* ignore badge errors */ }
 
     // Flag badges
@@ -714,11 +688,18 @@ export function renderProductCard(product, lang, translations) {
 
     const srcsetLine = srcsetAttr ? `srcset="${srcsetAttr}"` : '';
 
-    // Price
+    // Price (bottom-left with optional discount line above)
     const formatPriceInt = (v) => Math.round(v).toLocaleString('uk-UA', { maximumFractionDigits: 0 });
-    let priceHtml = `${formatPriceInt(product.price)} грн`;
-    if (typeof product.oldPrice === 'number' && product.oldPrice > product.price) {
-        priceHtml = `<span class="product-card__price-current">${formatPriceInt(product.price)} грн</span> <s class="product-card__price-old" aria-label="Старая цена">${formatPriceInt(product.oldPrice)} грн</s>`;
+    let priceHtml = `<span class="product-card__price-current">${formatPriceInt(product.price)} грн</span>`;
+    if (typeof product.oldPrice === 'number' && product.oldPrice > (product.price || 0)) {
+        const discountPercent = Math.max(1, Math.round(100 - (product.price / product.oldPrice) * 100));
+        priceHtml = `
+            <span class="product-card__price-oldline">
+                <s class="product-card__price-old" aria-label="Старая цена">${formatPriceInt(product.oldPrice)} грн</s>
+                <span class="product-card__discount-pct">−${discountPercent}%</span>
+            </span>
+            <span class="product-card__price-current">${formatPriceInt(product.price)} грн</span>
+        `;
     }
 
     const favoriteActive = isFavorite(product.id);
@@ -863,144 +844,18 @@ export function renderProductCard(product, lang, translations) {
         }
     }
 
-    // Admin kebab popover wiring (scoped to this card) with keyboard nav and confirm modal
+    // Упрощённая навигация по карточке (без админ-меню)
     try {
-        const kebab = productCard.querySelector('[data-admin-kebab]');
-        const menu = productCard.querySelector('.product-card__admin-menu');
         // Make whole card focusable & keyboard-navigable to details
         productCard.setAttribute('tabindex','0');
         productCard.setAttribute('role','link');
         productCard.setAttribute('aria-label', `${viewDetailsLabel} ${product.name[lang]}`);
         productCard.addEventListener('keydown', (ev) => {
-            if ((ev.key === 'Enter' || ev.key === ' ') && !menu?.contains(document.activeElement)) {
+            if (ev.key === 'Enter' || ev.key === ' ') {
                 ev.preventDefault();
                 location.hash = `#product-${product.id}`;
             }
         });
-        if (kebab && menu) {
-            const closeMenu = () => { menu.hidden = true; kebab.setAttribute('aria-expanded','false'); };
-            const openMenu = () => { menu.hidden = false; kebab.setAttribute('aria-expanded','true'); };
-            const items = Array.from(menu.querySelectorAll('.product-card__admin-item'));
-            const focusItem = (idx) => { items.forEach((btn,i) => btn.tabIndex = i === idx ? 0 : -1); if (items[idx]) items[idx].focus(); };
-            kebab.addEventListener('click', (e) => {
-                e.stopPropagation();
-                if (menu.hidden) { openMenu(); focusItem(0); } else closeMenu();
-            });
-            document.addEventListener('click', function onDocClick(ev){
-                if (!productCard.isConnected) { document.removeEventListener('click', onDocClick); return; }
-                if (!menu.hidden && !productCard.contains(ev.target)) closeMenu();
-            });
-            productCard.addEventListener('keydown', (ev) => {
-                if (ev.key === 'Escape' && !menu.hidden) { ev.stopPropagation(); closeMenu(); kebab.focus?.(); }
-            });
-            menu.addEventListener('keydown', (ev) => {
-                if (menu.hidden) return;
-                const currentIndex = items.indexOf(document.activeElement);
-                if (['ArrowDown','ArrowUp','Home','End'].includes(ev.key)) ev.preventDefault();
-                if (ev.key === 'ArrowDown') {
-                    const next = currentIndex < 0 ? 0 : (currentIndex + 1) % items.length; focusItem(next);
-                } else if (ev.key === 'ArrowUp') {
-                    const prev = currentIndex < 0 ? items.length - 1 : (currentIndex - 1 + items.length) % items.length; focusItem(prev);
-                } else if (ev.key === 'Home') { focusItem(0); }
-                else if (ev.key === 'End') { focusItem(items.length - 1); }
-            });
-            kebab.addEventListener('keydown', (ev) => {
-                if ((ev.key === 'Enter' || ev.key === ' ') && menu.hidden) { ev.preventDefault(); openMenu(); focusItem(0); }
-            });
-            items.forEach(btn => btn.addEventListener('keydown', (ev) => {
-                if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); btn.click(); }
-            }));
-
-            // Confirm deletion modal helpers
-            const ensureConfirmModal = () => {
-                let modal = document.getElementById('adminDeleteConfirmModal');
-                if (modal) return modal;
-                modal = document.createElement('div');
-                modal.id = 'adminDeleteConfirmModal';
-                modal.className = 'confirm-modal';
-                modal.setAttribute('role','dialog');
-                modal.setAttribute('aria-modal','true');
-                modal.setAttribute('aria-labelledby','confirmDeleteTitle');
-                modal.innerHTML = `
-                  <div class="confirm-modal__backdrop" data-confirm-backdrop></div>
-                  <div class="confirm-modal__panel" role="document">
-                    <h2 id="confirmDeleteTitle" class="confirm-modal__title">Удалить товар?</h2>
-                    <p class="confirm-modal__text">Действие необратимо. Вы уверены?</p>
-                    <div class="confirm-modal__actions">
-                      <button type="button" class="btn btn--secondary" data-confirm-cancel>Отмена</button>
-                      <button type="button" class="btn btn--danger" data-confirm-ok>Удалить</button>
-                    </div>
-                  </div>`;
-                document.body.appendChild(modal);
-                return modal;
-            };
-            const openConfirm = (onOk) => {
-                const modal = ensureConfirmModal();
-                modal.classList.add('is-open');
-                const okBtn = modal.querySelector('[data-confirm-ok]');
-                const cancelBtn = modal.querySelector('[data-confirm-cancel]');
-                const backdrop = modal.querySelector('[data-confirm-backdrop]');
-                const panel = modal.querySelector('.confirm-modal__panel');
-                const focusables = [okBtn, cancelBtn];
-                let lastFocused = document.activeElement;
-                let isClosing = false;
-                const trap = (e) => {
-                    if (!modal.classList.contains('is-open')) return;
-                    if (e.key === 'Tab') { e.preventDefault(); const idx = focusables.indexOf(document.activeElement); const dir = e.shiftKey ? -1 : 1; const next = (idx + dir + focusables.length) % focusables.length; focusables[next].focus(); }
-                    else if (e.key === 'Escape') closeConfirm();
-                };
-                const finalizeClose = () => {
-                    modal.classList.remove('is-closing');
-                };
-                const closeConfirm = () => {
-                    if (isClosing) return;
-                    isClosing = true;
-                    // start closing animation: keep displayed via is-closing
-                    modal.classList.remove('is-open');
-                    modal.classList.add('is-closing');
-                    document.removeEventListener('keydown', trap);
-                    // restore focus immediately as per UX requirement
-                    if (lastFocused && lastFocused.focus) { try { lastFocused.focus(); } catch {} }
-                    const onEnd = (ev) => {
-                        if (ev.target !== panel) return;
-                        panel.removeEventListener('transitionend', onEnd);
-                        finalizeClose();
-                    };
-                    // Fallback in case transitionend doesn't fire
-                    setTimeout(finalizeClose, 350);
-                    panel.addEventListener('transitionend', onEnd);
-                };
-                document.addEventListener('keydown', trap);
-                cancelBtn.addEventListener('click', () => closeConfirm(), { once:true });
-                backdrop.addEventListener('click', () => closeConfirm(), { once:true });
-                okBtn.addEventListener('click', () => { try { onOk?.(); } finally { closeConfirm(); } }, { once:true });
-                setTimeout(() => okBtn.focus(), 30);
-            };
-            const deleteBtn = menu.querySelector('[data-delete][data-id="' + product.id + '"]');
-            if (deleteBtn) {
-                deleteBtn.addEventListener('click', (ev) => {
-                    ev.preventDefault(); ev.stopPropagation();
-                    const pid = product.id;
-                    openConfirm(() => {
-                        try {
-                            const raw = localStorage.getItem('products_local_v1');
-                            const list = raw ? JSON.parse(raw) : [];
-                            const filtered = Array.isArray(list) ? list.filter(p => String(p.id) !== String(pid)) : [];
-                            localStorage.setItem('products_local_v1', JSON.stringify(filtered));
-                        } catch {}
-                        try {
-                            const merged = (typeof getMergedProducts === 'function') ? getMergedProducts() : (window.products || []);
-                            if (typeof setProducts === 'function') setProducts(merged);
-                            if (typeof renderProducts === 'function') {
-                                const langCode = (localStorage.getItem('language') || 'ru');
-                                renderProducts(langCode, (window.translations || translations), merged);
-                            }
-                            if (typeof window.showToast === 'function') window.showToast('Товар удалён');
-                        } catch {}
-                    });
-                }, { capture:true });
-            }
-        }
     } catch {}
 
     return productCard;

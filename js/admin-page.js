@@ -219,8 +219,7 @@ export async function initAdminPage(translations, lang = 'ru') {
           <div class="admin-list__meta-sub">ID: ${p.id} · SKU: ${p.sku || '—'}</div>
         </div>
         <div class="admin-list__actions">
-          <button type="button" data-act="edit" data-id="${p.id}" class="btn btn--small">${t('admin-edit')}</button>
-          <button type="button" data-act="del" data-id="${p.id}" class="btn btn--danger btn--small">${t('admin-delete')}</button>
+          <span class="admin-list__hint">Правка и удаление отключены — редактируйте в редакторе</span>
         </div>`;
       const wrap = document.createElement('div');
       wrap.appendChild(li);
@@ -378,28 +377,7 @@ export async function initAdminPage(translations, lang = 'ru') {
     } catch {}
   }
 
-  // Bind list actions
-  listEl?.addEventListener('click', (e) => {
-    const btn = e.target.closest('button');
-    if (!btn) return;
-    const id = btn.getAttribute('data-id');
-    const act = btn.getAttribute('data-act');
-    if (act === 'edit') {
-      const item = getLocalProducts().find(p => String(p.id) === String(id));
-      if (item) fillForm(item);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    } else if (act === 'del') {
-      if (!confirm(t('admin-confirm-delete'))) return;
-      const rest = getLocalProducts().filter(p => String(p.id) !== String(id));
-      saveLocalProducts(rest);
-      renderList();
-      try {
-        const merged = getMergedProducts();
-        setProducts(merged); window.products = merged; renderProducts(lang, translations, merged);
-      } catch {}
-      showToast(t('admin-toast-removed'));
-    }
-  });
+  // Действия редактирования/удаления в админ-списке отключены
 
   // Image preview
   form?.querySelector('input[name="image"]').addEventListener('change', async (e) => {

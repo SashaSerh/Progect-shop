@@ -947,51 +947,7 @@ export function initAdminProducts(translations, lang = 'ru') {
     } catch(_){}
   }
 
-  // Delegate edit/delete actions from product cards
-  document.addEventListener('click', (e) => {
-    const el = e.target;
-    if (!(el instanceof HTMLElement)) return;
-    // edit button: .product-card__button with data-edit
-    if (el.matches('.product-card__button[data-edit]')) {
-      const id = el.getAttribute('data-id');
-      const locals = getLocalProducts();
-      const prod = locals.find(p => String(p.id) === String(id));
-      if (prod) {
-        try {
-          // Сохраняем как черновик, чтобы страница подтянула значения
-          const draft = {
-            id: prod.id || '',
-            title_ru: prod.name?.ru || '',
-            title_uk: prod.name?.uk || '',
-            description_ru: prod.description?.ru || '',
-            description_uk: prod.description?.uk || '',
-            price: String(prod.price || 0),
-            sku: prod.sku || '',
-            category: prod.category || 'service',
-            inStock: prod.inStock ? 'true' : 'false',
-            specs_ru: (Array.isArray(prod.specs) ? prod.specs.map(s => `${s.key}: ${(s.value && (s.value.ru || s.value.uk || ''))}`).join('\n') : ''),
-            specs_uk: (Array.isArray(prod.specs) ? prod.specs.map(s => `${s.key}: ${(s.value && (s.value.uk || s.value.ru || ''))}`).join('\n') : ''),
-            _flags: JSON.stringify(Array.isArray(prod.flags) ? prod.flags : [])
-          };
-          localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
-        } catch {}
-        location.hash = '#admin/products';
-      }
-    }
-    // delete button: .product-card__button with data-delete
-    if (el.matches('.product-card__button[data-delete]')) {
-      const id = el.getAttribute('data-id');
-      if (!confirm('Удалить товар?')) return;
-      const list = getLocalProducts().filter(p => String(p.id) !== String(id));
-      saveLocalProducts(list);
-      // re-render
-  const merged = Products.getMergedProducts();
-  Products.setProducts(merged);
-  window.products = merged;
-  Products.renderProducts(lang, translations, merged);
-      showToast('Товар удалён');
-    }
-  });
+  // Делегирование редактирования/удаления с карточек убрано (правки выполняются вручную в редакторе)
 
   // Admin controls visibility and handlers
   const adminControls = document.getElementById('adminControls');

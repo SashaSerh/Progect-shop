@@ -1377,45 +1377,7 @@ async function initApp() {
         });
     }
 
-    // Глобальный (ленивый) обработчик кнопки редактирования локального товара на карточке.
-    // Проблема: logic сохранения черновика раньше находилась только в admin-products.js,
-    // который подгружается ТОЛЬКО после перехода в #admin/products. Поэтому на главной
-    // странице клик по "Редактировать" не делал ничего. Здесь дублируем минимально
-    // необходимую логику: кладём черновик в localStorage и переводим hash на админ-маршрут.
-    // Полное редактирование инициализируется уже внутри admin-page.js.
-    document.addEventListener('click', (e) => {
-        const btn = e.target instanceof HTMLElement ? e.target.closest('.product-card__button[data-edit]') : null;
-        if (!btn) return;
-        // Если уже на админ-странице — пусть штатная логика модуля сработает (не мешаем)
-        if (location.hash === '#admin/products') return;
-        try {
-            const id = btn.getAttribute('data-id');
-            if (!id) return;
-            const localsRaw = localStorage.getItem('products_local_v1');
-            if (!localsRaw) return;
-            const locals = JSON.parse(localsRaw || '[]');
-            const prod = Array.isArray(locals) ? locals.find(p => String(p.id) === String(id)) : null;
-            if (!prod) return;
-            const draft = {
-                id: prod.id || '',
-                title_ru: prod.name?.ru || '',
-                title_uk: prod.name?.uk || '',
-                description_ru: prod.description?.ru || '',
-                description_uk: prod.description?.uk || '',
-                price: String(prod.price || 0),
-                sku: prod.sku || '',
-                category: prod.category || 'service',
-                inStock: prod.inStock ? 'true' : 'false',
-                specs_ru: (Array.isArray(prod.specs) ? prod.specs.map(s => `${s.key}: ${(s.value && (s.value.ru || s.value.uk || ''))}`).join('\n') : ''),
-                specs_uk: (Array.isArray(prod.specs) ? prod.specs.map(s => `${s.key}: ${(s.value && (s.value.uk || s.value.ru || ''))}`).join('\n') : ''),
-                _flags: JSON.stringify(Array.isArray(prod.flags) ? prod.flags : [])
-            };
-            localStorage.setItem('admin:product:draft:v1', JSON.stringify(draft));
-            location.hash = '#admin/products';
-        } catch (_) {
-            // Fail silent — не критично для UX
-        }
-    });
+    // Обработчик редактирования с карточек убран по запросу: правки будут в редакторе.
 
     const checkoutButton = document.querySelector('.cart-button--checkout');
     if (checkoutButton) checkoutButton.addEventListener('click', openCartModal);
@@ -1915,9 +1877,9 @@ function renderProductDetail(productId, productsList) {
     } catch {}
     const stockEl = section.querySelector('.product-buy__stock');
     if (stockEl) {
-        stockEl.textContent = product.inStock ? (translations?.[lang]?.['in-stock'] || 'В наличии') : (translations?.[lang]?.['on-order'] || 'Под заказ');
-        stockEl.style.background = product.inStock ? 'var(--stock-bg, #e8f5e9)' : '#fff3e0';
-        stockEl.style.color = product.inStock ? 'var(--stock-color, #1b5e20)' : '#e65100';
+        // Бейдж наличия скрыт по требованиям дизайна
+        stockEl.hidden = true;
+        stockEl.textContent = '';
     }
     // Main image and thumbnails (responsive variants using local naming convention: -320w/-480w/-768w/-1200w)
     const imgEl = section.querySelector('.product-gallery__image, .product-detail__image');

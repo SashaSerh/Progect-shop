@@ -74,8 +74,7 @@ describe('Products integration: карточки и флаги', () => {
 
 		const card = document.querySelector('.product-card');
 		expect(card).toBeTruthy();
-		expect(card.querySelector('.badge--local')).toBeTruthy();
-		expect(card.querySelector('.product-card__admin-actions')).toBeTruthy();
+		// Бейджи "Локально" и admin-actions больше не отображаются на карточке
 
 		const flagKeys = Array.from(card.querySelectorAll('.flag-badge')).map((el) => el.getAttribute('data-flag-key'));
 		expect(flagKeys).toEqual(['hit', 'new']);

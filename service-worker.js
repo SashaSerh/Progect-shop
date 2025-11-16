@@ -1,4 +1,4 @@
-const CACHE_NAME = 'climat-control-v80'; // hero images disabled + UI updates
+const CACHE_NAME = 'climat-control-v81'; // hero banner path update + preload
 const urlsToCache = [
     '/',
     '/index.html',

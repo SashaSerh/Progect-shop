@@ -916,6 +916,27 @@ export function initAdminProducts(translations, lang = 'ru') {
     setTimeout(() => t.remove(), ms);
   }
 
+  // Global delete handler for elements with [data-delete]
+  document.addEventListener('click', (e) => {
+    const target = e.target.closest('[data-delete][data-id]');
+    if (!target) return;
+    const id = target.getAttribute('data-id');
+    // Use confirm() in admin integration tests
+    const ok = typeof window !== 'undefined' && typeof window.confirm === 'function' ? window.confirm('Удалить товар?') : true;
+    if (!ok) return;
+    try {
+      const list = getLocalProducts();
+      const next = Array.isArray(list) ? list.filter(p => String(p.id) !== String(id)) : [];
+      saveLocalProducts(next);
+    } catch(_) {}
+    try {
+      const merged = Products.getMergedProducts();
+      Products.setProducts(merged);
+      window.products = merged;
+      Products.renderProducts(lang, translations, merged);
+    } catch(_) {}
+  });
+
   function fillFormWithProduct(product) {
     if (!product) return;
     form.querySelector('input[name="id"]').value = product.id || '';

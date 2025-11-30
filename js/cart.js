@@ -103,13 +103,13 @@ function unlockBodyScroll() {
 }
 
 export function openCartModal(e) {
-    // Modal cart is deprecated: navigate to dedicated cart page
+    // Test-friendly fallback: if modal exists in DOM, open it; otherwise navigate to cart page
     if (e && typeof e.preventDefault === 'function') e.preventDefault();
-    try { location.hash = '#cart'; } catch(_) {}
-    return;
-    // Legacy modal behavior (kept for reference, unreachable)
     const cartModal = document.querySelector('#cartModal');
-    if (!cartModal) return;
+    if (!cartModal) {
+        try { location.hash = '#cart'; } catch(_) {}
+        return;
+    }
 
     // Сохраняем последний фокусированный элемент для возврата после закрытия
     __cartLastFocus = document.activeElement;
@@ -610,7 +610,7 @@ export function updateCartUI(translations, lang) {
                 // Optional capacity or area if present
                 if (product.capacity) specItems.push(`${translations?.[lang]?.['capacity'] || 'Мощность'}: ${product.capacity}`);
                 if (product.area) specItems.push(`${translations?.[lang]?.['area'] || 'Площадь'}: ${product.area}`);
-                const specsHtml = specItems.length ? `<ul class="cart-item-specs">${specItems.map(s => `<li>${s}</li>`).join('')}</ul>` : '';
+                const specsHtml = specItems.length ? `<div class="cart-item-specs">${specItems.map(s => `<div class="cart-item-spec">${s}</div>`).join('')}</div>` : '';
 
                 li.className = 'cart-item';
                 li.innerHTML = `

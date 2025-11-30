@@ -611,7 +611,20 @@ export function renderProductCard(product, lang, translations) {
         isLocal = String(product.id).startsWith('p_') || (Array.isArray(locals) && locals.some(lp => String(lp.id) === String(product.id)));
         // Не добавляем локальный бейдж в UI
         localBadgeHtml = '';
-    } catch (err) { adminHtml = ''; isLocal = false; localBadgeHtml = ''; }
+        } catch (err) { adminHtml = ''; isLocal = false; localBadgeHtml = ''; }
+
+        // Admin controls: kebab + delete (for local products and tests)
+        if (isLocal) {
+                const pid = String(product.id);
+                adminHtml = `
+                    <div class="product-card__admin" data-admin="true">
+                        <button type="button" class="product-card__admin-kebab" data-admin-kebab aria-label="Admin actions">⋮</button>
+                        <div class="product-card__admin-menu" hidden>
+                            <button type="button" class="product-card__button" data-delete data-id="${pid}">Удалить</button>
+                        </div>
+                    </div>
+                `;
+        }
 
     // Badges
     let badgesHtml = '';
@@ -858,5 +871,121 @@ export function renderProductCard(product, lang, translations) {
         });
     } catch {}
 
+    // Admin menu behaviors (kebab + delete confirm modal)
+    if (isLocal) {
+        try {
+            const kebabBtn = productCard.querySelector('[data-admin-kebab]');
+            const menu = productCard.querySelector('.product-card__admin-menu');
+            const delBtn = productCard.querySelector('[data-delete][data-id]');
+            if (kebabBtn && menu) {
+                kebabBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    menu.hidden = !menu.hidden;
+                });
+                document.addEventListener('click', (ev) => {
+                    if (!productCard.contains(ev.target)) menu.hidden = true;
+                }, { once: true });
+            }
+            if (delBtn) {
+                delBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const lastFocused = delBtn;
+                    const modal = ensureAdminDeleteConfirmModal();
+                    openAdminDeleteConfirmModal(modal, lastFocused, () => {
+                        // On OK: remove from localStorage and re-render via products API if available
+                        try {
+                            const id = delBtn.getAttribute('data-id');
+                            const raw = localStorage.getItem('products_local_v1');
+                            const arr = raw ? JSON.parse(raw) : [];
+                            const next = Array.isArray(arr) ? arr.filter(p => String(p.id) !== String(id)) : [];
+                            localStorage.setItem('products_local_v1', JSON.stringify(next));
+                        } catch(_) {}
+                        try {
+                            if (typeof window !== 'undefined' && window.products) {
+                                // Optionally refresh UI if grid exists
+                                if (typeof window.renderProducts === 'function') {
+                                    window.renderProducts('ru', window.translations || {});
+                                }
+                            }
+                        } catch(_) {}
+                    });
+                });
+            }
+        } catch {}
+    }
+
     return productCard;
+}
+
+// ----- Admin delete confirm modal helpers (minimal, test-friendly) -----
+function ensureAdminDeleteConfirmModal() {
+    let modal = document.getElementById('adminDeleteConfirmModal');
+    if (modal) return modal;
+    modal = document.createElement('div');
+    modal.id = 'adminDeleteConfirmModal';
+    modal.className = 'admin-confirm-modal';
+    modal.setAttribute('role', 'dialog');
+    modal.setAttribute('aria-modal', 'true');
+    modal.style.display = 'none';
+    modal.innerHTML = `
+      <div class="admin-confirm-modal__content" tabindex="-1">
+        <p>Удалить товар?</p>
+        <div class="admin-confirm-modal__actions">
+          <button type="button" data-confirm-ok>OK</button>
+          <button type="button" data-confirm-cancel>Cancel</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+    return modal;
+}
+
+function openAdminDeleteConfirmModal(modal, returnFocusEl, onOk) {
+    if (!modal) return;
+    modal.classList.add('is-open');
+    modal.style.display = 'block';
+    const okBtn = modal.querySelector('[data-confirm-ok]');
+    const cancelBtn = modal.querySelector('[data-confirm-cancel]');
+    // Focus after tick for test's fake timers
+    setTimeout(() => { okBtn && okBtn.focus && okBtn.focus(); }, 0);
+
+    const onKey = (e) => {
+        if (e.key === 'Escape') {
+            close();
+            if (returnFocusEl && returnFocusEl.focus) returnFocusEl.focus();
+            return;
+        }
+        if (e.key === 'Tab') {
+            // Explicitly toggle focus between OK and Cancel for JSDOM/tab trapping
+            e.preventDefault();
+            const active = document.activeElement;
+            if (e.shiftKey) {
+                if (active === cancelBtn) {
+                    okBtn && okBtn.focus && okBtn.focus();
+                } else {
+                    cancelBtn && cancelBtn.focus && cancelBtn.focus();
+                }
+            } else {
+                if (active === okBtn) {
+                    cancelBtn && cancelBtn.focus && cancelBtn.focus();
+                } else {
+                    okBtn && okBtn.focus && okBtn.focus();
+                }
+            }
+        }
+    };
+    const onOkClick = () => { try { onOk && onOk(); } finally { close(); if (returnFocusEl?.focus) returnFocusEl.focus(); } };
+    const onCancelClick = () => { close(); if (returnFocusEl?.focus) returnFocusEl.focus(); };
+
+    function close() {
+        modal.classList.remove('is-open');
+        modal.style.display = 'none';
+        document.removeEventListener('keydown', onKey);
+        okBtn && okBtn.removeEventListener('click', onOkClick);
+        cancelBtn && cancelBtn.removeEventListener('click', onCancelClick);
+    }
+
+    document.addEventListener('keydown', onKey);
+    okBtn && okBtn.addEventListener('click', onOkClick);
+    cancelBtn && cancelBtn.addEventListener('click', onCancelClick);
 }

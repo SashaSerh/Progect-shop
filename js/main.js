@@ -883,33 +883,18 @@ async function initApp() {
     loadComponent('compare-modal-container', 'components/compare-modal.html'),
         loadComponent('contacts-container', 'components/contacts.html'),
         loadComponent('portfolio-container', 'components/portfolio.html'),
-        loadComponent('footer-container', 'components/footer.html'),
-        loadComponent('cart-modal-container', 'components/cart.html')
+        loadComponent('footer-container', 'components/footer.html')
     ]);
 
     // Применяем тему по умолчанию (теперь светлая) и синхронизируем иконки/ARIA
     try { initTheme(); } catch(_) {}
 
+    // Cart modal open is deprecated in favor of dedicated cart page
     const openCartModalButton = document.querySelector('#openCartModal');
-    const cartModal = document.querySelector('#cartModal');
-    const closeModalButton = document.querySelector('.cart-modal__close');
-
-    if (openCartModalButton && cartModal) {
+    if (openCartModalButton) {
         openCartModalButton.addEventListener('click', (e) => {
-            e.stopPropagation();
-            openCartModal(e);
-            updateCartUI(translations, savedLanguage);
-        });
-    }
-
-    if (closeModalButton) {
-        closeModalButton.addEventListener('click', closeCartModal);
-    }
-    if (cartModal) {
-        cartModal.addEventListener('click', (e) => {
-            if (e.target === cartModal) {
-                closeCartModal();
-            }
+            e.preventDefault();
+            location.hash = '#cart';
         });
     }
 
@@ -1380,7 +1365,7 @@ async function initApp() {
     // Обработчик редактирования с карточек убран по запросу: правки будут в редакторе.
 
     const checkoutButton = document.querySelector('.cart-button--checkout');
-    if (checkoutButton) checkoutButton.addEventListener('click', openCartModal);
+    if (checkoutButton) checkoutButton.addEventListener('click', () => { location.hash = '#cart'; });
 
     const clearCartButton = document.querySelector('.cart-button--clear');
     if (clearCartButton) clearCartButton.addEventListener('click', () => {
@@ -2751,6 +2736,47 @@ function setupHashRouting(initialLang) {
                 });
                 return;
             }
+        }
+
+        // Cart page route
+        if (hash === '#cart') {
+            loadComponent('main-container', 'components/cart-page.html').then(() => {
+                // Hide other sections, show main-container
+                showSection('hero-container', false);
+                showSection('services-container', false);
+                showSection('products-container', false);
+                showSection('portfolio-container', false);
+                showSection('contacts-container', false);
+                showSection('product-detail-container', false);
+                showSection('admin-page-container', false);
+                showSection('main-container', true);
+
+                // Initialize cart page interactions
+                const clearBtn = document.querySelector('.cart-button--clear');
+                if (clearBtn) {
+                    clearBtn.addEventListener('click', () => {
+                        clearCart();
+                        const lang = getLangSafe();
+                        updateCartUI(translations, lang);
+                    });
+                }
+                const itemsList = document.querySelector('.cart-items');
+                if (itemsList) {
+                    itemsList.addEventListener('click', (e) => {
+                        if (e.target.classList.contains('cart-item-remove')) {
+                            const productId = e.target.dataset.id;
+                            removeFromCart(productId);
+                            const lang = getLangSafe();
+                            updateCartUI(translations, lang);
+                        }
+                    });
+                }
+                // Render current cart state
+                const lang = getLangSafe();
+                updateCartUI(translations, lang);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }).catch(err => console.error('Error loading cart page component:', err));
+            return;
         }
         
     const m = hash.match(/^#product-(.+)$/);

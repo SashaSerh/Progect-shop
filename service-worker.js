@@ -1,4 +1,4 @@
-const CACHE_NAME = 'climat-control-v81'; // hero banner path update + preload
+const CACHE_NAME = 'climat-control-v81'; // hero: image-set + dark theme bg
 const urlsToCache = [
     '/',
     '/index.html',
@@ -35,7 +35,10 @@ const urlsToCache = [
     // Social icons used in footer
     '/icons/facebook-icon_1.svg',
     '/icons/telegram-logo-icon_1.svg',
-    '/icons/instagram-icon_1.svg'
+    '/icons/instagram-icon_1.svg',
+    // Hero background images (static)
+    '/picture/hero-picture/hero-1-1200w.jpg',
+    '/picture/hero-picture/hero-3-1200w.jpg'
 ];
 
 self.addEventListener('install', event => {

@@ -28,7 +28,7 @@
                 <!-- Компактные настройки (перемещено вверх) -->
                 <li class="mobile-nav__item mobile-settings">
                     <div class="mobile-settings__row" role="group" aria-label="Быстрые настройки">
-                        <button class="mobile-settings__btn mobile-settings__cart" id="mobileCartButton" aria-label="Открыть корзину" type="button">
+                        <button class="mobile-settings__btn mobile-settings__cart" id="mobileCartButton" aria-label="Открыть корзину" type="button" onclick="location.hash='#cart'">
                             <span class="mobile-settings__icon" aria-hidden="true"><img src="icons/cart512x512.svg" alt="корзина" style="width: 24px; height: 24px;"></span>
                             <span class="cart-count" id="mobileCartCount" aria-live="polite" aria-atomic="true">0</span>
                         </button>
@@ -126,7 +126,7 @@
                 <a href="tel:+380633353410" aria-label="Позвонить по номеру +380-63-335-34-10"><img src="icons/icon-phone512x512.svg" alt="icon phone" style="width: 16px; height: 16px; vertical-align: sub; fill: currentColor;">  +380-63-335-34-10</a>
                 <a href="tel:+380995543499" aria-label="Позвонить по номеру +380-99-554-34-99"><img src="icons/icon-phone512x512.svg" alt="icon phone" style="width: 16px; height: 16px; vertical-align: sub; fill: currentColor;">  +380-99-554-34-99</a>
             </div>
-            <button class="cart-button" id="openCartModal" aria-label="Открыть корзину" aria-haspopup="dialog">
+            <button class="cart-button" id="openCartPage" aria-label="Открыть корзину" onclick="location.hash='#cart'">
                 <span class="cart-icon-wrapper">
                     <span class="cart-icon" aria-hidden="true"><img src="icons/cart512x512.svg" alt="Корзина" style="width:28px;height:28px;vertical-align:middle; fill: currentColor;" /></span>
                     <span class="cart-count" aria-live="polite" aria-atomic="true">0</span>

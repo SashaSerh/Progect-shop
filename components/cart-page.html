@@ -1,0 +1,20 @@
+<section class="cart-page" id="cart-page" aria-labelledby="cartPageTitle">
+  <div class="container">
+    <h2 id="cartPageTitle" data-i18n="cart-title">Корзина</h2>
+    <div class="cart-page__content">
+      <ul class="cart-items" aria-label="Товары в корзине"></ul>
+      <div class="cart-page__aside">
+        <div class="cart-summary" data-i18n="cart-total" aria-live="polite" aria-atomic="true">Итого: $0.00</div>
+        <div class="cart-page__actions">
+          <button class="btn cart-button--clear" data-i18n="cart-clear">Очистить корзину</button>
+          <button class="btn cart-button--checkout" data-i18n="cart-checkout">Оформить заказ</button>
+        </div>
+      </div>
+    </div>
+    <!-- Мобильная липкая панель CTA -->
+    <div class="cart-sticky" aria-hidden="false">
+      <div class="cart-sticky__summary" data-i18n="cart-total" aria-live="polite" aria-atomic="true">Итого: $0.00</div>
+      <button class="btn cart-button--checkout" data-i18n="cart-checkout">Оформить заказ</button>
+    </div>
+  </div>
+</section>

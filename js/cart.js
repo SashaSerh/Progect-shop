@@ -103,7 +103,11 @@ function unlockBodyScroll() {
 }
 
 export function openCartModal(e) {
-    if (e && typeof e.stopPropagation === 'function') e.stopPropagation();
+    // Modal cart is deprecated: navigate to dedicated cart page
+    if (e && typeof e.preventDefault === 'function') e.preventDefault();
+    try { location.hash = '#cart'; } catch(_) {}
+    return;
+    // Legacy modal behavior (kept for reference, unreachable)
     const cartModal = document.querySelector('#cartModal');
     if (!cartModal) return;
 
@@ -511,19 +515,10 @@ function disableCartEdgeSwipeOpen() {
     __cartEdgeOpen = null;
 }
 
-// Авто-инициализация edge-swipe в мобильном режиме
+// Авто-инициализация edge-swipe отключена: корзина как отдельная страница
 (() => {
     if (typeof window === 'undefined') return;
-    const apply = () => {
-        if (window.innerWidth <= 768) enableCartEdgeSwipeOpen();
-        else disableCartEdgeSwipeOpen();
-    };
-    apply();
-    window.addEventListener('resize', () => {
-        // debounce лёгкий
-        clearTimeout(apply.__t);
-        apply.__t = setTimeout(apply, 150);
-    }, { passive: true });
+    disableCartEdgeSwipeOpen();
 })();
 
 export function updateCartUI(translations, lang) {
@@ -556,6 +551,9 @@ export function updateCartUI(translations, lang) {
     const totalText = `${totalLabel}: ${fmt(totalPrice)} грн`;
     if (cartDropdownSummary) cartDropdownSummary.textContent = totalText;
     if (cartSummary) cartSummary.textContent = totalText;
+    // Update mobile sticky cart summary on the cart page
+    const stickySummary = document.querySelector('.cart-sticky__summary');
+    if (stickySummary) stickySummary.textContent = totalText;
 
     if (cartDropdownItems) {
         cartDropdownItems.innerHTML = '';
@@ -592,18 +590,68 @@ export function updateCartUI(translations, lang) {
         } else {
             cart.forEach(item => {
                 const product = products.find(p => p.id == item.id);
-                if (product) {
-                    const li = document.createElement('li');
-                    li.innerHTML = `
-                        <div>
-                            <span class="cart-item-name">${product.name[lang]}</span>
-                            <span class="cart-item-price">${fmt(product.price * item.quantity)} грн (x${item.quantity})</span>
+                if (!product) return;
+                const li = document.createElement('li');
+                const name = (product.name && (product.name[lang] || product.name.ru)) || '';
+                const imgSrc = Array.isArray(product.images) && product.images.length ? product.images[0] : product.image;
+                const desc = (product.summary && (product.summary[lang] || product.summary.ru)) || '';
+                const oldPrice = Number(product.oldPrice);
+                const price = Number(product.price) || 0;
+                const qty = Number(item.quantity) || 1;
+                const total = price * qty;
+                const hasDiscount = oldPrice && oldPrice > price;
+                const pct = hasDiscount ? Math.max(1, Math.round(100 - (price / oldPrice) * 100)) : 0;
+                // simple specs block: try common fields with graceful fallbacks
+                const energy = product.energyClass ? String(product.energyClass) : '';
+                const brand = product.brand || product.brandName || '';
+                const specItems = [];
+                if (energy) specItems.push(`${translations?.[lang]?.['energy-class'] || 'Класс энергоэффективности'}: ${energy}`);
+                if (brand) specItems.push(`${translations?.[lang]?.['brand'] || 'Бренд'}: ${brand}`);
+                // Optional capacity or area if present
+                if (product.capacity) specItems.push(`${translations?.[lang]?.['capacity'] || 'Мощность'}: ${product.capacity}`);
+                if (product.area) specItems.push(`${translations?.[lang]?.['area'] || 'Площадь'}: ${product.area}`);
+                const specsHtml = specItems.length ? `<ul class="cart-item-specs">${specItems.map(s => `<li>${s}</li>`).join('')}</ul>` : '';
+
+                li.className = 'cart-item';
+                li.innerHTML = `
+                    <img class="cart-item-thumb" src="${imgSrc}" alt="${name}" loading="lazy" onerror="this.src='https://placehold.co/84x84/blue/white?text=No+Image'">
+                    <div class="cart-item-meta">
+                        <span class="cart-item-name">${name}</span>
+                        ${desc ? `<span class="cart-item-desc">${desc}</span>` : ''}
+                        ${specsHtml}
+                        <div class="cart-item-prices">
+                          ${hasDiscount ? `<span class="cart-item-old">${fmt(oldPrice)} грн</span>` : ''}
+                          <span class="cart-item-price">${fmt(price)} грн</span>
+                          ${hasDiscount ? `<span class="cart-item-discount">−${pct}%</span>` : ''}
+                          <span class="cart-item-total">×${qty} = <b>${fmt(total)} грн</b></span>
                         </div>
-                        <button class="cart-item-remove" data-id="${item.id}" aria-label="Удалить ${product.name[lang]} из корзины" title="Удалить">✕</button>
-                    `;
-                    li.setAttribute('tabindex', '0');
-                    cartItems.appendChild(li);
-                }
+                    </div>
+                    <div class="cart-item-actions">
+                        <div class="quantity-stepper quantity-stepper--vertical" aria-label="Количество">
+                            <button class="quantity-stepper__btn" data-action="decrement" aria-label="Уменьшить">−</button>
+                            <input class="quantity-stepper__input" type="number" min="1" max="99" value="${qty}" aria-label="Количество">
+                            <button class="quantity-stepper__btn" data-action="increment" aria-label="Увеличить">+</button>
+                        </div>
+                        <button class="cart-item-remove" data-id="${item.id}" aria-label="Удалить ${name} из корзины" title="Удалить">✕</button>
+                    </div>
+                `;
+                li.setAttribute('tabindex', '0');
+                // attach local handlers for quantity
+                const dec = li.querySelector('.quantity-stepper__btn[data-action="decrement"]');
+                const inc = li.querySelector('.quantity-stepper__btn[data-action="increment"]');
+                const input = li.querySelector('.quantity-stepper__input');
+                const applyQty = (next) => {
+                    const n = Math.max(1, Math.min(99, Number(next) || 1));
+                    // update in cart
+                    const ci = cart.find(x => String(x.id) === String(item.id));
+                    if (ci) ci.quantity = n;
+                    saveCart();
+                    updateCartUI(translations, lang);
+                };
+                if (dec) dec.addEventListener('click', () => applyQty(qty - 1));
+                if (inc) inc.addEventListener('click', () => applyQty(qty + 1));
+                if (input) input.addEventListener('change', (e) => applyQty(e.target.value));
+                cartItems.appendChild(li);
             });
         }
     }

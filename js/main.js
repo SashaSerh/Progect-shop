@@ -9,6 +9,8 @@ import { initCompareModal } from './compare-modal.js';
 const contentConfig = (typeof window !== 'undefined' && window.contentConfig) ? window.contentConfig : {};
 import { initMarketing } from './marketing.js';
 import { initNavigation } from './navigation.js';
+// Landing mode: services portfolio contacts only; disable products/cart flows
+const LANDING_MODE = true;
 
 // Utility functions
 const clampQuantity = (value) => {
@@ -887,11 +889,10 @@ async function initApp() {
         loadComponent('header-container', 'components/header.html'),
         loadComponent('hero-container', 'components/hero.html'),
         loadComponent('services-container', 'components/services.html'),
-        loadComponent('products-container', 'components/products.html'),
-        // product-detail загружается по маршруту, но подключаем шаблон заранее (скрыт)
-        loadComponent('product-detail-container', 'components/product-detail.html').catch(() => {}),
-        loadComponent('comparison-container', 'components/compare-bar.html'),
-    loadComponent('compare-modal-container', 'components/compare-modal.html'),
+        ...(LANDING_MODE ? [] : [loadComponent('products-container', 'components/products.html')]),
+        ...(LANDING_MODE ? [] : [loadComponent('product-detail-container', 'components/product-detail.html').catch(() => {})]),
+        ...(LANDING_MODE ? [] : [loadComponent('comparison-container', 'components/compare-bar.html')]),
+        ...(LANDING_MODE ? [] : [loadComponent('compare-modal-container', 'components/compare-modal.html')]),
         loadComponent('contacts-container', 'components/contacts.html'),
         loadComponent('portfolio-container', 'components/portfolio.html'),
         loadComponent('footer-container', 'components/footer.html')
@@ -922,15 +923,17 @@ async function initApp() {
     if (typeof switchLanguage === 'function') {
         switchLanguage(savedLanguage);
     }
-    // Гидратируем товары локальными (LocalStorage) перед первым рендером,
-    // чтобы локальные карточки не пропадали после перезагрузки
-    try {
-        const merged = getMergedProducts();
-        setProducts(merged);
-        renderProducts(savedLanguage, translations, merged);
-    } catch (_) {
-        // Фоллбек — рендер по базовым, если что-то пошло не так
-        renderProducts(savedLanguage, translations);
+    if (!LANDING_MODE) {
+        // Гидратируем товары локальными (LocalStorage) перед первым рендером,
+        // чтобы локальные карточки не пропадали после перезагрузки
+        try {
+            const merged = getMergedProducts();
+            setProducts(merged);
+            renderProducts(savedLanguage, translations, merged);
+        } catch (_) {
+            // Фоллбек — рендер по базовым, если что-то пошло не так
+            renderProducts(savedLanguage, translations);
+        }
     }
 
     // Remote-first: если настроен удалённый провайдер (Git‑CMS / Supabase), загружаем и перерисовываем
@@ -949,9 +952,11 @@ async function initApp() {
     } catch (e) {
         console.warn('Remote provider load failed, keeping local/merged products', e);
     }
-    initCompareBar(savedLanguage);
-    initCompareModal(savedLanguage);
-    initCollectionBadges();
+    if (!LANDING_MODE) {
+        initCompareBar(savedLanguage);
+        initCompareModal(savedLanguage);
+        initCollectionBadges();
+    }
 
     // Загружаем компонент приветствия (лениво) и отображаем, если первый визит
     // Show overlay if cookie missing (first visit or expired manual clear scenario)
@@ -978,7 +983,9 @@ async function initApp() {
                 try { initWelcomeOverlay(savedLanguage); } catch(_) {}
         }
     // После первичного рендера привяжем переход на страницу товара
-    bindProductCardNavigation();
+    if (!LANDING_MODE) {
+        bindProductCardNavigation();
+    }
 
     // Админ-модуль больше не загружаем на главной; он подгружается только при переходе в #admin/products
 
@@ -1375,14 +1382,15 @@ async function initApp() {
 
     // Обработчик редактирования с карточек убран по запросу: правки будут в редакторе.
 
-    const checkoutButton = document.querySelector('.cart-button--checkout');
-    if (checkoutButton) checkoutButton.addEventListener('click', () => { location.hash = '#cart'; });
-
-    const clearCartButton = document.querySelector('.cart-button--clear');
-    if (clearCartButton) clearCartButton.addEventListener('click', () => {
-        clearCart();
-        updateCartUI(translations, savedLanguage);
-    });
+    if (!LANDING_MODE) {
+        const checkoutButton = document.querySelector('.cart-button--checkout');
+        if (checkoutButton) checkoutButton.addEventListener('click', () => { location.hash = '#cart'; });
+        const clearCartButton = document.querySelector('.cart-button--clear');
+        if (clearCartButton) clearCartButton.addEventListener('click', () => {
+            clearCart();
+            updateCartUI(translations, savedLanguage);
+        });
+    }
 
     const productsGrid = document.querySelector('.products__grid');
     if (productsGrid) {
@@ -1408,15 +1416,17 @@ async function initApp() {
         });
     }
 
-    const cartDropdownItems = document.querySelector('.cart-dropdown__items');
-    if (cartDropdownItems) {
-        cartDropdownItems.addEventListener('click', (e) => {
-            if (e.target.classList.contains('cart-dropdown__item-remove')) {
-                const productId = e.target.dataset.id;
-                removeFromCart(productId);
-                updateCartUI(translations, savedLanguage);
-            }
-        });
+    if (!LANDING_MODE) {
+        const cartDropdownItems = document.querySelector('.cart-dropdown__items');
+        if (cartDropdownItems) {
+            cartDropdownItems.addEventListener('click', (e) => {
+                if (e.target.classList.contains('cart-dropdown__item-remove')) {
+                    const productId = e.target.dataset.id;
+                    removeFromCart(productId);
+                    updateCartUI(translations, savedLanguage);
+                }
+            });
+        }
     }
 
     // Fallback delegation for cart dropdown remove in environments where container listener wasn't bound
@@ -1431,15 +1441,17 @@ async function initApp() {
         }
     });
 
-    const cartItems = document.querySelector('.cart-items');
-    if (cartItems) {
-        cartItems.addEventListener('click', (e) => {
-            if (e.target.classList.contains('cart-item-remove')) {
-                const productId = e.target.dataset.id;
-                removeFromCart(productId);
-                updateCartUI(translations, savedLanguage);
-            }
-        });
+    if (!LANDING_MODE) {
+        const cartItems = document.querySelector('.cart-items');
+        if (cartItems) {
+            cartItems.addEventListener('click', (e) => {
+                if (e.target.classList.contains('cart-item-remove')) {
+                    const productId = e.target.dataset.id;
+                    removeFromCart(productId);
+                    updateCartUI(translations, savedLanguage);
+                }
+            });
+        }
     }
 
     const scrollToTopButton = document.querySelector('.scroll-to-top');
@@ -2791,8 +2803,8 @@ function setupHashRouting(initialLang) {
             }
         }
 
-        // Cart page route
-        if (hash === '#cart') {
+        // Cart page route (disabled in landing mode)
+        if (!LANDING_MODE && hash === '#cart') {
             loadComponent('main-container', 'components/cart-page.html').then(() => {
                 // Hide other sections, show main-container
                 showSection('hero-container', false);
@@ -2833,7 +2845,7 @@ function setupHashRouting(initialLang) {
         }
         
     const m = hash.match(/^#product-(.+)$/);
-        if (m) {
+        if (!LANDING_MODE && m) {
             const pid = m[1];
             ensureProductDetailLoaded().then(ok => {
                 if (!ok) return;
@@ -2857,7 +2869,7 @@ function setupHashRouting(initialLang) {
                     }
                 } catch { window.scrollTo({ top: 0, behavior: 'smooth' }); }
             });
-    } else if (hash === '#products') {
+    } else if (!LANDING_MODE && hash === '#products') {
             // Show products section
             showSection('hero-container', true);
             showSection('services-container', true);
@@ -2913,7 +2925,7 @@ function setupHashRouting(initialLang) {
             // Show main sections
             showSection('hero-container', true);
             showSection('services-container', true);
-            showSection('products-container', true);
+            if (!LANDING_MODE) showSection('products-container', true); else showSection('products-container', false);
             showSection('portfolio-container', true);
             showSection('contacts-container', true);
             showSection('product-detail-container', false);

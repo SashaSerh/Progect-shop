@@ -48,9 +48,7 @@
                 <li class="mobile-nav__item">
                     <a href="#services" class="mobile-nav__link" data-i18n="nav-services">Услуги</a>
                 </li>
-                <li class="mobile-nav__item">
-                    <a href="#products" class="mobile-nav__link" data-i18n="nav-products">Товары</a>
-                </li>
+                <!-- Удаляем каталог товаров для визитки -->
                 <li class="mobile-nav__item">
                     <a href="#about" class="mobile-nav__link" data-i18n="nav-about">О нас</a>
                 </li>
@@ -91,10 +89,7 @@
                     </ul>
                 </nav>
                 <div class="header__controls">
-                    <div class="header__collections">
-                        <span class="header-badge header-badge--favorite" id="favoriteBadge" data-label="Избранное" data-i18n-label="badge-favorites" hidden aria-live="polite" aria-atomic="true">0</span>
-                        <span class="header-badge header-badge--compare" id="compareBadge" data-label="Сравнение" data-i18n-label="badge-compare" hidden aria-live="polite" aria-atomic="true">0</span>
-                    </div>
+                    <!-- Коллекции отключены в режиме визитки -->
                     <a id="adminPageLink" href="#admin/products" class="btn" style="display:none" aria-label="Открыть админ-страницу" data-i18n="admin-link">Админка</a>
                     <button class="profile-button" id="profileButton" data-i18n="login" aria-label="Войти или профиль">Войти</button>
                     <button class="theme-toggle" aria-label="Переключить тему">
@@ -111,11 +106,7 @@
                     </span>
                     <span class="visually-hidden">ClimaTech</span>
                 </div>
-            <button class="catalog-button" id="catalogButton" aria-haspopup="true" aria-controls="catalogDropdown" aria-expanded="false" aria-label="Открыть меню каталога">
-                <span class="catalog-icon"><img src="icons/squares-button-of-view-options.svg" alt="" aria-hidden="true" style="width:24px;height:24px;vertical-align:middle;fill:currentColor;" /></span>
-                <span class="catalog-button__label" data-i18n="catalog">Каталог</span>
-                <span class="catalog-button__chevron" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span>
-            </button>
+            <!-- Кнопка каталога скрыта для визитки -->
             <div class="search-container">
                 <input type="search" id="site-search" data-i18n-placeholder="search-placeholder" placeholder="Поиск по сайту" aria-label="Поиск по сайту">
                 <button class="search-button" id="searchButton" aria-label="Искать">
@@ -126,15 +117,7 @@
                 <a href="tel:+380633353410" aria-label="Позвонить по номеру +380-63-335-34-10"><img src="icons/icon-phone512x512.svg" alt="icon phone" style="width: 16px; height: 16px; vertical-align: sub; fill: currentColor;">  +380-63-335-34-10</a>
                 <a href="tel:+380995543499" aria-label="Позвонить по номеру +380-99-554-34-99"><img src="icons/icon-phone512x512.svg" alt="icon phone" style="width: 16px; height: 16px; vertical-align: sub; fill: currentColor;">  +380-99-554-34-99</a>
             </div>
-            <button class="cart-button" id="openCartPage" aria-label="Открыть корзину" onclick="location.hash='#cart'">
-                <span class="cart-icon-wrapper">
-                    <span class="cart-icon" aria-hidden="true"><img src="icons/cart512x512.svg" alt="Корзина" style="width:28px;height:28px;vertical-align:middle; fill: currentColor;" /></span>
-                    <span class="cart-count" aria-live="polite" aria-atomic="true">0</span>
-                </span>
-                <span class="cart-text">
-                </span>
-                <span class="cart-dropdown-toggle" id="cartDropdownToggle" aria-controls="cartDropdown" aria-expanded="false" aria-label="Открыть выпадающее меню корзины"></span>
-            </button>
+            <!-- Кнопка корзины скрыта для визитки -->
             <button class="header__toggle" aria-controls="header-nav" aria-expanded="false" aria-label="Открыть меню навигации">
                 <span class="header__toggle-icon" aria-hidden="true"></span>
             </button>
@@ -156,29 +139,8 @@
     <div id="modalContent" aria-live="polite" aria-atomic="true"></div>
     </div>
 </div>
-<div class="cart-dropdown" id="cartDropdown" role="region" aria-label="Предпросмотр корзины" aria-hidden="true">
-    <ul class="cart-dropdown__items" aria-label="Элементы в корзине"></ul>
-    <div class="cart-dropdown__summary" data-i18n="cart-total" aria-live="polite" aria-atomic="true">Итого: $0.00</div>
-    <button class="cart-dropdown__button" id="openCartModal" data-i18n="cart-checkout">Оформить заказ</button>
-</div>
-<div class="catalog-dropdown" id="catalogDropdown" role="menu" aria-label="Меню каталога" aria-hidden="true">
-    <ul class="catalog-dropdown__list">
-        <li><a href="#category-conditioners">Кондиціонери</a></li>
-        <li><a href="#category-commercial-ac">Комерційні кондиціонери</a></li>
-        <li><a href="#category-multi-split">Мульти-спліт системи</a></li>
-        <li><a href="#category-indoor-units">Внутрішні блоки кондиціонера</a></li>
-        <li><a href="#category-outdoor-units">Зовнішні блоки кондиціонера</a></li>
-        <li><a href="#category-mobile-ac">Мобільні кондиціонери та моноблоки</a></li>
-        <li><a href="#category-fan-coils">Фанкойли</a></li>
-        <li><a href="#category-humidifiers">Зволожувачі повітря</a></li>
-        <li><a href="#category-air-purifiers">Очищувачі повітря</a></li>
-        <li><a href="#category-dehumidifiers">Осушувачі повітря</a></li>
-        <li><a href="#category-controllers">Регулятори та модулi</a></li>
-        <li><a href="#category-heat-pumps">Теплові насоси</a></li>
-        <li><a href="#category-electric-heaters">Електричні обігрівачі</a></li>
-        <li><a href="#category-accessories">Комплектуючі</a></li>
-    </ul>
-</div>
+<!-- cart dropdown отключён для визитки -->
+<!-- catalog dropdown отключён для визитки -->
 <div class="search-dropdown" id="searchDropdown" role="listbox" aria-label="Предложения поиска" aria-hidden="true">
     <ul class="search-dropdown__list"></ul>
 </div>

@@ -120,6 +120,24 @@ html { scroll-behavior: smooth; }
     to { transform: rotate(360deg); }
 }
 
+/* Service pages */
+.service-page { padding: clamp(16px, 4vw, 32px) 0; }
+.service-page__header { margin-bottom: 16px; }
+.service-page__title { font-size: clamp(20px, 2.4vw, 32px); margin: 0 0 8px; }
+.service-page__lead { color: var(--color-muted, #555); margin: 0; }
+.service-page__banner { margin: 16px 0; border-radius: 12px; overflow: hidden; background: var(--color-surface, #f5f5f5); }
+.service-page__banner img { display: block; width: 100%; height: auto; object-fit: cover; }
+.service-page__content { line-height: 1.6; display: grid; gap: 8px; }
+.service-benefits { list-style: none; padding: 0; margin: 16px 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; }
+.service-benefits__item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid var(--color-border, #e5e5e5); border-radius: 10px; background: var(--color-surface, #fff); }
+.service-benefits__item .icon { flex: 0 0 24px; }
+.service-page__gallery { margin-top: 8px; }
+.service-gallery { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+.service-gallery img { width: 100%; height: 100%; aspect-ratio: 4/3; object-fit: cover; border-radius: 10px; }
+.service-page__cta { margin-top: 16px; }
+.service-page .cta-group { display: flex; flex-wrap: wrap; gap: 8px; }
+.theme-dark .service-benefits__item { background: var(--color-surface, #161616); border-color: rgba(255,255,255,0.08); }
+
 /* Reviews & FAQ sections */
 .reviews { margin: clamp(28px, 8vw, 64px) 0; }
 .reviews__list { display:grid; grid-template-columns: repeat(auto-fit, minmax(240px,1fr)); gap: 16px; margin-bottom: 20px; }

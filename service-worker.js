@@ -1,5 +1,5 @@
-const CACHE_VERSION = 'v51'; // Incremented cache version
-const CACHE_NAME = 'climat-control-v83'; // bump: add service pages components
+const CACHE_VERSION = 'v52'; // Incremented cache version
+const CACHE_NAME = 'climat-control-v84'; // bump: css for service pages + i18n
 const urlsToCache = [
     '/',
     '/index.html',

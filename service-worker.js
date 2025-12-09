@@ -1,5 +1,5 @@
 const CACHE_VERSION = 'v51'; // Incremented cache version
-const CACHE_NAME = 'climat-control-v82'; // bump: marketing.js cta aria tweaks
+const CACHE_NAME = 'climat-control-v83'; // bump: add service pages components
 const urlsToCache = [
     '/',
     '/index.html',
@@ -28,6 +28,9 @@ const urlsToCache = [
     '/components/compare-modal.html',
     '/components/contacts.html',
     '/components/portfolio.html',
+    '/components/service-ac-install.html',
+    '/components/service-recuperator-install.html',
+    '/components/service-maintenance.html',
     '/components/case-1.html',
     '/components/case-2.html',
     '/components/case-3.html',

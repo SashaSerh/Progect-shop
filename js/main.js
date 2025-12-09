@@ -911,6 +911,10 @@ async function initApp() {
         loadComponent('hero-container', 'components/hero.html'),
         loadComponent('services-container', 'components/services.html'),
         loadComponent('portfolio-container', 'components/portfolio.html'),
+        // Service pages (separate sections)
+        loadComponent('service-ac-install-container', 'components/service-ac-install.html'),
+        loadComponent('service-recuperator-install-container', 'components/service-recuperator-install.html'),
+        loadComponent('service-maintenance-container', 'components/service-maintenance.html'),
         loadComponent('case-1-container', 'components/case-1.html'),
         loadComponent('case-2-container', 'components/case-2.html'),
         loadComponent('case-3-container', 'components/case-3.html'),

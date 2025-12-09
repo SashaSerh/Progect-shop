@@ -1826,6 +1826,7 @@ function setupServiceRouting() {
         'case-2-container',
         'case-3-container'
     ];
+    const CASE_HASHES = ['case-1','case-2','case-3'];
 
     function setHiddenById(id, hidden) {
         const el = document.getElementById(id);
@@ -1873,6 +1874,8 @@ function setupServiceRouting() {
         LANDING_CONTAINERS.forEach(id => setHiddenById(id, isServiceView));
         // Кейсы показываем ТОЛЬКО на страницах услуг
         CASE_CONTAINERS.forEach(id => setHiddenById(id, !isServiceView));
+        // Хлебные крошки показываем только для кейсов
+        setHiddenById('breadcrumbs-container', !CASE_HASHES.includes(hash));
 
         // Всегда показать все сервисные секции по умолчанию (а ниже скроем лишнее)
         Object.values(SERVICE_MAP).forEach(id => setHiddenById(id, false));
@@ -1896,6 +1899,8 @@ function setupServiceRouting() {
             Object.values(SERVICE_MAP).forEach(id => setHiddenById(id, true));
             // Кейсы скрываем на лендинге
             CASE_CONTAINERS.forEach(id => setHiddenById(id, true));
+            // Хлебные крошки скрыть
+            setHiddenById('breadcrumbs-container', true);
             scrollToSectionTop('services');
             setActiveNav('services');
             focusSectionHeading('services', 'h2');
@@ -1909,6 +1914,8 @@ function setupServiceRouting() {
         Object.values(SERVICE_MAP).forEach(id => setHiddenById(id, true));
         // Кейсы скрываем на главной
         CASE_CONTAINERS.forEach(id => setHiddenById(id, true));
+        // Хлебные крошки скрыть
+        setHiddenById('breadcrumbs-container', true);
     }
 
     window.addEventListener('hashchange', applyRoute, { passive: true });

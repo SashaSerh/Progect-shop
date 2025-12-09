@@ -121,6 +121,15 @@ html { scroll-behavior: smooth; }
 }
 
 /* Service pages */
+.service-page {
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 180ms ease-out, transform 180ms ease-out;
+}
+.service-page.service-page--visible {
+    opacity: 1;
+    transform: translateY(0);
+}
 .service-page { padding: clamp(16px, 4vw, 32px) 0; }
 .service-page__header { margin-bottom: 16px; }
 .service-page__title { font-size: clamp(20px, 2.4vw, 32px); margin: 0 0 8px; }

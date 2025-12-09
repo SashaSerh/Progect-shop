@@ -1881,9 +1881,20 @@ function setupServiceRouting() {
         Object.values(SERVICE_MAP).forEach(id => setHiddenById(id, true));
 
         if (isServiceView) {
-            // Показать только нужную сервисную секцию
+            // Показать только нужную сервисную секцию с анимацией
             const onlyId = targetContainerId;
             setHiddenById(onlyId, false);
+            try {
+                const section = document.getElementById(onlyId)?.querySelector('.service-page');
+                if (section) {
+                    // Сброс анимации
+                    section.classList.remove('service-page--visible');
+                    // В следующем кадре включить класс видимости
+                    requestAnimationFrame(() => {
+                        section.classList.add('service-page--visible');
+                    });
+                }
+            } catch(_) { /* noop */ }
             scrollToSectionTop(targetContainerId);
             setActiveNav('services');
             // Фокус на заголовке страницы услуги
@@ -1910,7 +1921,13 @@ function setupServiceRouting() {
         setActiveNav('');
         // На главной скрываем подробные страницы услуг, показываем лендинг
         LANDING_CONTAINERS.forEach(id => setHiddenById(id, false));
-        Object.values(SERVICE_MAP).forEach(id => setHiddenById(id, true));
+        Object.values(SERVICE_MAP).forEach(id => {
+            setHiddenById(id, true);
+            try {
+                const section = document.getElementById(id)?.querySelector('.service-page');
+                if (section) section.classList.remove('service-page--visible');
+            } catch(_) {}
+        });
         // Кейсы скрываем на главной
         CASE_CONTAINERS.forEach(id => setHiddenById(id, true));
         // Хлебные крошки скрыть

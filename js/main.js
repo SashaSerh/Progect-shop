@@ -937,6 +937,9 @@ async function initApp() {
 
     // Делегирование кликов по карточкам услуг на переход к соответствующей странице
     initServiceCardsNavigation();
+    
+    // FAB для связи
+    initFabContact();
 
     // Cart modal open is deprecated in favor of dedicated cart page
     const openCartModalButton = document.querySelector('#openCartModal');
@@ -1942,89 +1945,84 @@ function setupServiceRouting() {
 function initServiceCardsNavigation() {
     const host = document.getElementById('services-container');
     if (!host) return;
-    // Клик/тач раскрывает круглые кнопки, навигация убрана (кроме кнопки «Подробнее»)
-    let pressTimer = null;
-    let pressedCard = null;
-
-    const openActions = (card) => {
-        if (!card) return;
-        const isOpen = true;
-        card.classList.add('is-open');
-        card.setAttribute('aria-expanded', String(isOpen));
-        const actions = card.querySelector('.service-card__actions');
-        if (actions) actions.setAttribute('aria-hidden', 'false');
-        // Закрыть остальные открытые карточки, чтобы не перекрывались
-        card.parentElement?.querySelectorAll('.service-card.is-open').forEach((c) => {
-            if (c !== card) {
-                c.classList.remove('is-open');
-                c.setAttribute('aria-expanded', 'false');
-                const a = c.querySelector('.service-card__actions');
-                if (a) a.setAttribute('aria-hidden', 'true');
-            }
-        });
-    };
-
-    const closeActions = (card) => {
-        if (!card) return;
-        // Запускаем анимацию закрытия и после завершения убираем класс
-        card.classList.add('is-closing');
-        card.classList.remove('is-open');
-        card.setAttribute('aria-expanded', 'false');
-        const actions = card.querySelector('.service-card__actions');
-        if (actions) actions.setAttribute('aria-hidden', 'true');
-        const onAnimEnd = () => {
-            card.classList.remove('is-closing');
-            card.removeEventListener('animationend', onAnimEnd);
-        };
-        card.addEventListener('animationend', onAnimEnd);
-    };
-
-    // Навигацию оставляем только на circle-action--more
+    
+    // Клик по карточке — переход на страницу услуги
     host.addEventListener('click', (e) => {
-        const more = e.target.closest('.circle-action--more');
-        if (more) return; // браузер сам перейдёт по ссылке
-    }, { passive: true });
-
-    host.addEventListener('mousedown', (e) => {
-        const card = e.target.closest('.service-card');
+        const card = e.target.closest('.service-card[role="link"]');
         if (!card) return;
-        pressedCard = card;
-        // мгновенное раскрытие
-        openActions(card);
-        pressTimer = null;
-    }, { passive: true });
-
-    host.addEventListener('mouseup', (e) => {
-        // no-op; оставляем кнопки раскрытыми
-    }, { passive: true });
-
-    host.addEventListener('touchstart', (e) => {
-        const card = e.target.closest('.service-card');
-        if (!card) return;
-        pressedCard = card;
-        openActions(card);
-    }, { passive: true });
-
-    host.addEventListener('touchend', (e) => {
-        // no-op
-    }, { passive: true });
-
-    // Enter/Space — раскрыть (без навигации)
+        const target = card.getAttribute('data-target');
+        if (target) {
+            location.hash = target;
+        }
+    });
+    
+    // Enter/Space — переход на страницу
     host.addEventListener('keydown', (e) => {
-        const card = e.target.closest('.service-card');
+        const card = e.target.closest('.service-card[role="link"]');
         if (!card) return;
         if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
-            if (card.classList.contains('is-open')) closeActions(card); else openActions(card);
+            const target = card.getAttribute('data-target');
+            if (target) location.hash = target;
         }
     }, { passive: false });
+}
 
-    // Клик вне карточки — закрыть открытые действия
+// FAB (Floating Action Button) — раскрытие/скрытие кнопок связи
+function initFabContact() {
+    const fab = document.getElementById('fab-contact');
+    if (!fab) return;
+    
+    const trigger = fab.querySelector('.fab-trigger');
+    const actions = fab.querySelector('.fab-actions');
+    const floatingButtons = document.querySelector('.floating-buttons');
+    if (!trigger || !actions) return;
+    
+    const open = () => {
+        fab.classList.add('is-open');
+        trigger.setAttribute('aria-expanded', 'true');
+        actions.setAttribute('aria-hidden', 'false');
+        if (floatingButtons) floatingButtons.classList.add('fab-open');
+    };
+    
+    const close = () => {
+        fab.classList.add('is-closing');
+        fab.classList.remove('is-open');
+        trigger.setAttribute('aria-expanded', 'false');
+        actions.setAttribute('aria-hidden', 'true');
+        if (floatingButtons) floatingButtons.classList.remove('fab-open');
+        const onEnd = () => {
+            fab.classList.remove('is-closing');
+            fab.removeEventListener('animationend', onEnd);
+        };
+        fab.addEventListener('animationend', onEnd);
+        // Fallback
+        setTimeout(() => fab.classList.remove('is-closing'), 400);
+    };
+    
+    trigger.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (fab.classList.contains('is-open')) {
+            close();
+        } else {
+            open();
+        }
+    });
+    
+    // Закрыть при клике вне FAB
     document.addEventListener('click', (e) => {
-        const anyCard = e.target.closest('.service-card');
-        if (anyCard) return; // клики внутри карточек не закрывают
-        host.querySelectorAll('.service-card.is-open').forEach((c) => closeActions(c));
-    }, { passive: true });
+        if (!fab.contains(e.target) && fab.classList.contains('is-open')) {
+            close();
+        }
+    });
+    
+    // Esc закрывает
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && fab.classList.contains('is-open')) {
+            close();
+            trigger.focus();
+        }
+    });
 }
 
 // Run initApp immediately if document already parsed (tests import the module), otherwise wait for DOMContentLoaded

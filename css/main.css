@@ -1618,87 +1618,195 @@ body {
     outline-offset: var(--focus-ring-offset);
 }
 
-/* Круглые экшен-кнопки на карточках услуг */
-.service-card {
-    position: relative;
-    cursor: pointer;
+/* FAB (Floating Action Button) для связи */
+.fab-container {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    z-index: 1000;
 }
-.service-card__actions {
-    position: absolute;
-    right: -24px; /* частично за пределами карточки */
-    bottom: -24px; /* частично за пределами карточки */
-    width: 200px; /* больше радиус для вихря */
-    height: 200px;
-    pointer-events: none;
+.fab-trigger {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--accent-color, #007aff);
+    color: #fff;
+    border: none;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 200ms ease, box-shadow 200ms ease, background 200ms ease;
+    position: relative;
     z-index: 2;
 }
-.service-card__actions .circle-action {
-    position: absolute;
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    background: var(--button-bg);
-    color: var(--button-color);
-    box-shadow: 0 6px 16px rgba(0,0,0,0.25);
-    border: 1px solid var(--button-border);
-    transform: scale(0.8) translate(-50%, -50%);
-    opacity: 0;
-    transition: transform 280ms ease, opacity 280ms ease;
-    pointer-events: auto;
-    z-index: 3;
+.fab-trigger:hover {
+    transform: scale(1.08);
+    box-shadow: 0 6px 24px rgba(0,0,0,0.3);
 }
-.service-card__actions .circle-action .icon { width: 22px; height: 22px; display:block; margin: 11px auto; }
+.fab-trigger:active {
+    transform: scale(0.95);
+}
+.fab-trigger__icon {
+    transition: opacity 200ms ease, transform 200ms ease;
+}
+.fab-trigger__icon--close {
+    position: absolute;
+    opacity: 0;
+    transform: rotate(-90deg);
+}
+.fab-container.is-open .fab-trigger__icon--default {
+    opacity: 0;
+    transform: rotate(90deg);
+}
+.fab-container.is-open .fab-trigger__icon--close {
+    opacity: 1;
+    transform: rotate(0deg);
+}
+.fab-container.is-open .fab-trigger {
+    background: #374151;
+}
+
+/* FAB actions — кнопки связи */
+.fab-actions {
+    position: absolute;
+    bottom: 70px;
+    right: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    pointer-events: none;
+}
+.fab-action {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.2);
+    opacity: 0;
+    transform: scale(0.5) translateY(20px);
+    transition: opacity 180ms ease, transform 180ms ease, box-shadow 150ms ease;
+    pointer-events: none;
+}
+.fab-action .icon {
+    width: 24px;
+    height: 24px;
+}
+.fab-container.is-open .fab-actions {
+    pointer-events: auto;
+}
+.fab-container.is-open .fab-action {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    pointer-events: auto;
+}
+/* Stagger animation */
+.fab-container.is-open .fab-action:nth-child(1) { transition-delay: 0ms; }
+.fab-container.is-open .fab-action:nth-child(2) { transition-delay: 40ms; }
+.fab-container.is-open .fab-action:nth-child(3) { transition-delay: 80ms; }
+.fab-container.is-open .fab-action:nth-child(4) { transition-delay: 120ms; }
+.fab-container.is-open .fab-action:nth-child(5) { transition-delay: 160ms; }
+.fab-container.is-open .fab-action:nth-child(6) { transition-delay: 200ms; }
+
+/* Closing animation — обратный порядок */
+.fab-container.is-closing .fab-action:nth-child(6) { transition-delay: 0ms; }
+.fab-container.is-closing .fab-action:nth-child(5) { transition-delay: 40ms; }
+.fab-container.is-closing .fab-action:nth-child(4) { transition-delay: 80ms; }
+.fab-container.is-closing .fab-action:nth-child(3) { transition-delay: 120ms; }
+.fab-container.is-closing .fab-action:nth-child(2) { transition-delay: 160ms; }
+.fab-container.is-closing .fab-action:nth-child(1) { transition-delay: 200ms; }
+
+/* FAB action colors */
+.fab-action--phone { background: #10B981; color: #fff; }
+.fab-action--wa { background: #25D366; color: #fff; }
+.fab-action--tg { background: #0088cc; color: #fff; }
+.fab-action--viber { background: #7360F2; color: #fff; }
+.fab-action--instagram { background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fd5949 45%, #d6249f 60%, #285AEB 90%); color: #fff; }
+.fab-action--facebook { background: #1877F2; color: #fff; }
+
+.fab-action:hover {
+    transform: scale(1.12) translateY(0);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+}
 
 @media (prefers-reduced-motion: reduce) {
-    .service-page { transition: none; transform: none; }
-    .service-card__actions .circle-action { transition: none; }
+    .fab-trigger, .fab-action, .fab-trigger__icon { transition: none; }
 }
-.service-card.is-open .service-card__actions .circle-action {
-    opacity: 1;
-    transform: scale(1) translate(-50%, -50%) rotate(0deg);
-}
-@keyframes swirl-pop {
-    0% { opacity: 0; transform: scale(0.6) translate(-50%, -50%) rotate(-35deg); }
-    100% { opacity: 1; transform: scale(1) translate(-50%, -50%) rotate(0deg); }
-}
-@keyframes swirl-hide {
-    0% { opacity: 1; transform: scale(1) translate(-50%, -50%) rotate(0deg); }
-    100% { opacity: 0; transform: scale(0.6) translate(-50%, -50%) rotate(35deg); }
-}
-/* Стагер по порядку, создаёт эффект вихря */
-.service-card.is-open .service-card__actions .circle-action:nth-child(1) { animation: swirl-pop 220ms ease-out 0ms both; }
-.service-card.is-open .service-card__actions .circle-action:nth-child(2) { animation: swirl-pop 220ms ease-out 60ms both; }
-.service-card.is-open .service-card__actions .circle-action:nth-child(3) { animation: swirl-pop 220ms ease-out 120ms both; }
-.service-card.is-open .service-card__actions .circle-action:nth-child(4) { animation: swirl-pop 220ms ease-out 180ms both; }
-.service-card.is-open .service-card__actions .circle-action:nth-child(5) { animation: swirl-pop 220ms ease-out 240ms both; }
-.service-card.is-open .service-card__actions .circle-action:nth-child(6) { animation: swirl-pop 220ms ease-out 300ms both; }
-.service-card.is-open .service-card__actions .circle-action:nth-child(7) { animation: swirl-pop 220ms ease-out 360ms both; }
 
-/* Анимация скрытия с обратным стагером */
-.service-card.is-closing .service-card__actions .circle-action:nth-child(1) { animation: swirl-hide 200ms ease-in 360ms both; }
-.service-card.is-closing .service-card__actions .circle-action:nth-child(2) { animation: swirl-hide 200ms ease-in 300ms both; }
-.service-card.is-closing .service-card__actions .circle-action:nth-child(3) { animation: swirl-hide 200ms ease-in 240ms both; }
-.service-card.is-closing .service-card__actions .circle-action:nth-child(4) { animation: swirl-hide 200ms ease-in 180ms both; }
-.service-card.is-closing .service-card__actions .circle-action:nth-child(5) { animation: swirl-hide 200ms ease-in 120ms both; }
-.service-card.is-closing .service-card__actions .circle-action:nth-child(6) { animation: swirl-hide 200ms ease-in 60ms both; }
-.service-card.is-closing .service-card__actions .circle-action:nth-child(7) { animation: swirl-hide 200ms ease-in 0ms both; }
-/* Раскладка по окружности (вихрь) */
-.service-card__actions .circle-action:nth-child(1) { left: 20%; top: 20%; }
-.service-card__actions .circle-action:nth-child(2) { left: 80%; top: 25%; }
-.service-card__actions .circle-action:nth-child(3) { left: 22%; top: 80%; }
-.service-card__actions .circle-action:nth-child(4) { left: 78%; top: 82%; }
-.service-card__actions .circle-action:nth-child(5) { left: 50%; top: 6%; }
-.service-card__actions .circle-action:nth-child(6) { left: 94%; top: 50%; }
-.service-card__actions .circle-action:nth-child(7) { left: 50%; top: 94%; }
-/* Цвета */
-.circle-action--call { background: var(--accent-color, #007aff); color: #fff; }
-.circle-action--wa { background: #25D366; color: #fff; }
-.circle-action--tg { background: #0088cc; color: #fff; }
-.circle-action--viber { background: #7360F2; color: #fff; }
-.circle-action--instagram { background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fd5949 45%, #d6249f 60%, #285AEB 90%); color: #fff; }
-.circle-action--facebook { background: #1877F2; color: #fff; }
-.circle-action--phone { background: #10B981; color: #fff; }
-.circle-action--more { background: #374151; color: #fff; }
+/* Мобильный Arc (полукруг) — кнопки веером влево-вверх */
+@media (max-width: 768px) {
+    .fab-actions {
+        bottom: auto;
+        right: auto;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        flex-direction: row;
+        gap: 0;
+        width: 0;
+        height: 0;
+    }
+    
+    .fab-action {
+        position: absolute;
+        width: 44px;
+        height: 44px;
+        /* Начальное положение — в центре FAB */
+        transform: scale(0.3) translate(0, 0);
+    }
+    
+    .fab-action .icon {
+        width: 22px;
+        height: 22px;
+    }
+    
+    /* Arc позиции — полукруг с радиусом ~90px, от 180° до 270° (влево-вверх) */
+    /* 6 кнопок распределены по дуге с шагом ~18° */
+    .fab-container.is-open .fab-action:nth-child(1) {
+        /* 180° — прямо влево */
+        transform: scale(1) translate(-95px, 0);
+    }
+    .fab-container.is-open .fab-action:nth-child(2) {
+        /* 198° */
+        transform: scale(1) translate(-90px, -30px);
+    }
+    .fab-container.is-open .fab-action:nth-child(3) {
+        /* 216° */
+        transform: scale(1) translate(-76px, -58px);
+    }
+    .fab-container.is-open .fab-action:nth-child(4) {
+        /* 234° */
+        transform: scale(1) translate(-55px, -80px);
+    }
+    .fab-container.is-open .fab-action:nth-child(5) {
+        /* 252° */
+        transform: scale(1) translate(-28px, -95px);
+    }
+    .fab-container.is-open .fab-action:nth-child(6) {
+        /* 270° — прямо вверх */
+        transform: scale(1) translate(0, -100px);
+    }
+    
+    .fab-action:hover {
+        /* На мобильных без смещения Y */
+        transform: scale(1.15) translate(var(--arc-x, 0), var(--arc-y, 0));
+    }
+    
+    /* CSS переменные для hover — сохраняем позицию */
+    .fab-container.is-open .fab-action:nth-child(1) { --arc-x: -95px; --arc-y: 0; }
+    .fab-container.is-open .fab-action:nth-child(2) { --arc-x: -90px; --arc-y: -30px; }
+    .fab-container.is-open .fab-action:nth-child(3) { --arc-x: -76px; --arc-y: -58px; }
+    .fab-container.is-open .fab-action:nth-child(4) { --arc-x: -55px; --arc-y: -80px; }
+    .fab-container.is-open .fab-action:nth-child(5) { --arc-x: -28px; --arc-y: -95px; }
+    .fab-container.is-open .fab-action:nth-child(6) { --arc-x: 0; --arc-y: -100px; }
+}
+
+/* Скрыть FAB на сервисных страницах (там есть свои CTA) */
+.service-page--visible ~ .fab-container { display: none; }
 
 .header__nav {
     display: flex;
@@ -3784,97 +3892,73 @@ textarea.form-input { resize: vertical; min-height: 120px; }
 .floating-buttons {
     position: fixed;
     right: var(--fab-right, 24px);
-    bottom: var(--fab-bottom, 32px);
-  display: flex;
-  flex-direction: column;
+    bottom: 90px; /* Выше FAB кнопки */
+    display: flex;
+    flex-direction: column;
     gap: var(--fab-gap, 12px);
-  z-index: 1000;
-  align-items: center; /* Центрируем кнопки для идеального выравнивания */
+    z-index: 999; /* Ниже FAB */
+    align-items: center; /* Центрируем кнопки для идеального выравнивания */
+    transition: bottom 300ms ease, transform 300ms ease;
+}
+
+/* Смещение вверх при открытом FAB меню (только десктоп) */
+@media (min-width: 769px) {
+    .floating-buttons.fab-open {
+        bottom: 460px; /* Поднимаем выше открытого меню FAB (6 кнопок × ~60px + отступы) */
+    }
 }
 
 @media (max-width: 768px) {
   .floating-buttons {
-    bottom: 110px; /* Поднимаем всю группу выше мобильной навигации */
+    bottom: 170px; /* Поднимаем всю группу выше мобильной навигации и FAB */
     gap: 12px;
   }
 }
 
 /* Дополнительные стили для кнопок */
 .scroll-to-top {
-  /* Стилизуем кнопку "наверх" с адаптивными цветами */
-        width: 56px;
-        height: 56px;
-        background: #007B9E; /* Цвет для темной темы */
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 4px 15px rgba(0, 123, 158, 0.3);
-  order: 2; /* Кнопка "наверх" будет снизу */
-        position: relative; /* Убираем fixed позиционирование */
-  font-size: 24px; /* Одинаковый размер иконки */
-  border-radius: 50%;
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-        transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+    /* Стилизуем кнопку "наверх" как FAB */
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--accent-color, #007aff);
+    color: #fff;
+    border: none;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    order: 2;
+    position: relative;
+    transition: transform 200ms ease, box-shadow 200ms ease, background 200ms ease;
+}
+
+.scroll-to-top:hover {
+    transform: scale(1.08);
+    box-shadow: 0 6px 24px rgba(0,0,0,0.3);
+}
+
+.scroll-to-top:active {
+    transform: scale(0.95);
 }
 
 /* Цвета для светлой темы */
 .light-theme .scroll-to-top {
-  background: #00A8E8 !important;
-  box-shadow: 0 4px 15px rgba(0, 168, 232, 0.3);
+    background: var(--accent-color, #00A8E8);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.25);
 }
 
 .light-theme .scroll-to-top:hover {
-  background: #0085B8 !important; /* Темнее на 20% от #00A8E8 */
-  box-shadow: 0 6px 20px rgba(0, 133, 184, 0.4);
+    transform: scale(1.08);
+    box-shadow: 0 6px 24px rgba(0,0,0,0.3);
 }
 
 .scroll-to-top.visible {
     opacity: 1;
     transform: translateY(0);
     pointer-events: auto;
-}
-
-.fab {
-  /* FAB с адаптивными цветами */
-        width: 56px;
-        height: 56px;
-        background: #007B9E; /* Цвет для темной темы */
-  box-shadow: 0 4px 15px rgba(0, 123, 158, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  order: 1; /* FAB будет сверху */
-        position: relative; /* Убираем fixed позиционирование */
-  font-size: 24px; /* Одинаковый размер иконки */
-  border-radius: 50%;
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-        transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
-  border: none;
-}
-
-/* Цвета для светлой темы */
-.light-theme .fab {
-  background: #00A8E8 !important;
-  box-shadow: 0 4px 15px rgba(0, 168, 232, 0.3);
-}
-
-.light-theme .fab:hover {
-  background: #0085B8 !important; /* Темнее на 20% от #00A8E8 */
-  box-shadow: 0 6px 20px rgba(0, 133, 184, 0.4);
-}
-
-.fab:hover {
-  transform: scale(1.1);
-  box-shadow: 0 6px 20px rgba(0, 107, 138, 0.4);
-  background: #006B8A !important; /* Цвет hover для темной темы */
 }
 
 /* Glassmorphism эффекты */

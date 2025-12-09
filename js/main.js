@@ -932,6 +932,12 @@ async function initApp() {
     // Применяем тему по умолчанию (теперь светлая) и синхронизируем иконки/ARIA
     try { initTheme(); } catch(_) {}
 
+    // Простая маршрутизация для сервисных страниц: показываем только выбранную секцию
+    setupServiceRouting();
+
+    // Делегирование кликов по карточкам услуг на переход к соответствующей странице
+    initServiceCardsNavigation();
+
     // Cart modal open is deprecated in favor of dedicated cart page
     const openCartModalButton = document.querySelector('#openCartModal');
     if (openCartModalButton) {
@@ -1797,6 +1803,86 @@ function changeLogoColorScheme(scheme) {
     
     // Сохраняем выбор в localStorage
     localStorage.setItem('logoColorScheme', scheme || 'default');
+}
+
+function setupServiceRouting() {
+    const SERVICE_MAP = {
+        'service-ac-install': 'service-ac-install-container',
+        'service-recuperator-install': 'service-recuperator-install-container',
+        'service-maintenance': 'service-maintenance-container'
+    };
+    const LANDING_CONTAINERS = [
+        'hero-container',
+        'services-container',
+        'portfolio-container',
+        'case-1-container',
+        'case-2-container',
+        'case-3-container',
+        'reviews-container',
+        'faq-container',
+        'contacts-container',
+        'breadcrumbs-container',
+        'welcome-container'
+    ];
+
+    function setHiddenById(id, hidden) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        if (hidden) el.setAttribute('hidden', ''); else el.removeAttribute('hidden');
+    }
+
+    function applyRoute() {
+        const hash = (location.hash || '').replace('#', '');
+        const targetContainerId = SERVICE_MAP[hash];
+        const isServiceView = Boolean(targetContainerId);
+
+        // Скрыть/показать лендинговые контейнеры
+        LANDING_CONTAINERS.forEach(id => setHiddenById(id, isServiceView));
+
+        // Скрыть все сервисные секции сначала
+        Object.values(SERVICE_MAP).forEach(id => setHiddenById(id, false));
+        // Если сервисный вид — показать только целевой, остальные скрыть
+        if (isServiceView) {
+            Object.entries(SERVICE_MAP).forEach(([key, containerId]) => {
+                setHiddenById(containerId, key !== hash);
+            });
+            // Скролл к началу секции с учётом хедера
+            const el = document.getElementById(targetContainerId);
+            if (el) {
+                const headerH = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--header-height')) || 60;
+                const top = el.offsetTop - headerH;
+                window.scrollTo({ top: Math.max(0, top), behavior: 'instant' });
+            }
+        }
+    }
+
+    window.addEventListener('hashchange', applyRoute, { passive: true });
+    // Применить текущий маршрут сразу
+    applyRoute();
+}
+
+function initServiceCardsNavigation() {
+    const host = document.getElementById('services-container');
+    if (!host) return;
+    host.addEventListener('click', (e) => {
+        const ctas = e.target.closest('.service-card__ctas');
+        if (ctas) return; // клики по CTA не перенаправляют
+        const card = e.target.closest('.service-card[role="link"]');
+        if (!card) return;
+        const target = card.getAttribute('data-target');
+        if (target) {
+            location.hash = target;
+        }
+    });
+    host.addEventListener('keydown', (e) => {
+        const card = e.target.closest('.service-card[role="link"]');
+        if (!card) return;
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            const target = card.getAttribute('data-target');
+            if (target) location.hash = target;
+        }
+    }, { passive: false });
 }
 
 // Run initApp immediately if document already parsed (tests import the module), otherwise wait for DOMContentLoaded

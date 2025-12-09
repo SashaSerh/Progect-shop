@@ -3240,10 +3240,16 @@ function bindProductCardNavigation() {
 
 // Ненавязчивый тост по активации нового SW
 function showUpdateToast() {
-    // Используем общий механизм тостов и i18n
-    const message = translateKey('toast-update-installed');
-    // Короткое авто‑скрытие, без действий — просто уведомление
-    showActionToast({ message: message || 'Обновление установлено', type: 'success', duration: 2400 });
+    const message = translateKey('toast-update-installed') || 'Обновление установлено';
+    const reloadLabel = translateKey('toast-reload') || 'Обновить';
+    showActionToast({
+        message,
+        type: 'success',
+        actions: [
+            { label: reloadLabel, ariaLabel: reloadLabel, handler: () => { try { location.reload(); } catch (_) {} }, autoClose: true }
+        ],
+        duration: 5000
+    });
 }
 
 // ====== SEO/OG/Twitter helpers ======

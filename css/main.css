@@ -137,6 +137,12 @@ html { scroll-behavior: smooth; }
 .service-page__cta { margin-top: 16px; }
 .service-page .cta-group { display: flex; flex-wrap: wrap; gap: 8px; }
 .theme-dark .service-benefits__item { background: var(--color-surface, #161616); border-color: rgba(255,255,255,0.08); }
+/* Кликабельные карточки услуг: указатель и фокус */
+.service-card[role="link"] { cursor: pointer; }
+.service-card[role="link"]:focus { outline: 2px solid var(--accent-color, #007aff); outline-offset: 4px; }
+.service-card[role="link"]:focus-visible { outline: 2px solid var(--accent-color, #007aff); outline-offset: 4px; }
+/* Кнопка возврата на главную в сервисных секциях */
+.service-page__back { margin: 0 0 1rem; }
 
 /* Reviews & FAQ sections */
 .reviews { margin: clamp(28px, 8vw, 64px) 0; }

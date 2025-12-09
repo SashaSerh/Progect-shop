@@ -1639,6 +1639,11 @@ body {
     background: rgba(0, 0, 0, 0.1);
 }
 
+.header__nav-link.active {
+    background: var(--accent-color, #007aff);
+    color: #fff;
+}
+
 .header__controls {
     display: flex;
     align-items: center;

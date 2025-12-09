@@ -1831,6 +1831,37 @@ function setupServiceRouting() {
         if (hidden) el.setAttribute('hidden', ''); else el.removeAttribute('hidden');
     }
 
+    function setActiveNav(target) {
+        try {
+            const links = document.querySelectorAll('.header__nav-link, .mobile-nav__link');
+            links.forEach(a => a.classList.remove('active'));
+            const selector = target ? `a[href="#${target}"]` : '';
+            if (selector) {
+                document.querySelectorAll(`.header__nav-link${selector.startsWith('a') ? selector.replace('a', '') : selector}, .mobile-nav__link${selector.startsWith('a') ? selector.replace('a', '') : selector}`).forEach(a => a.classList.add('active'));
+            }
+        } catch (_) { /* noop */ }
+    }
+
+    function focusSectionHeading(sectionId, headingSelector = 'h2') {
+        const section = document.getElementById(sectionId);
+        if (!section) return;
+        const heading = section.querySelector(headingSelector);
+        if (!heading) return;
+        const prevTab = heading.getAttribute('tabindex');
+        heading.setAttribute('tabindex', '-1');
+        try { heading.focus({ preventScroll: true }); } catch(_) {}
+        // вернуть исходный tabindex
+        if (prevTab === null) heading.removeAttribute('tabindex'); else heading.setAttribute('tabindex', prevTab);
+    }
+
+    function scrollToSectionTop(sectionId) {
+        const el = document.getElementById(sectionId);
+        if (!el) return;
+        const headerH = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--header-height')) || 60;
+        const top = el.offsetTop - headerH;
+        window.scrollTo({ top: Math.max(0, top), behavior: 'instant' });
+    }
+
     function applyRoute() {
         const hash = (location.hash || '').replace('#', '');
         const targetContainerId = SERVICE_MAP[hash];
@@ -1839,21 +1870,37 @@ function setupServiceRouting() {
         // Скрыть/показать лендинговые контейнеры
         LANDING_CONTAINERS.forEach(id => setHiddenById(id, isServiceView));
 
-        // Скрыть все сервисные секции сначала
+        // Всегда показать все сервисные секции по умолчанию (а ниже скроем лишнее)
         Object.values(SERVICE_MAP).forEach(id => setHiddenById(id, false));
-        // Если сервисный вид — показать только целевой, остальные скрыть
+
         if (isServiceView) {
+            // Показать только нужную сервисную секцию
             Object.entries(SERVICE_MAP).forEach(([key, containerId]) => {
                 setHiddenById(containerId, key !== hash);
             });
-            // Скролл к началу секции с учётом хедера
-            const el = document.getElementById(targetContainerId);
-            if (el) {
-                const headerH = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--header-height')) || 60;
-                const top = el.offsetTop - headerH;
-                window.scrollTo({ top: Math.max(0, top), behavior: 'instant' });
-            }
+            scrollToSectionTop(targetContainerId);
+            setActiveNav('services');
+            // Фокус на заголовке страницы услуги
+            focusSectionHeading(targetContainerId, 'h2');
+            return;
         }
+
+        // Якорь секции услуг или возвращение на лендинг
+        if (hash === 'services') {
+            LANDING_CONTAINERS.forEach(id => setHiddenById(id, false));
+            // Скрыть сервисные разделы полностью
+            Object.values(SERVICE_MAP).forEach(id => setHiddenById(id, true));
+            scrollToSectionTop('services');
+            setActiveNav('services');
+            focusSectionHeading('services', 'h2');
+            return;
+        }
+
+        // Прочие якоря лендинга: просто снять актив и ничего не прятать дополнительно
+        setActiveNav('');
+        // На главной скрываем подробные страницы услуг, показываем лендинг
+        LANDING_CONTAINERS.forEach(id => setHiddenById(id, false));
+        Object.values(SERVICE_MAP).forEach(id => setHiddenById(id, true));
     }
 
     window.addEventListener('hashchange', applyRoute, { passive: true });

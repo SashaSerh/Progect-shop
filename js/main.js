@@ -1877,14 +1877,13 @@ function setupServiceRouting() {
         // Хлебные крошки показываем только для кейсов
         setHiddenById('breadcrumbs-container', !CASE_HASHES.includes(hash));
 
-        // Всегда показать все сервисные секции по умолчанию (а ниже скроем лишнее)
-        Object.values(SERVICE_MAP).forEach(id => setHiddenById(id, false));
+        // По умолчанию скрыть все сервисные секции
+        Object.values(SERVICE_MAP).forEach(id => setHiddenById(id, true));
 
         if (isServiceView) {
             // Показать только нужную сервисную секцию
-            Object.entries(SERVICE_MAP).forEach(([key, containerId]) => {
-                setHiddenById(containerId, key !== hash);
-            });
+            const onlyId = targetContainerId;
+            setHiddenById(onlyId, false);
             scrollToSectionTop(targetContainerId);
             setActiveNav('services');
             // Фокус на заголовке страницы услуги

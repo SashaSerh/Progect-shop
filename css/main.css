@@ -1618,6 +1618,88 @@ body {
     outline-offset: var(--focus-ring-offset);
 }
 
+/* Круглые экшен-кнопки на карточках услуг */
+.service-card {
+    position: relative;
+    cursor: pointer;
+}
+.service-card__actions {
+    position: absolute;
+    right: -24px; /* частично за пределами карточки */
+    bottom: -24px; /* частично за пределами карточки */
+    width: 200px; /* больше радиус для вихря */
+    height: 200px;
+    pointer-events: none;
+    z-index: 2;
+}
+.service-card__actions .circle-action {
+    position: absolute;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--button-bg);
+    color: var(--button-color);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.25);
+    border: 1px solid var(--button-border);
+    transform: scale(0.8) translate(-50%, -50%);
+    opacity: 0;
+    transition: transform 280ms ease, opacity 280ms ease;
+    pointer-events: auto;
+    z-index: 3;
+}
+.service-card__actions .circle-action .icon { width: 22px; height: 22px; display:block; margin: 11px auto; }
+
+@media (prefers-reduced-motion: reduce) {
+    .service-page { transition: none; transform: none; }
+    .service-card__actions .circle-action { transition: none; }
+}
+.service-card.is-open .service-card__actions .circle-action {
+    opacity: 1;
+    transform: scale(1) translate(-50%, -50%) rotate(0deg);
+}
+@keyframes swirl-pop {
+    0% { opacity: 0; transform: scale(0.6) translate(-50%, -50%) rotate(-35deg); }
+    100% { opacity: 1; transform: scale(1) translate(-50%, -50%) rotate(0deg); }
+}
+@keyframes swirl-hide {
+    0% { opacity: 1; transform: scale(1) translate(-50%, -50%) rotate(0deg); }
+    100% { opacity: 0; transform: scale(0.6) translate(-50%, -50%) rotate(35deg); }
+}
+/* Стагер по порядку, создаёт эффект вихря */
+.service-card.is-open .service-card__actions .circle-action:nth-child(1) { animation: swirl-pop 220ms ease-out 0ms both; }
+.service-card.is-open .service-card__actions .circle-action:nth-child(2) { animation: swirl-pop 220ms ease-out 60ms both; }
+.service-card.is-open .service-card__actions .circle-action:nth-child(3) { animation: swirl-pop 220ms ease-out 120ms both; }
+.service-card.is-open .service-card__actions .circle-action:nth-child(4) { animation: swirl-pop 220ms ease-out 180ms both; }
+.service-card.is-open .service-card__actions .circle-action:nth-child(5) { animation: swirl-pop 220ms ease-out 240ms both; }
+.service-card.is-open .service-card__actions .circle-action:nth-child(6) { animation: swirl-pop 220ms ease-out 300ms both; }
+.service-card.is-open .service-card__actions .circle-action:nth-child(7) { animation: swirl-pop 220ms ease-out 360ms both; }
+
+/* Анимация скрытия с обратным стагером */
+.service-card.is-closing .service-card__actions .circle-action:nth-child(1) { animation: swirl-hide 200ms ease-in 360ms both; }
+.service-card.is-closing .service-card__actions .circle-action:nth-child(2) { animation: swirl-hide 200ms ease-in 300ms both; }
+.service-card.is-closing .service-card__actions .circle-action:nth-child(3) { animation: swirl-hide 200ms ease-in 240ms both; }
+.service-card.is-closing .service-card__actions .circle-action:nth-child(4) { animation: swirl-hide 200ms ease-in 180ms both; }
+.service-card.is-closing .service-card__actions .circle-action:nth-child(5) { animation: swirl-hide 200ms ease-in 120ms both; }
+.service-card.is-closing .service-card__actions .circle-action:nth-child(6) { animation: swirl-hide 200ms ease-in 60ms both; }
+.service-card.is-closing .service-card__actions .circle-action:nth-child(7) { animation: swirl-hide 200ms ease-in 0ms both; }
+/* Раскладка по окружности (вихрь) */
+.service-card__actions .circle-action:nth-child(1) { left: 20%; top: 20%; }
+.service-card__actions .circle-action:nth-child(2) { left: 80%; top: 25%; }
+.service-card__actions .circle-action:nth-child(3) { left: 22%; top: 80%; }
+.service-card__actions .circle-action:nth-child(4) { left: 78%; top: 82%; }
+.service-card__actions .circle-action:nth-child(5) { left: 50%; top: 6%; }
+.service-card__actions .circle-action:nth-child(6) { left: 94%; top: 50%; }
+.service-card__actions .circle-action:nth-child(7) { left: 50%; top: 94%; }
+/* Цвета */
+.circle-action--call { background: var(--accent-color, #007aff); color: #fff; }
+.circle-action--wa { background: #25D366; color: #fff; }
+.circle-action--tg { background: #0088cc; color: #fff; }
+.circle-action--viber { background: #7360F2; color: #fff; }
+.circle-action--instagram { background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fd5949 45%, #d6249f 60%, #285AEB 90%); color: #fff; }
+.circle-action--facebook { background: #1877F2; color: #fff; }
+.circle-action--phone { background: #10B981; color: #fff; }
+.circle-action--more { background: #374151; color: #fff; }
+
 .header__nav {
     display: flex;
 }

@@ -1942,25 +1942,89 @@ function setupServiceRouting() {
 function initServiceCardsNavigation() {
     const host = document.getElementById('services-container');
     if (!host) return;
-    host.addEventListener('click', (e) => {
-        const ctas = e.target.closest('.service-card__ctas');
-        if (ctas) return; // клики по CTA не перенаправляют
-        const card = e.target.closest('.service-card[role="link"]');
+    // Клик/тач раскрывает круглые кнопки, навигация убрана (кроме кнопки «Подробнее»)
+    let pressTimer = null;
+    let pressedCard = null;
+
+    const openActions = (card) => {
         if (!card) return;
-        const target = card.getAttribute('data-target');
-        if (target) {
-            location.hash = target;
-        }
-    });
+        const isOpen = true;
+        card.classList.add('is-open');
+        card.setAttribute('aria-expanded', String(isOpen));
+        const actions = card.querySelector('.service-card__actions');
+        if (actions) actions.setAttribute('aria-hidden', 'false');
+        // Закрыть остальные открытые карточки, чтобы не перекрывались
+        card.parentElement?.querySelectorAll('.service-card.is-open').forEach((c) => {
+            if (c !== card) {
+                c.classList.remove('is-open');
+                c.setAttribute('aria-expanded', 'false');
+                const a = c.querySelector('.service-card__actions');
+                if (a) a.setAttribute('aria-hidden', 'true');
+            }
+        });
+    };
+
+    const closeActions = (card) => {
+        if (!card) return;
+        // Запускаем анимацию закрытия и после завершения убираем класс
+        card.classList.add('is-closing');
+        card.classList.remove('is-open');
+        card.setAttribute('aria-expanded', 'false');
+        const actions = card.querySelector('.service-card__actions');
+        if (actions) actions.setAttribute('aria-hidden', 'true');
+        const onAnimEnd = () => {
+            card.classList.remove('is-closing');
+            card.removeEventListener('animationend', onAnimEnd);
+        };
+        card.addEventListener('animationend', onAnimEnd);
+    };
+
+    // Навигацию оставляем только на circle-action--more
+    host.addEventListener('click', (e) => {
+        const more = e.target.closest('.circle-action--more');
+        if (more) return; // браузер сам перейдёт по ссылке
+    }, { passive: true });
+
+    host.addEventListener('mousedown', (e) => {
+        const card = e.target.closest('.service-card');
+        if (!card) return;
+        pressedCard = card;
+        // мгновенное раскрытие
+        openActions(card);
+        pressTimer = null;
+    }, { passive: true });
+
+    host.addEventListener('mouseup', (e) => {
+        // no-op; оставляем кнопки раскрытыми
+    }, { passive: true });
+
+    host.addEventListener('touchstart', (e) => {
+        const card = e.target.closest('.service-card');
+        if (!card) return;
+        pressedCard = card;
+        openActions(card);
+    }, { passive: true });
+
+    host.addEventListener('touchend', (e) => {
+        // no-op
+    }, { passive: true });
+
+    // Enter/Space — раскрыть (без навигации)
     host.addEventListener('keydown', (e) => {
-        const card = e.target.closest('.service-card[role="link"]');
+        const card = e.target.closest('.service-card');
         if (!card) return;
         if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
-            const target = card.getAttribute('data-target');
-            if (target) location.hash = target;
+            if (card.classList.contains('is-open')) closeActions(card); else openActions(card);
         }
     }, { passive: false });
+
+    // Клик вне карточки — закрыть открытые действия
+    document.addEventListener('click', (e) => {
+        const anyCard = e.target.closest('.service-card');
+        if (anyCard) return; // клики внутри карточек не закрывают
+        host.querySelectorAll('.service-card.is-open').forEach((c) => closeActions(c));
+    }, { passive: true });
 }
 
 // Run initApp immediately if document already parsed (tests import the module), otherwise wait for DOMContentLoaded

@@ -1,4 +1,5 @@
-const CACHE_NAME = 'climat-control-v81'; // hero: image-set + dark theme bg
+const CACHE_VERSION = 'v51'; // Incremented cache version
+const CACHE_NAME = 'climat-control-v82'; // bump: marketing.js cta aria tweaks
 const urlsToCache = [
     '/',
     '/index.html',
@@ -27,6 +28,11 @@ const urlsToCache = [
     '/components/compare-modal.html',
     '/components/contacts.html',
     '/components/portfolio.html',
+    '/components/case-1.html',
+    '/components/case-2.html',
+    '/components/case-3.html',
+        '/components/reviews.html',
+        '/components/faq.html',
     '/components/footer.html',
     '/components/cart.html',
     '/offline.html',

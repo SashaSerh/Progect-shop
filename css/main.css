@@ -1,3 +1,50 @@
+.portfolio__item a:focus-visible { outline: 2px solid var(--color-accent, #4da3ff); outline-offset: 3px; border-radius: 8px; }
+.portfolio__item .portfolio__item-link { display: inline-block; }
+/* Breadcrumbs minimal styles */
+.breadcrumbs { padding: 8px 0; font-size: 14px; color: var(--color-on-surface, #222); }
+.breadcrumbs__list { display: flex; gap: 8px; list-style: none; padding: 0; margin: 0; }
+.breadcrumbs__item { opacity: 0.8; }
+.breadcrumbs__item a { color: inherit; text-decoration: none; }
+.breadcrumbs__item a:focus-visible { outline: 2px solid var(--color-accent, #4da3ff); outline-offset: 2px; border-radius: 6px; }
+.breadcrumbs__item::after { content: '/'; margin: 0 4px; opacity: 0.5; }
+.breadcrumbs__item:last-child::after { content: ''; }
+
+/* Case section basic layout */
+.case { padding: 24px 0; }
+.case__title { font-size: clamp(20px, 2.2vw, 28px); margin-bottom: 8px; }
+.case__summary { color: var(--color-muted, #555); margin-bottom: 16px; }
+.case__content { background: var(--color-surface, #f7f7f7); border-radius: 8px; padding: 16px; }
+.case__gallery { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; margin-top: 12px; }
+.case__gallery img { width: 100%; height: auto; border-radius: 8px; object-fit: cover; }
+.case__gallery img:focus-visible { outline: 2px solid var(--color-accent, #4da3ff); outline-offset: 2px; }
+.case__actions { display: flex; gap: 8px; margin-top: 12px; }
+.case__actions .btn:focus-visible { outline: 2px solid var(--color-accent, #4da3ff); outline-offset: 2px; }
+
+/* Anchor target highlight for sections */
+:target {
+    scroll-margin-top: var(--header-height, 72px);
+    outline: 2px solid rgba(0,0,0,0.05);
+    outline-offset: 4px;
+}
+
+/* Smooth scroll behavior (fallback to JS already present) */
+html { scroll-behavior: smooth; }
+
+/* Service card CTA polish */
+.service-card__more { display: inline-block; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--color-border, #ddd); background: var(--color-surface, #fff); transition: transform 120ms ease, background-color 120ms ease; }
+.service-card__more:hover { transform: translateY(-1px); background: var(--color-surface-hover, #f9f9f9); }
+.service-card__more:focus-visible { outline: 2px solid var(--color-accent, #4da3ff); outline-offset: 2px; box-shadow: 0 0 0 4px rgba(77,163,255,0.15); }
+.service-card__ctas .btn { margin-right: 6px; }
+/* Accessible focus styles for primary buttons */
+.btn:focus-visible { outline: 2px solid var(--color-accent, #4da3ff); outline-offset: 2px; box-shadow: 0 0 0 4px rgba(77,163,255,0.15); }
+.btn.btn--primary:focus-visible { outline-color: var(--color-primary, #4da3ff); box-shadow: 0 0 0 4px rgba(77,163,255,0.2); }
+.btn.btn--ghost:focus-visible { outline-color: var(--color-border, #ddd); box-shadow: 0 0 0 4px rgba(0,0,0,0.06); }
+
+/* Breadcrumbs subtle background */
+.breadcrumbs { background: var(--color-surface, #fafafa); border-radius: 8px; padding: 8px 12px; }
+.theme-dark .breadcrumbs { background: var(--color-surface, #191919); color: var(--color-on-surface, #f0f0f0); }
+.theme-dark .breadcrumbs__item { opacity: 0.9; }
+.theme-dark .breadcrumbs__item::after { opacity: 0.35; }
 /* Admin gallery sizing variables */
 :root {
     --admin-gallery-gap: 12px;
@@ -53,9 +100,8 @@
 .catalog-dropdown__list > li > a:hover {
     background: rgba(0,0,0,0.06);
 }
-    /* Light theme uses the same hero image */
-    .light-theme .hero { /* no-op: inherits from .hero */ }
-}
+
+
 
 /* Inline spinner for Git status */
 .spinner.spinner--inline {
@@ -73,6 +119,31 @@
 @keyframes spin {
     to { transform: rotate(360deg); }
 }
+
+/* Reviews & FAQ sections */
+.reviews { margin: clamp(28px, 8vw, 64px) 0; }
+.reviews__list { display:grid; grid-template-columns: repeat(auto-fit, minmax(240px,1fr)); gap: 16px; margin-bottom: 20px; }
+.review-card { padding:14px; background: var(--surface,#fff); border:1px solid var(--border,#e5e5e5); border-radius:14px; box-shadow:0 4px 14px rgba(0,0,0,.04); }
+.review-card:focus-visible { outline:2px solid var(--accent-color,#007aff); outline-offset:3px; box-shadow:0 0 0 4px rgba(0,122,255,0.15); }
+.review-card__name { font-weight:700; margin-bottom:6px; }
+.review-card__stars { margin-bottom:8px; }
+.review-card__text { font-size:14px; line-height:1.55; color: var(--on-surface,#222); }
+.reviews__form { margin-top: 8px; border-top:1px dashed var(--border,#ddd); padding-top: 16px; }
+.reviews__form-title { margin:0 0 10px; font-size: clamp(16px, 3.2vw, 20px); font-weight:700; }
+.form--compact .form-field { margin-bottom: 10px; }
+.form--compact .form-input { width:100%; padding:8px 10px; border:1px solid var(--border,#ddd); border-radius:10px; background: var(--surface,#fff); color:inherit; }
+.form--compact .form-input:focus-visible { outline:2px solid var(--accent-color,#007aff); outline-offset:2px; }
+.form--compact .form-actions .btn { min-width: 160px; }
+.form-status { margin-top: 8px; font-size: 13px; }
+.form-status.is-success { color: #207227; }
+.form-status.is-error { color: #b00020; }
+
+.faq { margin: clamp(28px, 8vw, 64px) 0; }
+.faq__list { display:grid; gap: 10px; }
+.faq-item { border:1px solid var(--border,#e5e5e5); border-radius:12px; padding:10px 12px; background: var(--surface,#fff); }
+.faq-item__q { font-weight:700; cursor:pointer; }
+.faq-item__q:focus-visible { outline:2px solid var(--accent-color,#007aff); outline-offset:2px; border-radius:8px; }
+.faq-item__a { margin-top: 8px; font-size:14px; line-height:1.55; color: var(--on-surface,#222); }
 
 /* Tiny admin buttons for conflict actions */
 .btn.btn--tiny {
@@ -1067,7 +1138,7 @@ body.compare-modal-open {
     --modern-radius: 16px;
     --micro-transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     --thumb-size: 44px;
-    --mobile-padding: 20px;
+    --mobile-padding: 2px;
     /* Flag badge theme colors */
     --flag-sale-bg: #1e63d0; /* blue */
     --flag-sale-color: #ffffff;
@@ -2187,8 +2258,7 @@ body {
     min-height: clamp(420px, 60vh, 720px);
 }
 
-/* Light theme uses the same hero image */
-.light-theme .hero { /* inherits from .hero */ }
+
 
 .hero__container {
     max-width: var(--container-width);

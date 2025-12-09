@@ -42,7 +42,11 @@ export function buildPhoneLink(phone = getContentConfig().contacts.phonePrimary)
 
 export function attachCTAs() {
   // Обновляем tel-ссылки при любом вызове
-  document.querySelectorAll('[data-cta="call"]').forEach(btn => btn.setAttribute('href', buildPhoneLink()));
+  document.querySelectorAll('[data-cta="call"]').forEach(btn => {
+    const phone = getContentConfig().contacts.phonePrimary || btn.getAttribute('href')?.replace('tel:','') || '';
+    btn.setAttribute('href', buildPhoneLink());
+    if (phone) btn.setAttribute('aria-label', `Позвонить ${phone}`);
+  });
 
   // Проставим базовые href для кнопок WA/TG, чтобы сработало даже без JS-предзаполнения текста
   document.querySelectorAll('.btn--wa').forEach(a => {
@@ -57,6 +61,9 @@ export function attachCTAs() {
       ? `tg://resolve?phone=${digits}`
       : `https://t.me/${raw}`;
     a.setAttribute('href', href);
+    a.setAttribute('target','_blank');
+    a.setAttribute('rel','noopener');
+    a.setAttribute('aria-describedby','contacts-newtab-hint');
   });
 
   // Делегирование кликов для CTA-кнопок, чтобы не зависеть от порядка вставки DOM
@@ -104,6 +111,9 @@ export function attachCTAs() {
       e.preventDefault();
       const url = getContentConfig().social?.instagram;
       if (url) safeOpen(url);
+      igBtn.setAttribute('target','_blank');
+      igBtn.setAttribute('rel','noopener');
+      igBtn.setAttribute('aria-describedby','contacts-newtab-hint');
       return;
     }
     const fbBtn = target.closest('.btn--fb');
@@ -111,6 +121,9 @@ export function attachCTAs() {
       e.preventDefault();
       const url = getContentConfig().social?.facebook;
       if (url) safeOpen(url);
+      fbBtn.setAttribute('target','_blank');
+      fbBtn.setAttribute('rel','noopener');
+      fbBtn.setAttribute('aria-describedby','contacts-newtab-hint');
       return;
     }
   });

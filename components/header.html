@@ -107,7 +107,8 @@
                     <span class="visually-hidden">ClimaTech</span>
                 </div>
             <!-- Кнопка каталога скрыта для визитки -->
-            <div class="search-container">
+            <!-- Глобальный поиск скрыт в режиме визитки; используем FAQ и быстрые CTA -->
+            <div class="search-container" hidden>
                 <input type="search" id="site-search" data-i18n-placeholder="search-placeholder" placeholder="Поиск по сайту" aria-label="Поиск по сайту">
                 <button class="search-button" id="searchButton" aria-label="Искать">
                     <span class="search-icon"><img src="icons/magnifying-glass512x512.svg" alt="Поиск" style="width: 28px;height: 28px;vertical-align:middle; fill: currentColor;" /></span>
@@ -141,6 +142,7 @@
 </div>
 <!-- cart dropdown отключён для визитки -->
 <!-- catalog dropdown отключён для визитки -->
-<div class="search-dropdown" id="searchDropdown" role="listbox" aria-label="Предложения поиска" aria-hidden="true">
+<!-- dropdown поиска скрыт -->
+<div class="search-dropdown" id="searchDropdown" role="listbox" aria-label="Предложения поиска" aria-hidden="true" hidden>
     <ul class="search-dropdown__list"></ul>
-</div>
+    </div>

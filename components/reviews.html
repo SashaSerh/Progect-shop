@@ -1,0 +1,33 @@
+<section class="reviews fade-in-section" id="reviews">
+  <div class="container">
+    <h2 class="reviews__title" data-i18n="reviews-title">Отзывы клиентов</h2>
+    <div class="reviews__list" aria-live="polite" role="list"></div>
+    <div class="reviews__form">
+      <h3 class="reviews__form-title" data-i18n="reviews-form-title">Оставить отзыв</h3>
+      <form id="reviewForm" class="form form--compact" novalidate aria-labelledby="reviewsFormTitle">
+        <div class="form-field">
+          <label for="reviewName" data-i18n="reviews-form-name">Ваше имя</label>
+          <input id="reviewName" name="name" type="text" class="form-input" required maxlength="60" />
+        </div>
+        <div class="form-field">
+          <label for="reviewRating" data-i18n="reviews-form-rating">Оценка</label>
+          <select id="reviewRating" name="rating" class="form-input" required>
+            <option value="5">5</option>
+            <option value="4">4</option>
+            <option value="3">3</option>
+            <option value="2">2</option>
+            <option value="1">1</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label for="reviewText" data-i18n="reviews-form-message">Отзыв</label>
+          <textarea id="reviewText" name="text" class="form-input" rows="4" required maxlength="600"></textarea>
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn btn--primary" data-i18n="reviews-form-submit">Отправить</button>
+        </div>
+        <div class="form-status" aria-live="polite" aria-atomic="true"></div>
+      </form>
+    </div>
+  </div>
+  </section>

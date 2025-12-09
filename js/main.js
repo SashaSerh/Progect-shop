@@ -1815,14 +1815,16 @@ function setupServiceRouting() {
         'hero-container',
         'services-container',
         'portfolio-container',
-        'case-1-container',
-        'case-2-container',
-        'case-3-container',
         'reviews-container',
         'faq-container',
         'contacts-container',
         'breadcrumbs-container',
         'welcome-container'
+    ];
+    const CASE_CONTAINERS = [
+        'case-1-container',
+        'case-2-container',
+        'case-3-container'
     ];
 
     function setHiddenById(id, hidden) {
@@ -1869,6 +1871,8 @@ function setupServiceRouting() {
 
         // Скрыть/показать лендинговые контейнеры
         LANDING_CONTAINERS.forEach(id => setHiddenById(id, isServiceView));
+        // Кейсы показываем ТОЛЬКО на страницах услуг
+        CASE_CONTAINERS.forEach(id => setHiddenById(id, !isServiceView));
 
         // Всегда показать все сервисные секции по умолчанию (а ниже скроем лишнее)
         Object.values(SERVICE_MAP).forEach(id => setHiddenById(id, false));
@@ -1890,6 +1894,8 @@ function setupServiceRouting() {
             LANDING_CONTAINERS.forEach(id => setHiddenById(id, false));
             // Скрыть сервисные разделы полностью
             Object.values(SERVICE_MAP).forEach(id => setHiddenById(id, true));
+            // Кейсы скрываем на лендинге
+            CASE_CONTAINERS.forEach(id => setHiddenById(id, true));
             scrollToSectionTop('services');
             setActiveNav('services');
             focusSectionHeading('services', 'h2');
@@ -1901,6 +1907,8 @@ function setupServiceRouting() {
         // На главной скрываем подробные страницы услуг, показываем лендинг
         LANDING_CONTAINERS.forEach(id => setHiddenById(id, false));
         Object.values(SERVICE_MAP).forEach(id => setHiddenById(id, true));
+        // Кейсы скрываем на главной
+        CASE_CONTAINERS.forEach(id => setHiddenById(id, true));
     }
 
     window.addEventListener('hashchange', applyRoute, { passive: true });

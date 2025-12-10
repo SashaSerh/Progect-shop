@@ -2493,7 +2493,7 @@ body {
 .hero__container {
     max-width: var(--container-width);
     margin: 0 112.5px;
-    padding: var(--page-top) var(--gutter-sm) 0;
+    /* padding: var(--page-top) var(--gutter-sm) 0; */
 }
 
 .hero__title {
@@ -4073,7 +4073,7 @@ textarea.form-input { resize: vertical; min-height: 120px; }
     
     /* Современные отступы */
     .container {
-        padding: 35px var(--mobile-padding) 0;
+        /* padding: 35px var(--mobile-padding) 0; */
         margin: 0 var(--mobile-padding);
     }
 }

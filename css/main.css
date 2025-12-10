@@ -2466,7 +2466,6 @@ body {
 
 .hero {
     padding: 40px 0;
-    min-height: clamp(300px, 42vh, 560px);
     /* Dark (default) theme background */
     background-image: -webkit-image-set(
         url('../picture/hero-picture/hero-1-1200w.jpg') 1x,
@@ -2482,10 +2481,10 @@ body {
     /* Centered focal point for natural alignment */
     background-position: center center;
     background-repeat: no-repeat;
-    /* Show the entire image without cropping */
-    background-size: contain;
-    /* Increase height to avoid image clipping when contained */
-    min-height: clamp(420px, 60vh, 720px);
+    /* Cover: fill the entire section, may crop edges */
+    background-size: cover;
+    /* Responsive height */
+    min-height: clamp(350px, 50vh, 600px);
 }
 
 

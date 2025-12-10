@@ -2469,12 +2469,12 @@ body {
     min-height: clamp(300px, 42vh, 560px);
     /* Dark (default) theme background */
     background-image: -webkit-image-set(
-        url('picture/hero-picture/hero-1-1200w.jpg') 1x,
-        url('picture/hero-picture/hero-1-1200w.jpg') 2x
+        url('../picture/hero-picture/hero-1-1200w.jpg') 1x,
+        url('../picture/hero-picture/hero-1-1200w.jpg') 2x
     );
     background-image: image-set(
-        url('picture/hero-picture/hero-1-1200w.jpg') 1x,
-        url('picture/hero-picture/hero-1-1200w.jpg') 2x
+        url('../picture/hero-picture/hero-1-1200w.jpg') 1x,
+        url('../picture/hero-picture/hero-1-1200w.jpg') 2x
     );
     text-align: center;
     /* Scroll with content to match section movement */

@@ -1,5 +1,5 @@
-const CACHE_VERSION = 'v58'; // Incremented cache version
-const CACHE_NAME = 'climat-control-v89'; // mobile FAB bigger, nav arrows fix
+const CACHE_VERSION = 'v59'; // Incremented cache version
+const CACHE_NAME = 'climat-control-v90'; // fix hero image path for GitHub Pages
 const urlsToCache = [
     '/',
     '/index.html',

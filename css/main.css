@@ -2466,15 +2466,8 @@ body {
 
 .hero {
     padding: 40px 0;
-    /* Dark (default) theme background */
-    background-image: -webkit-image-set(
-        url('../picture/hero-picture/hero-1-1200w.jpg') 1x,
-        url('../picture/hero-picture/hero-1-1200w.jpg') 2x
-    );
-    background-image: image-set(
-        url('../picture/hero-picture/hero-1-1200w.jpg') 1x,
-        url('../picture/hero-picture/hero-1-1200w.jpg') 2x
-    );
+    /* Desktop background (default) */
+    background-image: url('../picture/hero-picture/hero-1-1200w.jpg');
     text-align: center;
     /* Scroll with content to match section movement */
     background-attachment: scroll;
@@ -2485,6 +2478,25 @@ body {
     background-size: cover;
     /* Responsive height */
     min-height: clamp(350px, 50vh, 600px);
+}
+
+/* Responsive hero images for different screen sizes */
+@media (max-width: 768px) {
+    .hero {
+        background-image: url('../picture/hero-picture/Hero-banner-768*432px.png');
+    }
+}
+
+@media (max-width: 480px) {
+    .hero {
+        background-image: url('../picture/hero-picture/Hero-banner-480*270px.png');
+    }
+}
+
+@media (max-width: 320px) {
+    .hero {
+        background-image: url('../picture/hero-picture/Hero-banner-320*180px.png');
+    }
 }
 
 
@@ -2524,14 +2536,11 @@ body {
     background: var(--background-color-secondary-hover);
 }
 
-/* Hero uses image-set for retina and theme-specific images */
+/* Hero mobile typography adjustments */
 
 @media (max-width: 768px) {
-    /* Avoid fixed attachment issues on mobile; ensure full paint */
     .hero {
-        background-attachment: scroll;
-        background-position: center center;
-        min-height: 440px;
+        min-height: 300px;
     }
     .hero__title {
         font-size: 28px;

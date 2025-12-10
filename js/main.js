@@ -1607,7 +1607,7 @@ async function initApp() {
     }
     if (searchDropdown) {
         document.addEventListener('click', (e) => {
-            if (!searchDropdown.contains(e.target) && !searchInput.contains(e.target)) {
+            if (!searchDropdown.contains(e.target) && (!searchInput || !searchInput.contains(e.target))) {
                 searchDropdown.classList.remove('search-dropdown--open');
             }
         });

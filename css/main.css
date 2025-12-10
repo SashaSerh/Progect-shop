@@ -1764,31 +1764,31 @@ body {
         height: 26px;
     }
     
-    /* Arc позиции — полукруг с радиусом ~130px, от 180° до 270° (влево-вверх) */
-    /* 6 кнопок распределены по дуге — дальше от угла */
+    /* Arc позиции — полукруг с радиусом ~170px, от 180° до 270° (влево-вверх) */
+    /* 6 кнопок распределены по дуге — ещё дальше от угла */
     .fab-container.is-open .fab-action:nth-child(1) {
         /* 180° — прямо влево */
-        transform: scale(1) translate(-130px, 0);
+        transform: scale(1) translate(-170px, 0);
     }
     .fab-container.is-open .fab-action:nth-child(2) {
         /* 198° */
-        transform: scale(1) translate(-123px, -42px);
+        transform: scale(1) translate(-162px, -53px);
     }
     .fab-container.is-open .fab-action:nth-child(3) {
         /* 216° */
-        transform: scale(1) translate(-105px, -78px);
+        transform: scale(1) translate(-138px, -100px);
     }
     .fab-container.is-open .fab-action:nth-child(4) {
         /* 234° */
-        transform: scale(1) translate(-76px, -108px);
+        transform: scale(1) translate(-100px, -138px);
     }
     .fab-container.is-open .fab-action:nth-child(5) {
         /* 252° */
-        transform: scale(1) translate(-40px, -125px);
+        transform: scale(1) translate(-53px, -162px);
     }
     .fab-container.is-open .fab-action:nth-child(6) {
         /* 270° — прямо вверх */
-        transform: scale(1) translate(0, -135px);
+        transform: scale(1) translate(0, -175px);
     }
     
     .fab-action:hover {
@@ -1797,12 +1797,12 @@ body {
     }
     
     /* CSS переменные для hover — сохраняем позицию */
-    .fab-container.is-open .fab-action:nth-child(1) { --arc-x: -130px; --arc-y: 0; }
-    .fab-container.is-open .fab-action:nth-child(2) { --arc-x: -123px; --arc-y: -42px; }
-    .fab-container.is-open .fab-action:nth-child(3) { --arc-x: -105px; --arc-y: -78px; }
-    .fab-container.is-open .fab-action:nth-child(4) { --arc-x: -76px; --arc-y: -108px; }
-    .fab-container.is-open .fab-action:nth-child(5) { --arc-x: -40px; --arc-y: -125px; }
-    .fab-container.is-open .fab-action:nth-child(6) { --arc-x: 0; --arc-y: -135px; }
+    .fab-container.is-open .fab-action:nth-child(1) { --arc-x: -170px; --arc-y: 0; }
+    .fab-container.is-open .fab-action:nth-child(2) { --arc-x: -162px; --arc-y: -53px; }
+    .fab-container.is-open .fab-action:nth-child(3) { --arc-x: -138px; --arc-y: -100px; }
+    .fab-container.is-open .fab-action:nth-child(4) { --arc-x: -100px; --arc-y: -138px; }
+    .fab-container.is-open .fab-action:nth-child(5) { --arc-x: -53px; --arc-y: -162px; }
+    .fab-container.is-open .fab-action:nth-child(6) { --arc-x: 0; --arc-y: -175px; }
 }
 
 /* Скрыть FAB на сервисных страницах (там есть свои CTA) */

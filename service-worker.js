@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'v57'; // Incremented cache version
+const CACHE_VERSION = 'v58'; // Incremented cache version
 const CACHE_NAME = 'climat-control-v89'; // mobile FAB bigger, nav arrows fix
 const urlsToCache = [
     '/',

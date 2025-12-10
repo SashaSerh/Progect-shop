@@ -1,5 +1,5 @@
-const CACHE_VERSION = 'v56'; // Incremented cache version
-const CACHE_NAME = 'climat-control-v88'; // mobile nav arrows, hide cart/badges
+const CACHE_VERSION = 'v57'; // Incremented cache version
+const CACHE_NAME = 'climat-control-v89'; // mobile FAB bigger, nav arrows fix
 const urlsToCache = [
     '/',
     '/index.html',

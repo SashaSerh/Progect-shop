@@ -1721,7 +1721,7 @@ body {
 .fab-container.is-closing .fab-action:nth-child(1) { transition-delay: 200ms; }
 
 /* FAB action colors */
-.fab-action--phone { background: #10B981; color: #fff; }
+.fab-action--phone { background: #007AFF; color: #fff; }
 .fab-action--wa { background: #25D366; color: #fff; }
 .fab-action--tg { background: #0088cc; color: #fff; }
 .fab-action--viber { background: #7360F2; color: #fff; }
@@ -1753,42 +1753,42 @@ body {
     
     .fab-action {
         position: absolute;
-        width: 44px;
-        height: 44px;
+        width: 52px;
+        height: 52px;
         /* Начальное положение — в центре FAB */
         transform: scale(0.3) translate(0, 0);
     }
     
     .fab-action .icon {
-        width: 22px;
-        height: 22px;
+        width: 26px;
+        height: 26px;
     }
     
-    /* Arc позиции — полукруг с радиусом ~90px, от 180° до 270° (влево-вверх) */
-    /* 6 кнопок распределены по дуге с шагом ~18° */
+    /* Arc позиции — полукруг с радиусом ~130px, от 180° до 270° (влево-вверх) */
+    /* 6 кнопок распределены по дуге — дальше от угла */
     .fab-container.is-open .fab-action:nth-child(1) {
         /* 180° — прямо влево */
-        transform: scale(1) translate(-95px, 0);
+        transform: scale(1) translate(-130px, 0);
     }
     .fab-container.is-open .fab-action:nth-child(2) {
         /* 198° */
-        transform: scale(1) translate(-90px, -30px);
+        transform: scale(1) translate(-123px, -42px);
     }
     .fab-container.is-open .fab-action:nth-child(3) {
         /* 216° */
-        transform: scale(1) translate(-76px, -58px);
+        transform: scale(1) translate(-105px, -78px);
     }
     .fab-container.is-open .fab-action:nth-child(4) {
         /* 234° */
-        transform: scale(1) translate(-55px, -80px);
+        transform: scale(1) translate(-76px, -108px);
     }
     .fab-container.is-open .fab-action:nth-child(5) {
         /* 252° */
-        transform: scale(1) translate(-28px, -95px);
+        transform: scale(1) translate(-40px, -125px);
     }
     .fab-container.is-open .fab-action:nth-child(6) {
         /* 270° — прямо вверх */
-        transform: scale(1) translate(0, -100px);
+        transform: scale(1) translate(0, -135px);
     }
     
     .fab-action:hover {
@@ -1797,12 +1797,12 @@ body {
     }
     
     /* CSS переменные для hover — сохраняем позицию */
-    .fab-container.is-open .fab-action:nth-child(1) { --arc-x: -95px; --arc-y: 0; }
-    .fab-container.is-open .fab-action:nth-child(2) { --arc-x: -90px; --arc-y: -30px; }
-    .fab-container.is-open .fab-action:nth-child(3) { --arc-x: -76px; --arc-y: -58px; }
-    .fab-container.is-open .fab-action:nth-child(4) { --arc-x: -55px; --arc-y: -80px; }
-    .fab-container.is-open .fab-action:nth-child(5) { --arc-x: -28px; --arc-y: -95px; }
-    .fab-container.is-open .fab-action:nth-child(6) { --arc-x: 0; --arc-y: -100px; }
+    .fab-container.is-open .fab-action:nth-child(1) { --arc-x: -130px; --arc-y: 0; }
+    .fab-container.is-open .fab-action:nth-child(2) { --arc-x: -123px; --arc-y: -42px; }
+    .fab-container.is-open .fab-action:nth-child(3) { --arc-x: -105px; --arc-y: -78px; }
+    .fab-container.is-open .fab-action:nth-child(4) { --arc-x: -76px; --arc-y: -108px; }
+    .fab-container.is-open .fab-action:nth-child(5) { --arc-x: -40px; --arc-y: -125px; }
+    .fab-container.is-open .fab-action:nth-child(6) { --arc-x: 0; --arc-y: -135px; }
 }
 
 /* Скрыть FAB на сервисных страницах (там есть свои CTA) */
@@ -4726,27 +4726,27 @@ body.theme-transition, body.theme-transition * { transition: background-color .3
     visibility: visible;
 }
 
-.mobile-nav--drawer .mobile-nav__list { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:6px; }
-.mobile-nav--drawer .mobile-nav__link { padding:14px 14px; border-radius:12px; display:flex; align-items:center; justify-content:space-between; gap:10px; font-size:15px; font-weight:500; text-decoration:none; color: var(--nav-text-color); transition: background-color .25s ease, color .25s ease, transform .25s ease; }
-.mobile-nav--drawer .mobile-nav__link::after { content:''; width:20px; height:20px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-size: contain; background-repeat: no-repeat; opacity: 0.5; transition: transform 0.2s ease, opacity 0.2s ease; flex-shrink: 0; }
-.light-theme .mobile-nav--drawer .mobile-nav__link::after { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23333333' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); }
-.mobile-nav--drawer .mobile-nav__link:hover::after { opacity: 0.8; transform: translateY(2px); }
-.mobile-nav--drawer .mobile-nav__link:hover { background: var(--button-bg); }
-.light-theme .mobile-nav--drawer .mobile-nav__link:hover { background: var(--button-bg); }
-.mobile-nav--drawer .mobile-nav__link:active { transform: translateX(4px); }
+.mobile-nav .mobile-nav__list { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:6px; }
+.mobile-nav .mobile-nav__link { padding:14px 14px; border-radius:12px; display:flex; align-items:center; justify-content:space-between; gap:10px; font-size:15px; font-weight:500; text-decoration:none; color: var(--nav-text-color); transition: background-color .25s ease, color .25s ease, transform .25s ease; }
+.mobile-nav .mobile-nav__link::after { content:''; width:20px; height:20px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-size: contain; background-repeat: no-repeat; opacity: 0.5; transition: transform 0.2s ease, opacity 0.2s ease; flex-shrink: 0; }
+.light-theme .mobile-nav .mobile-nav__link::after { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23333333' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); }
+.mobile-nav .mobile-nav__link:hover::after { opacity: 0.8; transform: translateY(2px); }
+.mobile-nav .mobile-nav__link:hover { background: var(--button-bg); }
+.light-theme .mobile-nav .mobile-nav__link:hover { background: var(--button-bg); }
+.mobile-nav .mobile-nav__link:active { transform: translateX(4px); }
 
-.mobile-nav--drawer .mobile-nav__section { margin-top: 20px; }
-.mobile-nav--drawer .mobile-nav__divider { height:1px; background: rgba(255,255,255,0.1); margin:18px 0; }
-.light-theme .mobile-nav--drawer .mobile-nav__divider { background: rgba(0,0,0,0.12); }
+.mobile-nav .mobile-nav__section { margin-top: 20px; }
+.mobile-nav .mobile-nav__divider { height:1px; background: rgba(255,255,255,0.1); margin:18px 0; }
+.light-theme .mobile-nav .mobile-nav__divider { background: rgba(0,0,0,0.12); }
 
 /* Utility cluster inside drawer */
-.mobile-nav--drawer .mobile-nav__utilities { margin-top:auto; display:grid; grid-template-columns:repeat(auto-fit,minmax(44px,1fr)); gap:12px; }
-.mobile-nav--drawer .mobile-nav__utilities button { background: var(--button-bg); border:none; border-radius:14px; height:44px; display:flex; align-items:center; justify-content:center; cursor:pointer; color: var(--nav-text-color); transition: background-color .25s ease, transform .25s ease; }
-.mobile-nav--drawer .mobile-nav__utilities button:hover { background: var(--button-bg-hover); }
+.mobile-nav .mobile-nav__utilities { margin-top:auto; display:grid; grid-template-columns:repeat(auto-fit,minmax(44px,1fr)); gap:12px; }
+.mobile-nav .mobile-nav__utilities button { background: var(--button-bg); border:none; border-radius:14px; height:44px; display:flex; align-items:center; justify-content:center; cursor:pointer; color: var(--nav-text-color); transition: background-color .25s ease, transform .25s ease; }
+.mobile-nav .mobile-nav__utilities button:hover { background: var(--button-bg-hover); }
 
 /* Focus ring reuse */
-.mobile-nav--drawer .mobile-nav__link:focus-visible,
-.mobile-nav--drawer .mobile-nav__utilities button:focus-visible { outline: var(--focus-ring); outline-offset: var(--focus-ring-offset); }
+.mobile-nav .mobile-nav__link:focus-visible,
+.mobile-nav .mobile-nav__utilities button:focus-visible { outline: var(--focus-ring); outline-offset: var(--focus-ring-offset); }
 
 /* TODO(a11y): Проверить, что кнопки без текстовых меток имеют aria-label:
     - .theme-toggle / .mobile-nav__utilities button (иконки)

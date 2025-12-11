@@ -1,5 +1,5 @@
-const CACHE_VERSION = 'v70'; // Incremented cache version
-const CACHE_NAME = 'climat-control-v101'; // border-radius: 50% !important для floating-control-btn
+const CACHE_VERSION = 'v71'; // Incremented cache version
+const CACHE_NAME = 'climat-control-v102'; // floating-control-btn фиксированный синий цвет
 const urlsToCache = [
     '/',
     '/index.html',

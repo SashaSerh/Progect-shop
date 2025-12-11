@@ -128,7 +128,7 @@
         height: 56px;
         border-radius: 50% !important; /* Переопределяем другие правила */
         border: none;
-        background: var(--accent-color, #007aff);
+        background: #007AFF !important; /* Фиксированный синий цвет для обеих тем */
         color: #fff;
         box-shadow: 0 4px 16px rgba(0,0,0,0.25);
         cursor: pointer;
@@ -165,7 +165,7 @@
 
 /* Светлая тема для floating-control-btn */
 .light-theme .floating-control-btn {
-    background: var(--accent-color, #00A8E8);
+    background: #007AFF !important; /* Тот же синий цвет для светлой темы */
     color: #fff;
     box-shadow: 0 4px 16px rgba(0,0,0,0.25);
 }

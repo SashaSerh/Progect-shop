@@ -1974,59 +1974,66 @@ function initServiceCardsNavigation() {
 
 // FAB (Floating Action Button) — раскрытие/скрытие кнопок связи
 function initFabContact() {
-    // Ищем FAB в services.html или мобильный в index.html
-    const fab = document.getElementById('fab-contact') || document.getElementById('fab-contact-mobile');
-    if (!fab) return;
+    // Инициализируем ВСЕ FAB контейнеры на странице (в services.html и в index.html)
+    const fabContainers = document.querySelectorAll('.fab-container');
+    if (!fabContainers.length) return;
     
-    const trigger = fab.querySelector('.fab-trigger');
-    const actions = fab.querySelector('.fab-actions');
     const floatingButtons = document.querySelector('.floating-buttons');
-    if (!trigger || !actions) return;
     
-    const open = () => {
-        fab.classList.add('is-open');
-        trigger.setAttribute('aria-expanded', 'true');
-        actions.setAttribute('aria-hidden', 'false');
-        if (floatingButtons) floatingButtons.classList.add('fab-open');
-    };
-    
-    const close = () => {
-        fab.classList.add('is-closing');
-        fab.classList.remove('is-open');
-        trigger.setAttribute('aria-expanded', 'false');
-        actions.setAttribute('aria-hidden', 'true');
-        if (floatingButtons) floatingButtons.classList.remove('fab-open');
-        const onEnd = () => {
-            fab.classList.remove('is-closing');
-            fab.removeEventListener('animationend', onEnd);
+    fabContainers.forEach(fab => {
+        const trigger = fab.querySelector('.fab-trigger');
+        const actions = fab.querySelector('.fab-actions');
+        if (!trigger || !actions) return;
+        
+        // Проверяем, не инициализирован ли уже
+        if (fab.dataset.fabInit) return;
+        fab.dataset.fabInit = 'true';
+        
+        const open = () => {
+            fab.classList.add('is-open');
+            trigger.setAttribute('aria-expanded', 'true');
+            actions.setAttribute('aria-hidden', 'false');
+            if (floatingButtons) floatingButtons.classList.add('fab-open');
         };
-        fab.addEventListener('animationend', onEnd);
-        // Fallback
-        setTimeout(() => fab.classList.remove('is-closing'), 400);
-    };
-    
-    trigger.addEventListener('click', (e) => {
-        e.stopPropagation();
-        if (fab.classList.contains('is-open')) {
-            close();
-        } else {
-            open();
-        }
-    });
-    
-    // Закрыть при клике вне FAB
-    document.addEventListener('click', (e) => {
-        if (!fab.contains(e.target) && fab.classList.contains('is-open')) {
-            close();
-        }
-    });
-    
-    // Esc закрывает
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && fab.classList.contains('is-open')) {
-            close();
-            trigger.focus();
-        }
+        
+        const close = () => {
+            fab.classList.add('is-closing');
+            fab.classList.remove('is-open');
+            trigger.setAttribute('aria-expanded', 'false');
+            actions.setAttribute('aria-hidden', 'true');
+            if (floatingButtons) floatingButtons.classList.remove('fab-open');
+            const onEnd = () => {
+                fab.classList.remove('is-closing');
+                fab.removeEventListener('animationend', onEnd);
+            };
+            fab.addEventListener('animationend', onEnd);
+            // Fallback
+            setTimeout(() => fab.classList.remove('is-closing'), 400);
+        };
+        
+        trigger.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (fab.classList.contains('is-open')) {
+                close();
+            } else {
+                open();
+            }
+        });
+        
+        // Закрыть при клике вне FAB
+        document.addEventListener('click', (e) => {
+            if (!fab.contains(e.target) && fab.classList.contains('is-open')) {
+                close();
+            }
+        });
+        
+        // Esc закрывает
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && fab.classList.contains('is-open')) {
+                close();
+                trigger.focus();
+            }
+        });
     });
 }
 

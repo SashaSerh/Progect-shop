@@ -1,5 +1,5 @@
-const CACHE_VERSION = 'v66'; // Incremented cache version
-const CACHE_NAME = 'climat-control-v97'; // FAB в index.html, стили floating-control-btn как FAB
+const CACHE_VERSION = 'v67'; // Incremented cache version
+const CACHE_NAME = 'climat-control-v98'; // FAB init для всех .fab-container
 const urlsToCache = [
     '/',
     '/index.html',

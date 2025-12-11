@@ -1,5 +1,5 @@
-const CACHE_VERSION = 'v59'; // Incremented cache version
-const CACHE_NAME = 'climat-control-v90'; // fix hero image path for GitHub Pages
+const CACHE_VERSION = 'v60'; // Incremented cache version
+const CACHE_NAME = 'climat-control-v91'; // mobile-app viewport & touch optimizations
 const urlsToCache = [
     '/',
     '/index.html',

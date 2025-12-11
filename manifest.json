@@ -2,23 +2,42 @@
     "name": "ClimaTech",
     "short_name": "ClimaTech",
     "description": "Монтаж и продажа кондиционеров и рекуператоров",
-    "start_url": "/",
+    "start_url": "./index.html",
+    "scope": "./",
     "display": "standalone",
-    "background_color": "#000000",
+    "display_override": ["standalone", "minimal-ui"],
+    "background_color": "#0e1117",
     "theme_color": "#007AFF",
     "orientation": "portrait-primary",
+    "prefer_related_applications": false,
+    "categories": ["business", "lifestyle"],
     "icons": [
         {
-            "src": "/icons/icon-icon192x192.png",
+            "src": "icons/icon-icon192x192.png",
             "sizes": "192x192",
-            "type": "image/png"
+            "type": "image/png",
+            "purpose": "any maskable"
         },
         {
-            "src": "/icons/icon-icon512x512.png",
+            "src": "icons/icon-icon512x512.png",
             "sizes": "512x512",
-            "type": "image/png"
+            "type": "image/png",
+            "purpose": "any maskable"
         }
     ],
-    "apple-mobile-web-app-capable": "yes",
-    "apple-mobile-web-app-status-bar-style": "black-translucent"
+    "screenshots": [],
+    "shortcuts": [
+        {
+            "name": "Услуги",
+            "short_name": "Услуги",
+            "url": "./#services",
+            "icons": []
+        },
+        {
+            "name": "Контакты",
+            "short_name": "Контакты", 
+            "url": "./#contacts",
+            "icons": []
+        }
+    ]
 }

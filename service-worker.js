@@ -1,5 +1,5 @@
-const CACHE_VERSION = 'v64'; // Incremented cache version
-const CACHE_NAME = 'climat-control-v95'; // mobile-app layout refactor
+const CACHE_VERSION = 'v65'; // Incremented cache version
+const CACHE_NAME = 'climat-control-v96'; // floating controls moved to right under scroll-to-top
 const urlsToCache = [
     '/',
     '/index.html',

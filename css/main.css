@@ -1395,6 +1395,76 @@ button:active, .btn:active, .fab:active, a:active {
     opacity: 0.85;
 }
 
+/* ========================================
+   MOBILE TOUCH TARGETS (min 44px)
+   WCAG 2.5.5 / Apple HIG / Material Design
+   ======================================== */
+@media (max-width: 768px) {
+    /* Minimum touch target size */
+    .btn,
+    button:not(.fab-trigger):not(.fab-action),
+    .mobile-nav__link,
+    .theme-toggle,
+    .lang-toggle,
+    .nav__link,
+    .hero__cta,
+    .service-card__more,
+    .welcome-lang-btn,
+    .product-tabs__tab,
+    .collapsible__toggle,
+    .share-btn,
+    input[type="checkbox"],
+    input[type="radio"] {
+        min-height: 44px;
+        min-width: 44px;
+    }
+    
+    /* Larger buttons for primary actions */
+    .btn,
+    .hero__cta,
+    .welcome-lang-btn,
+    .welcome-overlay__continue {
+        padding: 14px 20px;
+        font-size: 16px;
+    }
+    
+    /* Form inputs touch-friendly */
+    input[type="text"],
+    input[type="email"],
+    input[type="tel"],
+    input[type="search"],
+    input[type="number"],
+    textarea,
+    select {
+        min-height: 48px;
+        font-size: 16px; /* Prevents iOS zoom on focus */
+        padding: 12px 16px;
+    }
+    
+    /* Links with more padding for easier tapping */
+    .mobile-nav__link {
+        padding: 16px;
+        min-height: 52px;
+    }
+    
+    /* Product tabs */
+    .product-tabs__tab {
+        padding: 12px 16px;
+        min-height: 48px;
+    }
+    
+    /* Social/messenger buttons */
+    .contacts__cta .btn {
+        padding: 14px 18px;
+        min-height: 48px;
+    }
+    
+    /* Service card CTA */
+    .service-card__more {
+        padding: 12px 16px;
+    }
+}
+
 /* Welcome overlay (языковой выбор при первом визите) */
 .welcome-overlay { position: fixed; inset:0; background:rgba(0,0,0,.55); display:none; z-index:6000; padding:24px; align-items:center; justify-content:center; overflow:auto; }
 .welcome-overlay.is-visible { display:flex; }

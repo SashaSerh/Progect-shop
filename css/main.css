@@ -126,7 +126,7 @@
         display: flex;
         width: 56px;
         height: 56px;
-        border-radius: 50%;
+        border-radius: 50% !important; /* Переопределяем другие правила */
         border: none;
         background: var(--accent-color, #007aff);
         color: #fff;

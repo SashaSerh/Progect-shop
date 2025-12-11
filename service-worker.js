@@ -1,5 +1,5 @@
-const CACHE_VERSION = 'v61'; // Incremented cache version
-const CACHE_NAME = 'climat-control-v92'; // mobile touch targets min 44-48px
+const CACHE_VERSION = 'v62'; // Incremented cache version
+const CACHE_NAME = 'climat-control-v93'; // PWA install prompt, offline page
 const urlsToCache = [
     '/',
     '/index.html',
@@ -45,9 +45,11 @@ const urlsToCache = [
     '/icons/facebook-icon_1.svg',
     '/icons/telegram-logo-icon_1.svg',
     '/icons/instagram-icon_1.svg',
-    // Hero background images (static)
+    // Hero background images (static + responsive)
     '/picture/hero-picture/hero-1-1200w.jpg',
-    '/picture/hero-picture/hero-3-1200w.jpg'
+    '/picture/hero-picture/Hero-banner-768*432px.png',
+    '/picture/hero-picture/Hero-banner-480*270px.png',
+    '/picture/hero-picture/Hero-banner-320*180px.png'
 ];
 
 self.addEventListener('install', event => {

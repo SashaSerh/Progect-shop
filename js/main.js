@@ -1765,6 +1765,9 @@ async function initApp() {
         }
     }
 
+    // PWA Install Prompt
+    initPWAInstallPrompt();
+
     // Обновляем базовый JSON-LD WebSite/Organization (url + SearchAction) после загрузки
     try { updateBaseJsonLd(); } catch {}
 
@@ -4439,5 +4442,115 @@ function updateProductsCount(count) {
     const countElement = document.getElementById('productsCount');
     if (countElement) {
         countElement.textContent = count;
+    }
+}
+
+// ========================================
+// PWA INSTALL PROMPT
+// ========================================
+let deferredPrompt = null;
+
+function initPWAInstallPrompt() {
+    // Capture the install prompt event
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        
+        // Show install banner after a delay (don't be too aggressive)
+        setTimeout(() => {
+            if (deferredPrompt && !localStorage.getItem('pwa-install-dismissed')) {
+                showInstallBanner();
+            }
+        }, 5000);
+    });
+
+    // Track successful installation
+    window.addEventListener('appinstalled', () => {
+        deferredPrompt = null;
+        hideInstallBanner();
+        localStorage.setItem('pwa-installed', 'true');
+    });
+}
+
+function showInstallBanner() {
+    // Don't show if already installed or dismissed recently
+    if (localStorage.getItem('pwa-installed')) return;
+    
+    // Check if banner already exists
+    if (document.getElementById('pwa-install-banner')) return;
+    
+    const banner = document.createElement('div');
+    banner.id = 'pwa-install-banner';
+    banner.innerHTML = `
+        <div class="pwa-banner__content">
+            <div class="pwa-banner__icon">📱</div>
+            <div class="pwa-banner__text">
+                <strong>Установить приложение</strong>
+                <span>Быстрый доступ с главного экрана</span>
+            </div>
+        </div>
+        <div class="pwa-banner__actions">
+            <button class="pwa-banner__install" id="pwa-install-btn">Установить</button>
+            <button class="pwa-banner__close" id="pwa-close-btn" aria-label="Закрыть">✕</button>
+        </div>
+    `;
+    
+    // Add styles
+    banner.style.cssText = `
+        position: fixed;
+        bottom: 80px;
+        left: 16px;
+        right: 16px;
+        background: var(--primary-color, rgba(30, 30, 30, 0.95));
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid var(--glass-border, rgba(255,255,255,0.2));
+        border-radius: 16px;
+        padding: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        z-index: 5000;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        transform: translateY(120%);
+        transition: transform 0.3s ease;
+    `;
+    
+    document.body.appendChild(banner);
+    
+    // Animate in
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            banner.style.transform = 'translateY(0)';
+        });
+    });
+    
+    // Install button
+    document.getElementById('pwa-install-btn').addEventListener('click', async () => {
+        if (!deferredPrompt) return;
+        
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        
+        if (outcome === 'accepted') {
+            hideInstallBanner();
+        }
+        deferredPrompt = null;
+    });
+    
+    // Close button
+    document.getElementById('pwa-close-btn').addEventListener('click', () => {
+        hideInstallBanner();
+        // Don't show again for 7 days
+        localStorage.setItem('pwa-install-dismissed', Date.now().toString());
+    });
+}
+
+function hideInstallBanner() {
+    const banner = document.getElementById('pwa-install-banner');
+    if (banner) {
+        banner.style.transform = 'translateY(120%)';
+        setTimeout(() => banner.remove(), 300);
     }
 }

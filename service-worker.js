@@ -1,5 +1,5 @@
-const CACHE_VERSION = 'v68'; // Incremented cache version
-const CACHE_NAME = 'climat-control-v99'; // кнопка языка показывает UA/RU вместо эмодзи
+const CACHE_VERSION = 'v69'; // Incremented cache version
+const CACHE_NAME = 'climat-control-v100'; // floating-control-btn синий фон как FAB
 const urlsToCache = [
     '/',
     '/index.html',

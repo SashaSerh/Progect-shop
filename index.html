@@ -98,16 +98,31 @@
             <button id="welcomeContinue">Продолжить</button>
         </div>
     
-    <!-- Плавающие кнопки справа (scroll-to-top + тема + язык) -->
+    <!-- Плавающие кнопки справа (scroll-to-top + настройки) -->
     <div class="floating-buttons">
         <button class="scroll-to-top" aria-label="Прокрутить наверх" title="Наверх">↑</button>
-        <!-- Мобильные контролы (тема + язык) - под scroll-to-top -->
-        <button class="floating-control-btn theme-toggle" id="floatingThemeToggle" aria-label="Переключить тему" aria-pressed="false">
-            <span class="theme-icon"><img src="icons/moons-icon.svg" alt="Тема" width="24" height="24"></span>
-        </button>
-        <button class="floating-control-btn open-language-overlay" id="floatingLangToggle" aria-label="Сменить язык" aria-controls="welcomeOverlay" aria-haspopup="dialog">
-            <span class="lang-label">UA</span>
-        </button>
+        <!-- Кнопка настроек (тема + язык) -->
+        <div class="settings-container" id="settings-container">
+            <button class="settings-trigger" aria-label="Настройки" aria-expanded="false" aria-controls="settings-actions">
+                <svg class="settings-trigger__icon settings-trigger__icon--default" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+                    <circle cx="6" cy="12" r="2" fill="currentColor"/>
+                    <circle cx="12" cy="12" r="2" fill="currentColor"/>
+                    <circle cx="18" cy="12" r="2" fill="currentColor"/>
+                    <circle cx="12" cy="6" r="2" fill="currentColor"/>
+                </svg>
+                <svg class="settings-trigger__icon settings-trigger__icon--close" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+                    <path d="M19 6.4L17.6 5 12 10.6 6.4 5 5 6.4l5.6 5.6L5 17.6 6.4 19l5.6-5.6 5.6 5.6 1.4-1.4-5.6-5.6z" fill="currentColor"/>
+                </svg>
+            </button>
+            <div class="settings-actions" id="settings-actions" aria-hidden="true">
+                <button class="settings-action settings-action--theme" id="settingsThemeToggle" data-action="theme" aria-label="Переключить тему" aria-pressed="false">
+                    <span class="theme-icon"><img src="icons/moons-icon.svg" alt="Тема" width="20" height="20"></span>
+                </button>
+                <button class="settings-action settings-action--language" id="settingsLangToggle" data-action="language" aria-label="Сменить язык" aria-controls="welcomeOverlay" aria-haspopup="dialog">
+                    <span class="lang-label">UA</span>
+                </button>
+            </div>
+        </div>
     </div>
     
     <!-- FAB (Floating Action Button) для связи -->

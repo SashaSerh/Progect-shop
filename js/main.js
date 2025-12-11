@@ -941,6 +941,9 @@ async function initApp() {
     
     // FAB для связи
     initFabContact();
+    
+    // Кнопка настроек (тема + язык)
+    initSettingsButton();
 
     // Cart modal open is deprecated in favor of dedicated cart page
     const openCartModalButton = document.querySelector('#openCartModal');
@@ -2034,6 +2037,86 @@ function initFabContact() {
                 trigger.focus();
             }
         });
+    });
+}
+
+function initSettingsButton() {
+    const settingsContainer = document.querySelector('.settings-container');
+    if (!settingsContainer) return;
+    
+    const trigger = settingsContainer.querySelector('.settings-trigger');
+    const actions = settingsContainer.querySelector('.settings-actions');
+    if (!trigger || !actions) return;
+    
+    // Проверяем, не инициализирован ли уже
+    if (settingsContainer.dataset.settingsInit) return;
+    settingsContainer.dataset.settingsInit = 'true';
+    
+    const open = () => {
+        settingsContainer.classList.add('is-open');
+        trigger.setAttribute('aria-expanded', 'true');
+        actions.setAttribute('aria-hidden', 'false');
+    };
+    
+    const close = () => {
+        settingsContainer.classList.add('is-closing');
+        settingsContainer.classList.remove('is-open');
+        trigger.setAttribute('aria-expanded', 'false');
+        actions.setAttribute('aria-hidden', 'true');
+        const onEnd = () => {
+            settingsContainer.classList.remove('is-closing');
+            settingsContainer.removeEventListener('animationend', onEnd);
+        };
+        settingsContainer.addEventListener('animationend', onEnd);
+        // Fallback
+        setTimeout(() => settingsContainer.classList.remove('is-closing'), 400);
+    };
+    
+    trigger.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (settingsContainer.classList.contains('is-open')) {
+            close();
+        } else {
+            open();
+        }
+    });
+    
+    // Обработчики для кнопок настроек
+    actions.addEventListener('click', (e) => {
+        const button = e.target.closest('.settings-action');
+        if (!button) return;
+        
+        const action = button.dataset.action;
+        if (action === 'theme') {
+            if (typeof toggleTheme === 'function') {
+                toggleTheme();
+            }
+        } else if (action === 'language') {
+            // Переключаем между uk и ru
+            const currentLang = localStorage.getItem('language') || 'uk';
+            const newLang = currentLang === 'uk' ? 'ru' : 'uk';
+            if (typeof switchLanguage === 'function') {
+                switchLanguage(newLang);
+            }
+        }
+        
+        // Закрываем меню после действия
+        close();
+    });
+    
+    // Закрыть при клике вне settings
+    document.addEventListener('click', (e) => {
+        if (!settingsContainer.contains(e.target) && settingsContainer.classList.contains('is-open')) {
+            close();
+        }
+    });
+    
+    // Esc закрывает
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && settingsContainer.classList.contains('is-open')) {
+            close();
+            trigger.focus();
+        }
     });
 }
 

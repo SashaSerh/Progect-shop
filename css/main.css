@@ -120,63 +120,129 @@
     display: none;
 }
 
-@media (max-width: 768px) {
-    .floating-control-btn {
-        /* Стилизуем как FAB — такие же как scroll-to-top и fab-trigger */
-        display: flex;
-        width: 56px;
-        height: 56px;
-        border-radius: 50% !important; /* Переопределяем другие правила */
-        border: none;
-        background: #007AFF !important; /* Фиксированный синий цвет для обеих тем */
-        color: #fff;
-        box-shadow: 0 4px 16px rgba(0,0,0,0.25);
-        cursor: pointer;
-        align-items: center;
-        justify-content: center;
-        font-size: 22px;
-        transition: transform 200ms ease, box-shadow 200ms ease, background 200ms ease;
-    }
-    
-    .floating-control-btn:hover {
-        transform: scale(1.08);
-        box-shadow: 0 6px 24px rgba(0,0,0,0.3);
-    }
-    
-    .floating-control-btn:active {
-        transform: scale(0.95);
-    }
-    
-    .floating-control-btn img {
-        width: 24px;
-        height: 24px;
-        /* Инвертируем иконку для белого цвета на синем фоне */
-        filter: invert(1) brightness(2);
-    }
-    
-    /* Текст языка на кнопке (UA/RU) */
-    .lang-label {
-        font-size: 14px;
-        font-weight: 700;
-        letter-spacing: 0.5px;
-        text-transform: uppercase;
-    }
+/* Settings container - аналог FAB для настроек */
+.settings-container {
+    position: relative;
 }
 
-/* Светлая тема для floating-control-btn */
-.light-theme .floating-control-btn {
-    background: #007AFF !important; /* Тот же синий цвет для светлой темы */
+.settings-trigger {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: #007AFF !important;
     color: #fff;
+    border: none;
     box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 200ms ease, box-shadow 200ms ease, background 200ms ease;
+    position: relative;
+    z-index: 2;
 }
 
-.light-theme .floating-control-btn:hover {
+.settings-trigger:hover {
     transform: scale(1.08);
     box-shadow: 0 6px 24px rgba(0,0,0,0.3);
 }
 
-.light-theme .floating-control-btn img {
+.settings-trigger:active {
+    transform: scale(0.95);
+}
+
+.settings-trigger__icon {
+    transition: opacity 200ms ease, transform 200ms ease;
+}
+
+.settings-trigger__icon--close {
+    position: absolute;
+    opacity: 0;
+    transform: rotate(-90deg);
+}
+
+.settings-container.is-open .settings-trigger__icon--default {
+    opacity: 0;
+    transform: rotate(90deg);
+}
+
+.settings-container.is-open .settings-trigger__icon--close {
+    opacity: 1;
+    transform: rotate(0deg);
+}
+
+.settings-container.is-open .settings-trigger {
+    background: #374151 !important;
+}
+
+/* Settings actions — кнопки настроек */
+.settings-actions {
+    position: absolute;
+    bottom: 70px;
+    right: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    pointer-events: none;
+}
+
+.settings-action {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.2);
+    opacity: 0;
+    transform: scale(0.5) translateY(20px);
+    transition: opacity 180ms ease, transform 180ms ease, box-shadow 150ms ease;
+    pointer-events: none;
+    border: none;
+    cursor: pointer;
+    background: #007AFF;
+    color: #fff;
+}
+
+.settings-action img {
+    width: 20px;
+    height: 20px;
     filter: invert(1) brightness(2);
+}
+
+.settings-action .lang-label {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+.settings-container.is-open .settings-actions {
+    pointer-events: auto;
+}
+
+.settings-container.is-open .settings-action {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    pointer-events: auto;
+}
+
+/* Stagger animation */
+.settings-container.is-open .settings-action:nth-child(1) { transition-delay: 0ms; }
+.settings-container.is-open .settings-action:nth-child(2) { transition-delay: 60ms; }
+
+/* Closing animation — обратный порядок */
+.settings-container.is-closing .settings-action:nth-child(2) { transition-delay: 0ms; }
+.settings-container.is-closing .settings-action:nth-child(1) { transition-delay: 60ms; }
+
+.settings-action:hover {
+    transform: scale(1.12) translateY(0);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .settings-trigger, .settings-action, .settings-trigger__icon { transition: none; }
 }
 
 /* ========================================

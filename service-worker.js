@@ -1,5 +1,5 @@
-const CACHE_VERSION = 'v65'; // Incremented cache version
-const CACHE_NAME = 'climat-control-v96'; // floating controls moved to right under scroll-to-top
+const CACHE_VERSION = 'v66'; // Incremented cache version
+const CACHE_NAME = 'climat-control-v97'; // FAB в index.html, стили floating-control-btn как FAB
 const urlsToCache = [
     '/',
     '/index.html',

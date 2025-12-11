@@ -98,17 +98,47 @@
             <button id="welcomeContinue">Продолжить</button>
         </div>
     
-    <!-- Плавающие кнопки (scroll-to-top + тема + язык) -->
+    <!-- Плавающие кнопки справа (scroll-to-top + тема + язык) -->
     <div class="floating-buttons">
         <button class="scroll-to-top" aria-label="Прокрутить наверх" title="Наверх">↑</button>
-        <!-- Мобильные контролы (тема + язык) - под scroll-to-top -->
-        <div class="floating-controls">
-            <button class="floating-control-btn theme-toggle" id="floatingThemeToggle" aria-label="Переключить тему" aria-pressed="false">
-                <span class="theme-icon"><img src="icons/moons-icon.svg" alt="Тема" width="24" height="24"></span>
-            </button>
-            <button class="floating-control-btn open-language-overlay" id="floatingLangToggle" aria-label="Сменить язык" aria-controls="welcomeOverlay" aria-haspopup="dialog">
-                🌐
-            </button>
+        <!-- Мобильные контролы (тема + язык) -->
+        <button class="floating-control-btn theme-toggle" id="floatingThemeToggle" aria-label="Переключить тему" aria-pressed="false">
+            <span class="theme-icon"><img src="icons/moons-icon.svg" alt="Тема" width="24" height="24"></span>
+        </button>
+        <button class="floating-control-btn open-language-overlay" id="floatingLangToggle" aria-label="Сменить язык" aria-controls="welcomeOverlay" aria-haspopup="dialog">
+            🌐
+        </button>
+    </div>
+    
+    <!-- FAB (Floating Action Button) для связи -->
+    <div class="fab-container" id="fab-contact-mobile">
+        <button class="fab-trigger" aria-label="Связаться с нами" aria-expanded="false" aria-controls="fab-actions-mobile">
+            <svg class="fab-trigger__icon fab-trigger__icon--default" viewBox="0 0 24 24" width="28" height="28" aria-hidden="true">
+                <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H5.2L4 17.2V4h16v12z" fill="currentColor"/>
+            </svg>
+            <svg class="fab-trigger__icon fab-trigger__icon--close" viewBox="0 0 24 24" width="28" height="28" aria-hidden="true">
+                <path d="M19 6.4L17.6 5 12 10.6 6.4 5 5 6.4l5.6 5.6L5 17.6 6.4 19l5.6-5.6 5.6 5.6 1.4-1.4-5.6-5.6z" fill="currentColor"/>
+            </svg>
+        </button>
+        <div class="fab-actions" id="fab-actions-mobile" aria-hidden="true">
+            <a class="fab-action fab-action--phone" href="tel:+380633353410" aria-label="Позвонить">
+                <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 10.2c1.2 2.4 3.1 4.3 5.5 5.5l2-2c.3-.3.8-.4 1.2-.3 1 .3 2 .5 3 .5.7 0 1.3.6 1.3 1.3v3.3c0 .7-.6 1.3-1.3 1.3C9.7 21.8 2.2 14.3 2.2 4.7c0-.7.6-1.3 1.3-1.3H6.8c.7 0 1.3.6 1.3 1.3 0 1 .2 2 .5 3 .1.4 0 .9-.3 1.2l-1.7 1.3z" fill="currentColor"/></svg>
+            </a>
+            <a class="fab-action fab-action--wa" href="https://wa.me/380633353410" target="_blank" rel="noopener" aria-label="WhatsApp">
+                <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 00-8.7 15.1L2 22l5-1.3A10 10 0 1012 2z" fill="#25D366"/><path d="M17 15.3c-.3.8-1.8 1.6-2.5 1.6-.7 0-2.3-.5-4.1-2.2-1.6-1.6-2.2-3.2-2.2-4 0-.8.8-2.2 1.6-2.5.4-.1.9 0 1.2.4l.9 1.4c.2.3.2.7-.2 1-.2.2-.6.5-.6.8 0 .3.4 1 .9 1.6.6.6 1.3 1 1.6 1 .3 0 .5-.3.8-.6.3-.3.7-.4 1-.2l1.4.9c.4.3.5.8.3 1.2z" fill="#fff"/></svg>
+            </a>
+            <a class="fab-action fab-action--tg" href="https://t.me/climate_service" target="_blank" rel="noopener" aria-label="Telegram">
+                <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="#fff" d="M23 3L1 11l6.2 2.4L19 6 9.7 14.2l.2 6.8 3.7-3.9 4.9 3.6z"/></svg>
+            </a>
+            <a class="fab-action fab-action--viber" href="viber://chat?number=%2B380633353410" aria-label="Viber">
+                <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M17.5 2H6.5A4.5 4.5 0 002 6.5v11A4.5 4.5 0 006.5 22h7.6l4.9 2-.9-5.4a4.5 4.5 0 002.4-4V6.5A4.5 4.5 0 0017.5 2z" fill="#fff"/></svg>
+            </a>
+            <a class="fab-action fab-action--instagram" href="https://instagram.com/ClimaTechUA" target="_blank" rel="noopener" aria-label="Instagram">
+                <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 2h10a5 5 0 015 5v10a5 5 0 01-5 5H7a5 5 0 01-5-5V7a5 5 0 015-5zm5 5a5 5 0 100 10 5 5 0 000-10zm6.5-2a1.5 1.5 0 11-3 .001 1.5 1.5 0 013-.001z" fill="currentColor"/></svg>
+            </a>
+            <a class="fab-action fab-action--facebook" href="https://facebook.com/ClimaTechUA" target="_blank" rel="noopener" aria-label="Facebook">
+                <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M13.5 22V12.8h2.8l.4-3h-3.2V8.1c0-.9.3-1.5 1.6-1.5h1.7V4.1c-.3 0-1.3-.1-2.3-.1-2.3 0-3.8 1.4-3.8 3.9v2.1H9v3h1.7V22h2.8z" fill="#fff"/></svg>
+            </a>
         </div>
     </div>
     

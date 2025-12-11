@@ -1974,7 +1974,8 @@ function initServiceCardsNavigation() {
 
 // FAB (Floating Action Button) — раскрытие/скрытие кнопок связи
 function initFabContact() {
-    const fab = document.getElementById('fab-contact');
+    // Ищем FAB в services.html или мобильный в index.html
+    const fab = document.getElementById('fab-contact') || document.getElementById('fab-contact-mobile');
     if (!fab) return;
     
     const trigger = fab.querySelector('.fab-trigger');

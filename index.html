@@ -65,6 +65,8 @@
     <div id="header-container"></div>
     <div id="main-container" style="display:none"></div>
     <div id="hero-container"></div>
+    <!-- Мобильное меню на главной (под hero) -->
+    <div id="mobile-main-nav-container"></div>
     <div id="services-container"></div>
     <div id="reviews-container"></div>
     <div id="faq-container"></div>
@@ -99,6 +101,16 @@
     <!-- Плавающие кнопки -->
     <div class="floating-buttons">
         <button class="scroll-to-top" aria-label="Прокрутить наверх" title="Наверх">↑</button>
+    </div>
+    
+    <!-- Мобильные контролы (тема + язык) -->
+    <div class="floating-controls">
+        <button class="floating-control-btn theme-toggle" id="floatingThemeToggle" aria-label="Переключить тему" aria-pressed="false">
+            <span class="theme-icon"><img src="icons/moons-icon.svg" alt="Тема" width="24" height="24"></span>
+        </button>
+        <button class="floating-control-btn open-language-overlay" id="floatingLangToggle" aria-label="Сменить язык" aria-controls="welcomeOverlay" aria-haspopup="dialog">
+            🌐
+        </button>
     </div>
     
     <!-- Toast area for cart Undo messages -->

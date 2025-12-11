@@ -1,3 +1,319 @@
+/* ========================================
+   MOBILE-FIRST BASE LAYER
+   Базовые стили для мобильных устройств
+   Десктоп расширяется через min-width
+   ======================================== */
+
+/* Mobile base: single column, full width */
+.container {
+    width: 100%;
+    max-width: 100%;
+    padding-left: 16px;
+    padding-right: 16px;
+    margin: 0 auto;
+}
+
+/* ========================================
+   MOBILE APP LAYOUT (скрытие элементов)
+   ======================================== */
+@media (max-width: 768px) {
+    /* Скрыть header полностью на мобильных */
+    .header {
+        display: none !important;
+    }
+    
+    /* Hero занимает меньше места */
+    .hero {
+        min-height: 200px;
+        padding: 40px 0 24px;
+    }
+    
+    /* Скрыть CTA кнопку в hero */
+    .hero__cta {
+        display: none !important;
+    }
+    
+    /* Скрыть секции услуг и портфолио на главной */
+    .services,
+    .portfolio,
+    #services-container,
+    #portfolio-container {
+        display: none !important;
+    }
+}
+
+/* ========================================
+   MOBILE MAIN NAV (меню под hero)
+   ======================================== */
+.main-nav-mobile {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .main-nav-mobile {
+        display: block;
+        padding: 8px 16px 24px;
+        background: var(--background-color, #0e1117);
+    }
+    
+    .main-nav-mobile__list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .main-nav-mobile__item {
+        border-radius: 16px;
+        overflow: hidden;
+    }
+    
+    .main-nav-mobile__link {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 16px 18px;
+        background: var(--glass-bg, rgba(255,255,255,0.08));
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        border: 1px solid var(--glass-border, rgba(255,255,255,0.12));
+        border-radius: 16px;
+        text-decoration: none;
+        color: var(--nav-text-color, #D1D1D6);
+        font-size: 16px;
+        font-weight: 500;
+        transition: background 200ms ease, transform 150ms ease;
+        min-height: 56px;
+    }
+    
+    .main-nav-mobile__link:active {
+        transform: scale(0.98);
+        background: var(--glass-bg, rgba(255,255,255,0.12));
+    }
+    
+    .main-nav-mobile__icon {
+        font-size: 22px;
+        flex-shrink: 0;
+        width: 32px;
+        text-align: center;
+    }
+    
+    .main-nav-mobile__text {
+        flex: 1;
+    }
+    
+    .main-nav-mobile__arrow {
+        font-size: 20px;
+        opacity: 0.5;
+        font-weight: 300;
+    }
+}
+
+/* ========================================
+   FLOATING CONTROLS (тема + язык)
+   ======================================== */
+.floating-controls {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .floating-controls {
+        display: flex;
+        flex-direction: column;
+        position: fixed;
+        left: 16px;
+        bottom: calc(100px + var(--safe-area-bottom, 0px));
+        gap: 12px;
+        z-index: 1000;
+    }
+    
+    .floating-control-btn {
+        width: 52px;
+        height: 52px;
+        border-radius: 50%;
+        border: none;
+        background: var(--glass-bg, rgba(255,255,255,0.15));
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid var(--glass-border, rgba(255,255,255,0.2));
+        box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--nav-text-color, #D1D1D6);
+        font-size: 22px;
+        transition: transform 200ms ease, box-shadow 200ms ease;
+    }
+    
+    .floating-control-btn:active {
+        transform: scale(0.92);
+    }
+    
+    .floating-control-btn:hover {
+        transform: scale(1.08);
+        box-shadow: 0 6px 24px rgba(0,0,0,0.3);
+    }
+    
+    .floating-control-btn img {
+        width: 24px;
+        height: 24px;
+    }
+}
+
+/* ========================================
+   MOBILE FOOTER (лозунг)
+   ======================================== */
+@media (max-width: 768px) {
+    .footer__top,
+    .footer__links,
+    .footer__info,
+    .footer__about {
+        display: none !important;
+    }
+    
+    .footer {
+        padding: 24px 16px;
+        text-align: center;
+    }
+    
+    .footer__slogan {
+        display: block !important;
+        font-size: 15px;
+        color: var(--nav-text-color, #D1D1D6);
+        opacity: 0.8;
+        margin-bottom: 12px;
+    }
+    
+    .footer__copyright {
+        font-size: 13px;
+        opacity: 0.6;
+    }
+}
+
+.footer__slogan {
+    display: none;
+}
+
+/* Mobile base: stack layout */
+.header__nav {
+    display: none; /* Hidden on mobile, shown via burger menu */
+}
+
+/* Mobile base: full-width cards */
+.card,
+.service-card,
+.product-card {
+    width: 100%;
+}
+
+/* Mobile base: single column grids */
+.products__grid,
+.services__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+}
+
+/* Mobile base: larger text for readability */
+html {
+    font-size: 16px;
+}
+
+/* Mobile base: bottom navigation space */
+main {
+    padding-bottom: calc(80px + var(--safe-area-bottom, 0px));
+}
+
+/* ========================================
+   DESKTOP EXPANSION (min-width: 769px)
+   ======================================== */
+@media (min-width: 769px) {
+    .container {
+        max-width: var(--container-width, 1200px);
+        padding-left: var(--gutter-sm, 24px);
+        padding-right: var(--gutter-sm, 24px);
+    }
+    
+    .header__nav {
+        display: flex;
+    }
+    
+    .products__grid {
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 24px;
+    }
+    
+    .services__grid {
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 24px;
+    }
+    
+    main {
+        padding-bottom: var(--page-bottom, 24px);
+    }
+}
+
+/* Tablet breakpoint */
+@media (min-width: 481px) and (max-width: 768px) {
+    .products__grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 16px;
+    }
+    
+    .services__grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* ========================================
+   MOBILE-FIRST TYPOGRAPHY & SPACING
+   ======================================== */
+
+/* Section titles - mobile first */
+.section__title,
+.hero__title,
+.services__title,
+.products__title,
+.contacts__title {
+    font-size: clamp(24px, 6vw, 36px);
+    line-height: 1.2;
+    margin-bottom: 16px;
+}
+
+/* Section subtitles */
+.section__subtitle,
+.hero__subtitle {
+    font-size: clamp(14px, 4vw, 18px);
+    line-height: 1.5;
+    margin-bottom: 20px;
+}
+
+/* Section padding - mobile compact */
+section {
+    padding: 32px 0;
+}
+
+@media (min-width: 769px) {
+    section {
+        padding: 48px 0;
+    }
+    
+    .section__title,
+    .hero__title,
+    .services__title,
+    .products__title,
+    .contacts__title {
+        margin-bottom: 24px;
+    }
+}
+
+/* ========================================
+   EXISTING STYLES BELOW
+   ======================================== */
+
 .portfolio__item a:focus-visible { outline: 2px solid var(--color-accent, #4da3ff); outline-offset: 3px; border-radius: 8px; }
 .portfolio__item .portfolio__item-link { display: inline-block; }
 /* Breadcrumbs minimal styles */

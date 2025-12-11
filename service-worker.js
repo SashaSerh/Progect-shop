@@ -1,5 +1,5 @@
-const CACHE_VERSION = 'v62'; // Incremented cache version
-const CACHE_NAME = 'climat-control-v93'; // PWA install prompt, offline page
+const CACHE_VERSION = 'v64'; // Incremented cache version
+const CACHE_NAME = 'climat-control-v95'; // mobile-app layout refactor
 const urlsToCache = [
     '/',
     '/index.html',
@@ -21,6 +21,7 @@ const urlsToCache = [
     '/components/admin-products.html',
     '/components/header.html',
     '/components/hero.html',
+    '/components/mobile-main-nav.html',
     '/components/services.html',
     '/components/products.html',
     '/components/product-detail.html',

@@ -909,6 +909,7 @@ async function initApp() {
     await Promise.all([
         loadComponent('header-container', 'components/header.html'),
         loadComponent('hero-container', 'components/hero.html'),
+        loadComponent('mobile-main-nav-container', 'components/mobile-main-nav.html'),
         loadComponent('services-container', 'components/services.html'),
         loadComponent('portfolio-container', 'components/portfolio.html'),
         // Service pages (separate sections)

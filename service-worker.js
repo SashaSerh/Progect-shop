@@ -1,5 +1,5 @@
-const CACHE_VERSION = 'v67'; // Incremented cache version
-const CACHE_NAME = 'climat-control-v98'; // FAB init для всех .fab-container
+const CACHE_VERSION = 'v68'; // Incremented cache version
+const CACHE_NAME = 'climat-control-v99'; // кнопка языка показывает UA/RU вместо эмодзи
 const urlsToCache = [
     '/',
     '/index.html',

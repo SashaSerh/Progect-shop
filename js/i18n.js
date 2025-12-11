@@ -620,6 +620,23 @@ export const translations = {
     }
 };
 
+// Обновляем текст на плавающей кнопке языка (UA/RU)
+function updateFloatingLangButton(lang) {
+    const langLabels = document.querySelectorAll('.lang-label');
+    const label = lang === 'uk' ? 'UA' : 'RU';
+    langLabels.forEach(el => {
+        el.textContent = label;
+    });
+}
+
+// Инициализация кнопки языка при загрузке страницы
+if (typeof window !== 'undefined') {
+    document.addEventListener('DOMContentLoaded', () => {
+        const savedLang = localStorage.getItem('language') || 'uk';
+        updateFloatingLangButton(savedLang);
+    });
+}
+
 export function switchLanguage(lang) {
     // Безопасный язык + fallback на ru
     const safeLang = ['ru','uk'].includes(lang) ? lang : 'ru';
@@ -646,6 +663,9 @@ export function switchLanguage(lang) {
         const value = translations[safeLang][key] || translations.ru[key];
         if (value) option.textContent = value;
     });
+
+    // Обновляем текст на плавающей кнопке языка
+    updateFloatingLangButton(safeLang);
 
     document.title = translations[safeLang]['site-title'] || 'ClimaTech';
     localStorage.setItem('language', safeLang);

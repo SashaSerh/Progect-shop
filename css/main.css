@@ -3079,6 +3079,33 @@ button:active, .btn:active, .fab:active, a:active {
     }
 }
 
+/* Мобильный размытый фон для полного заполнения */
+@media (max-width: 768px) {
+    .hero {
+        position: relative;
+    }
+    
+    .hero::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-image: url('../picture/hero-picture/background-blur-mobile.png');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        filter: blur(2px);
+        z-index: -1;
+    }
+    
+    .hero__container {
+        position: relative;
+        z-index: 1;
+    }
+}
+
 
 
 .hero__container {

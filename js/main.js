@@ -4668,8 +4668,11 @@ function initMobileMainNav() {
         if (href === '#services-page') {
             e.preventDefault();
             showServicesList(navList);
+        } else if (href && href.startsWith('#')) {
+            // Для других внутренних ссылок - позволяем переход
+            // Но если нужно, можно добавить логику здесь
         }
-        // Другие ссылки можно добавить аналогично
+        // Для внешних ссылок или других - не мешаем
     });
 }
 
@@ -4723,6 +4726,18 @@ function showServicesList(navList) {
                 restoreMainMenu(navList);
             });
         }
+        
+        // Обработчик для ссылок услуг
+        const serviceLinks = navList.querySelectorAll('.main-nav-mobile__link:not(.main-nav-mobile__link--back)');
+        serviceLinks.forEach(serviceLink => {
+            serviceLink.addEventListener('click', (e) => {
+                const href = serviceLink.getAttribute('href');
+                if (href && href.startsWith('#')) {
+                    // Убедимся, что hash изменяется
+                    location.hash = href;
+                }
+            });
+        });
     }, 300);
 }
 

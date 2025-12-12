@@ -4501,7 +4501,7 @@ textarea.form-input { resize: vertical; min-height: 120px; }
 
 .footer__container {
     max-width: var(--container-width);
-    margin: 0 112.5px;
+    margin: 0 auto;
     padding: var(--page-top) var(--gutter-sm) 0;
 }
 

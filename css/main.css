@@ -27,7 +27,7 @@
     .hero {
         min-height: auto;
         height: auto;
-        padding: 60px 16px 20px;
+        padding: 60px 16px 40px;
     }
     
     /* Скрыть CTA кнопку в hero */
@@ -80,7 +80,7 @@
         display: flex;
         flex-direction: column;
         gap: 8px;
-        min-height: 240px; /* Фиксированная высота для предотвращения прыжка фона */
+        min-height: 300px; /* Prevent background jumping when content changes */
     }
     
     .main-nav-mobile__item {
@@ -3214,7 +3214,7 @@ button:active, .btn:active, .fab:active, a:active {
     }
 }
 
-/* Мобильный размытый фон для всего html */
+/* Мобильный размытый фон для всего body */
 @media (max-width: 768px) {
     html {
         background-image: url('../picture/hero-picture/background-blur-mobile.png');
@@ -3225,7 +3225,6 @@ button:active, .btn:active, .fab:active, a:active {
     }
     
     body {
-        background: transparent;
         overflow-y: auto; /* Ensure scrolling works */
     }
     

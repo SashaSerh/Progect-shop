@@ -3123,6 +3123,53 @@ button:active, .btn:active, .fab:active, a:active {
         position: relative;
         z-index: 1;
     }
+    
+    /* Размытый фон для мобильной навигации */
+    .main-nav-mobile {
+        position: relative;
+    }
+    
+    .main-nav-mobile::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-image: url('../picture/hero-picture/background-blur-mobile.png');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        filter: blur(3px);
+        z-index: -1;
+        opacity: 0.8;
+    }
+    
+    /* Размытый фон для футера */
+    .footer {
+        position: relative;
+    }
+    
+    .footer::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-image: url('../picture/hero-picture/background-blur-mobile.png');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        filter: blur(2px);
+        z-index: -1;
+        opacity: 0.9;
+    }
+    
+    .footer__container {
+        position: relative;
+        z-index: 1;
+    }
 }
 
 

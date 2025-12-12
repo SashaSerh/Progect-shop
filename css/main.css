@@ -23,10 +23,11 @@
         display: none !important;
     }
     
-    /* Hero занимает больше места для лучшего скролла */
+    /* Hero - компактная высота для удобного скролла */
     .hero {
-        min-height: 100vh;
-        padding: 80px 0 40px;
+        min-height: auto;
+        height: auto;
+        padding: 60px 16px 40px;
     }
     
     /* Скрыть CTA кнопку в hero */
@@ -423,6 +424,9 @@
 /* Mobile base: larger text for readability */
 html {
     font-size: 16px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    height: auto;
 }
 
 /* Mobile base: bottom navigation space */

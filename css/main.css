@@ -43,10 +43,7 @@
         display: none !important;
     }
     
-    /* Скрыть все остальные секции в мобильной версии */
-    #service-ac-install-container,
-    #service-recuperator-install-container,
-    #service-maintenance-container,
+    /* Скрыть остальные секции лендинга в мобильной версии */
     #case-1-container,
     #case-2-container,
     #case-3-container,
@@ -55,6 +52,19 @@
     #faq-container,
     #breadcrumbs-container,
     #welcome-container {
+        display: none !important;
+    }
+    
+    /* Контейнеры услуг: скрыты по умолчанию, показываются через [hidden] attr */
+    #service-ac-install-container,
+    #service-recuperator-install-container,
+    #service-maintenance-container {
+        display: block;
+    }
+    
+    #service-ac-install-container[hidden],
+    #service-recuperator-install-container[hidden],
+    #service-maintenance-container[hidden] {
         display: none !important;
     }
 }

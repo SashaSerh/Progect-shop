@@ -4675,75 +4675,107 @@ function initMobileMainNav() {
 
 // Функция для показа списка услуг вместо меню
 function showServicesList(navList) {
-    const servicesHTML = `
-        <li class="main-nav-mobile__item">
-            <a href="#service-ac-install" class="main-nav-mobile__link">
-                <span class="main-nav-mobile__text" data-i18n="service-ac-install-title">Монтаж кондиционеров</span>
-            </a>
-        </li>
-        <li class="main-nav-mobile__item">
-            <a href="#service-recuperator-install" class="main-nav-mobile__link">
-                <span class="main-nav-mobile__text" data-i18n="service-recuperator-install-title">Монтаж рекуператоров</span>
-            </a>
-        </li>
-        <li class="main-nav-mobile__item">
-            <a href="#service-maintenance" class="main-nav-mobile__link">
-                <span class="main-nav-mobile__text" data-i18n="service-maintenance-title">Обслуживание систем</span>
-            </a>
-        </li>
-        <li class="main-nav-mobile__item">
-            <a href="#back-to-menu" class="main-nav-mobile__link main-nav-mobile__link--back">
-                <span class="main-nav-mobile__text">← Назад к меню</span>
-            </a>
-        </li>
-    `;
-
-    navList.innerHTML = servicesHTML;
-
-    // Обработчик для кнопки "Назад"
-    const backLink = navList.querySelector('.main-nav-mobile__link--back');
-    if (backLink) {
-        backLink.addEventListener('click', (e) => {
-            e.preventDefault();
-            restoreMainMenu(navList);
-        });
-    }
+    // Start slide out animation
+    navList.classList.add('main-nav-mobile__list--slide-out');
+    
+    setTimeout(() => {
+        const servicesHTML = `
+            <li class="main-nav-mobile__item">
+                <a href="#service-ac-install" class="main-nav-mobile__link">
+                    <span class="main-nav-mobile__text" data-i18n="service-ac-install-title">Монтаж кондиционеров</span>
+                </a>
+            </li>
+            <li class="main-nav-mobile__item">
+                <a href="#service-recuperator-install" class="main-nav-mobile__link">
+                    <span class="main-nav-mobile__text" data-i18n="service-recuperator-install-title">Монтаж рекуператоров</span>
+                </a>
+            </li>
+            <li class="main-nav-mobile__item">
+                <a href="#service-maintenance" class="main-nav-mobile__link">
+                    <span class="main-nav-mobile__text" data-i18n="service-maintenance-title">Обслуживание систем</span>
+                </a>
+            </li>
+            <li class="main-nav-mobile__item">
+                <a href="#back-to-menu" class="main-nav-mobile__link main-nav-mobile__link--back">
+                    <span class="main-nav-mobile__text">← Назад к меню</span>
+                </a>
+            </li>
+        `;
+        
+        navList.innerHTML = servicesHTML;
+        navList.classList.remove('main-nav-mobile__list--slide-out');
+        navList.classList.add('main-nav-mobile__list--slide-in-from-right');
+        
+        // Force reflow to start animation
+        navList.offsetHeight;
+        
+        // Start slide in animation
+        setTimeout(() => {
+            navList.classList.remove('main-nav-mobile__list--slide-in-from-right');
+            navList.classList.add('main-nav-mobile__list--slide-in');
+        }, 10);
+        
+        // Обработчик для кнопки "Назад"
+        const backLink = navList.querySelector('.main-nav-mobile__link--back');
+        if (backLink) {
+            backLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                restoreMainMenu(navList);
+            });
+        }
+    }, 300);
 }
 
 // Функция для восстановления основного меню
 function restoreMainMenu(navList) {
-    const menuHTML = `
-        <li class="main-nav-mobile__item">
-            <a href="#services-page" class="main-nav-mobile__link">
-                <span class="main-nav-mobile__text" data-i18n="nav-services">Услуги</span>
-            </a>
-        </li>
-        <li class="main-nav-mobile__item">
-            <a href="#portfolio-page" class="main-nav-mobile__link">
-                <span class="main-nav-mobile__text" data-i18n="nav-portfolio">Наши работы</span>
-            </a>
-        </li>
-        <li class="main-nav-mobile__item">
-            <a href="#reviews-page" class="main-nav-mobile__link">
-                <span class="main-nav-mobile__text" data-i18n="nav-reviews">Отзывы клиентов</span>
-            </a>
-        </li>
-        <li class="main-nav-mobile__item">
-            <a href="#faq-page" class="main-nav-mobile__link">
-                <span class="main-nav-mobile__text" data-i18n="nav-faq">Вопросы и ответы</span>
-            </a>
-        </li>
-        <li class="main-nav-mobile__item">
-            <a href="#about" class="main-nav-mobile__link">
-                <span class="main-nav-mobile__text" data-i18n="nav-about">О нас</span>
-            </a>
-        </li>
-        <li class="main-nav-mobile__item">
-            <a href="#contacts" class="main-nav-mobile__link">
-                <span class="main-nav-mobile__text" data-i18n="nav-contacts">Контакты</span>
-            </a>
-        </li>
-    `;
-
-    navList.innerHTML = menuHTML;
+    // Start slide out animation (to the right)
+    navList.classList.add('main-nav-mobile__list--slide-in-from-right');
+    
+    setTimeout(() => {
+        const menuHTML = `
+            <li class="main-nav-mobile__item">
+                <a href="#services-page" class="main-nav-mobile__link">
+                    <span class="main-nav-mobile__text" data-i18n="nav-services">Услуги</span>
+                </a>
+            </li>
+            <li class="main-nav-mobile__item">
+                <a href="#portfolio-page" class="main-nav-mobile__link">
+                    <span class="main-nav-mobile__text" data-i18n="nav-portfolio">Наши работы</span>
+                </a>
+            </li>
+            <li class="main-nav-mobile__item">
+                <a href="#reviews-page" class="main-nav-mobile__link">
+                    <span class="main-nav-mobile__text" data-i18n="nav-reviews">Отзывы клиентов</span>
+                </a>
+            </li>
+            <li class="main-nav-mobile__item">
+                <a href="#faq-page" class="main-nav-mobile__link">
+                    <span class="main-nav-mobile__text" data-i18n="nav-faq">Вопросы и ответы</span>
+                </a>
+            </li>
+            <li class="main-nav-mobile__item">
+                <a href="#about" class="main-nav-mobile__link">
+                    <span class="main-nav-mobile__text" data-i18n="nav-about">О нас</span>
+                </a>
+            </li>
+            <li class="main-nav-mobile__item">
+                <a href="#contacts" class="main-nav-mobile__link">
+                    <span class="main-nav-mobile__text" data-i18n="nav-contacts">Контакты</span>
+                </a>
+            </li>
+        `;
+        
+        navList.innerHTML = menuHTML;
+        navList.classList.remove('main-nav-mobile__list--slide-in-from-right');
+        navList.classList.add('main-nav-mobile__list--slide-out');
+        
+        // Force reflow
+        navList.offsetHeight;
+        
+        // Start slide in animation
+        setTimeout(() => {
+            navList.classList.remove('main-nav-mobile__list--slide-out');
+            navList.classList.add('main-nav-mobile__list--slide-in');
+        }, 10);
+    }, 300);
 }

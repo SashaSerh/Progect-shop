@@ -81,6 +81,7 @@
         flex-direction: column;
         gap: 8px;
         min-height: 300px; /* Prevent layout jump when switching menus */
+        transition: transform 0.3s ease-in-out;
     }
     
     .main-nav-mobile__item {
@@ -113,6 +114,19 @@
     .main-nav-mobile__link--back {
         color: var(--accent-color, #007AFF);
         font-weight: 600;
+    }
+    
+    /* Animation classes for menu transitions */
+    .main-nav-mobile__list--slide-out {
+        transform: translateX(-100%);
+    }
+    
+    .main-nav-mobile__list--slide-in {
+        transform: translateX(0);
+    }
+    
+    .main-nav-mobile__list--slide-in-from-right {
+        transform: translateX(100%);
     }
     
     .main-nav-mobile__icon,

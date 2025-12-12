@@ -40,6 +40,21 @@
     #portfolio-container {
         display: none !important;
     }
+    
+    /* Скрыть все остальные секции в мобильной версии */
+    #service-ac-install-container,
+    #service-recuperator-install-container,
+    #service-maintenance-container,
+    #case-1-container,
+    #case-2-container,
+    #case-3-container,
+    #reviews-container,
+    #contacts-container,
+    #faq-container,
+    #breadcrumbs-container,
+    #welcome-container {
+        display: none !important;
+    }
 }
 
 /* ========================================

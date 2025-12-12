@@ -378,6 +378,13 @@
         height: 20px;
     }
     
+    .footer__fab img {
+        width: 20px;
+        height: 20px;
+        filter: invert(1);
+        display: block;
+    }
+    
     .footer__fab--tg { background: #229ED9; }
     .footer__fab--wa { background: #25D366; }
     .footer__fab--ig { background: linear-gradient(135deg, #F58529, #DD2A7B, #8134AF, #515BD4); }

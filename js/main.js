@@ -4668,11 +4668,15 @@ function initMobileMainNav() {
         if (href === '#services-page') {
             e.preventDefault();
             showServicesList(navList);
-        } else if (href && href.startsWith('#')) {
-            // Для других внутренних ссылок - позволяем переход
-            // Но если нужно, можно добавить логику здесь
+        } else if (href === '#back-to-menu') {
+            e.preventDefault();
+            restoreMainMenu(navList);
+        } else if (href && href.startsWith('#service-')) {
+            // Ссылки на страницы услуг - устанавливаем hash для навигации
+            e.preventDefault();
+            location.hash = href;
         }
-        // Для внешних ссылок или других - не мешаем
+        // Другие ссылки можно добавить аналогично
     });
 }
 
@@ -4717,27 +4721,6 @@ function showServicesList(navList) {
             navList.classList.remove('main-nav-mobile__list--slide-in-from-right');
             navList.classList.add('main-nav-mobile__list--slide-in');
         }, 10);
-        
-        // Обработчик для кнопки "Назад"
-        const backLink = navList.querySelector('.main-nav-mobile__link--back');
-        if (backLink) {
-            backLink.addEventListener('click', (e) => {
-                e.preventDefault();
-                restoreMainMenu(navList);
-            });
-        }
-        
-        // Обработчик для ссылок услуг
-        const serviceLinks = navList.querySelectorAll('.main-nav-mobile__link:not(.main-nav-mobile__link--back)');
-        serviceLinks.forEach(serviceLink => {
-            serviceLink.addEventListener('click', (e) => {
-                const href = serviceLink.getAttribute('href');
-                if (href && href.startsWith('#')) {
-                    // Убедимся, что hash изменяется
-                    location.hash = href;
-                }
-            });
-        });
     }, 300);
 }
 

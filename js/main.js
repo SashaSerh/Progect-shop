@@ -4678,6 +4678,15 @@ function initMobileMainNav() {
         }
         // Другие ссылки можно добавить аналогично
     });
+    
+    // Обработчик для кнопки "Назад" на страницах услуг
+    document.addEventListener('click', (e) => {
+        const backButton = e.target.closest('.service-page__back a[href="#services-page"]');
+        if (!backButton) return;
+        
+        e.preventDefault();
+        showServicesList(navList);
+    });
 }
 
 // Функция для показа списка услуг вместо меню

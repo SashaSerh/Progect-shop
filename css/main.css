@@ -108,6 +108,11 @@
         background: transparent;
         transform: none;
     }
+
+    .main-nav-mobile__link--back {
+        color: var(--accent-color, #007AFF);
+        font-weight: 600;
+    }
     
     .main-nav-mobile__icon,
     .main-nav-mobile__arrow {

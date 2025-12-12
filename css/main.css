@@ -1890,6 +1890,7 @@ body {
     -webkit-touch-callout: none;
     /* Allow normal scrolling behavior */
     overscroll-behavior-y: auto;
+    -webkit-overflow-scrolling: touch;
     /* Safe area padding for notch devices */
     padding-top: var(--safe-area-top);
     padding-bottom: var(--safe-area-bottom);
@@ -3211,6 +3212,7 @@ button:active, .btn:active, .fab:active, a:active {
         background-position: center;
         background-repeat: no-repeat;
         background-attachment: scroll;
+        overflow-y: auto; /* Ensure scrolling works */
     }
     
     .hero {

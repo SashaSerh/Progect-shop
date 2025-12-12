@@ -3083,7 +3083,7 @@ button:active, .btn:active, .fab:active, a:active {
 @media (max-width: 768px) {
     .hero {
         position: relative;
-        /* Убираем обычное background-image, чтобы был виден размытый фон */
+        /* Убираем обычное background-image для мобильной версии */
         background-image: none !important;
     }
     
@@ -3099,19 +3099,12 @@ button:active, .btn:active, .fab:active, a:active {
         background-position: center;
         background-repeat: no-repeat;
         filter: blur(2px);
-        z-index: 0;
+        z-index: -1;
     }
     
     .hero__container {
         position: relative;
         z-index: 1;
-    }
-}
-
-/* Скрыть hero секцию в мобильной версии */
-@media (max-width: 768px) {
-    .hero {
-        display: none !important;
     }
 }
 

@@ -261,11 +261,32 @@
 /* ========================================
    MOBILE FOOTER (лозунг)
    ======================================== */
+.footer__mobile {
+    display: none;
+}
+
+.footer__slogan {
+    display: none;
+}
+
 @media (max-width: 768px) {
-    .footer__top,
-    .footer__links,
-    .footer__about {
+    .footer__desktop {
         display: none !important;
+    }
+    
+    .footer__container {
+        margin: 0 auto;
+        padding: 24px 16px 0;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+    
+    .footer__mobile {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        align-items: center;
+        width: 100%;
     }
     
     .footer {
@@ -273,7 +294,7 @@
         text-align: center;
     }
     
-    .footer__info {
+    .footer__mobile .footer__info {
         display: flex;
         flex-direction: column;
         gap: 12px;
@@ -369,10 +390,6 @@
         opacity: 0.8;
         margin-bottom: 12px;
     }
-}
-
-.footer__slogan {
-    display: none;
 }
 
 /* Mobile base: stack layout */

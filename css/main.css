@@ -3284,6 +3284,8 @@ button:active, .btn:active, .fab:active, a:active {
     .service-page {
         padding: 16px 0;
         background: transparent;
+        opacity: 1 !important;
+        transform: none !important;
     }
     
     .service-page__back {

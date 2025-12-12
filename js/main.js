@@ -1951,6 +1951,14 @@ function setupServiceRouting() {
     window.addEventListener('hashchange', applyRoute, { passive: true });
     // Применить текущий маршрут сразу
     applyRoute();
+
+    // Обработчик для кнопки "Назад" на страницах услуг
+    document.addEventListener('click', (e) => {
+        if (e.target.closest('.service-page .btn.btn--ghost')) {
+            e.preventDefault();
+            location.hash = '';
+        }
+    });
 }
 
 function initServiceCardsNavigation() {
@@ -4677,15 +4685,6 @@ function initMobileMainNav() {
             location.hash = href;
         }
         // Другие ссылки можно добавить аналогично
-    });
-    
-    // Обработчик для кнопки "Назад" на страницах услуг
-    document.addEventListener('click', (e) => {
-        const backButton = e.target.closest('.service-page__back a[href="#services-page"]');
-        if (!backButton) return;
-        
-        e.preventDefault();
-        showServicesList(navList);
     });
 }
 

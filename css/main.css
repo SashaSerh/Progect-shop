@@ -86,37 +86,35 @@
     }
     
     .main-nav-mobile__link {
-        display: flex;
-        align-items: center;
-        gap: 14px;
-        padding: 16px 18px;
-        background: var(--glass-bg, rgba(255,255,255,0.08));
-        backdrop-filter: blur(8px);
-        -webkit-backdrop-filter: blur(8px);
-        border: 1px solid var(--glass-border, rgba(255,255,255,0.12));
-        border-radius: 16px;
+        display: block;
+        padding: 16px 20px;
+        background: transparent;
+        border: none;
+        border-radius: 0;
         text-decoration: none;
         color: var(--nav-text-color, #D1D1D6);
         font-size: 16px;
         font-weight: 500;
-        transition: background 200ms ease, transform 150ms ease;
-        min-height: 56px;
-    }
-    
-    .main-nav-mobile__link:active {
-        transform: scale(0.98);
-        background: var(--glass-bg, rgba(255,255,255,0.12));
-    }
-    
-    .main-nav-mobile__icon {
-        font-size: 22px;
-        flex-shrink: 0;
-        width: 32px;
         text-align: center;
+        transition: color 200ms ease;
+        min-height: auto;
+    }
+    
+    .main-nav-mobile__link:hover,
+    .main-nav-mobile__link:active {
+        color: var(--accent-color, #007AFF);
+        background: transparent;
+        transform: none;
+    }
+    
+    .main-nav-mobile__icon,
+    .main-nav-mobile__arrow {
+        display: none;
     }
     
     .main-nav-mobile__text {
-        flex: 1;
+        flex: none;
+        font-weight: 600;
     }
     
     .main-nav-mobile__arrow {
@@ -1791,6 +1789,7 @@ body {
     padding-right: var(--safe-area-right);
     /* Ensure full height for proper scrolling */
     min-height: 100vh;
+    height: auto;
 }
 
 /* Smooth momentum scrolling for iOS */
@@ -3096,27 +3095,21 @@ button:active, .btn:active, .fab:active, a:active {
     }
 }
 
-/* Мобильный размытый фон для полного заполнения */
+/* Мобильный размытый фон для всего body */
 @media (max-width: 768px) {
-    .hero {
-        position: relative;
-        /* Убираем обычное background-image для мобильной версии */
-        background-image: none !important;
-    }
-    
-    .hero::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
+    body {
         background-image: url('../picture/hero-picture/background-blur-mobile.png');
         background-size: cover;
         background-position: center;
         background-repeat: no-repeat;
-        filter: blur(2px);
-        z-index: -1;
+        background-attachment: scroll;
+    }
+    
+    .hero {
+        position: relative;
+        /* Убираем обычное background-image для мобильной версии */
+        background-image: none !important;
+        background: transparent;
     }
     
     .hero__container {
@@ -3124,51 +3117,18 @@ button:active, .btn:active, .fab:active, a:active {
         z-index: 1;
     }
     
-    /* Размытый фон для мобильной навигации */
+    /* Прозрачный фон для мобильной навигации */
     .main-nav-mobile {
-        position: relative;
+        background: rgba(0, 0, 0, 0.1);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
     }
     
-    .main-nav-mobile::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background-image: url('../picture/hero-picture/background-blur-mobile.png');
-        background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
-        filter: blur(3px);
-        z-index: -1;
-        opacity: 0.8;
-    }
-    
-    /* Размытый фон для футера */
+    /* Прозрачный фон для футера */
     .footer {
-        position: relative;
-    }
-    
-    .footer::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background-image: url('../picture/hero-picture/background-blur-mobile.png');
-        background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
-        filter: blur(2px);
-        z-index: -1;
-        opacity: 0.9;
-    }
-    
-    .footer__container {
-        position: relative;
-        z-index: 1;
+        background: rgba(0, 0, 0, 0.1);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
     }
 }
 

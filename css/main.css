@@ -80,7 +80,7 @@
         display: flex;
         flex-direction: column;
         gap: 8px;
-        min-height: 300px; /* Prevent background jumping when content changes */
+        min-height: 300px; /* Prevent layout jump when switching menus */
     }
     
     .main-nav-mobile__item {
@@ -3219,12 +3219,14 @@ button:active, .btn:active, .fab:active, a:active {
     html {
         background-image: url('../picture/hero-picture/background-blur-mobile.png');
         background-size: cover;
-        background-position: center;
+        background-position: center top;
         background-repeat: no-repeat;
-        background-attachment: scroll;
+        background-attachment: fixed;
+        min-height: 100vh;
     }
     
     body {
+        background: transparent;
         overflow-y: auto; /* Ensure scrolling works */
     }
     

@@ -109,15 +109,20 @@
         display: none !important;
     }
     
-    /* Скрыть секции услуг и портфолио на главной */
+    /* Секции услуг и портфолио — управление через [hidden] атрибут в JS */
     .services,
     .portfolio,
     #services-container,
     #portfolio-container {
+        display: block;
+    }
+    
+    #services-container[hidden],
+    #portfolio-container[hidden] {
         display: none !important;
     }
     
-    /* Скрыть остальные секции лендинга в мобильной версии */
+    /* Остальные секции лендинга — управление через [hidden] атрибут в JS */
     #case-1-container,
     #case-2-container,
     #case-3-container,
@@ -126,6 +131,17 @@
     #faq-container,
     #breadcrumbs-container,
     #welcome-container {
+        display: block;
+    }
+    
+    #case-1-container[hidden],
+    #case-2-container[hidden],
+    #case-3-container[hidden],
+    #reviews-container[hidden],
+    #contacts-container[hidden],
+    #faq-container[hidden],
+    #breadcrumbs-container[hidden],
+    #welcome-container[hidden] {
         display: none !important;
     }
     
@@ -4848,6 +4864,38 @@ textarea.form-input { resize: vertical; min-height: 120px; }
 /* Портфолио: базовая сетка под общий стиль карточек */
 .portfolio { padding: 40px 0; }
 .portfolio__title { font-size: 28px; margin-bottom: 16px; }
+
+/* Анимация появления portfolio для мобильной версии */
+@media (max-width: 768px) {
+    .portfolio,
+    .reviews,
+    .faq,
+    .contacts,
+    .welcome {
+        opacity: 1;
+        transform: translateX(0);
+        transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease;
+        will-change: transform, opacity;
+    }
+    
+    .portfolio--slide-in-from-right,
+    .reviews--slide-in-from-right,
+    .faq--slide-in-from-right,
+    .contacts--slide-in-from-right,
+    .welcome--slide-in-from-right {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    
+    .portfolio--slide-in,
+    .reviews--slide-in,
+    .faq--slide-in,
+    .contacts--slide-in,
+    .welcome--slide-in {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
 .portfolio__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px,1fr)); gap: 16px; }
 .portfolio__item { border-radius: 16px; 
     overflow: hidden; 

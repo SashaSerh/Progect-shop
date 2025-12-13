@@ -1917,10 +1917,14 @@ function setupServiceRouting() {
             }
 
             // Обработка страниц лендинга для мобильной версии
+            // Поддержка хешей с суффиксом -page и без
             const pageMap = {
                 'portfolio': 'portfolio-container',
+                'portfolio-page': 'portfolio-container',
                 'reviews': 'reviews-container',
+                'reviews-page': 'reviews-container',
                 'faq': 'faq-container',
+                'faq-page': 'faq-container',
                 'contacts': 'contacts-container',
                 'about': 'welcome-container'
             };
@@ -1930,6 +1934,27 @@ function setupServiceRouting() {
                 LANDING_CONTAINERS.forEach(id => {
                     setHiddenById(id, !['hero-container', 'mobile-main-nav-container', targetPage].includes(id));
                 });
+                
+                // Анимация появления для portfolio и других секций
+                try {
+                    const container = document.getElementById(targetPage);
+                    const section = container?.querySelector('.portfolio, .reviews, .faq, .contacts, .welcome');
+                    if (section) {
+                        // Определяем базовый класс секции для правильной анимации
+                        const sectionClass = section.classList.contains('portfolio') ? 'portfolio' :
+                                             section.classList.contains('reviews') ? 'reviews' :
+                                             section.classList.contains('faq') ? 'faq' :
+                                             section.classList.contains('contacts') ? 'contacts' :
+                                             section.classList.contains('welcome') ? 'welcome' : 'portfolio';
+                        
+                        section.classList.add(`${sectionClass}--slide-in-from-right`);
+                        requestAnimationFrame(() => {
+                            section.classList.remove(`${sectionClass}--slide-in-from-right`);
+                            section.classList.add(`${sectionClass}--slide-in`);
+                        });
+                    }
+                } catch(_) { /* noop */ }
+                
                 scrollToSectionTop(targetPage);
                 setActiveNav(hash);
                 focusSectionHeading(targetPage, 'h2');
@@ -1999,6 +2024,29 @@ function setupServiceRouting() {
             scrollToSectionTop('services');
             setActiveNav('services');
             focusSectionHeading('services', 'h2');
+            return;
+        }
+
+        // Обработка переходов к секциям лендинга (portfolio, reviews, faq и т.д.)
+        const desktopPageMap = {
+            'portfolio': 'portfolio-container',
+            'portfolio-page': 'portfolio-container',
+            'reviews': 'reviews-container',
+            'reviews-page': 'reviews-container',
+            'faq': 'faq-container',
+            'faq-page': 'faq-container',
+            'contacts': 'contacts-container',
+            'about': 'welcome-container'
+        };
+        const desktopTargetPage = desktopPageMap[hash];
+        if (desktopTargetPage) {
+            LANDING_CONTAINERS.forEach(id => setHiddenById(id, false));
+            Object.values(SERVICE_MAP).forEach(id => setHiddenById(id, true));
+            CASE_CONTAINERS.forEach(id => setHiddenById(id, true));
+            setHiddenById('breadcrumbs-container', true);
+            scrollToSectionTop(desktopTargetPage);
+            setActiveNav(hash.replace('-page', ''));
+            focusSectionHeading(desktopTargetPage, 'h2');
             return;
         }
 
@@ -4754,8 +4802,11 @@ function initMobileMainNav() {
             // Ссылки на страницы услуг - устанавливаем hash для навигации
             e.preventDefault();
             location.hash = href;
+        } else if (href && href.startsWith('#')) {
+            // Все остальные хеш-ссылки (portfolio-page, reviews-page, faq-page, contacts, about)
+            e.preventDefault();
+            location.hash = href;
         }
-        // Другие ссылки можно добавить аналогично
     });
 }
 

@@ -4,6 +4,80 @@
    Десктоп расширяется через min-width
    ======================================== */
 
+/* ========================================
+   GLASSMORPHISM UTILITIES
+   Эффект стекла с преломлением по краям
+   ======================================== */
+.glass {
+    position: relative;
+    background: rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 
+        inset 0 1px 1px 0 rgba(255, 255, 255, 0.15),
+        inset 0 -1px 1px 0 rgba(0, 0, 0, 0.1),
+        0 8px 32px rgba(0, 0, 0, 0.25);
+    overflow: hidden;
+}
+
+/* Эффект преломления по краям (блик сверху и затемнение снизу) */
+.glass::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.12) 0%,
+        rgba(255, 255, 255, 0.05) 40%,
+        transparent 50%,
+        rgba(0, 0, 0, 0.05) 60%,
+        rgba(0, 0, 0, 0.1) 100%
+    );
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* Внутренняя тень для эффекта толщины стекла */
+.glass::after {
+    content: '';
+    position: absolute;
+    inset: 2px;
+    border-radius: calc(16px - 2px);
+    box-shadow: 
+        inset 1px 1px 2px rgba(255, 255, 255, 0.08),
+        inset -1px -1px 2px rgba(0, 0, 0, 0.08);
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* Вариант с меньшим радиусом */
+.glass--sm {
+    border-radius: 12px;
+}
+.glass--sm::after {
+    border-radius: calc(12px - 2px);
+}
+
+/* Светлый вариант для light theme */
+.glass--light {
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+.glass--light::before {
+    background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.25) 0%,
+        rgba(255, 255, 255, 0.1) 40%,
+        transparent 50%,
+        rgba(0, 0, 0, 0.03) 60%,
+        rgba(0, 0, 0, 0.06) 100%
+    );
+}
+
 /* Mobile base: single column, full width */
 .container {
     width: 100%;
@@ -353,23 +427,46 @@
     }
     
     .footer__phone {
+        position: relative;
         display: inline-flex;
         align-items: center;
         justify-content: center;
         gap: 8px;
         padding: 10px 14px;
-        border-radius: 12px;
+        border-radius: 14px;
         background: rgba(255,255,255,0.08);
+        border: 1px solid rgba(255, 255, 255, 0.1);
         color: var(--nav-text-color, #D1D1D6);
         text-decoration: none;
         backdrop-filter: blur(12px);
-        box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+        -webkit-backdrop-filter: blur(12px);
+        box-shadow: 
+            inset 0 1px 1px 0 rgba(255, 255, 255, 0.1),
+            inset 0 -1px 1px 0 rgba(0, 0, 0, 0.06),
+            0 6px 18px rgba(0,0,0,0.25);
         transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease;
+        overflow: hidden;
+    }
+    
+    .footer__phone::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        background: linear-gradient(
+            135deg,
+            rgba(255, 255, 255, 0.12) 0%,
+            transparent 50%,
+            rgba(0, 0, 0, 0.04) 100%
+        );
+        pointer-events: none;
     }
     
     .footer__phone:hover {
         transform: translateY(-1px);
-        box-shadow: 0 10px 24px rgba(0,0,0,0.3);
+        box-shadow: 
+            inset 0 1px 1px 0 rgba(255, 255, 255, 0.12),
+            0 10px 24px rgba(0,0,0,0.3);
         background: rgba(255,255,255,0.12);
     }
     
@@ -390,6 +487,7 @@
     }
     
     .footer__fab {
+        position: relative;
         width: 48px;
         height: 48px;
         border-radius: 50%;
@@ -398,20 +496,44 @@
         justify-content: center;
         color: #fff;
         background: var(--accent-color, #007AFF);
-        box-shadow: 0 8px 20px rgba(0,0,0,0.28);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 
+            inset 0 1px 2px 0 rgba(255, 255, 255, 0.25),
+            inset 0 -1px 2px 0 rgba(0, 0, 0, 0.15),
+            0 8px 20px rgba(0,0,0,0.28);
         transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
         -webkit-tap-highlight-color: transparent;
+        overflow: hidden;
+    }
+    
+    .footer__fab::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        background: linear-gradient(
+            135deg,
+            rgba(255, 255, 255, 0.3) 0%,
+            rgba(255, 255, 255, 0.1) 30%,
+            transparent 50%,
+            rgba(0, 0, 0, 0.1) 100%
+        );
+        pointer-events: none;
     }
     
     .footer__fab:hover {
         transform: translateY(-1px) scale(1.04);
-        box-shadow: 0 12px 28px rgba(0,0,0,0.35);
+        box-shadow: 
+            inset 0 1px 2px 0 rgba(255, 255, 255, 0.3),
+            0 12px 28px rgba(0,0,0,0.35);
         filter: brightness(1.05);
     }
     
     .footer__fab:active {
         transform: scale(0.95);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+        box-shadow: 
+            inset 0 2px 4px 0 rgba(0, 0, 0, 0.2),
+            0 4px 12px rgba(0,0,0,0.25);
     }
     
     .footer__fab svg {
@@ -3313,22 +3435,65 @@ button:active, .btn:active, .fab:active, a:active {
     }
     
     .service-page__back .btn {
+        position: relative;
         background: rgba(0, 0, 0, 0.2);
         backdrop-filter: blur(10px);
         -webkit-backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        border-radius: 12px;
         color: var(--nav-text-color, #D1D1D6);
         font-size: 18px;
         padding: 8px 16px;
+        box-shadow: 
+            inset 0 1px 1px 0 rgba(255, 255, 255, 0.12),
+            inset 0 -1px 1px 0 rgba(0, 0, 0, 0.08),
+            0 4px 16px rgba(0, 0, 0, 0.2);
+        overflow: hidden;
+    }
+    
+    .service-page__back .btn::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        background: linear-gradient(
+            135deg,
+            rgba(255, 255, 255, 0.1) 0%,
+            transparent 50%,
+            rgba(0, 0, 0, 0.05) 100%
+        );
+        pointer-events: none;
     }
     
     .service-page__header {
+        position: relative;
         background: rgba(0, 0, 0, 0.2);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        border-radius: 12px;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border-radius: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
         padding: 16px;
         margin-bottom: 16px;
+        box-shadow: 
+            inset 0 1px 1px 0 rgba(255, 255, 255, 0.12),
+            inset 0 -1px 1px 0 rgba(0, 0, 0, 0.08),
+            0 8px 32px rgba(0, 0, 0, 0.25);
+        overflow: hidden;
+    }
+    
+    .service-page__header::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        background: linear-gradient(
+            135deg,
+            rgba(255, 255, 255, 0.12) 0%,
+            rgba(255, 255, 255, 0.04) 40%,
+            transparent 50%,
+            rgba(0, 0, 0, 0.04) 100%
+        );
+        pointer-events: none;
     }
     
     .service-page__title {
@@ -3349,14 +3514,37 @@ button:active, .btn:active, .fab:active, a:active {
     }
     
     .service-page__content {
+        position: relative;
         background: rgba(0, 0, 0, 0.2);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        border-radius: 12px;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border-radius: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
         padding: 16px;
         margin: 16px 0;
         color: rgba(255, 255, 255, 0.9);
         line-height: 1.6;
+        box-shadow: 
+            inset 0 1px 1px 0 rgba(255, 255, 255, 0.12),
+            inset 0 -1px 1px 0 rgba(0, 0, 0, 0.08),
+            0 8px 32px rgba(0, 0, 0, 0.25);
+        overflow: hidden;
+    }
+    
+    .service-page__content::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        background: linear-gradient(
+            135deg,
+            rgba(255, 255, 255, 0.12) 0%,
+            rgba(255, 255, 255, 0.04) 40%,
+            transparent 50%,
+            rgba(0, 0, 0, 0.04) 100%
+        );
+        pointer-events: none;
+        z-index: 1;
     }
     
     .service-page__content p {
@@ -3381,16 +3569,36 @@ button:active, .btn:active, .fab:active, a:active {
     }
     
     .service-benefits__item {
+        position: relative;
         display: flex;
         align-items: center;
         gap: 10px;
         padding: 12px 16px;
         background: rgba(0, 0, 0, 0.2);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 10px;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 12px;
         color: rgba(255, 255, 255, 0.9);
+        box-shadow: 
+            inset 0 1px 1px 0 rgba(255, 255, 255, 0.1),
+            inset 0 -1px 1px 0 rgba(0, 0, 0, 0.06),
+            0 4px 16px rgba(0, 0, 0, 0.2);
+        overflow: hidden;
+    }
+    
+    .service-benefits__item::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        background: linear-gradient(
+            135deg,
+            rgba(255, 255, 255, 0.1) 0%,
+            transparent 50%,
+            rgba(0, 0, 0, 0.04) 100%
+        );
+        pointer-events: none;
     }
     
     .service-benefits__item .icon {

@@ -1,5 +1,5 @@
-const CACHE_VERSION = 'v72'; // Optimized mobile animations
-const CACHE_NAME = 'climat-control-v103'; // mobile performance improvements
+const CACHE_VERSION = 'v73'; // Glassmorphism edge refraction effect
+const CACHE_NAME = 'climat-control-v104'; // glass edge refraction
 const urlsToCache = [
     '/',
     '/index.html',

@@ -1881,6 +1881,78 @@ function setupServiceRouting() {
 
     function applyRoute() {
         const hash = (location.hash || '').replace('#', '');
+        const isMobile = window.innerWidth <= 768;
+
+        if (isMobile) {
+            // Мобильная логика маршрутизации
+            // По умолчанию показать только постоянные контейнеры
+            LANDING_CONTAINERS.forEach(id => {
+                setHiddenById(id, !['hero-container', 'mobile-main-nav-container'].includes(id));
+            });
+            // Скрыть все сервисные и кейсы
+            Object.values(SERVICE_MAP).forEach(id => setHiddenById(id, true));
+            CASE_CONTAINERS.forEach(id => setHiddenById(id, true));
+            setHiddenById('breadcrumbs-container', true);
+
+            const targetContainerId = SERVICE_MAP[hash];
+            const isServiceView = Boolean(targetContainerId);
+
+            if (isServiceView) {
+                // Показать сервисную страницу с анимацией
+                setHiddenById(targetContainerId, false);
+                try {
+                    const section = document.getElementById(targetContainerId)?.querySelector('.service-page');
+                    if (section) {
+                        section.classList.add('service-page--slide-in-from-right');
+                        requestAnimationFrame(() => {
+                            section.classList.remove('service-page--slide-in-from-right');
+                            section.classList.add('service-page--slide-in');
+                        });
+                    }
+                } catch(_) { /* noop */ }
+                scrollToSectionTop(targetContainerId);
+                setActiveNav('services');
+                focusSectionHeading(targetContainerId, 'h2');
+                return;
+            }
+
+            // Обработка страниц лендинга для мобильной версии
+            const pageMap = {
+                'portfolio': 'portfolio-container',
+                'reviews': 'reviews-container',
+                'faq': 'faq-container',
+                'contacts': 'contacts-container',
+                'about': 'welcome-container'
+            };
+
+            const targetPage = pageMap[hash];
+            if (targetPage) {
+                LANDING_CONTAINERS.forEach(id => {
+                    setHiddenById(id, !['hero-container', 'mobile-main-nav-container', targetPage].includes(id));
+                });
+                scrollToSectionTop(targetPage);
+                setActiveNav(hash);
+                focusSectionHeading(targetPage, 'h2');
+                return;
+            }
+
+            // Для services-page
+            if (hash === 'services') {
+                LANDING_CONTAINERS.forEach(id => {
+                    setHiddenById(id, !['hero-container', 'mobile-main-nav-container', 'services-container'].includes(id));
+                });
+                scrollToSectionTop('services');
+                setActiveNav('services');
+                focusSectionHeading('services', 'h2');
+                return;
+            }
+
+            // Для пустого hash или неизвестных - главная мобильная (уже установлена)
+            setActiveNav('');
+            return;
+        }
+
+        // Десктопная логика маршрутизации (существующая)
         const targetContainerId = SERVICE_MAP[hash];
         const isServiceView = Boolean(targetContainerId);
 
@@ -1901,11 +1973,10 @@ function setupServiceRouting() {
             try {
                 const section = document.getElementById(onlyId)?.querySelector('.service-page');
                 if (section) {
-                    // Сброс анимации
-                    section.classList.remove('service-page--visible');
-                    // В следующем кадре включить класс видимости
+                    section.classList.add('service-page--slide-in-from-right');
                     requestAnimationFrame(() => {
-                        section.classList.add('service-page--visible');
+                        section.classList.remove('service-page--slide-in-from-right');
+                        section.classList.add('service-page--slide-in');
                     });
                 }
             } catch(_) { /* noop */ }
@@ -1939,7 +2010,7 @@ function setupServiceRouting() {
             setHiddenById(id, true);
             try {
                 const section = document.getElementById(id)?.querySelector('.service-page');
-                if (section) section.classList.remove('service-page--visible');
+                if (section) section.classList.remove('service-page--slide-in');
             } catch(_) {}
         });
         // Кейсы скрываем на главной
@@ -4721,15 +4792,14 @@ function showServicesList(navList) {
         navList.classList.remove('main-nav-mobile__list--slide-out');
         navList.classList.add('main-nav-mobile__list--slide-in-from-right');
         
-        // Force reflow to start animation
-        navList.offsetHeight;
-        
-        // Start slide in animation
-        setTimeout(() => {
-            navList.classList.remove('main-nav-mobile__list--slide-in-from-right');
-            navList.classList.add('main-nav-mobile__list--slide-in');
-        }, 10);
-    }, 300);
+        // Use rAF for smooth animation start
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                navList.classList.remove('main-nav-mobile__list--slide-in-from-right');
+                navList.classList.add('main-nav-mobile__list--slide-in');
+            });
+        });
+    }, 250);
 }
 
 // Функция для восстановления основного меню
@@ -4775,13 +4845,12 @@ function restoreMainMenu(navList) {
         navList.classList.remove('main-nav-mobile__list--slide-in-from-right');
         navList.classList.add('main-nav-mobile__list--slide-out');
         
-        // Force reflow
-        navList.offsetHeight;
-        
-        // Start slide in animation
-        setTimeout(() => {
-            navList.classList.remove('main-nav-mobile__list--slide-out');
-            navList.classList.add('main-nav-mobile__list--slide-in');
-        }, 10);
-    }, 300);
+        // Use rAF for smooth animation start
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                navList.classList.remove('main-nav-mobile__list--slide-out');
+                navList.classList.add('main-nav-mobile__list--slide-in');
+            });
+        });
+    }, 250);
 }

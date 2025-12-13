@@ -91,7 +91,8 @@
         flex-direction: column;
         gap: 8px;
         min-height: 300px; /* Prevent layout jump when switching menus */
-        transition: transform 0.3s ease-in-out;
+        transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        will-change: transform;
     }
     
     .main-nav-mobile__item {
@@ -101,24 +102,27 @@
     
     .main-nav-mobile__link {
         display: block;
-        padding: 16px 20px;
+        padding: 18px 24px;
         background: transparent;
         border: none;
-        border-radius: 0;
+        border-radius: 12px;
         text-decoration: none;
         color: var(--nav-text-color, #D1D1D6);
-        font-size: 16px;
+        font-size: 17px;
         font-weight: 500;
         text-align: center;
-        transition: color 200ms ease;
-        min-height: auto;
+        transition: background 0.15s ease, transform 0.1s ease, color 0.15s ease;
+        min-height: 48px; /* Touch-friendly minimum */
+        -webkit-tap-highlight-color: transparent;
     }
     
-    .main-nav-mobile__link:hover,
-    .main-nav-mobile__link:active {
+    .main-nav-mobile__link:hover {
         color: var(--accent-color, #007AFF);
-        background: transparent;
-        transform: none;
+    }
+    
+    .main-nav-mobile__link:active {
+        background: rgba(255, 255, 255, 0.1);
+        transform: scale(0.98);
     }
 
     .main-nav-mobile__link--back {
@@ -386,8 +390,8 @@
     }
     
     .footer__fab {
-        width: 44px;
-        height: 44px;
+        width: 48px;
+        height: 48px;
         border-radius: 50%;
         display: inline-flex;
         align-items: center;
@@ -395,13 +399,19 @@
         color: #fff;
         background: var(--accent-color, #007AFF);
         box-shadow: 0 8px 20px rgba(0,0,0,0.28);
-        transition: transform 160ms ease, box-shadow 160ms ease, filter 160ms ease;
+        transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+        -webkit-tap-highlight-color: transparent;
     }
     
     .footer__fab:hover {
         transform: translateY(-1px) scale(1.04);
         box-shadow: 0 12px 28px rgba(0,0,0,0.35);
         filter: brightness(1.05);
+    }
+    
+    .footer__fab:active {
+        transform: scale(0.95);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.25);
     }
     
     .footer__fab svg {
@@ -3285,7 +3295,17 @@ button:active, .btn:active, .fab:active, a:active {
         padding: 16px 0;
         background: transparent;
         opacity: 1 !important;
-        transform: none !important;
+        transform: translateX(0);
+        transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        will-change: transform;
+    }
+    
+    .service-page--slide-in-from-right {
+        transform: translateX(100%);
+    }
+    
+    .service-page--slide-in {
+        transform: translateX(0);
     }
     
     .service-page__back {

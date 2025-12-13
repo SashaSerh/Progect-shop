@@ -1,5 +1,5 @@
-const CACHE_VERSION = 'v71'; // Incremented cache version
-const CACHE_NAME = 'climat-control-v102'; // floating-control-btn фиксированный синий цвет
+const CACHE_VERSION = 'v72'; // Optimized mobile animations
+const CACHE_NAME = 'climat-control-v103'; // mobile performance improvements
 const urlsToCache = [
     '/',
     '/index.html',
@@ -46,6 +46,10 @@ const urlsToCache = [
     '/icons/facebook-icon_1.svg',
     '/icons/telegram-logo-icon_1.svg',
     '/icons/instagram-icon_1.svg',
+    '/icons/whatsapp-icon_1.svg',
+    '/icons/gmail.svg',
+    // Mobile background
+    '/picture/hero-picture/background-blur-mobile.png',
     // Hero background images (static + responsive)
     '/picture/hero-picture/hero-1-1200w.jpg',
     '/picture/hero-picture/Hero-banner-768*432px.png',

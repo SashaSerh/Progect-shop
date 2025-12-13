@@ -10,7 +10,9 @@
     "images:cleanup": "node scripts/cleanup-pictures.js --dir picture --json data/products.local.json,data/products.json --yes",
     "images:create-demo": "node scripts/create-demo-image.js",
     "cleanup:base64": "node scripts/cleanup-base64-in-products.js",
-    "cleanup:base64:dry": "node scripts/cleanup-base64-in-products.js --dry"
+    "cleanup:base64:dry": "node scripts/cleanup-base64-in-products.js --dry",
+    "visual:test": "node tests/visual/visual-test.js",
+    "visual:create-baseline": "node tests/visual/visual-test.js --baseline"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.57.4"
@@ -19,6 +21,9 @@
     "chokidar-cli": "^3.0.0",
     "jsdom": "^24.0.0",
     "sharp": "^0.33.4",
-    "vitest": "^1.6.0"
+    "vitest": "^1.6.0",
+    "playwright": "^1.44.0",
+    "pixelmatch": "^5.3.0",
+    "pngjs": "^7.0.0"
   }
 }

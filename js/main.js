@@ -938,6 +938,9 @@ async function initApp() {
 
     // Делегирование кликов по карточкам услуг на переход к соответствующей странице
     initServiceCardsNavigation();
+
+    // Слайдеры в галереях услуг
+    initServiceGallerySliders();
     
     // FAB для связи
     initFabContact();
@@ -2139,6 +2142,74 @@ function initServiceCardsNavigation() {
             if (target) location.hash = target;
         }
     }, { passive: false });
+}
+
+function initServiceGallerySliders() {
+    const sliders = document.querySelectorAll('.service-gallery__slider');
+    sliders.forEach((slider) => {
+        const track = slider.querySelector('.service-gallery__track');
+        const slides = Array.from(slider.querySelectorAll('.service-gallery__slide'));
+        if (!track || slides.length <= 1) {
+            slider.querySelectorAll('.service-gallery__nav, .service-gallery__dots').forEach((el) => {
+                if (el) el.hidden = true;
+            });
+            return;
+        }
+        if (!slider.hasAttribute('tabindex')) {
+            slider.setAttribute('tabindex', '0');
+        }
+        let index = 0;
+        const prevBtn = slider.querySelector('.service-gallery__nav--prev');
+        const nextBtn = slider.querySelector('.service-gallery__nav--next');
+        const dotsWrap = slider.querySelector('.service-gallery__dots');
+        let dots = [];
+
+        const update = () => {
+            track.style.transform = `translateX(-${index * 100}%)`;
+            dots.forEach((dot, dotIndex) => {
+                const isActive = dotIndex === index;
+                dot.classList.toggle('is-active', isActive);
+                dot.setAttribute('aria-current', isActive ? 'true' : 'false');
+            });
+        };
+
+        const goTo = (targetIndex) => {
+            index = (targetIndex + slides.length) % slides.length;
+            update();
+        };
+
+        if (dotsWrap) {
+            dots = slides.map((_, dotIndex) => {
+                let dot = dotsWrap.children[dotIndex];
+                if (!dot) {
+                    dot = document.createElement('button');
+                    dot.type = 'button';
+                    dot.className = 'service-gallery__dot';
+                    dotsWrap.appendChild(dot);
+                }
+                dot.dataset.index = dotIndex;
+                dot.setAttribute('aria-label', `Слайд ${dotIndex + 1}`);
+                dot.addEventListener('click', () => goTo(dotIndex));
+                return dot;
+            });
+        }
+
+        prevBtn?.addEventListener('click', () => goTo(index - 1));
+        nextBtn?.addEventListener('click', () => goTo(index + 1));
+
+        slider.addEventListener('keydown', (event) => {
+            if (event.key === 'ArrowLeft') {
+                event.preventDefault();
+                goTo(index - 1);
+            }
+            if (event.key === 'ArrowRight') {
+                event.preventDefault();
+                goTo(index + 1);
+            }
+        });
+
+        update();
+    });
 }
 
 // FAB (Floating Action Button) — раскрытие/скрытие кнопок связи

@@ -9,7 +9,7 @@
     </header>
 
     <figure class="service-page__banner" role="img" aria-label="Баннер услуги: монтаж кондиционеров">
-      <img src="https://placehold.co/1200x360?text=AC+Installation+Banner" alt="Баннер: монтаж кондиционеров" width="1200" height="360" loading="lazy">
+      <img src="picture/worker-cond.png" alt="Баннер: монтаж кондиционеров" width="1200" height="360" loading="lazy">
     </figure>
 
     <section class="service-page__content" aria-label="Описание услуги">
@@ -36,7 +36,23 @@
 
     <section class="service-page__gallery" aria-label="Примеры работ">
       <div class="service-gallery">
-        <img src="https://placehold.co/480x320?text=Work+Preview+1" alt="Пример монтажа 1" loading="lazy" width="480" height="320">
+        <div class="service-gallery__slider" data-slider="ac-work-preview">
+          <div class="service-gallery__track">
+            <div class="service-gallery__slide">
+              <img src="picture/picture-for-forworkpreview/131605.jpg" alt="Монтаж кондиционеров — подготовка и разметка" width="480" height="320" loading="lazy">
+            </div>
+            <div class="service-gallery__slide">
+              <img src="picture/picture-for-forworkpreview/131801.jpg" alt="Монтаж кондиционеров — установка оборудования" width="480" height="320" loading="lazy">
+            </div>
+          </div>
+          <button class="service-gallery__nav service-gallery__nav--prev" type="button" aria-label="Предыдущая фотография">
+            <span aria-hidden="true">‹</span>
+          </button>
+          <button class="service-gallery__nav service-gallery__nav--next" type="button" aria-label="Следующая фотография">
+            <span aria-hidden="true">›</span>
+          </button>
+          <div class="service-gallery__dots" role="tablist" aria-label="Переключение примеров работ"></div>
+        </div>
         <img src="https://placehold.co/480x320?text=Work+Preview+2" alt="Пример монтажа 2" loading="lazy" width="480" height="320">
         <img src="https://placehold.co/480x320?text=Work+Preview+3" alt="Пример монтажа 3" loading="lazy" width="480" height="320">
       </div>

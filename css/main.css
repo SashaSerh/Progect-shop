@@ -944,6 +944,23 @@ html { scroll-behavior: smooth; }
 .service-page__gallery { margin-top: 8px; }
 .service-gallery { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
 .service-gallery img { width: 100%; height: 100%; aspect-ratio: 4/3; object-fit: cover; border-radius: 10px; }
+.service-gallery__slider { position: relative; border-radius: 10px; overflow: hidden; aspect-ratio: 4 / 3; background: var(--color-surface, #f4f4f6); box-shadow: 0 6px 22px rgba(0,0,0,0.08); }
+.service-gallery__track { display: flex; width: 100%; height: 100%; transition: transform 240ms ease; }
+.service-gallery__slide { flex: 0 0 100%; width: 100%; height: 100%; }
+.service-gallery__slide img { width: 100%; height: 100%; object-fit: cover; display: block; border-radius: 0; }
+.service-gallery__nav { position: absolute; top: 50%; transform: translateY(-50%); border: none; background: rgba(0,0,0,0.45); color: #fff; width: 36px; height: 36px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; transition: background 0.2s ease, transform 0.2s ease; z-index: 2; }
+.service-gallery__nav span { font-size: 20px; line-height: 1; }
+.service-gallery__nav:hover { background: rgba(0,0,0,0.6); transform: translateY(-50%) scale(1.05); }
+.service-gallery__nav:focus-visible { outline: 2px solid var(--color-accent, #4da3ff); outline-offset: 2px; }
+.service-gallery__nav--prev { left: 10px; }
+.service-gallery__nav--next { right: 10px; }
+.service-gallery__dots { position: absolute; left: 50%; bottom: 12px; transform: translateX(-50%); display: inline-flex; gap: 6px; z-index: 2; }
+.service-gallery__dot { width: 8px; height: 8px; border-radius: 999px; background: rgba(255,255,255,0.5); border: none; padding: 0; cursor: pointer; transition: background 0.2s ease, transform 0.2s ease; }
+.service-gallery__dot.is-active { background: #fff; transform: scale(1.15); }
+.theme-dark .service-gallery__nav { background: rgba(0,0,0,0.65); }
+.theme-dark .service-gallery__nav:hover { background: rgba(0,0,0,0.8); }
+.theme-dark .service-gallery__dot { background: rgba(255,255,255,0.4); }
+.theme-dark .service-gallery__dot.is-active { background: #fff; }
 .service-page__cta { margin-top: 16px; }
 .service-page .cta-group { display: flex; flex-wrap: wrap; gap: 8px; }
 .theme-dark .service-benefits__item { background: var(--color-surface, #161616); border-color: rgba(255,255,255,0.08); }

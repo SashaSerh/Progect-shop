@@ -1885,9 +1885,10 @@ function setupServiceRouting() {
 
         if (isMobile) {
             // Мобильная логика маршрутизации
-            // По умолчанию показать только постоянные контейнеры
+            // По умолчанию показать только hero, мобильное меню и футер
+            const alwaysVisible = ['hero-container', 'mobile-main-nav-container', 'footer-container'];
             LANDING_CONTAINERS.forEach(id => {
-                setHiddenById(id, !['hero-container', 'mobile-main-nav-container'].includes(id));
+                setHiddenById(id, !alwaysVisible.includes(id));
             });
             // Скрыть все сервисные и кейсы
             Object.values(SERVICE_MAP).forEach(id => setHiddenById(id, true));
@@ -1898,8 +1899,10 @@ function setupServiceRouting() {
             const isServiceView = Boolean(targetContainerId);
 
             if (isServiceView) {
-                // Показать сервисную страницу с анимацией
+                // На внутренних страницах: скрыть hero и меню, показать только нужную секцию и футер
+                LANDING_CONTAINERS.forEach(id => setHiddenById(id, ![targetContainerId, 'footer-container'].includes(id)));
                 setHiddenById(targetContainerId, false);
+                // Не добавляем кнопку возврата для service-page (она уже есть в разметке)
                 try {
                     const section = document.getElementById(targetContainerId)?.querySelector('.service-page');
                     if (section) {
@@ -1931,14 +1934,24 @@ function setupServiceRouting() {
 
             const targetPage = pageMap[hash];
             if (targetPage) {
+                // На внутренних страницах: скрыть hero и меню, показать только нужную секцию и футер
                 LANDING_CONTAINERS.forEach(id => {
-                    setHiddenById(id, !['hero-container', 'mobile-main-nav-container', targetPage].includes(id));
+                    setHiddenById(id, ![targetPage, 'footer-container'].includes(id));
                 });
-                
-                // Анимация появления для portfolio и других секций
+                // Добавить кнопку возврата (в стиле btn btn--ghost), если нет
                 try {
                     const container = document.getElementById(targetPage);
                     const section = container?.querySelector('.portfolio, .reviews, .faq, .contacts, .welcome');
+                    if (section && !section.querySelector('.back-to-main')) {
+                        const btn = document.createElement('a');
+                        btn.className = 'back-to-main btn btn--ghost service-page__back glass';
+                        btn.href = '#';
+                        btn.setAttribute('aria-label', 'Назад на главную');
+                        btn.title = 'Назад';
+                        btn.innerText = '←';
+                        btn.onclick = (e) => { e.preventDefault(); location.hash = ''; };
+                        section.insertBefore(btn, section.firstChild);
+                    }
                     if (section) {
                         // Определяем базовый класс секции для правильной анимации
                         const sectionClass = section.classList.contains('portfolio') ? 'portfolio' :
@@ -1946,7 +1959,6 @@ function setupServiceRouting() {
                                              section.classList.contains('faq') ? 'faq' :
                                              section.classList.contains('contacts') ? 'contacts' :
                                              section.classList.contains('welcome') ? 'welcome' : 'portfolio';
-                        
                         section.classList.add(`${sectionClass}--slide-in-from-right`);
                         requestAnimationFrame(() => {
                             section.classList.remove(`${sectionClass}--slide-in-from-right`);
@@ -1954,7 +1966,6 @@ function setupServiceRouting() {
                         });
                     }
                 } catch(_) { /* noop */ }
-                
                 scrollToSectionTop(targetPage);
                 setActiveNav(hash);
                 focusSectionHeading(targetPage, 'h2');
@@ -1964,31 +1975,55 @@ function setupServiceRouting() {
             // Для services-page
             if (hash === 'services') {
                 LANDING_CONTAINERS.forEach(id => {
-                    setHiddenById(id, !['hero-container', 'mobile-main-nav-container', 'services-container'].includes(id));
+                    setHiddenById(id, !['services-container', 'footer-container'].includes(id));
                 });
+                // Добавить кнопку возврата (в стиле btn btn--ghost), если нет
+                try {
+                    const container = document.getElementById('services-container');
+                    const section = container?.querySelector('.services');
+                    if (section && !section.querySelector('.back-to-main')) {
+                        const btn = document.createElement('a');
+                        btn.className = 'back-to-main btn btn--ghost service-page__back glass';
+                        btn.href = '#';
+                        btn.setAttribute('aria-label', 'Назад на главную');
+                        btn.title = 'Назад';
+                        btn.innerText = '←';
+                        btn.onclick = (e) => { e.preventDefault(); location.hash = ''; };
+                        section.insertBefore(btn, section.firstChild);
+                    }
+                } catch(_) { /* noop */ }
                 scrollToSectionTop('services');
                 setActiveNav('services');
                 focusSectionHeading('services', 'h2');
                 return;
             }
 
-            // Для пустого hash или неизвестных - главная мобильная (уже установлена)
+            // Для пустого hash или неизвестных — только hero, меню и футер
+            LANDING_CONTAINERS.forEach(id => {
+                setHiddenById(id, !alwaysVisible.includes(id));
+            });
             setActiveNav('');
             return;
         }
 
-        // Десктопная логика маршрутизации (существующая)
+        // Десктопная логика маршрутизации
         const targetContainerId = SERVICE_MAP[hash];
         const isServiceView = Boolean(targetContainerId);
 
-        // Скрыть/показать лендинговые контейнеры
-        LANDING_CONTAINERS.forEach(id => setHiddenById(id, isServiceView));
-        // Кейсы показываем ТОЛЬКО на страницах услуг
-        CASE_CONTAINERS.forEach(id => setHiddenById(id, !isServiceView));
-        // Хлебные крошки показываем только для кейсов
-        setHiddenById('breadcrumbs-container', !CASE_HASHES.includes(hash));
+        // На главной (нет хеша или не сервис/кейс) показываем все лендинговые секции
+        if (!isServiceView && !CASE_HASHES.includes(hash)) {
+            LANDING_CONTAINERS.forEach(id => setHiddenById(id, false));
+            CASE_CONTAINERS.forEach(id => setHiddenById(id, true));
+            setHiddenById('breadcrumbs-container', true);
+            Object.values(SERVICE_MAP).forEach(id => setHiddenById(id, true));
+            setActiveNav('');
+            return;
+        }
 
-        // По умолчанию скрыть все сервисные секции
+        // Для сервисных страниц
+        LANDING_CONTAINERS.forEach(id => setHiddenById(id, !isServiceView));
+        CASE_CONTAINERS.forEach(id => setHiddenById(id, !isServiceView));
+        setHiddenById('breadcrumbs-container', !CASE_HASHES.includes(hash));
         Object.values(SERVICE_MAP).forEach(id => setHiddenById(id, true));
 
         if (isServiceView) {

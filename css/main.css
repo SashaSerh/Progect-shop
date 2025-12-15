@@ -78,6 +78,106 @@
     );
 }
 
+/* Кнопка «Назад» с эффектом матового скругленного стекла */
+.back-to-main.glass,
+.service-page__back .glass {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    min-height: 44px;
+    padding: 10px 16px;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--nav-text-color, #222);
+    background: rgba(255, 255, 255, 0.18);
+    backdrop-filter: blur(16px) saturate(1.4);
+    -webkit-backdrop-filter: blur(16px) saturate(1.4);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    border-radius: 14px;
+    box-shadow:
+        inset 0 1px 2px rgba(255, 255, 255, 0.25),
+        inset 0 -1px 2px rgba(0, 0, 0, 0.06),
+        0 4px 16px rgba(0, 0, 0, 0.12);
+    overflow: hidden;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+/* Блик сверху и мягкое затемнение снизу (эффект преломления) */
+.back-to-main.glass::before,
+.service-page__back .glass::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(
+        145deg,
+        rgba(255, 255, 255, 0.35) 0%,
+        rgba(255, 255, 255, 0.12) 35%,
+        transparent 55%,
+        rgba(0, 0, 0, 0.04) 75%,
+        rgba(0, 0, 0, 0.08) 100%
+    );
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* Внутренняя тень для глубины стекла */
+.back-to-main.glass::after,
+.service-page__back .glass::after {
+    content: '';
+    position: absolute;
+    inset: 2px;
+    border-radius: calc(14px - 2px);
+    box-shadow:
+        inset 1px 1px 3px rgba(255, 255, 255, 0.15),
+        inset -1px -1px 3px rgba(0, 0, 0, 0.05);
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* Hover: подсветка и легкий подъем */
+.back-to-main.glass:hover,
+.service-page__back .glass:hover {
+    background: rgba(255, 255, 255, 0.28);
+    box-shadow:
+        inset 0 1px 2px rgba(255, 255, 255, 0.3),
+        inset 0 -1px 2px rgba(0, 0, 0, 0.08),
+        0 6px 20px rgba(0, 0, 0, 0.16);
+    transform: translateY(-2px);
+}
+
+/* Focus-visible */
+.back-to-main.glass:focus-visible,
+.service-page__back .glass:focus-visible {
+    outline: 2px solid var(--accent-color, #007aff);
+    outline-offset: 3px;
+}
+
+/* Active: press effect */
+.back-to-main.glass:active,
+.service-page__back .glass:active {
+    transform: translateY(0) scale(0.97);
+    box-shadow:
+        inset 0 1px 1px rgba(255, 255, 255, 0.1),
+        inset 0 -1px 1px rgba(0, 0, 0, 0.1),
+        0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Темная тема */
+.theme-dark .back-to-main.glass,
+.theme-dark .service-page__back .glass {
+    background: rgba(40, 40, 50, 0.55);
+    border-color: rgba(255, 255, 255, 0.12);
+    color: var(--nav-text-color, #f0f0f0);
+}
+
+.theme-dark .back-to-main.glass:hover,
+.theme-dark .service-page__back .glass:hover {
+    background: rgba(60, 60, 75, 0.65);
+}
+
 /* Mobile base: single column, full width */
 .container {
     width: 100%;

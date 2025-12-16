@@ -1,5 +1,5 @@
-const CACHE_VERSION = 'v73'; // Glassmorphism edge refraction effect
-const CACHE_NAME = 'climat-control-v104'; // glass edge refraction
+const CACHE_VERSION = 'v74'; // Glassmorphism edge refraction effect
+const CACHE_NAME = 'climat-control-v105'; // glass edge refraction
 const urlsToCache = [
     '/',
     '/index.html',

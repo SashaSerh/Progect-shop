@@ -36,7 +36,26 @@
 
     <section class="service-page__gallery" aria-label="Примеры работ">
       <div class="service-gallery">
-        <img src="https://placehold.co/480x320?text=Recup+Work+1" alt="Пример системы 1" loading="lazy" width="480" height="320">
+        <div class="service-gallery__slider" data-slider="recup-work-1">
+          <div class="service-gallery__track">
+            <div class="service-gallery__slide">
+              <img src="picture/picture-for-forworkpreview-recuperator/IMG_1215.HEIC.jpg" alt="Монтаж рекуператора — подготовка воздуховодов" width="480" height="320" loading="lazy">
+            </div>
+            <div class="service-gallery__slide">
+              <img src="picture/picture-for-forworkpreview-recuperator/IMG_1210.HEIC.jpg" alt="Монтаж рекуператора — установка теплообменника" width="480" height="320" loading="lazy">
+            </div>
+            <div class="service-gallery__slide">
+              <img src="picture/picture-for-forworkpreview-recuperator/2024-10-06.jpg" alt="Монтаж рекуператора — завершённая система" width="480" height="320" loading="lazy">
+            </div>
+          </div>
+          <button class="service-gallery__nav service-gallery__nav--prev" type="button" aria-label="Предыдущая фотография">
+            <span aria-hidden="true">‹</span>
+          </button>
+          <button class="service-gallery__nav service-gallery__nav--next" type="button" aria-label="Следующая фотография">
+            <span aria-hidden="true">›</span>
+          </button>
+          <div class="service-gallery__dots" role="tablist" aria-label="Переключение примеров работ"></div>
+        </div>
         <img src="https://placehold.co/480x320?text=Recup+Work+2" alt="Пример системы 2" loading="lazy" width="480" height="320">
         <img src="https://placehold.co/480x320?text=Recup+Work+3" alt="Пример системы 3" loading="lazy" width="480" height="320">
       </div>

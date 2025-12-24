@@ -3587,6 +3587,11 @@ function showSection(id, show) {
             el.classList.add('is-hidden');
             const onEnd = (ev) => {
                 if (ev && ev.target !== el) return;
+                // If element is no longer hidden (was re-shown), skip hiding
+                if (!el.classList.contains('is-hidden')) {
+                    el.removeEventListener('transitionend', onEnd);
+                    return;
+                }
                 try { el.style.display = 'none'; } catch (_) {}
                 el.removeEventListener('transitionend', onEnd);
             };

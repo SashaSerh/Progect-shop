@@ -2069,12 +2069,10 @@ function setupServiceRouting() {
         }
 
         // Обработка переходов к секциям лендинга (portfolio, reviews, faq и т.д.)
+        // Landing-only page map: prefer explicit "-page" suffix to avoid collisions with SPA routes
         const desktopPageMap = {
-            'portfolio': 'portfolio-container',
             'portfolio-page': 'portfolio-container',
-            'reviews': 'reviews-container',
             'reviews-page': 'reviews-container',
-            'faq': 'faq-container',
             'faq-page': 'faq-container',
             'contacts': 'contacts-container'
         };
@@ -3809,7 +3807,12 @@ function setupHashRouting(initialLang) {
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             }).catch(err => console.error('Error loading about component:', err));
             return;
-
+        } else if (hash === '#welcome') {
+            // Show welcome overlay as an explicit route
+            loadComponent('welcome-container', 'components/welcome.html').then(() => {
+                try { initWelcomeOverlay(localStorage.getItem('language') || 'uk'); if (typeof window.showWelcomeOverlay === 'function') window.showWelcomeOverlay(); } catch (e) { console.warn('Could not show welcome overlay', e); }
+            }).catch(err => console.error('Error loading welcome component:', err));
+            return;
         } else {
             // Show main sections
             showSection('hero-container', true);

@@ -33,6 +33,7 @@ const urlsToCache = [
     '/components/service-recuperator-install.html',
     '/components/service-maintenance.html',
     '/components/about.html',
+    '/components/welcome.html',
     '/components/case-1.html',
     '/components/case-2.html',
     '/components/case-3.html',

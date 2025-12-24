@@ -369,6 +369,12 @@
     transform: translateY(6px);
 }
 
+/* Respect reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+    #main-container, #main-container.is-visible, #main-container.is-hidden {
+        transition: none !important;
+    }
+}
 /* ========================================
    FLOATING CONTROLS (тема + язык)
    Располагаются в .floating-buttons под scroll-to-top

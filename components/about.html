@@ -1,8 +1,11 @@
 <section class="about-page" id="about" aria-labelledby="about-title">
   <div class="container">
+    <div class="about-page__back">
+      <a href="#" class="back-to-main btn btn--ghost glass" aria-label="Назад на главную" title="Назад" onclick="event.preventDefault(); location.hash='';">←</a>
+    </div>
     <header class="about-page__header">
-      <h2 id="about-title" class="about-page__title">О нас</h2>
-      <p class="about-page__lead">Мы — команда профессионалов в сфере климат‑техники: продажа, монтаж и сервис кондиционеров, вентиляции и рекуператоров. Работает быстро, аккуратно и с гарантией.</p>
+      <h2 id="about-title" class="about-page__title" data-i18n="about-title">О нас</h2>
+      <p class="about-page__lead" data-i18n="about-lead">Мы — команда профессионалов в сфере климат‑техники: продажа, монтаж и сервис кондиционеров, вентиляции и рекуператоров. Работает быстро, аккуратно и с гарантией.</p>
     </header>
 
     <figure class="about-page__banner" role="img" aria-label="Баннер О нас">
@@ -20,25 +23,25 @@
     <section class="about-page__values" aria-label="Наши преимущества">
       <ul class="about-values" role="list">
         <li class="about-values__item">
-          <img src="icons/wrench-icon.svg" alt="инструменты" width="48" height="48" loading="lazy">
-          <h3>Профессиональный монтаж</h3>
-          <p>Опытная бригада, аккуратная работа и контроль на каждом этапе.</p>
+          <img src="icons/wrench-icon.svg" alt="инструменты" data-i18n-alt="about-values-1-alt" width="48" height="48" loading="lazy">
+          <h3 data-i18n="about-values-1-title">Профессиональный монтаж</h3>
+          <p data-i18n="about-values-1-desc">Опытная бригада, аккуратная работа и контроль на каждом этапе.</p>
         </li>
         <li class="about-values__item">
-          <img src="icons/free-icon-clock-3884295.svg" alt="сроки" width="48" height="48" loading="lazy">
-          <h3>Соблюдаем сроки</h3>
-          <p>Планируем работы так, чтобы минимизировать дискомфорт и завершить в срок.</p>
+          <img src="icons/free-icon-clock-3884295.svg" alt="сроки" data-i18n-alt="about-values-2-alt" width="48" height="48" loading="lazy">
+          <h3 data-i18n="about-values-2-title">Соблюдаем сроки</h3>
+          <p data-i18n="about-values-2-desc">Планируем работы так, чтобы минимизировать дискомфорт и завершить в срок.</p>
         </li>
         <li class="about-values__item">
-          <img src="icons/free-icon-house-3884324.svg" alt="гарантия" width="48" height="48" loading="lazy">
-          <h3>Официальная гарантия</h3>
-          <p>Гарантия на работы и помощь в послегарантийном обслуживании.</p>
+          <img src="icons/free-icon-house-3884324.svg" alt="гарантия" data-i18n-alt="about-values-3-alt" width="48" height="48" loading="lazy">
+          <h3 data-i18n="about-values-3-title">Официальная гарантия</h3>
+          <p data-i18n="about-values-3-desc">Гарантия на работы и помощь в послегарантийном обслуживании.</p>
         </li>
       </ul>
     </section>
 
     <section class="about-page__cta" aria-label="Связаться">
-      <a class="btn" href="#contacts" aria-label="Связаться">Связаться с нами</a>
+      <a class="btn" href="#contacts" aria-label="Связаться" data-i18n="about-cta">Связаться с нами</a>
     </section>
   </div>
 </section>

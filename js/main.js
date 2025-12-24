@@ -3818,7 +3818,7 @@ function setupHashRouting(initialLang) {
             restoreDefaultMetaOg();
         }
     }
-    window.addEventListener('hashchange', () => { handleRoute(); try { initMarketing(); } catch {} });
+    window.addEventListener('hashchange', (ev) => { try { console.log('HASHCHANGE event:', location.hash, new Error().stack.split('\n').slice(1,5).join('\n')); } catch(_){}; handleRoute(); try { initMarketing(); } catch {} });
     // language change should refresh detail contents
     window.addEventListener('languagechange', () => {
         const hash = location.hash || '';

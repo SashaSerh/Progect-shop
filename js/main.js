@@ -3625,7 +3625,6 @@ function setupHashRouting(initialLang) {
 
     function handleRoute() {
         const hash = location.hash || '';
-        try { console.log('ROUTE: handleRoute', hash); } catch (_) {}
         
         // Check for category hash pattern
         const categoryMatch = hash.match(/^#category-(.+)$/);
@@ -3828,7 +3827,7 @@ function setupHashRouting(initialLang) {
             restoreDefaultMetaOg();
         }
     }
-    window.addEventListener('hashchange', (ev) => { try { console.log('HASHCHANGE event:', location.hash, new Error().stack.split('\n').slice(1,5).join('\n')); } catch(_){}; handleRoute(); try { initMarketing(); } catch {} });
+    window.addEventListener('hashchange', (ev) => { handleRoute(); try { initMarketing(); } catch {} });
     // language change should refresh detail contents
     window.addEventListener('languagechange', () => {
         const hash = location.hash || '';

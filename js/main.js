@@ -2076,8 +2076,7 @@ function setupServiceRouting() {
             'reviews-page': 'reviews-container',
             'faq': 'faq-container',
             'faq-page': 'faq-container',
-            'contacts': 'contacts-container',
-            'about': 'welcome-container'
+            'contacts': 'contacts-container'
         };
         const desktopTargetPage = desktopPageMap[hash];
         if (desktopTargetPage) {

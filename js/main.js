@@ -1927,15 +1927,12 @@ function setupServiceRouting() {
 
             // Обработка страниц лендинга для мобильной версии
             // Поддержка хешей с суффиксом -page и без
+            // Use explicit '-page' suffix for landing page anchors to avoid SPA conflicts
             const pageMap = {
-                'portfolio': 'portfolio-container',
                 'portfolio-page': 'portfolio-container',
-                'reviews': 'reviews-container',
                 'reviews-page': 'reviews-container',
-                'faq': 'faq-container',
                 'faq-page': 'faq-container',
-                'contacts': 'contacts-container',
-                'about': 'welcome-container'
+                'contacts': 'contacts-container'
             };
 
             const targetPage = pageMap[hash];

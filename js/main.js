@@ -3614,6 +3614,7 @@ function setupHashRouting(initialLang) {
 
     function handleRoute() {
         const hash = location.hash || '';
+        try { console.log('ROUTE: handleRoute', hash); } catch (_) {}
         
         // Check for category hash pattern
         const categoryMatch = hash.match(/^#category-(.+)$/);

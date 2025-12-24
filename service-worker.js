@@ -55,7 +55,15 @@ const urlsToCache = [
     '/picture/hero-picture/hero-1-1200w.jpg',
     '/picture/hero-picture/Hero-banner-768*432px.png',
     '/picture/hero-picture/Hero-banner-480*270px.png',
-    '/picture/hero-picture/Hero-banner-320*180px.png'
+    '/picture/hero-picture/Hero-banner-320*180px.png',
+    '/picture/about-banner-1200.jpg',
+    '/picture/about-banner-768.jpg',
+    '/picture/about-banner-480.jpg',
+    '/picture/about-banner-320.jpg',
+    '/picture/about-banner-1200.webp',
+    '/picture/about-banner-768.webp',
+    '/picture/about-banner-480.webp',
+    '/picture/about-banner-320.webp'
 ];
 
 self.addEventListener('install', event => {

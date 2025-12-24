@@ -3569,6 +3569,7 @@ function showSection(id, show) {
     if (id === 'main-container') {
         if (show) {
             // Make visible then animate in
+            console.log('SHOW main-container');
             el.style.display = '';
             // Ensure classes are applied in next frame
             requestAnimationFrame(() => {
@@ -3577,6 +3578,7 @@ function showSection(id, show) {
             });
         } else {
             // Animate out then hide on transition end
+            console.log('HIDE main-container', new Error().stack.split('\n').slice(1,6).join('\n'));
             el.classList.remove('is-visible');
             el.classList.add('is-hidden');
             const onEnd = (ev) => {

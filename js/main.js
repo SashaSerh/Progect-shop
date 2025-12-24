@@ -3568,7 +3568,7 @@ function showSection(id, show) {
     if (id === 'main-container') {
         if (show) {
             // Make visible then animate in
-            console.log('SHOW main-container');
+            el.dataset.lastShownAt = String(Date.now());
             el.style.display = '';
             // Ensure classes are applied in next frame
             requestAnimationFrame(() => {
@@ -3576,8 +3576,13 @@ function showSection(id, show) {
                 el.classList.add('is-visible');
             });
         } else {
+            // Avoid immediately hiding if we were just shown (race with other route handlers)
+            const last = parseInt(el.dataset.lastShownAt || '0', 10);
+            if (Date.now() - last < 700) {
+                // skip this hide; it is probably from a conflicting route handler fired earlier
+                return;
+            }
             // Animate out then hide on transition end
-            console.log('HIDE main-container', new Error().stack.split('\n').slice(1,6).join('\n'));
             el.classList.remove('is-visible');
             el.classList.add('is-hidden');
             const onEnd = (ev) => {

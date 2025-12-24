@@ -3563,7 +3563,34 @@ function ensureProductDetailLoaded() {
 
 function showSection(id, show) {
     const el = document.getElementById(id);
-    if (el) el.style.display = show ? '' : 'none';
+    if (!el) return;
+
+    // Animated show/hide for main-container to allow smooth transitions
+    if (id === 'main-container') {
+        if (show) {
+            // Make visible then animate in
+            el.style.display = '';
+            // Ensure classes are applied in next frame
+            requestAnimationFrame(() => {
+                el.classList.remove('is-hidden');
+                el.classList.add('is-visible');
+            });
+        } else {
+            // Animate out then hide on transition end
+            el.classList.remove('is-visible');
+            el.classList.add('is-hidden');
+            const onEnd = (ev) => {
+                if (ev && ev.target !== el) return;
+                try { el.style.display = 'none'; } catch (_) {}
+                el.removeEventListener('transitionend', onEnd);
+            };
+            el.addEventListener('transitionend', onEnd);
+        }
+        return;
+    }
+
+    // Fallback immediate show/hide for other sections
+    el.style.display = show ? '' : 'none';
 }
 
 function setupHashRouting(initialLang) {
@@ -3753,8 +3780,6 @@ function setupHashRouting(initialLang) {
                 } catch (e) { console.error('Admin page init error', e); }
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             }).catch(err => console.error('Error loading admin page component:', err));
-        } else {
-            // About page
         } else if (hash === '#about') {
             loadComponent('main-container', 'components/about.html').then(() => {
                 // Hide other sections and show about page in main-container
@@ -3774,7 +3799,7 @@ function setupHashRouting(initialLang) {
             }).catch(err => console.error('Error loading about component:', err));
             return;
 
-            // Show main sections
+        } else {
             // Show main sections
             showSection('hero-container', true);
             showSection('services-container', true);

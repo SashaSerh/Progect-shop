@@ -3754,6 +3754,27 @@ function setupHashRouting(initialLang) {
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             }).catch(err => console.error('Error loading admin page component:', err));
         } else {
+            // About page
+        } else if (hash === '#about') {
+            loadComponent('main-container', 'components/about.html').then(() => {
+                // Hide other sections and show about page in main-container
+                showSection('hero-container', false);
+                showSection('services-container', false);
+                showSection('products-container', false);
+                showSection('portfolio-container', false);
+                showSection('contacts-container', false);
+                showSection('product-detail-container', false);
+                showSection('admin-page-container', false);
+                showSection('main-container', true);
+
+                // Apply translations for the newly loaded content
+                try { const lang = getLangSafe(); if (typeof switchLanguage === 'function') switchLanguage(lang); } catch {}
+
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }).catch(err => console.error('Error loading about component:', err));
+            return;
+
+            // Show main sections
             // Show main sections
             showSection('hero-container', true);
             showSection('services-container', true);

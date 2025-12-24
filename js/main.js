@@ -1952,7 +1952,7 @@ function setupServiceRouting() {
                         btn.setAttribute('aria-label', 'Назад на главную');
                         btn.title = 'Назад';
                         btn.innerText = '←';
-                        btn.onclick = (e) => { e.preventDefault(); location.hash = ''; };
+                        // back click handled by delegated handler to provide smooth exit animation and focus
                         section.insertBefore(btn, section.firstChild);
                     }
                     if (section) {
@@ -1991,7 +1991,7 @@ function setupServiceRouting() {
                         btn.setAttribute('aria-label', 'Назад на главную');
                         btn.title = 'Назад';
                         btn.innerText = '←';
-                        btn.onclick = (e) => { e.preventDefault(); location.hash = ''; };
+                        // back click handled by delegated handler to provide smooth exit animation and focus
                         section.insertBefore(btn, section.firstChild);
                     }
                 } catch(_) { /* noop */ }
@@ -3989,6 +3989,91 @@ document.addEventListener('DOMContentLoaded', () => {
         resizeTimeout = setTimeout(() => {
             initModernMobileEffects();
         }, 250);
+    });
+
+    // Делегированный обработчик для кнопок возврата с плавной анимацией и переносом фокуса
+    document.addEventListener('click', (ev) => {
+        const btn = ev.target.closest && ev.target.closest('a.back-to-main');
+        if (!btn) return;
+        ev.preventDefault();
+
+        // Respect user preference for reduced motion: jump immediately
+        const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (reduced) {
+            location.hash = '';
+            return;
+        }
+
+        if (btn.getAttribute('aria-disabled')) return; // already running
+        btn.setAttribute('aria-disabled', 'true');
+
+        // Find nearest high-level section
+        const section = btn.closest('.portfolio, .reviews, .faq, .contacts, .welcome, .services, .service-page, .about-page');
+
+        // Helper to finalize navigation (safety fallback)
+        let finished = false;
+        const finalize = () => {
+            if (finished) return; finished = true;
+            // Immediately update hash and restore state
+            location.hash = '';
+            btn.removeAttribute('aria-disabled');
+            // ensure hero is visible and focused (guarded)
+            if (typeof scrollToSectionTop === 'function') {
+                try { scrollToSectionTop('hero-container'); } catch(_) {}
+            }
+            if (typeof focusSectionHeading === 'function') {
+                try { focusSectionHeading('hero-container', 'h1'); } catch(_) {}
+            }
+        };
+
+        // If clicked from about/main-container — hide main container with its existing animation
+        const mainContainer = document.getElementById('main-container');
+        if (section && section.classList.contains('about-page')) {
+            // Trigger hide animation for main container
+            if (mainContainer) {
+                const onEnd = (e) => {
+                    if (e.target !== mainContainer) return;
+                    mainContainer.removeEventListener('transitionend', onEnd);
+                    finalize();
+                };
+                mainContainer.addEventListener('transitionend', onEnd);
+                // ensure animation class present
+                mainContainer.classList.add('is-hidden');
+                // safety fallback
+                setTimeout(finalize, 500);
+                return;
+            }
+            // fallback
+            finalize();
+            return;
+        }
+
+        // Landing sections (portfolio, reviews, faq, contacts, welcome, services)
+        if (section) {
+            const sectionClass = section.classList.contains('portfolio') ? 'portfolio' :
+                                 section.classList.contains('reviews') ? 'reviews' :
+                                 section.classList.contains('faq') ? 'faq' :
+                                 section.classList.contains('contacts') ? 'contacts' :
+                                 section.classList.contains('welcome') ? 'welcome' :
+                                 section.classList.contains('services') ? 'service-page' : null;
+            if (sectionClass) {
+                const outClass = `${sectionClass}--slide-out-to-right`;
+                const onEnd = (e) => {
+                    if (e.target !== section) return;
+                    section.removeEventListener('transitionend', onEnd);
+                    finalize();
+                };
+                section.addEventListener('transitionend', onEnd);
+                // kick animation
+                section.classList.add(outClass);
+                // safety fallback in case transitionend doesn't fire
+                setTimeout(finalize, 500);
+                return;
+            }
+        }
+
+        // Default fallback
+        finalize();
     });
 });
 

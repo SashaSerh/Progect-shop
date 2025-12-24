@@ -3587,6 +3587,11 @@ button:active, .btn:active, .fab:active, a:active {
     .service-page--slide-in {
         transform: translateX(0);
     }
+
+    .service-page--slide-out-to-right {
+        transform: translateX(100%);
+        opacity: 0;
+    }
     
     .service-page__back {
         margin: 0 0 16px;
@@ -5036,6 +5041,16 @@ textarea.form-input { resize: vertical; min-height: 120px; }
     .welcome--slide-in {
         transform: translateX(0);
         opacity: 1;
+    }
+
+    /* Slide out helpers for returning to hero/main view */
+    .portfolio--slide-out-to-right,
+    .reviews--slide-out-to-right,
+    .faq--slide-out-to-right,
+    .contacts--slide-out-to-right,
+    .welcome--slide-out-to-right {
+        transform: translateX(100%);
+        opacity: 0;
     }
 }
 .portfolio__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px,1fr)); gap: 16px; }

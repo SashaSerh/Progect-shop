@@ -89,6 +89,9 @@
   --transition-fast: 150ms ease;
   --transition-normal: 300ms ease;
   --transition-slow: 500ms ease;
+  
+  /* Body gutter (side padding) - responsive */
+  --body-gutter: 0px;
 }
 
 /* Dark theme overrides */
@@ -848,9 +851,8 @@ main {
    DESKTOP EXPANSION (min-width: 769px)
    ======================================== */
 @media (min-width: 769px) {
-    body {
-        padding-left: var(--gutter-md, 24px);
-        padding-right: var(--gutter-md, 24px);
+    :root {
+        --body-gutter: var(--gutter-md, 24px);
     }
     
     .container {
@@ -938,9 +940,8 @@ section {
 
 /* Large desktop breakpoint (1200px+) */
 @media (min-width: 1200px) {
-    body {
-        padding-left: var(--gutter-lg, 32px);
-        padding-right: var(--gutter-lg, 32px);
+    :root {
+        --body-gutter: var(--gutter-lg, 32px);
     }
     
     .container {
@@ -969,9 +970,8 @@ section {
 
 /* Ultra-wide desktop breakpoint (1440px+) */
 @media (min-width: 1440px) {
-    body {
-        padding-left: var(--gutter-xl, 48px);
-        padding-right: var(--gutter-xl, 48px);
+    :root {
+        --body-gutter: var(--gutter-xl, 48px);
     }
     
     .container {
@@ -2399,8 +2399,8 @@ body {
     /* Safe area padding for notch devices */
     padding-top: var(--safe-area-top);
     padding-bottom: var(--safe-area-bottom);
-    padding-left: var(--safe-area-left);
-    padding-right: var(--safe-area-right);
+    padding-left: calc(var(--body-gutter, 0px) + var(--safe-area-left));
+    padding-right: calc(var(--body-gutter, 0px) + var(--safe-area-right));
     /* Ensure full height for proper scrolling */
     min-height: 100vh;
     height: auto;

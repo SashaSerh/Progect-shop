@@ -3803,6 +3803,19 @@ function setupHashRouting(initialLang) {
                 showSection('mobile-main-nav-container', false); // Hide mobile navigation menu
                 showSection('main-container', true);
 
+                // Add slide-in animation for about page
+                try {
+                    const container = document.getElementById('main-container');
+                    const section = container?.querySelector('.about-page');
+                    if (section) {
+                        section.classList.add('about-page--slide-in-from-right');
+                        requestAnimationFrame(() => {
+                            section.classList.remove('about-page--slide-in-from-right');
+                            section.classList.add('about-page--slide-in');
+                        });
+                    }
+                } catch(_) { /* noop */ }
+
                 // Apply translations for the newly loaded content
                 try { const lang = getLangSafe(); if (typeof switchLanguage === 'function') switchLanguage(lang); } catch {}
 

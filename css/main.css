@@ -848,6 +848,11 @@ main {
    DESKTOP EXPANSION (min-width: 769px)
    ======================================== */
 @media (min-width: 769px) {
+    body {
+        padding-left: var(--gutter-md, 24px);
+        padding-right: var(--gutter-md, 24px);
+    }
+    
     .container {
         max-width: 1200px;
         padding-left: var(--gutter-md, 24px);
@@ -933,6 +938,11 @@ section {
 
 /* Large desktop breakpoint (1200px+) */
 @media (min-width: 1200px) {
+    body {
+        padding-left: var(--gutter-lg, 32px);
+        padding-right: var(--gutter-lg, 32px);
+    }
+    
     .container {
         max-width: 1320px;
         padding-left: var(--gutter-lg, 32px);
@@ -959,6 +969,11 @@ section {
 
 /* Ultra-wide desktop breakpoint (1440px+) */
 @media (min-width: 1440px) {
+    body {
+        padding-left: var(--gutter-xl, 48px);
+        padding-right: var(--gutter-xl, 48px);
+    }
+    
     .container {
         max-width: 1400px;
         padding-left: var(--gutter-xl, 48px);

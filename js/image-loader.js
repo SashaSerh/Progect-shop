@@ -138,14 +138,6 @@ if (document.readyState === 'loading') {
     initLazyLoading();
 }
 
-// Named exports (repeat for compatibility)
-export {
-    enhanceImageWithLQIP,
-    initLazyLoading,
-    reinitLazyLoading,
-    preloadCriticalImages
-};
-
 export default {
     enhanceImageWithLQIP,
     initLazyLoading,

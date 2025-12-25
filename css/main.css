@@ -6247,6 +6247,76 @@ textarea.form-input { resize: vertical; min-height: 120px; }
         background: transparent;
         box-shadow: none;
     }
+
+    /* ======= TONING: мобильная тёмная тема =======
+       Цель: сделать все интерактивные поверхности более цельными (единый «tint»),
+       унифицировать hover/overlay и улучшить читаемость на мобиле.
+    */
+    .theme-dark {
+        /* Основной «тон» для стеклянных поверхностей (header/drawer/cart) */
+        --mobile-header-bg: rgba(12, 20, 33, 0.86);
+        --mobile-header-border: rgba(255, 255, 255, 0.10);
+
+        /* Унифицированные подложки для hover/подэлементов меню */
+        --mobile-nav-hover-bg: rgba(255, 255, 255, 0.08);
+        --mobile-nav-subtle-bg: rgba(255, 255, 255, 0.06);
+
+        /* Overlay затемнение (меню/корзина) */
+        --mobile-overlay-bg: rgba(0, 0, 0, 0.55);
+
+        /* Токены стекла и глубины — ближе к тонированной тёмной мобилке */
+        --glass-bg: rgba(12, 20, 33, 0.60);
+        --glass-border: rgba(255, 255, 255, 0.12);
+        --glass-blur: blur(14px);
+        --shadow: 0 18px 48px rgba(0, 0, 0, 0.45);
+
+        /* Кнопки/инпуты — чуть более читаемые на тонированном фоне */
+        --button-bg: rgba(255, 255, 255, 0.10);
+        --button-bg-hover: rgba(255, 255, 255, 0.16);
+        --input-bg: rgba(255, 255, 255, 0.06);
+        --input-border: rgba(255, 255, 255, 0.14);
+        --input-border-hover: rgba(255, 255, 255, 0.22);
+        --modal-bg: rgba(0, 0, 0, 0.55);
+    }
+
+    .theme-dark .mobile-nav-overlay::before {
+        background: var(--mobile-overlay-bg);
+    }
+
+    .theme-dark .mobile-nav__link:hover,
+    .theme-dark .mobile-nav__link:active,
+    .theme-dark .mobile-nav__profile:hover {
+        background: var(--mobile-nav-hover-bg);
+    }
+
+    .theme-dark .mobile-nav__phones a {
+        background: var(--mobile-nav-subtle-bg);
+    }
+    .theme-dark .mobile-nav__phones a:hover {
+        background: var(--mobile-nav-hover-bg);
+    }
+
+    .theme-dark .minimal-menu-btn:hover {
+        background: var(--mobile-nav-hover-bg);
+    }
+
+    .theme-dark .mobile-nav__link.active {
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
+    }
+
+    .theme-dark .glass {
+        background: rgba(12, 20, 33, 0.34);
+        border-color: rgba(255, 255, 255, 0.10);
+        box-shadow:
+            inset 0 1px 1px 0 rgba(255, 255, 255, 0.12),
+            inset 0 -1px 1px 0 rgba(0, 0, 0, 0.14),
+            0 12px 36px rgba(0, 0, 0, 0.30);
+    }
+
+    .theme-dark .badge {
+        background: rgba(255, 255, 255, 0.10);
+        color: var(--nav-text-color, #D1D1D6);
+    }
 }
 
 /* Десктопная версия - сохраняем существующие стили */

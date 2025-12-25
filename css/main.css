@@ -3686,6 +3686,9 @@ button:active, .btn:active, .fab:active, a:active {
 
 .hero {
     padding: 40px 0;
+    /* Full width - counteract body padding */
+    margin-left: calc(-1 * var(--body-gutter, 0px));
+    margin-right: calc(-1 * var(--body-gutter, 0px));
     /* Desktop background (default) */
     background-image: url('../picture/hero-picture/hero-1-1200w.jpg');
     text-align: center;
@@ -4026,6 +4029,8 @@ button:active, .btn:active, .fab:active, a:active {
 .hero__container {
     max-width: var(--container-width);
     margin: 0 auto;
+    padding-left: var(--body-gutter, 0px);
+    padding-right: var(--body-gutter, 0px);
     /* padding: var(--page-top) var(--gutter-sm) 0; */
 }
 

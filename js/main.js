@@ -9,6 +9,7 @@ import { initCompareModal } from './compare-modal.js';
 const contentConfig = (typeof window !== 'undefined' && window.contentConfig) ? window.contentConfig : {};
 import { initMarketing } from './marketing.js';
 import { initNavigation } from './navigation.js';
+import { reinitLazyLoading } from './image-loader.js';
 // Landing mode: services portfolio contacts only; disable products/cart flows
 const LANDING_MODE = true;
 
@@ -63,6 +64,8 @@ async function loadComponent(containerId, componentPath) {
             } else if (hadGrid) {
                 // keep existing grid if any
             }
+            // Reinit lazy loading for images in loaded component
+            reinitLazyLoading();
         } else {
             console.error(`Container ${containerId} not found`);
         }
@@ -4037,6 +4040,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         if (reduced) {
             location.hash = '';
+            window.scrollTo({ top: 0, behavior: 'instant' });
             return;
         }
 
@@ -4053,6 +4057,14 @@ document.addEventListener('DOMContentLoaded', () => {
             // Immediately update hash and restore state
             location.hash = '';
             btn.removeAttribute('aria-disabled');
+            // Scroll to top FIRST for about-page
+            window.scrollTo({ top: 0, behavior: 'instant' });
+            // Restore main-container visibility if it was hidden (about-page)
+            const mainContainer = document.getElementById('main-container');
+            if (mainContainer && mainContainer.classList.contains('is-hidden')) {
+                mainContainer.classList.remove('is-hidden');
+                mainContainer.classList.add('is-visible');
+            }
             // ensure hero is visible and focused (guarded)
             if (typeof scrollToSectionTop === 'function') {
                 try { scrollToSectionTop('hero-container'); } catch(_) {}

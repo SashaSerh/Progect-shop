@@ -7446,3 +7446,37 @@ textarea:disabled {
     margin-top: 0;
   }
 }
+/* ========================================
+   Image Loading with LQIP (Low Quality Image Placeholder)
+   Blur-up effect for smooth image transitions
+   ======================================== */
+
+/* Base image loading state */
+img[data-src],
+img.img-loading {
+    filter: blur(8px);
+    background-color: #f0f0f0;
+    transition: filter var(--transition-normal), opacity var(--transition-normal);
+}
+
+/* Image loaded state */
+img.img-loaded {
+    filter: blur(0);
+    opacity: 1;
+}
+
+/* Image error state */
+img.img-error {
+    filter: blur(0);
+    opacity: 0.6;
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    img[data-src],
+    img.img-loading,
+    img.img-loaded {
+        transition: none !important;
+        filter: blur(0) !important;
+    }
+}

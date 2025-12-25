@@ -64,6 +64,34 @@
 
 **Важно**: все данные валидируются через `window.validateProduct()` перед сохранением.
 
+### 2c. Загрузка изображений с LQIP (Low Quality Image Placeholder)
+**Система в `js/image-loader.js`** обеспечивает плавную загрузку изображений с эффектом blur-up.
+
+**Использование**:
+- Добавьте атрибут `data-src` с полным URL изображения: `<img data-src="/path/to/image.jpg" alt="...">`
+- Опционально используйте `data-placeholder` для пользовательского placeholder'а
+- Система автоматически инициализируется при загрузке страницы и компонентов
+
+**Особенности**:
+- Генерирует blur placeholder если не указан `data-placeholder`
+- Использует Intersection Observer для ленивой загрузки (50px перед viewport)
+- Добавляет классы: `img-loading` (во время загрузки), `img-loaded` (успешно), `img-error` (ошибка)
+- CSS переход с blur(8px) → blur(0) при загрузке
+- Автоматически вызывается после загрузки компонентов через `reinitLazyLoading()`
+- Уважает `prefers-reduced-motion` (отключает переходы при выборе пользователем)
+
+**CSS классы**:
+```css
+img[data-src] { filter: blur(8px); } /* изначально размыто */
+img.img-loaded { filter: blur(0); }   /* после загрузки четко */
+```
+
+**API**:
+- `enhanceImageWithLQIP(img)` - применить LQIP к одному img
+- `initLazyLoading()` - инициализировать для всех img[data-src]
+- `reinitLazyLoading()` - переинициализировать (после загрузки компонента)
+- `preloadCriticalImages(srcs)` - предзагрузить критические изображения
+
 ### 3. Принципы разработки
 1. Семантика: используем корректные теги (`nav`, `header`, `main`, `section`, `footer`).
 2. Доступность: ARIA атрибуты для навигации, фокус-ловушки при открытых модальных/меню.

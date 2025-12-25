@@ -11,6 +11,10 @@
   --spacing-2xl: 32px;
   --spacing-3xl: 48px;
   
+  /* Extended Spacing for large screens */
+  --spacing-4xl: 60px;
+  --spacing-5xl: 80px;
+  
   /* Border Radius Scale */
   --radius-sm: 8px;
   --radius-md: 12px;
@@ -845,27 +849,31 @@ main {
    ======================================== */
 @media (min-width: 769px) {
     .container {
-        max-width: var(--container-width, 1200px);
-        padding-left: var(--gutter-sm, 24px);
-        padding-right: var(--gutter-sm, 24px);
+        max-width: 1200px;
+        padding-left: var(--gutter-md, 24px);
+        padding-right: var(--gutter-md, 24px);
     }
     
     .header__nav {
         display: flex;
     }
-    
+
     .products__grid {
         grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
         gap: 24px;
     }
-    
+
     .services__grid {
         grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
         gap: 24px;
     }
-    
+
     main {
         padding-bottom: var(--page-bottom, 24px);
+    }
+    
+    section {
+        padding: 64px 0;
     }
 }
 
@@ -920,6 +928,58 @@ section {
     .products__title,
     .contacts__title {
         margin-bottom: 24px;
+    }
+}
+
+/* Large desktop breakpoint (1200px+) */
+@media (min-width: 1200px) {
+    .container {
+        max-width: 1320px;
+        padding-left: var(--gutter-lg, 32px);
+        padding-right: var(--gutter-lg, 32px);
+    }
+    
+    section {
+        padding: 64px 0;
+    }
+    
+    .section__title,
+    .hero__title,
+    .services__title,
+    .products__title,
+    .contacts__title {
+        font-size: clamp(32px, 6vw, 48px);
+    }
+    
+    .section__subtitle,
+    .hero__subtitle {
+        font-size: clamp(16px, 4vw, 20px);
+    }
+}
+
+/* Ultra-wide desktop breakpoint (1440px+) */
+@media (min-width: 1440px) {
+    .container {
+        max-width: 1400px;
+        padding-left: var(--gutter-xl, 48px);
+        padding-right: var(--gutter-xl, 48px);
+    }
+    
+    section {
+        padding: 80px 0;
+    }
+    
+    .section__title,
+    .hero__title,
+    .services__title,
+    .products__title,
+    .contacts__title {
+        font-size: clamp(36px, 8vw, 56px);
+    }
+    
+    .section__subtitle,
+    .hero__subtitle {
+        font-size: clamp(18px, 5vw, 24px);
     }
 }
 
@@ -2170,9 +2230,12 @@ body.compare-modal-open {
     --gutter-md: 24px;
     --gutter-lg: 32px;
     --gutter-xl: 48px;
+    --gutter-2xl: 60px;
+    --gutter-3xl: 80px;
     --section-y-sm: 32px;
     --section-y-md: 40px; /* соответствует текущим 40px у секций */
     --section-y-lg: 64px;
+    --section-y-xl: 80px;
     --page-top: 35px; /* соответствует текущему padding-top у контейнера */
     --fab-bottom: 32px;
     --fab-gap: 12px;

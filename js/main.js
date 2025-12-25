@@ -1838,6 +1838,7 @@ function setupServiceRouting() {
         'reviews-container',
         'faq-container',
         'contacts-container',
+        'about-page-container',
         'breadcrumbs-container',
         'welcome-container'
     ];
@@ -1932,7 +1933,8 @@ function setupServiceRouting() {
                 'portfolio-page': 'portfolio-container',
                 'reviews-page': 'reviews-container',
                 'faq-page': 'faq-container',
-                'contacts': 'contacts-container'
+                'contacts': 'contacts-container',
+                'about-page': 'about-page-container'
             };
 
             const targetPage = pageMap[hash];
@@ -1944,7 +1946,7 @@ function setupServiceRouting() {
                 // Добавить кнопку возврата (в стиле btn btn--ghost), если нет
                 try {
                     const container = document.getElementById(targetPage);
-                    const section = container?.querySelector('.portfolio, .reviews, .faq, .contacts, .welcome');
+                    const section = container?.querySelector('.portfolio, .reviews, .faq, .contacts, .welcome, .about-page');
                     if (section && !section.querySelector('.back-to-main')) {
                         const btn = document.createElement('a');
                         btn.className = 'back-to-main btn btn--ghost service-page__back glass';
@@ -1961,7 +1963,8 @@ function setupServiceRouting() {
                                              section.classList.contains('reviews') ? 'reviews' :
                                              section.classList.contains('faq') ? 'faq' :
                                              section.classList.contains('contacts') ? 'contacts' :
-                                             section.classList.contains('welcome') ? 'welcome' : 'portfolio';
+                                             section.classList.contains('welcome') ? 'welcome' :
+                                             section.classList.contains('about-page') ? 'about-page' : 'portfolio';
                         section.classList.add(`${sectionClass}--slide-in-from-right`);
                         requestAnimationFrame(() => {
                             section.classList.remove(`${sectionClass}--slide-in-from-right`);
@@ -2071,7 +2074,8 @@ function setupServiceRouting() {
             'portfolio-page': 'portfolio-container',
             'reviews-page': 'reviews-container',
             'faq-page': 'faq-container',
-            'contacts': 'contacts-container'
+            'contacts': 'contacts-container',
+            'about-page': 'about-page-container'
         };
         const desktopTargetPage = desktopPageMap[hash];
         if (desktopTargetPage) {
@@ -4026,35 +4030,17 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         };
 
-        // If clicked from about/main-container — hide main container with its existing animation
-        const mainContainer = document.getElementById('main-container');
-        if (section && section.classList.contains('about-page')) {
-            // Trigger hide animation for main container
-            if (mainContainer) {
-                const onEnd = (e) => {
-                    if (e.target !== mainContainer) return;
-                    mainContainer.removeEventListener('transitionend', onEnd);
-                    finalize();
-                };
-                mainContainer.addEventListener('transitionend', onEnd);
-                // ensure animation class present
-                mainContainer.classList.add('is-hidden');
-                // safety fallback
-                setTimeout(finalize, 500);
-                return;
-            }
-            // fallback
-            finalize();
-            return;
-        }
+        // If clicked from about-page (now a landing page) — slide out with its animation
+        // Old main-container logic removed since about is now a landing page
 
-        // Landing sections (portfolio, reviews, faq, contacts, welcome, services)
+        // Landing sections (portfolio, reviews, faq, contacts, welcome, services, about-page)
         if (section) {
             const sectionClass = section.classList.contains('portfolio') ? 'portfolio' :
                                  section.classList.contains('reviews') ? 'reviews' :
                                  section.classList.contains('faq') ? 'faq' :
                                  section.classList.contains('contacts') ? 'contacts' :
                                  section.classList.contains('welcome') ? 'welcome' :
+                                 section.classList.contains('about-page') ? 'about-page' :
                                  section.classList.contains('services') ? 'service-page' : null;
             if (sectionClass) {
                 const outClass = `${sectionClass}--slide-out-to-right`;

@@ -1,0 +1,13 @@
+import { chromium, devices } from 'playwright';
+const iphone = devices['iPhone 12'];
+const browser = await chromium.launch();
+const context = await browser.newContext({ ...iphone });
+const page = await context.newPage();
+await page.goto('http://localhost:8000/#about', { waitUntil: 'networkidle' });
+await page.waitForTimeout(600);
+const classes = await page.$eval('#main-container', el => el.className);
+const opacity = await page.$eval('#main-container', el => getComputedStyle(el).opacity);
+console.log('main-container classes:', classes);
+console.log('computed opacity:', opacity);
+await browser.close();
+process.exit(0);

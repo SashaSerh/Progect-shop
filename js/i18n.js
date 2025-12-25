@@ -116,6 +116,16 @@ export const translations = {
         "about-lead": "Мы — команда профессионалов в сфере климат‑техники: продажа, монтаж и сервис кондиционеров, вентиляции и рекуператоров.",
         "about-p1": "За годы работы мы выполнили сотни проектов — от квартирных решений до коммерческих объектов. Наша цель — обеспечить комфортный микроклимат с эффективным энергопотреблением.",
         "about-p2": "Предлагаем консультации, профессиональную установку и обслуживание с прозрачными ценами и официальной гарантией.",
+        "about-values-1-title": "Профессиональный монтаж",
+        "about-values-1-desc": "Опытная бригада, аккуратная работа и контроль на каждом этапе.",
+        "about-values-1-alt": "Инструменты для монтажа",
+        "about-values-2-title": "Соблюдаем сроки",
+        "about-values-2-desc": "Планируем работы так, чтобы минимизировать дискомфорт и завершить в срок.",
+        "about-values-2-alt": "Часы и сроки",
+        "about-values-3-title": "Официальная гарантия",
+        "about-values-3-desc": "Гарантия на работы и помощь в послегарантийном обслуживании.",
+        "about-values-3-alt": "Дом — гарантия",
+        "about-cta": "Связаться с нами",
         "orders-title": "Мои заказы",
         "catalog": "Каталог",
         "search-placeholder": "Поиск по сайту",
@@ -239,8 +249,7 @@ export const translations = {
         "admin-toast-removed": "Товар удалён",
         "admin-toast-saved": "Товар сохранён",
         "admin-export-done": "Экспорт завершён",
-        "admin-import-done": "Импортировано {{count}} товаров",
-        "admin-import-error": "Ошибка импорта: {{message}}",
+        "admin-import-done": "Импортирова  plujkl.oierofooohi 8dfuy7 ivfy89{message}}",
         "admin-selected-flag-remove-aria": "Удалить",
         "admin-preview-alt": "предпросмотр",
         "admin-error-title-ru": "Укажите название",
@@ -329,6 +338,16 @@ export const translations = {
         "about-lead": "Ми — команда професіоналів у сфері клімат‑техніки: продаж, монтаж та сервіс кондиціонерів, вентиляції та рекуператорів.",
         "about-p1": "За роки роботи ми виконали сотні проєктів — від квартирних рішень до комерційних об'єктів. Наша мета — забезпечити комфортний мікроклімат з ефективним споживанням енергії.",
         "about-p2": "Пропонуємо консультації, професійне встановлення та обслуговування з прозорими цінами та офіційною гарантією.",
+        "about-values-1-title": "Професійний монтаж",
+        "about-values-1-desc": "Досвідчена бригада, акуратна робота та контроль на кожному етапі.",
+        "about-values-1-alt": "Інструменти для монтажу",
+        "about-values-2-title": "Дотримуємось строків",
+        "about-values-2-desc": "Плануємо роботи так, щоб мінімізувати дискомфорт і завершити в строк.",
+        "about-values-2-alt": "Годинник та строки",
+        "about-values-3-title": "Офіційна гарантія",
+        "about-values-3-desc": "Гарантія на роботи та допомога в післягарантійному обслуговуванні.",
+        "about-values-3-alt": "Дім — гарантія",
+        "about-cta": "Зв'язатися з нами",
         "footer-slogan": "Комфортний клімат — наша турбота",
         "footer-contact-title": "Зв'яжіться з нами",
         "services-title": "Наші послуги",
@@ -670,6 +689,20 @@ export function switchLanguage(lang) {
         const key = option.getAttribute('data-i18n');
         const value = translations[safeLang][key] || translations.ru[key];
         if (value) option.textContent = value;
+    });
+
+    // Alt texts for images
+    document.querySelectorAll('[data-i18n-alt]').forEach(element => {
+        const key = element.getAttribute('data-i18n-alt');
+        const value = translations[safeLang][key] || translations.ru[key];
+        if (value) element.alt = value;
+    });
+
+    // Title attributes (tooltips)
+    document.querySelectorAll('[data-i18n-title]').forEach(element => {
+        const key = element.getAttribute('data-i18n-title');
+        const value = translations[safeLang][key] || translations.ru[key];
+        if (value) element.title = value;
     });
 
     // Обновляем текст на плавающей кнопке языка

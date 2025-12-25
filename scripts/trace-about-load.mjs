@@ -1,0 +1,14 @@
+import { chromium, devices } from 'playwright';
+const iPhone = devices['iPhone 12'];
+const browser = await chromium.launch({ headless: true });
+const context = await browser.newContext({ ...iPhone });
+const page = await context.newPage();
+page.on('console', msg => console.log('PAGE LOG:', msg.type(), msg.text()));
+page.on('pageerror', e => console.log('PAGE ERROR:', e.message));
+page.on('requestfailed', req => console.log('REQUEST FAILED:', req.url(), req.failure().errorText));
+page.on('response', async res => { if (res.request().resourceType() === 'document' || res.request().url().includes('components')) console.log('RESP', res.status(), res.request().url()); });
+await page.goto('http://localhost:8000/#about', { waitUntil: 'networkidle' });
+await page.waitForTimeout(1000);
+console.log('MAIN CONTAINER HTML LENGTH:', await page.$eval('#main-container', el => el ? el.innerHTML.length : null));
+await browser.close();
+process.exit(0);

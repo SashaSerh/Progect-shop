@@ -1965,6 +1965,15 @@ function setupServiceRouting() {
                                              section.classList.contains('contacts') ? 'contacts' :
                                              section.classList.contains('welcome') ? 'welcome' :
                                              section.classList.contains('about-page') ? 'about-page' : 'portfolio';
+                        
+                        // Clear old animation classes for re-animation on subsequent visits
+                        section.classList.remove(`${sectionClass}--slide-in-from-right`);
+                        section.classList.remove(`${sectionClass}--slide-in`);
+                        section.classList.remove(`${sectionClass}--slide-out-to-right`);
+                        
+                        // Trigger reflow to reset animation
+                        void section.offsetWidth;
+                        
                         section.classList.add(`${sectionClass}--slide-in-from-right`);
                         requestAnimationFrame(() => {
                             section.classList.remove(`${sectionClass}--slide-in-from-right`);
@@ -3808,6 +3817,14 @@ function setupHashRouting(initialLang) {
                     const container = document.getElementById('main-container');
                     const section = container?.querySelector('.about-page');
                     if (section) {
+                        // Clear old animation classes for re-animation on subsequent visits
+                        section.classList.remove('about-page--slide-in-from-right');
+                        section.classList.remove('about-page--slide-in');
+                        section.classList.remove('about-page--slide-out-to-right');
+                        
+                        // Trigger reflow to reset animation
+                        void section.offsetWidth;
+                        
                         section.classList.add('about-page--slide-in-from-right');
                         requestAnimationFrame(() => {
                             section.classList.remove('about-page--slide-in-from-right');
@@ -4045,17 +4062,31 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         };
 
-        // If clicked from about-page (now a landing page) — slide out with its animation
-        // Old main-container logic removed since about is now a landing page
+        // Special handling for about-page: hide main-container
+        if (section && section.classList.contains('about-page')) {
+            const mainContainer = document.getElementById('main-container');
+            if (mainContainer) {
+                const onEnd = (e) => {
+                    if (e.target !== mainContainer) return;
+                    mainContainer.removeEventListener('transitionend', onEnd);
+                    finalize();
+                };
+                mainContainer.addEventListener('transitionend', onEnd);
+                // Add is-hidden to trigger animation
+                mainContainer.classList.add('is-hidden');
+                // safety fallback in case transitionend doesn't fire
+                setTimeout(finalize, 500);
+                return;
+            }
+        }
 
-        // Landing sections (portfolio, reviews, faq, contacts, welcome, services, about-page)
+        // Landing sections (portfolio, reviews, faq, contacts, welcome, services)
         if (section) {
             const sectionClass = section.classList.contains('portfolio') ? 'portfolio' :
                                  section.classList.contains('reviews') ? 'reviews' :
                                  section.classList.contains('faq') ? 'faq' :
                                  section.classList.contains('contacts') ? 'contacts' :
                                  section.classList.contains('welcome') ? 'welcome' :
-                                 section.classList.contains('about-page') ? 'about-page' :
                                  section.classList.contains('services') ? 'service-page' : null;
             if (sectionClass) {
                 const outClass = `${sectionClass}--slide-out-to-right`;

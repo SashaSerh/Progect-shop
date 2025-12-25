@@ -1,5 +1,5 @@
-const CACHE_VERSION = 'v74'; // Glassmorphism edge refraction effect
-const CACHE_NAME = 'climat-control-v105'; // glass edge refraction
+const CACHE_VERSION = 'v75'; // Cache refresh for LQIP + dark-tone updates
+const CACHE_NAME = 'climat-control-v106'; // include new assets
 const urlsToCache = [
     '/',
     '/index.html',
@@ -12,6 +12,7 @@ const urlsToCache = [
     '/js/marketing.js',
     '/js/content-config.js',
     '/js/i18n.js',
+    '/js/image-loader.js',
     '/js/admin-products.js',
     '/js/admin-page.js',
     '/js/data-provider.js',

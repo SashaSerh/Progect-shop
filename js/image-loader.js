@@ -138,7 +138,7 @@ if (document.readyState === 'loading') {
     initLazyLoading();
 }
 
-// Экспорт функций как именованные экспорты
+// Named exports (repeat for compatibility)
 export {
     enhanceImageWithLQIP,
     initLazyLoading,

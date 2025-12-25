@@ -3800,6 +3800,7 @@ function setupHashRouting(initialLang) {
                 showSection('contacts-container', false);
                 showSection('product-detail-container', false);
                 showSection('admin-page-container', false);
+                showSection('mobile-main-nav-container', false); // Hide mobile navigation menu
                 showSection('main-container', true);
 
                 // Apply translations for the newly loaded content
@@ -3823,6 +3824,7 @@ function setupHashRouting(initialLang) {
             showSection('contacts-container', true);
             showSection('product-detail-container', false);
             showSection('admin-page-container', false);
+            showSection('mobile-main-nav-container', true); // Show mobile navigation menu
             showSection('main-container', false);
             // Restore title via i18n
             const lang = getLangSafe();

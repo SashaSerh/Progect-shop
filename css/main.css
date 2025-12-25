@@ -2746,7 +2746,17 @@ button:active, .btn:active, .fab:active, a:active {
 /* Desktop/laptop: при прокрутке прячем верхнюю полосу, основная остаётся на виду за счёт sticky у .header */
 @media (min-width: 769px) {
     /* Делаем липким весь header, чтобы основная панель всегда была в зоне видимости */
-    .header { position: sticky; top: 0; }
+    .header { 
+        position: sticky; 
+        top: 0;
+        padding-left: var(--body-gutter, 0px);
+        padding-right: var(--body-gutter, 0px);
+    }
+    
+    .header__container {
+        padding-left: 0;
+        padding-right: 0;
+    }
     /* Всегда абсолютная верхняя полоса внутри контейнера */
     .header__top-bar { 
         position: absolute; top: 0; left: 0; right: 0; 

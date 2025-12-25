@@ -272,7 +272,7 @@ const addToCartForm = document.getElementById('add-to-cart-form');
 const addBtn = addToCartForm.querySelector('button[type="submit"]');
 
 // Валидация количества
-const validator = new FormValidator(addToCartForm, {
+const cartValidator = new FormValidator(addToCartForm, {
   quantity: [
     ValidationRules.required,
     ValidationRules.number,
@@ -285,7 +285,7 @@ const validator = new FormValidator(addToCartForm, {
 addToCartForm.addEventListener('submit', async (e) => {
   e.preventDefault();
   
-  if (!validator.validate()) return;
+  if (!cartValidator.validate()) return;
   
   // Показать loading
   const loader = LoadingState.attach(addBtn, { message: 'Добавляю...' });

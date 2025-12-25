@@ -4,7 +4,12 @@
  */
 export function initTheme() {
     const savedTheme = localStorage.getItem('theme') || 'light';
+    const isDarkTheme = savedTheme === 'dark';
+    
+    // Применяем оба варианта классов для совместимости
+    document.documentElement.classList.toggle('theme-dark', isDarkTheme);
     document.body.classList.toggle('light-theme', savedTheme === 'light');
+    document.body.classList.toggle('theme-dark', isDarkTheme);
     
     // Обновляем все иконки тем
     updateAllThemeIcons(savedTheme);
@@ -17,7 +22,10 @@ export function initTheme() {
 export function toggleTheme() {
     // Добавляем класс для плавного перехода
     document.body.classList.add('theme-transition');
+    document.documentElement.classList.toggle('theme-dark');
     document.body.classList.toggle('light-theme');
+    document.body.classList.toggle('theme-dark');
+    
     const isLightTheme = document.body.classList.contains('light-theme');
     const currentTheme = isLightTheme ? 'light' : 'dark';
     
@@ -128,7 +136,13 @@ export function getCurrentTheme() {
  */
 export function setTheme(theme) {
     const isLight = theme === 'light';
+    const isDark = theme === 'dark';
+    
+    // Применяем оба варианта классов
+    document.documentElement.classList.toggle('theme-dark', isDark);
     document.body.classList.toggle('light-theme', isLight);
+    document.body.classList.toggle('theme-dark', isDark);
+    
     localStorage.setItem('theme', theme);
     updateAllThemeIcons(theme);
 }

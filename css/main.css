@@ -86,9 +86,24 @@
   --text-inverted: #fff;
   
   /* Transitions */
-  --transition-fast: 150ms ease;
-  --transition-normal: 300ms ease;
-  --transition-slow: 500ms ease;
+    /* Motion tokens (standardized) */
+    --motion-ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+    --motion-ease-emphasized: cubic-bezier(0.22, 0.9, 0.32, 1);
+    --motion-duration-fast: 150ms;
+    --motion-duration-micro: 200ms;
+    --motion-duration-normal: 300ms;
+    --motion-duration-slow: 500ms;
+    --motion-duration-theme: 350ms;
+
+    --motion-duration-press: 140ms;
+    --motion-ease-press: cubic-bezier(0.4, 0, 0.2, 1);
+
+    /* Legacy-friendly transition shorthands used across the stylesheet */
+    --transition-fast: var(--motion-duration-fast) var(--motion-ease-standard);
+    --transition-normal: var(--motion-duration-normal) var(--motion-ease-standard);
+    --transition-slow: var(--motion-duration-slow) var(--motion-ease-standard);
+    --transition-micro: var(--motion-duration-micro) var(--motion-ease-standard);
+    --transition-theme: var(--motion-duration-theme) var(--motion-ease-standard);
   
   /* Body gutter (side padding) - responsive */
   --body-gutter: 0px;
@@ -1288,7 +1303,10 @@ html { scroll-behavior: smooth; }
 .share-buttons { display:flex; gap:10px; }
 .share-btn { border:1px solid var(--border,#ddd); background: var(--surface,#fff); border-radius:10px; padding:8px 10px; font-size:16px; line-height:1; cursor:pointer; }
 .share-btn:hover { background: rgba(0,0,0,0.04); }
-.share-btn:active { transform: translateY(1px) scale(0.98); animation: btn-press 140ms ease-out both; }
+.share-btn:active {
+    transform: translateY(1px) scale(0.98);
+    animation: btn-press var(--motion-duration-press) var(--motion-ease-press) both;
+}
 .share-btn--tg { color:#229ED9; text-decoration:none; }
 .share-btn--wa { color:#25D366; text-decoration:none; }
 .product-buy__badges { list-style:none; margin:0; padding:0; display:flex; flex-wrap:wrap; gap:8px; }
@@ -1329,7 +1347,10 @@ html { scroll-behavior: smooth; }
 .collapsible__toggle { margin-top: 10px; background: none; border: 1px solid var(--border,#ddd); border-radius: 10px; padding: 8px 12px; font-weight: 600; color: var(--nav-text-color,#222); cursor: pointer; }
 .collapsible__toggle:hover, .collapsible__toggle:focus { background: var(--button-bg, rgba(0,0,0,0.04)); outline: none; }
 .collapsible__toggle:focus-visible { box-shadow: var(--input-focus-shadow); }
-.collapsible__toggle:active { transform: translateY(1px) scale(0.98); animation: btn-press 140ms ease-out both; }
+.collapsible__toggle:active {
+    transform: translateY(1px) scale(0.98);
+    animation: btn-press var(--motion-duration-press) var(--motion-ease-press) both;
+}
 
 .product-trust { margin-bottom: clamp(40px, 10vw, 100px); }
 .trust-title { font-size: clamp(20px,4.5vw,30px); font-weight:700; margin:0 0 20px; }
@@ -1485,7 +1506,10 @@ html { scroll-behavior: smooth; }
 .product-card__quick-btn:focus { background: var(--quick-action-hover-bg); border-color: var(--quick-action-hover-bg); outline:none; }
 .product-card__quick-btn:focus-visible { box-shadow: var(--input-focus-shadow); }
 .product-card__quick-btn:active { transform: scale(0.95); }
-.product-card__quick-btn:active { transform: translateY(1px) scale(0.95); animation: btn-press 140ms ease-out both; }
+.product-card__quick-btn:active {
+    transform: translateY(1px) scale(0.95);
+    animation: btn-press var(--motion-duration-press) var(--motion-ease-press) both;
+}
 .product-card__quick-btn.is-active { background: var(--quick-action-active-bg); color: var(--quick-action-active-color); border-color: var(--quick-action-active-border); }
 .quantity-stepper { display:inline-flex; align-items:center; border-radius:999px; background: var(--quantity-bg); border:1px solid var(--quantity-border); padding:4px; }
 .quantity-stepper--vertical { flex-direction:column; width:56px; padding:6px 4px; border-radius:18px; gap:6px; margin: 10px; }
@@ -1607,7 +1631,10 @@ html { scroll-behavior: smooth; }
     background: var(--button-bg-hover);
     outline: none;
 }
-.compare-bar__button:active { transform: translateY(1px) scale(0.98); animation: btn-press 140ms ease-out both; }
+.compare-bar__button:active {
+    transform: translateY(1px) scale(0.98);
+    animation: btn-press var(--motion-duration-press) var(--motion-ease-press) both;
+}
 
 .compare-bar__button:focus-visible {
     box-shadow: var(--input-focus-shadow);
@@ -1953,7 +1980,7 @@ html { scroll-behavior: smooth; }
 
 .compare-modal__cta:active {
     transform: translateY(1px) scale(0.98);
-    animation: btn-press 140ms ease-out both;
+    animation: btn-press var(--motion-duration-press) var(--motion-ease-press) both;
 }
 
 .compare-modal__cta--secondary {
@@ -2125,7 +2152,7 @@ body.compare-modal-open {
     font-size: 1rem;
     font-weight: 500;
     cursor: pointer;
-    transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+    transition: background-color var(--transition-micro), color var(--transition-micro), box-shadow var(--transition-micro);
     box-shadow: 0 1px 4px rgba(0,0,0,0.04);
 }
 .open-language-overlay:hover,
@@ -2209,8 +2236,9 @@ body.compare-modal-open {
     --font-bold: 600;
     --background-color-secondary: #008CBA;
     --background-color-secondary-hover: #007B9E;
-    /* TODO(theme-refactor): сократить область применения --transition (all) до конкретных свойств для снижения лишних repaint */
-    --transition: all 0.3s ease-in-out;
+     /* NOTE: переменные ниже используются как <duration> <timing-function>.
+         Не включайте сюда 'all', т.к. значение применяется в `transition: background var(--transition)` и подобных правилах. */
+     --transition: var(--motion-duration-normal) var(--motion-ease-standard);
     --shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     --focus-ring: 2px solid var(--accent-color);
     --focus-ring-offset: 2px;
@@ -2230,8 +2258,12 @@ body.compare-modal-open {
     --glass-bg: rgba(255, 255, 255, 0.1);
     --glass-border: rgba(255, 255, 255, 0.2);
     --glass-blur: blur(10px);
+    /* Mobile background blur + tint (used in @media (max-width: 768px)) */
+    --mobile-bg-tint: rgba(0, 0, 0, 0.42);
+    --mobile-hero-scrim: rgba(0, 0, 0, 0.22);
+    --mobile-hero-backdrop: blur(18px);
     --modern-radius: 16px;
-    --micro-transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    --micro-transition: var(--motion-duration-micro) var(--motion-ease-standard);
     --thumb-size: 44px;
     --mobile-padding: 2px;
     /* Flag badge theme colors */
@@ -2347,6 +2379,9 @@ body.compare-modal-open {
     --glass-bg: rgba(255, 255, 255, 0.8); /* оставляем как тема-специфическое */
     --glass-border: rgba(0, 0, 0, 0.1);
     --glass-blur: blur(15px);
+    --mobile-bg-tint: rgba(0, 0, 0, 0);
+    --mobile-hero-scrim: rgba(255, 255, 255, 0.18);
+    --mobile-hero-backdrop: blur(18px);
     /* Токены полей ввода (светлая тема) */
     --input-bg: rgba(0,0,0,0.02);
     --input-border: rgba(0,0,0,0.12);
@@ -3227,7 +3262,10 @@ button:active, .btn:active, .fab:active, a:active {
 .catalog-button:hover {
     background: var(--background-color-secondary-hover);
 }
-.catalog-button:active { transform: translateY(1px) scale(0.98); animation: btn-press 140ms ease-out both; }
+.catalog-button:active {
+    transform: translateY(1px) scale(0.98);
+    animation: btn-press var(--motion-duration-press) var(--motion-ease-press) both;
+}
 
 .catalog-icon {
     font-size: 20px;
@@ -3465,7 +3503,10 @@ button:active, .btn:active, .fab:active, a:active {
 .modal__button:hover {
     background: #005BB5;
 }
-.modal__button:active { transform: translateY(1px) scale(0.98); animation: btn-press 140ms ease-out both; }
+.modal__button:active {
+    transform: translateY(1px) scale(0.98);
+    animation: btn-press var(--motion-duration-press) var(--motion-ease-press) both;
+}
 
 /* Подложка под модалку профиля */
 .profile-backdrop {
@@ -3542,7 +3583,13 @@ button:active, .btn:active, .fab:active, a:active {
     font-size: 14px;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition:
+        background-color var(--transition-micro),
+        color var(--transition-micro),
+        border-color var(--transition-micro),
+        box-shadow var(--transition-micro),
+        transform var(--transition-micro),
+        filter var(--transition-micro);
 }
 
 .btn--primary {
@@ -3599,7 +3646,12 @@ button:active, .btn:active, .fab:active, a:active {
     background: rgba(255, 255, 255, 0.1);
     color: var(--nav-text-color);
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition:
+        background-color var(--transition-micro),
+        color var(--transition-micro),
+        border-color var(--transition-micro),
+        box-shadow var(--transition-micro),
+        transform var(--transition-micro);
 }
 
 .header-add-product:hover,
@@ -3762,7 +3814,10 @@ button:active, .btn:active, .fab:active, a:active {
 /* Мобильный размытый фон для всего body */
 @media (max-width: 768px) {
     html {
-        background-image: url('../picture/hero-picture/background-blur-mobile.png');
+        background-image:
+            linear-gradient(var(--mobile-bg-tint), var(--mobile-bg-tint)),
+            url('../picture/hero-picture/background-blur-mobile.png');
+        background-color: var(--background-color);
         background-size: cover;
         background-position: center top;
         background-repeat: no-repeat;
@@ -3777,9 +3832,20 @@ button:active, .btn:active, .fab:active, a:active {
     
     .hero {
         position: relative;
+        overflow: hidden;
         /* Убираем обычное background-image для мобильной версии */
         background-image: none !important;
-        background: transparent;
+        background: transparent !important;
+    }
+
+    .hero::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: var(--mobile-hero-scrim);
+        backdrop-filter: var(--mobile-hero-backdrop);
+        -webkit-backdrop-filter: var(--mobile-hero-backdrop);
+        z-index: 0;
     }
     
     .hero__container {
@@ -3789,16 +3855,16 @@ button:active, .btn:active, .fab:active, a:active {
     
     /* Прозрачный фон для мобильной навигации */
     .main-nav-mobile {
-        background: rgba(0, 0, 0, 0.1);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
+        background: var(--glass-bg);
+        backdrop-filter: var(--glass-blur);
+        -webkit-backdrop-filter: var(--glass-blur);
     }
     
     /* Прозрачный фон для футера */
     .footer {
-        background: rgba(0, 0, 0, 0.1);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
+        background: var(--glass-bg);
+        backdrop-filter: var(--glass-blur);
+        -webkit-backdrop-filter: var(--glass-blur);
     }
     
     /* Мобильные стили для страниц услуг */
@@ -4258,7 +4324,7 @@ button:active, .btn:active, .fab:active, a:active {
     font-size: 15px;
     cursor: pointer;
     backdrop-filter: blur(8px);
-    transition: background var(--transition);
+    transition: background-color var(--transition);
 }
 
 .filter-group select:hover {
@@ -4285,7 +4351,12 @@ button:active, .btn:active, .fab:active, a:active {
     font-size: 14px;
     font-weight: 600;
     cursor: pointer;
-    transition: all var(--transition);
+    transition:
+        background-color var(--transition),
+        color var(--transition),
+        border-color var(--transition),
+        box-shadow var(--transition),
+        transform var(--transition);
     text-decoration: none;
     display: inline-block;
 }
@@ -5212,7 +5283,10 @@ textarea.form-input { resize: vertical; min-height: 120px; }
     transition: transform 120ms ease, opacity 120ms ease, background 200ms ease;
 }
 .btn:hover { opacity: .95; }
-.btn:active { transform: translateY(1px) scale(.98); animation: btn-press 140ms ease-out both; }
+.btn:active {
+    transform: translateY(1px) scale(.98);
+    animation: btn-press var(--motion-duration-press) var(--motion-ease-press) both;
+}
 .btn:focus-visible { outline: var(--focus-ring); outline-offset: var(--focus-ring-offset); }
 
 @keyframes btn-press {
@@ -6373,7 +6447,9 @@ textarea.form-input { resize: vertical; min-height: 120px; }
 .light-theme { --skeleton-base: rgba(0,0,0,0.06); --skeleton-highlight: rgba(0,0,0,0.12); }
 
 /* ============ Плавный переход темы ============ */
-body.theme-transition, body.theme-transition * { transition: background-color .35s ease, color .35s ease, border-color .35s ease; }
+body.theme-transition, body.theme-transition * {
+    transition: background-color var(--transition-theme), color var(--transition-theme), border-color var(--transition-theme);
+}
 
 /* Respect user motion preferences */
 @media (prefers-reduced-motion: reduce) {

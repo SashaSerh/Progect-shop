@@ -113,9 +113,9 @@
 .theme-dark {
   /* Primary surface layers with warm blue tint for reduced eye strain */
   --surface-0: #0f1419;          /* Pure black background */
-  --surface-1: #1a1f2e;          /* Deep navy for cards and elevated surfaces */
+  --surface-1: #28292d;          /* Deep navy for cards and elevated surfaces */
   --surface-2: #252d3d;          /* Mid navy for secondary surfaces */
-  --surface-3: #303847;          /* Light navy for interactive surfaces */
+  --surface-3: #0000008a;          /* Light navy for interactive surfaces */
   
   /* Enhanced borders with subtle tint */
   --border-color: #404a5c;       /* Subtle navy-tinted border */
@@ -1216,8 +1216,12 @@ html { scroll-behavior: smooth; }
 .theme-dark .service-gallery__dot.is-active { background: #fff; }
 .service-page__cta { margin-top: 16px; }
 .service-page .cta-group { display: flex; flex-wrap: wrap; gap: 8px; }
-.theme-dark .service-benefits__item { background: var(--color-surface, #161616); border-color: rgba(255,255,255,0.08); }
-/* Кликабельные карточки услуг: указатель и фокус */
+.theme-dark .service-benefits__item { background: rgba(22, 22, 22, 0.8); border-color: rgba(255,255,255,0.08); }
+.theme-dark .service-page__content { background: rgba(22, 22, 22, 0.8); border: 1px solid rgba(255,255,255,0.08); color: var(--text-primary); }
+.theme-dark .service-page__header { background: rgba(22, 22, 22, 0.8); border: 1px solid rgba(255,255,255,0.08); color: var(--text-primary); }
+.theme-dark .main-nav-mobile { background: rgba(22, 22, 22, 0.8); border: 1px solid rgba(255,255,255,0.08); color: var(--text-primary); }
+.theme-dark .hero .fade-in-section.visible { color: var(--text-primary); }
+.theme-dark .reviews__form { background: rgba(22, 22, 22, 0.8); border: 1px solid rgba(255,255,255,0.08); color: var(--text-primary); }
 .service-card[role="link"] { cursor: pointer; }
 .service-card[role="link"]:focus { outline: 2px solid var(--accent-color, #007aff); outline-offset: 4px; }
 .service-card[role="link"]:focus-visible { outline: 2px solid var(--accent-color, #007aff); outline-offset: 4px; }
@@ -1232,6 +1236,7 @@ html { scroll-behavior: smooth; }
 .review-card__name { font-weight:700; margin-bottom:6px; }
 .review-card__stars { margin-bottom:8px; }
 .review-card__text { font-size:14px; line-height:1.55; color: var(--on-surface,#222); }
+.theme-dark .review-card__text { color: var(--text-primary); }
 .reviews__form { margin-top: 8px; border-top:1px dashed var(--border,#ddd); padding-top: 16px; }
 .reviews__form-title { margin:0 0 10px; font-size: clamp(16px, 3.2vw, 20px); font-weight:700; }
 .form--compact .form-field { margin-bottom: 10px; }
@@ -5283,10 +5288,7 @@ textarea.form-input { resize: vertical; min-height: 120px; }
     transition: transform 120ms ease, opacity 120ms ease, background 200ms ease;
 }
 .btn:hover { opacity: .95; }
-.btn:active {
-    transform: translateY(1px) scale(.98);
-    animation: btn-press var(--motion-duration-press) var(--motion-ease-press) both;
-}
+.btn:active { transform: translateY(1px) scale(.98); animation: btn-press 140ms ease-out both; }
 .btn:focus-visible { outline: var(--focus-ring); outline-offset: var(--focus-ring-offset); }
 
 @keyframes btn-press {

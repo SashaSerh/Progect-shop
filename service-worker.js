@@ -1,5 +1,5 @@
-const CACHE_VERSION = 'v75'; // Cache refresh for LQIP + dark-tone updates
-const CACHE_NAME = 'climat-control-v106'; // include new assets
+const CACHE_VERSION = 'v76'; // Cache refresh for mobile hero blur + dark background tint
+const CACHE_NAME = 'climat-control-v107'; // include new assets
 const urlsToCache = [
     '/',
     '/index.html',

@@ -1,320 +1,35 @@
-## Инструкции для GitHub Copilot
+## Инструкции для AI-агентов (Progect-shop)
 
-Документ описывает соглашения проекта для генерации кода и правок.
+### Архитектура
+- SPA без фреймворков (HTML/CSS/ESM). Точка входа: `js/main.js`.
+- UI собирается из HTML-фрагментов в `components/` через `loadComponent(containerId, path)`; после вставки вызывается `reinitLazyLoading()` из `js/image-loader.js`.
+- В `js/main.js` есть `LANDING_MODE`: при `true` отключает каталог/корзину/compare и связанные хеш-маршруты.
 
-### 1. Архитектура
-- **SPA без фреймворков** (HTML + CSS + JS). Главный режим: **LANDING_MODE = true** в `js/main.js` — скрывает товары и корзину, показывает услуги/портфолио.
-- **Компоненты** (HTML-фрагменты) в `components/` подгружаются через `loadComponent(containerId, path)` из `main.js`. После вставки навешиваются события через делегирование.
-- **Модель товара**: 
-  - Базовые поля: `id`, `name` ({ru,uk}), `price`, `category`, `sku`, `brand`, `inStock`, `rating`, `specs`
-  - Расширенные: `oldPrice`, `energyClass` (A+/A++), `creditProviders`, `deliveryInfoUrl`, `warrantyInfoUrl`
-  - Флаги (левые бейджи): `flags: ['sale','top','popular']` → цвета через `autoFlagColor()` в `flags-color.js`
-- **Провайдеры данных**: Модульная система в `data-provider.js`. Класс `LocalStorageProvider` + scaffold для `GitCMSProvider` (GitHub API). По умолчанию: статичный JSON (read-only).
-- **Темизация** (светлая/тёмная) через CSS переменные в `:root` блоке `css/main.css`: `--nav-text-color`, `--accent-color`, `--background-color`.
-- **PWA**: `service-worker.js` (версия кеша `CACHE_VERSION`), `manifest.json`. Стратегия: network-first для навигаций, cache-first для статики с fallback.
-- **Мобильное меню**: Выезжает справа, управление — бургер, Esc, свайп. Жесты подключаются лениво при первом открытии (`gestures-config.js`).
+### Навигация и конфиги
+- Маршруты через `location.hash`: `#products`, `#cart`, `#product-<id>`, `#category-<slug>`.
+- Категории/контент/контакты — `js/content-config.js` (classic script) → `window.Categories`, `window.getComponentBySlug(slug)`, `window.contentConfig`.
 
-### 2. Ключевые пути
-- `index.html` – корневой контейнер (основной мобильный layout с viewport-fit: cover для нотча).
-- `js/main.js` – инициализация, `loadComponent()`, навигация через хеши, `LANDING_MODE` флаг.
-- `js/products.js` – экспорт: `products`, `renderProducts()`, `filterProducts()`, `toggleFavorite/toggleCompare()`, `getMergedProducts()` (слияние локальных + статичных).
-- `js/cart.js` – состояние корзины в памяти, `addToCart()`, `removeFromCart()`, `updateCartUI()`.
-- `js/i18n.js` – объект `translations` {ru,uk}, `switchLanguage()`, fallback к ru.
-- `js/theme.js` – `toggleTheme()`, `initTheme()` с localStorage fallback.
-- `js/data-provider.js` – `LocalStorageProvider`, scaffold `GitCMSProvider`; экспортируется в `window.DataProviders`.
-- `js/admin-page.js` – админ-UI (локальное редактирование товаров, экспорт/импорт, Git-CMS интеграция).
-- `js/admin-products.js` – helper функции для сохранения товаров в localStorage и обработки картинок.
-- `js/navigation.js`, `js/content-config.js` – маршруты и конфиги сервисов/контактов.
-- `css/main.css` – все стили (6500+ строк), media-breakpoints, glassmorphism эффекты, переменные тем.
-- `components/*.html` – header, hero, products, services, footer, product-detail, cart, contact-form.
-- `data/products.json` – статичные товары (read-only по умолчанию).
-- `service-worker.js` – кеш версия `CACHE_VERSION`, список URL пред-кеша, стратегии сети.
-- `tests/setup.js` – глобальный setup для jsdom (polyfills для PointerEvent, vibrate, scrollTo).
-- `vitest.config.js` – Jest-подобная конфигурация с jsdom, фильтрация console.log ошибок компонентов.
+### Данные и админка
+- Провайдеры в `js/data-provider.js` (доступны в DevTools):
+  - Статика (read-only): `window.switchToStaticJson()` / `window.configureStaticJson({ path: 'data/products.json' })`
+  - Локальные правки: `window.switchToLocalProvider()` (LocalStorage key: `shop:products:v1`)
+  - GitHub: `window.configureGitCMS({ repo, branch, path, token })`
+  - Supabase (PostgREST): `window.configureSupabase({ url, key, table, schema })`
+- Админ-UI: `components/admin-products.html` + `js/admin-page.js` / `js/admin-products.js`; валидация товара через `window.validateProduct()`.
 
-### 2a. Провайдеры данных (Data Providers)
-**Модульная система в `js/data-provider.js`**. Обеспечивает гибкое переключение источников товаров.
+### Модель товара и i18n
+- Тексты часто двуязычные: `name: { ru, uk }` (пример в `js/products.js`); язык переключается через `js/i18n.js` (`switchLanguage()`), fallback к `ru`.
 
-**LocalStorageProvider** (основной для редактирования):
-- Сохраняет товары в `localStorage[shop:products:v1]`.
-- Методы: `loadAll()`, `create(product)`, `update(id, patch)`, `remove(id)`, `import(json)`, `export()`.
-- Валидирует уникальность `id` и `sku` через `window.validateProduct()`.
-- Используется админ-UI для локальных правок.
+### Стили и UI-паттерны
+- Тема/токены: CSS-переменные в `css/main.css` (`:root`). Не хардкодьте новые цвета/тени — добавляйте/используйте переменные.
+- Переиспользуемые паттерны: `js/ui-patterns.js` и `js/form-validation.js`.
 
-**GitCMSProvider** (scaffold для GitHub API):
-- Интегрирует GitHub API для чтения/записи `data/products.json` в репозитории.
-- Требует: `repo`, `branch`, `path`, `token`.
-- Методы: `loadAll()`, `create()`, `update()`, `remove()` (асинхронные с коммитами).
-- Конфигурируется через админ-UI (вкладка GitCMS Settings).
-- Auto-commit опция для автоматических push после сохранения.
+### Изображения и PWA
+- LQIP/lazy: используйте `img[data-src]` (см. `js/image-loader.js`).
+- Responsive картинки: `npm run images:gen` (watch: `npm run images:watch`), суффиксы `-320w/-480w/-768w/-1200w` (см. `README.md`).
+- Service Worker: `service-worker.js`; при изменении критичных ассетов обновляйте `CACHE_NAME` и список `urlsToCache`.
 
-**Текущий провайдер**: по умолчанию — статичный JSON (`data/products.json`, read-only). Переключение — через `js/admin-page.js` или консоль.
-
-**Слияние источников**: `getMergedProducts()` в `products.js` объединяет локальные + базовые товары для администраторов.
-
-### 2b. Админ-режим и управление товарами
-**Точка входа**: кнопка "Админка" в footer → `components/admin-products.html` → `js/admin-page.js`.
-
-**Возможности**:
-1. **Локальное редактирование**: форма с валидацией, drag-n-drop галерея, флаги товара.
-2. **Экспорт/импорт**: JSON export → файл; импорт из JSON с проверкой уникальности.
-3. **Сохранение картинок**: загрузка основного изображения и галереи → файловая система (если доступна).
-4. **Git-CMS интеграция**: синхронизация с GitHub репозиторием (push/pull/merge).
-5. **Supabase scaffold**: готовая структура для PostgREST интеграции.
-
-**Важно**: все данные валидируются через `window.validateProduct()` перед сохранением.
-
-### 2c. Загрузка изображений с LQIP (Low Quality Image Placeholder)
-**Система в `js/image-loader.js`** обеспечивает плавную загрузку изображений с эффектом blur-up.
-
-**Использование**:
-- Добавьте атрибут `data-src` с полным URL изображения: `<img data-src="/path/to/image.jpg" alt="...">`
-- Опционально используйте `data-placeholder` для пользовательского placeholder'а
-- Система автоматически инициализируется при загрузке страницы и компонентов
-
-**Особенности**:
-- Генерирует blur placeholder если не указан `data-placeholder`
-- Использует Intersection Observer для ленивой загрузки (50px перед viewport)
-- Добавляет классы: `img-loading` (во время загрузки), `img-loaded` (успешно), `img-error` (ошибка)
-- CSS переход с blur(8px) → blur(0) при загрузке
-- Автоматически вызывается после загрузки компонентов через `reinitLazyLoading()`
-- Уважает `prefers-reduced-motion` (отключает переходы при выборе пользователем)
-
-**CSS классы**:
-```css
-img[data-src] { filter: blur(8px); } /* изначально размыто */
-img.img-loaded { filter: blur(0); }   /* после загрузки четко */
-```
-
-**API**:
-- `enhanceImageWithLQIP(img)` - применить LQIP к одному img
-- `initLazyLoading()` - инициализировать для всех img[data-src]
-- `reinitLazyLoading()` - переинициализировать (после загрузки компонента)
-- `preloadCriticalImages(srcs)` - предзагрузить критические изображения
-
-### 3. Принципы разработки
-1. Семантика: используем корректные теги (`nav`, `header`, `main`, `section`, `footer`).
-2. Доступность: ARIA атрибуты для навигации, фокус-ловушки при открытых модальных/меню.
-3. Отложенная инициализация: тяжёлые/редко используемые возможности (свайпы, анимации) подключаются при первом взаимодействии.
-4. Производительность: минимизировать layout thrash (кеш значений, rAF для скролл‑обновлений, passive listeners).
-5. Унификация стилей: кнопки/карточки через общие классы (`.btn`, `.card`, и т.п.).
-6. Темизация: новые цвета только через существующие CSS-переменные. Если переменной нет — добавить в корневой блок и описать применение.
-7. Чистота DOM: не вставлять дубликаты компонент при повторной навигации.
-8. SRP в JS: каждая функция решает одну задачу (инициализация, переключение, рендер секции и т.д.).
-
-### 4. Навигация и компоненты
-- Навигация клиентская: подгрузка HTML-фрагментов и вставка в контейнер.
-- Использовать единый механизм загрузки (функция из `js/main.js`).
-- После вставки компонента: навесить его события (делегирование предпочтительно).
-- Новая секция: файл `components/<name>.html` + вызов загрузки при навигации.
-
-### 5. Мобильное меню
-- Панель выезжает справа (transform translateX).
-- Управление: кнопка бургер, внутренняя кнопка закрытия, Esc, клик по фону, свайп.
-- Ленивая инициализация: жесты и stagger-анимации только при первом открытии.
-- Динамическое сжатие header: scroll → обновление CSS переменных (в rAF, не напрямую из события).
-- Логотип масштабируется (CSS var) с кэшированием, избегаем лишних setProperty.
-
-### 6. Локализация (i18n)
-- `js/i18n.js` содержит переключение языка и словари.
-- Тексты в компонентах помечаются атрибутами или data-ключами (если внедрено).
-- Добавляя новый текст, обновить словари и убедиться в fallback (например, `ru` → `en`).
-
-### 7. Тема (светлая/тёмная)
-- Логика в `js/theme.js` (если отсутствует — расширить по примеру существующего переключателя в `main.js`).
-- Пользовательский выбор сохранять (localStorage / prefers-color-scheme fallback).
-- SVG-иконки должны адаптироваться через `currentColor` либо темы (не жёсткие цвета внутри path, если возможно).
-
-### 7a. Система дизайна (Design System) ✨ НОВОЕ
-**Унифицированная дизайн-система со стандартизированными токенами и компонентами.**
-
-**Дизайн токены** (переменные в `:root`):
-- Spacing: `--spacing-xs` до `--spacing-3xl` (4px - 48px)
-- Typography: `--font-size-xs` до `--font-size-4xl`, weights, line-height
-- Colors: `--color-primary`, `--color-success`, `--color-error`, `--color-warning`, `--color-info`
-- Shadows: `--shadow-sm` до `--shadow-elevation`
-- Border Radius: `--radius-sm` до `--radius-full`
-- Transitions: `--transition-fast`, `--transition-normal`, `--transition-slow`
-
-**UI Компоненты** (`js/ui-patterns.js`):
-- `Toast` — уведомления (success, error, warning, info)
-- `Modal` — модальные окна с поддержкой размеров (sm, md, lg)
-- `ConfirmDialog` — диалоги подтверждения (default, warning, danger)
-- `Dropdown` — выпадающие меню
-- `LoadingState` — состояния загрузки
-- `FormField` — валидация отдельных полей
-
-**Унифицированные кнопки** (класс `.btn`):
-- Варианты: `--primary`, `--secondary`, `--success`, `--error`, `--warning`, `--ghost`
-- Размеры: `--xs`, `--sm`, `--md`, `--lg`, `--xl`
-- Модификаторы: `--block`, `--loading`, `:disabled`
-
-**Валидация форм** (`js/form-validation.js`):
-- `FormValidator` — валидация всей формы
-- `FieldValidator` — валидация отдельного поля
-- `ValidationRules` — встроенные правила (required, email, phone, password, etc.)
-- Кастомные правила через `pattern()` или `custom()`
-
-**Примеры использования** в `js/ui-patterns-examples.js` и `docs/UI-DESIGN-SYSTEM.md`.
-
-Все новые компоненты — доступны глобально для консоли: `window.Toast`, `window.Modal`, `window.FormValidator`.
-
-### 8. Корзина
-- Логика изменения данных/состояний в `js/cart.js`.
-- Из UI вызывать публичные функции (не дублировать логику пересчёта сумм).
-- Хранение состояния — в памяти (при перезагрузке сбрасывается, если не реализовано иное).
-
-### 9. Продукты
-- Шаблоны карточек в `components/product-card.html` или встроенные сниппеты.
-- Скрипт `js/products.js` отвечает за загрузку данных, рендер, обновление фильтров.
-- Skeleton/placeholder показывается до загрузки.
-
-### 10. PWA и Service Worker
-- Версию кеша обязательно инкрементировать при изменениях критических ресурсов.
-- Стратегия: `network-first` для HTML/CSS/JS (обновляемость), fallback на кеш оффлайн.
-- Добавляя новые статические ассеты — включить их в список пред-кеша.
-- Избегать слишком агрессивного кеширования динамических данных (нет собственных API — безопасно).
-
-### 11. Производительность (Checklist)
-- [x] rAF для скролл‑зависимых вычислений.
-- [x] passive listeners на scroll/touch.
-- [x] Кэширование вычисленных значений (высоты, scale).
-- [x] Will-change только там, где реально есть анимация.
-- [x] Ленивая загрузка тяжёлых функций.
-- [ ] Избегать лишних принудительных reflow (добавлять при изменениях!).
-- [ ] Не добавлять новые таймеры setInterval без крайней необходимости.
-
-### 12. Добавление новой секции (пример)
-1. Создать `components/<name>.html`.
-2. Разметка: использовать существующие классы (типографика, кнопки, коробки).
-3. Избегать inline-стилей — только классы + CSS переменные.
-4. Подключить через навигационный конфиг или хэндлер (если есть конфиг-файл `navigation-config.js`).
-5. После вставки — инициализация событий внутри одного init-функционального блока.
-
-### 13. Добавление SVG-иконки
-1. Открыть `icons/icons-sprite.svg` (или основной спрайт).
-2. Добавить `<symbol id="icon-new" viewBox="0 0 ...">...</symbol>`.
-3. Использовать в HTML: `<svg class="icon"><use href="icons/icons-sprite.svg
-4. Цвет: через `fill="currentColor"` или оставить без fill для наследования.
-
-### 14. Адаптивность
-- Медиа-точки: ориентироваться на уже существующие (просмотреть `css/main.css`).
-- Не хардкодить px там, где подходит относительная единица (em/rem/%/clamp()).
-- Проверить мобильное меню после изменений (не ломать transform/transition).
-
-### 15. Доступность
-- Меню: при открытии — фокус внутри (trap), при закрытии — возврат на кнопку бургера.
-- Esc закрывает активный overlay.
-- Контраст текста: соответствовать минимум WCAG AA (проверить цвета темы при добавлении новых).
-
-### 16. Стиль кода JS
-- Имена функций глагольные: `initX`, `loadY`, `toggleZ`.
-- Не плодить глобальные переменные — использовать замыкания или неймспейсы.
-- Комментарии только там, где логика неочевидна (не дублировать то, что ясно из названия).
-
-### 17. Ошибки и логгирование
-- В проде не оставлять console.log кроме критичных (ошибки SW, загрузки ключевых модулей). Можно временно помечать `// DEBUG:` для быстрого поиска и удаления.
-
-### 17a. Тестирование и разработка
-**Запуск тестов**:
-```bash
-npm test              # запуск с режимом watch
-npm test --silent     # одноразовый запуск без логов
-npm run visual:test   # визуальные регрессионные тесты
-npm run visual:create-baseline  # создание базовых снимков экрана
-```
-
-**Конфигурация тестов** (`vitest.config.js`):
-- Окружение: jsdom (эмуляция DOM в Node.js)
-- Setup файл: `tests/setup.js` — polyfills для PointerEvent, vibrate, scrollTo
-- Фильтрация логов: подавляет предупреждения о загрузке компонентов (Invalid URL и т.д.)
-
-**Типовые тесты** (38+ файлов в `tests/`):
-- Unit: `i18n-switch.test.js`, `flags-color.test.js`, `price-validation.test.js`
-- Integration: `admin-ui.integration.test.js`, `persist-products.integration.test.js`, `integration-products.test.js`
-- Accessibility: `catalog-a11y.test.js`, `modal-a11y.test.js`, `product-detail.accessibility.test.js`
-- Функциональные: `mobile-gestures.test.js`, `product-gallery-navigation.test.js`, `compare-modal.test.js`
-
-**Разработка локально** (без npm запуска сервера):
-```bash
-python3 -m http.server 5173  # Python 3
-# Откройте http://localhost:5173/
-```
-
-### 18. Когда обновлять этот файл
-- Добавили новую сущность (контроллер, крупный модуль) — короткий раздел.
-- Изменили стратегию кеширования SW — обновить раздел 10.
-- Ввели новый паттерн (например, контроллер меню) — описать API.
-
-### 19. Отложенные улучшения
-- MobileNavController (объединение логики меню) — см. обсуждение, пока отложено.
-- Edge-swipe open (правый край) — потенциально.
-- Drag-to-close с инерцией — опционально.
-- Разделение кешей SW (static/runtime) — при росте ассетов.
-
-### 20. Мини чеклист перед коммитом
-1. Нет ли дубликатов классов / стилей?  
-2. Все новые цвета через переменные?  
-3. Не добавлен ли глобальный слушатель без снятия?  
-4. SW версия увеличена (если менялись кешируемые файлы)?  
-5. Локализации обновлены?  
-6. Тест мобильного меню (открыть → закрыть → Esc → свайп).  
-7. Lighthouse (Performance / Accessibility не деградировал заметно).
-
-### 21. Критичные паттерны и data flows
-**Загрузка компонента (основной паттерн)**:
-```javascript
-// В main.js:
-await loadComponent('content-container', 'components/hero.html');
-// Затем инициализировать события (если требуется)
-```
-
-**Получение и слияние товаров** (`products.js`):
-- В админ-режиме: `getMergedProducts()` → объединяет базовые товары + локальные правки
-- В обычном режиме: `products` → массив из провайдера (по умолчанию JSON)
-- После добавления/удаления: `setProducts()` → обновление внутреннего состояния
-
-**Переключение провайдера** (важно для админ):
-```javascript
-// По умолчанию: статичный JSON (data/products.json)
-// Для редактирования: window.DataProviders.LocalStorageProvider
-// Для GitHub: window.DataProviders.GitCMSProvider({ repo, branch, path, token })
-```
-
-**Динамические CSS переменные** (для тем и анимаций):
-- Не используйте `setProperty()` в scrolling событиях (layout thrash)
-- Используйте requestAnimationFrame (rAF) для batch updates
-- Кэшируйте вычисленные значения (высоты, ширины) в замыканиях
-
-**Формы и валидация**:
-- Все новые товары → проверка через `window.validateProduct()`
-- Отклонение дубликатов по `id` и `sku`
-- Использовать data-attributes для привязки логики (не class-селекторы для JS)
-
-### 22. Расширенная модель товара (Pricing / Credit / Energy)
-Добавлены поля для улучшенного отображения карточки и страницы товара:
-- `oldPrice` (number): прежняя цена. Если > `price` → показываем зачёркнутую цену и вычисляем процент скидки.
-- `energyClass` (string): класс энергоэффективности (например, `A++`). Рендерится отдельным бейджем.
-- `summary` ({ru,uk}): короткое резюме (1–2 строки) под заголовком.
-- `creditProviders` (string[] | {name,url}[]): список доступных банков / сервисов рассрочки.
-- `deliveryInfoUrl` / `warrantyInfoUrl` (string): внешние ссылки на условия доставки и гарантию.
-- `brandUrl` (string): ссылка на страницу бренда (используется в JSON-LD внутри Brand).
-
-Правила отображения:
-1. Скидка: процент вычисляется динамически как `100 - (price / oldPrice * 100)` (округление к целому). Минимум 1%.
-2. JSON-LD: при наличии `oldPrice` добавляем `priceValidUntil` (30 дней от текущей даты) и `additionalProperty` для `energyClass`.
-3. Кредитный блок скрыт, если `creditProviders` пуст.
-4. Ссылки доставки/гарантии скрыты, если соответствующие поля отсутствуют.
-5. Количество (quantity-stepper) управляет числом добавляемых экземпляров в корзину.
-
-Тесты должны покрывать:
-- видимость старой цены / процента скидки;
-- наличие бейджа energyClass;
-- динамические счётчики вкладок (Отзывы / Вопрос-ответ);
-- рендер кредитных провайдеров;
-- передачу количества в addToCart.
-
-При добавлении новых полей: обновить данный раздел и i18n ключи (если требуется подпись). Стараемся не ломать существующие тесты — новые тесты изолируем в отдельных файлах.
-
----
-**Последнее обновление**: 25 декабря 2025 г. — Полный анализ архитектуры, провайдеров данных, админ-режима и тестирования
+### Команды
+- Тесты: `npm test` (Vitest + JSDOM; шум про загрузку компонентов подавляется в `vitest.config.js`).
+- Визуальные: `npm run visual:test` / `npm run visual:create-baseline` (см. `tests/visual/README.md`).
+- Локальный сервер: `python3 -m http.server 5173`.

@@ -1247,7 +1247,7 @@ html { scroll-behavior: smooth; }
 .form-status.is-success { color: #207227; }
 .form-status.is-error { color: #b00020; }
 
-.faq { margin: clamp(28px, 8vw, 64px) 0; }
+/* .faq { margin: clamp(28px, 8vw, 64px) 0; } */
 .faq__list { display:grid; gap: 10px; }
 .faq-item { border:1px solid var(--border,#e5e5e5); border-radius:12px; padding:10px 12px; background: var(--surface,#fff); }
 .faq-item__q { font-weight:700; cursor:pointer; }
@@ -3962,7 +3962,7 @@ button:active, .btn:active, .fab:active, a:active {
     }
     
     .service-page__title {
-        color: var(--nav-text-color, #D1D1D6);
+        color: var(--color-text, #D1D1D6);
         font-size: 24px;
         margin: 0 0 8px;
     }
@@ -7812,8 +7812,10 @@ img.img-error {
 .theme-dark .services,
 .theme-dark .about-page,
 .theme-dark .welcome {
-    background: var(--surface-0);
-    color: var(--text-primary);
+    /* background: var(--surface-0);
+    color: var(--text-primary); */
+    background: rgba(22, 22, 22, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 /* Badges and Tags */

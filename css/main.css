@@ -1510,6 +1510,10 @@ html { scroll-behavior: smooth; }
 .calculator__result h2 { margin-top: 0; }
 #breakdown { white-space: pre-line; }
 
+/* Service page back with calculator button */
+.service-page__back { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+.service-page__calculator-btn { display: flex; align-items: center; gap: 8px; }
+
 @media (max-width: 920px) {
     .admin-page__content { grid-template-columns: 1fr; }
 }

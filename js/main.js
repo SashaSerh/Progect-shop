@@ -1933,6 +1933,15 @@ function setupServiceRouting() {
                         if (mod && typeof mod.initCalculator === 'function') {
                             mod.initCalculator();
                         }
+                        // Setup calculator button
+                        const calcBtn = document.querySelector('.service-page__calculator-btn');
+                        if (calcBtn) {
+                            calcBtn.addEventListener('click', () => {
+                                if (mod && typeof mod.openCalculatorModal === 'function') {
+                                    mod.openCalculatorModal();
+                                }
+                            });
+                        }
                     }).catch(err => {
                         console.error('Error initializing calculator:', err);
                     });

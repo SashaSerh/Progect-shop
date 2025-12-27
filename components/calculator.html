@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<div class="calculator">
+    <h1 data-i18n="calculator-title">Калькулятор стоимости монтажа кондиционера</h1>
+    <p data-i18n="calculator-description">Рассчитайте стоимость стандартного монтажа сплит-системы. Базовая стоимость включает монтаж до 3м магистрали и дренажа.</p>
+
+    <form class="calculator__form">
+        <div class="form-group">
+            <label for="power" data-i18n="power-label">Мощность кондиционера (БТУ):</label>
+            <select id="power" name="power" required>
+                <option value="7000-9000" data-i18n="power-7000-9000">До 7000-9000 БТУ</option>
+                <option value="12000" data-i18n="power-12000">12000 БТУ</option>
+                <option value="18000" data-i18n="power-18000">18000 БТУ</option>
+                <option value="18000-24000" data-i18n="power-18000-24000">18000-24000 БТУ</option>
+                <option value="24000+" data-i18n="power-24000+">Свыше 24000 БТУ</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="trunk" data-i18n="trunk-label">Длина магистрали (м, сверх 3м):</label>
+            <input type="number" id="trunk" name="trunk" min="0" value="0" step="0.1">
+        </div>
+
+        <div class="form-group">
+            <label for="drain" data-i18n="drain-label">Длина дренажной системы (м, сверх 3м):</label>
+            <input type="number" id="drain" name="drain" min="0" value="0" step="0.1">
+        </div>
+
+        <div class="form-group">
+            <label>
+                <input type="checkbox" id="cable" name="cable"> <span data-i18n="cable-label">Дополнительный кабель</span>
+            </label>
+            <input type="number" id="cable-length" name="cable-length" min="0" value="0" step="0.1" disabled> <span data-i18n="meters">м</span>
+            <label>
+                <input type="checkbox" id="plug" name="plug"> <span data-i18n="plug-label">Вилка</span>
+            </label>
+        </div>
+
+        <div class="form-group">
+            <label>
+                <input type="checkbox" id="hole" name="hole"> <span data-i18n="hole-label">Дополнительное отверстие 40мм</span>
+            </label>
+        </div>
+
+        <div class="form-group">
+            <label>
+                <input type="checkbox" id="box" name="box"> <span data-i18n="box-label">Дополнительный короб 60мм*60мм</span>
+            </label>
+        </div>
+
+        <button type="button" id="calculate-btn" class="btn btn--primary" data-i18n="calculate-btn">Рассчитать</button>
+    </form>
+
+    <div id="result" class="calculator__result" style="display: none;">
+        <h2 data-i18n="result-title">Результат расчета</h2>
+        <p id="total-cost" data-i18n="total-cost">Общая стоимость: </p>
+        <p id="breakdown"></p>
+    </div>
+</div></content>
+<parameter name="filePath">/Users/sa/Desktop/Progect-shop/components/calculator.html

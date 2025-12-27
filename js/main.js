@@ -3724,6 +3724,34 @@ function setupHashRouting(initialLang) {
             }).catch(err => console.error('Error loading cart page component:', err));
             return;
         }
+
+        // Calculator page route
+        if (hash === '#calculator') {
+            loadComponent('main-container', 'components/calculator.html').then(async () => {
+                // Hide other sections, show main-container
+                showSection('hero-container', false);
+                showSection('services-container', false);
+                showSection('products-container', false);
+                showSection('portfolio-container', false);
+                showSection('contacts-container', false);
+                showSection('product-detail-container', false);
+                showSection('admin-page-container', false);
+                showSection('main-container', true);
+
+                // Initialize calculator
+                try {
+                    const mod = await import('./calculator.js');
+                    if (mod && typeof mod.initCalculator === 'function') {
+                        mod.initCalculator();
+                    }
+                } catch (err) {
+                    console.error('Error initializing calculator:', err);
+                }
+
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }).catch(err => console.error('Error loading calculator component:', err));
+            return;
+        }
         
     const m = hash.match(/^#product-(.+)$/);
         if (!LANDING_MODE && m) {

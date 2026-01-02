@@ -1,12 +1,12 @@
-<section class="service-page" id="service-ac-install" aria-labelledby="service-ac-install-title">
+<section class="service-page" id="service-ac-install" role="region" aria-labelledby="service-ac-install-title">
   <div class="container">
     <div class="service-page__back">
       <a href="#" class="btn btn--ghost glass" aria-label="Назад на главную" title="Назад">←</a>
-      <button class="btn btn--ghost glass service-page__calculator-btn" aria-label="Открыть калькулятор стоимости" title="Калькулятор">
+      <a href="#calculator" role="button" class="btn btn--ghost glass service-page__calculator-btn" aria-label="Открыть калькулятор стоимости" title="Калькулятор">
         <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" width="24" height="24">
-          <use href="icons/calculator.svg#calculator"></use>
+          <path d="M7 2h10a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zM7 4v16h10V4H7zm2 2h6v2H9V6zm0 4h6v2H9v-2zm0 4h4v2H9v-2z"/>
         </svg>
-      </button>
+      </a>
     </div>
     <header class="service-page__header">
       <h2 id="service-ac-install-title" class="service-page__title" data-i18n="service-ac-install-title">Монтаж кондиционеров</h2>
@@ -37,64 +37,6 @@
           <span data-i18n="service-ac-b3">Гарантия на монтаж</span>
         </li>
       </ul>
-    </section>
-
-    <section class="service-page__calculator" aria-label="Калькулятор стоимости">
-      <h3 data-i18n="calculator-title">Калькулятор стоимости монтажа кондиционера</h3>
-      <p data-i18n="calculator-description">Рассчитайте стоимость стандартного монтажа сплит-системы. Базовая стоимость включает монтаж до 3м магистрали и дренажа.</p>
-
-      <form class="calculator__form">
-        <div class="form-group">
-          <label for="power" data-i18n="power-label">Мощность кондиционера (БТУ):</label>
-          <select id="power" name="power" required>
-            <option value="7000-9000" data-i18n="power-7000-9000">До 7000-9000 БТУ</option>
-            <option value="12000" data-i18n="power-12000">12000 БТУ</option>
-            <option value="18000" data-i18n="power-18000">18000 БТУ</option>
-            <option value="18000-24000" data-i18n="power-18000-24000">18000-24000 БТУ</option>
-            <option value="24000+" data-i18n="power-24000+">Свыше 24000 БТУ</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label for="trunk" data-i18n="trunk-label">Длина магистрали (м, сверх 3м):</label>
-          <input type="number" id="trunk" name="trunk" min="0" value="0" step="0.1">
-        </div>
-
-        <div class="form-group">
-          <label for="drain" data-i18n="drain-label">Длина дренажной системы (м, сверх 3м):</label>
-          <input type="number" id="drain" name="drain" min="0" value="0" step="0.1">
-        </div>
-
-        <div class="form-group">
-          <label>
-            <input type="checkbox" id="cable" name="cable"> <span data-i18n="cable-label">Дополнительный кабель</span>
-          </label>
-          <input type="number" id="cable-length" name="cable-length" min="0" value="0" step="0.1" disabled> <span data-i18n="meters">м</span>
-          <label>
-            <input type="checkbox" id="plug" name="plug"> <span data-i18n="plug-label">Вилка</span>
-          </label>
-        </div>
-
-        <div class="form-group">
-          <label>
-            <input type="checkbox" id="hole" name="hole"> <span data-i18n="hole-label">Дополнительное отверстие 40мм</span>
-          </label>
-        </div>
-
-        <div class="form-group">
-          <label>
-            <input type="checkbox" id="box" name="box"> <span data-i18n="box-label">Дополнительный короб 60мм*60мм</span>
-          </label>
-        </div>
-
-        <button type="button" id="calculate-btn" class="btn btn--primary" data-i18n="calculate-btn">Рассчитать</button>
-      </form>
-
-      <div id="result" class="calculator__result" style="display: none;">
-        <h4 data-i18n="result-title">Результат расчета</h4>
-        <p id="total-cost" data-i18n="total-cost">Общая стоимость: </p>
-        <p id="breakdown"></p>
-      </div>
     </section>
 
     <section class="service-page__gallery" aria-label="Примеры работ">

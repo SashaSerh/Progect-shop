@@ -1,5 +1,8 @@
-// Calculator logic for AC installation cost
-// Prices in UAH
+/**
+ * Calculator logic for AC installation cost
+ * Modern implementation with real-time updates
+ * Prices in UAH (₴)
+ */
 
 const prices = {
     base: {
@@ -24,159 +27,369 @@ const prices = {
 };
 
 let calculatorModal = null;
+let isCalculatorInitialized = false;
 
-function createCalculatorHTML() {
-    return `
-        <div class="calculator">
-            <h3 data-i18n="calculator-title">Калькулятор стоимости монтажа кондиционера</h3>
-            <p data-i18n="calculator-description">Рассчитайте стоимость стандартного монтажа сплит-системы. Базовая стоимость включает монтаж до 3м магистрали и дренажа.</p>
-
-            <form class="calculator__form">
-                <div class="form-group">
-                    <label for="power" data-i18n="power-label">Мощность кондиционера (БТУ):</label>
-                    <select id="power" name="power" required>
-                        <option value="7000-9000" data-i18n="power-7000-9000">До 7000-9000 БТУ</option>
-                        <option value="12000" data-i18n="power-12000">12000 БТУ</option>
-                        <option value="18000" data-i18n="power-18000">18000 БТУ</option>
-                        <option value="18000-24000" data-i18n="power-18000-24000">18000-24000 БТУ</option>
-                        <option value="24000+" data-i18n="power-24000+">Свыше 24000 БТУ</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="trunk" data-i18n="trunk-label">Длина магистрали (м, сверх 3м):</label>
-                    <input type="number" id="trunk" name="trunk" min="0" value="0" step="0.1">
-                </div>
-
-                <div class="form-group">
-                    <label for="drain" data-i18n="drain-label">Длина дренажной системы (м, сверх 3м):</label>
-                    <input type="number" id="drain" name="drain" min="0" value="0" step="0.1">
-                </div>
-
-                <div class="form-group">
-                    <label>
-                        <input type="checkbox" id="cable" name="cable"> <span data-i18n="cable-label">Дополнительный кабель</span>
-                    </label>
-                    <input type="number" id="cable-length" name="cable-length" min="0" value="0" step="0.1" disabled> <span data-i18n="meters">м</span>
-                    <label>
-                        <input type="checkbox" id="plug" name="plug"> <span data-i18n="plug-label">Вилка</span>
-                    </label>
-                </div>
-
-                <div class="form-group">
-                    <label>
-                        <input type="checkbox" id="hole" name="hole"> <span data-i18n="hole-label">Дополнительное отверстие 40мм</span>
-                    </label>
-                </div>
-
-                <div class="form-group">
-                    <label>
-                        <input type="checkbox" id="box" name="box"> <span data-i18n="box-label">Дополнительный короб 60мм*60мм</span>
-                    </label>
-                </div>
-
-                <button type="button" id="calculate-btn" class="btn btn--primary" data-i18n="calculate-btn">Рассчитать</button>
-            </form>
-
-            <div id="result" class="calculator__result" style="display: none;">
-                <h4 data-i18n="result-title">Результат расчета</h4>
-                <p id="total-cost" data-i18n="total-cost">Общая стоимость: </p>
-                <p id="breakdown"></p>
-            </div>
-        </div>
-    `;
+/**
+ * Форматувати число з розділювачами тисяч
+ */
+function formatNumber(num) {
+    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
 }
 
-function calculateCost() {
-    const power = document.getElementById('power').value;
-    const trunkLength = parseFloat(document.getElementById('trunk').value) || 0;
-    const drainLength = parseFloat(document.getElementById('drain').value) || 0;
-    const cableChecked = document.getElementById('cable').checked;
-    const cableLength = parseFloat(document.getElementById('cable-length').value) || 0;
-    const plugChecked = document.getElementById('plug').checked;
-    const holeChecked = document.getElementById('hole').checked;
-    const boxChecked = document.getElementById('box').checked;
-
-    let total = prices.base[power];
-    let breakdown = `Базовая стоимость (${power} БТУ): ${prices.base[power]} UAH\n`;
-
-    if (trunkLength > 0) {
-        const trunkCost = trunkLength * prices.trunk[power];
-        total += trunkCost;
-        breakdown += `Магистраль (${trunkLength}м): ${trunkCost} UAH\n`;
-    }
-
-    if (drainLength > 0) {
-        const drainCost = drainLength * prices.drain;
-        total += drainCost;
-        breakdown += `Дренаж (${drainLength}м): ${drainCost} UAH\n`;
-    }
-
-    if (cableChecked && cableLength > 0) {
-        const cableCost = cableLength * prices.cable;
-        total += cableCost;
-        breakdown += `Кабель (${cableLength}м): ${cableCost} UAH\n`;
-    }
-
-    if (plugChecked) {
-        total += prices.plug;
-        breakdown += `Вилка: ${prices.plug} UAH\n`;
-    }
-
-    if (holeChecked) {
-        total += prices.hole;
-        breakdown += `Отверстие 40мм: ${prices.hole} UAH\n`;
-    }
-
-    if (boxChecked) {
-        total += prices.box;
-        breakdown += `Короб 60мм*60мм: ${prices.box} UAH\n`;
-    }
-
-    document.getElementById('total-cost').textContent = `Общая стоимость: ${total} UAH`;
-    document.getElementById('breakdown').textContent = breakdown;
-    document.getElementById('result').style.display = 'block';
+/**
+ * Отримати поточне значення мощності
+ */
+function getSelectedPower() {
+    const selected = document.querySelector('input[name="power"]:checked');
+    return selected ? selected.value : '7000-9000';
 }
 
+/**
+ * Розрахувати та оновити всі значення
+ */
+function calculateAndUpdate() {
+    const power = getSelectedPower();
+    const trunkLength = parseFloat(document.getElementById('trunk')?.value) || 0;
+    const drainLength = parseFloat(document.getElementById('drain')?.value) || 0;
+    const cableChecked = document.getElementById('cable')?.checked || false;
+    const cableLength = parseFloat(document.getElementById('cable-length')?.value) || 0;
+    const plugChecked = document.getElementById('plug')?.checked || false;
+    const holeChecked = document.getElementById('hole')?.checked || false;
+    const boxChecked = document.getElementById('box')?.checked || false;
+
+    // Базова вартість
+    let total = prices.base[power] || 5000;
+    
+    // Оновлюємо базову вартість в UI
+    const baseEl = document.getElementById('breakdown-base');
+    if (baseEl) {
+        baseEl.textContent = `${formatNumber(prices.base[power])} ₴`;
+    }
+
+    // Магістраль
+    const trunkCost = trunkLength > 0 ? Math.round(trunkLength * prices.trunk[power]) : 0;
+    const trunkRow = document.getElementById('breakdown-trunk-row');
+    const trunkEl = document.getElementById('breakdown-trunk');
+    if (trunkRow && trunkEl) {
+        if (trunkCost > 0) {
+            trunkRow.style.display = '';
+            trunkEl.textContent = `+${formatNumber(trunkCost)} ₴`;
+            total += trunkCost;
+        } else {
+            trunkRow.style.display = 'none';
+        }
+    }
+
+    // Дренаж
+    const drainCost = drainLength > 0 ? Math.round(drainLength * prices.drain) : 0;
+    const drainRow = document.getElementById('breakdown-drain-row');
+    const drainEl = document.getElementById('breakdown-drain');
+    if (drainRow && drainEl) {
+        if (drainCost > 0) {
+            drainRow.style.display = '';
+            drainEl.textContent = `+${formatNumber(drainCost)} ₴`;
+            total += drainCost;
+        } else {
+            drainRow.style.display = 'none';
+        }
+    }
+
+    // Кабель
+    const cableCost = cableChecked && cableLength > 0 ? Math.round(cableLength * prices.cable) : 0;
+    const cableRow = document.getElementById('breakdown-cable-row');
+    const cableEl = document.getElementById('breakdown-cable');
+    if (cableRow && cableEl) {
+        if (cableCost > 0) {
+            cableRow.style.display = '';
+            cableEl.textContent = `+${formatNumber(cableCost)} ₴`;
+            total += cableCost;
+        } else {
+            cableRow.style.display = 'none';
+        }
+    }
+
+    // Вилка
+    const plugRow = document.getElementById('breakdown-plug-row');
+    const plugEl = document.getElementById('breakdown-plug');
+    if (plugRow && plugEl) {
+        if (plugChecked) {
+            plugRow.style.display = '';
+            plugEl.textContent = `+${formatNumber(prices.plug)} ₴`;
+            total += prices.plug;
+        } else {
+            plugRow.style.display = 'none';
+        }
+    }
+
+    // Отвір
+    const holeRow = document.getElementById('breakdown-hole-row');
+    const holeEl = document.getElementById('breakdown-hole');
+    if (holeRow && holeEl) {
+        if (holeChecked) {
+            holeRow.style.display = '';
+            holeEl.textContent = `+${formatNumber(prices.hole)} ₴`;
+            total += prices.hole;
+        } else {
+            holeRow.style.display = 'none';
+        }
+    }
+
+    // Короб
+    const boxRow = document.getElementById('breakdown-box-row');
+    const boxEl = document.getElementById('breakdown-box');
+    if (boxRow && boxEl) {
+        if (boxChecked) {
+            boxRow.style.display = '';
+            boxEl.textContent = `+${formatNumber(prices.box)} ₴`;
+            total += prices.box;
+        } else {
+            boxRow.style.display = 'none';
+        }
+    }
+
+    // Оновлюємо загальну суму з анімацією
+    const totalEl = document.getElementById('total-amount');
+    if (totalEl) {
+        const currentValue = parseInt(totalEl.textContent.replace(/\s/g, '')) || 0;
+        if (currentValue !== total) {
+            animateValue(totalEl, currentValue, total, 300);
+        }
+    }
+
+    return total;
+}
+
+/**
+ * Анімація зміни значення
+ */
+function animateValue(element, start, end, duration) {
+    const startTime = performance.now();
+    const difference = end - start;
+    
+    function update(currentTime) {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        
+        // Easing function (ease-out)
+        const easeOut = 1 - Math.pow(1 - progress, 3);
+        const current = Math.round(start + difference * easeOut);
+        
+        element.textContent = formatNumber(current);
+        
+        if (progress < 1) {
+            requestAnimationFrame(update);
+        }
+    }
+    
+    requestAnimationFrame(update);
+}
+
+/**
+ * Обробник кнопок +/-
+ */
+function handleLengthButton(target, delta) {
+    const input = document.getElementById(target);
+    if (!input) return;
+    
+    const min = parseFloat(input.min) || 0;
+    const max = parseFloat(input.max) || 50;
+    const step = parseFloat(input.step) || 0.5;
+    let value = parseFloat(input.value) || 0;
+    
+    value = Math.max(min, Math.min(max, value + delta * step));
+    input.value = value.toFixed(1);
+    
+    // Trigger input event for recalculation
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    
+    // Haptic feedback
+    if (navigator.vibrate) navigator.vibrate(10);
+}
+
+/**
+ * Ініціалізація калькулятора
+ */
 function initCalculator() {
-    const calculateBtn = document.getElementById('calculate-btn');
-    if (calculateBtn) {
-        calculateBtn.addEventListener('click', calculateCost);
+    if (isCalculatorInitialized) return;
+    
+    const form = document.getElementById('calculator-form');
+    if (!form) return;
+
+    // Power cards selection
+    const powerCards = document.querySelectorAll('.power-card');
+    powerCards.forEach(card => {
+        card.addEventListener('click', () => {
+            // Remove active from all
+            powerCards.forEach(c => c.classList.remove('power-card--active'));
+            // Add active to clicked
+            card.classList.add('power-card--active');
+            // Check the radio
+            const radio = card.querySelector('input[type="radio"]');
+            if (radio) {
+                radio.checked = true;
+                calculateAndUpdate();
+            }
+            // Haptic feedback
+            if (navigator.vibrate) navigator.vibrate(15);
+        });
+    });
+    
+    // Set initial active state
+    const initialPower = document.querySelector('input[name="power"]:checked');
+    if (initialPower) {
+        const parentCard = initialPower.closest('.power-card');
+        if (parentCard) parentCard.classList.add('power-card--active');
     }
 
+    // Length +/- buttons
+    document.querySelectorAll('.length-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const target = btn.dataset.target;
+            const delta = btn.classList.contains('length-btn--plus') ? 1 : -1;
+            handleLengthButton(target, delta);
+        });
+    });
+
+    // Number inputs real-time update
+    document.querySelectorAll('.length-input').forEach(input => {
+        input.addEventListener('input', calculateAndUpdate);
+        input.addEventListener('change', calculateAndUpdate);
+    });
+
+    // Cable checkbox toggle
     const cableCheckbox = document.getElementById('cable');
     const cableLengthInput = document.getElementById('cable-length');
+    const cableLengthWrapper = document.getElementById('cable-length-wrapper');
+    
     if (cableCheckbox && cableLengthInput) {
         cableCheckbox.addEventListener('change', () => {
             cableLengthInput.disabled = !cableCheckbox.checked;
+            if (cableLengthWrapper) {
+                cableLengthWrapper.classList.toggle('extra-length--active', cableCheckbox.checked);
+            }
+            if (!cableCheckbox.checked) {
+                cableLengthInput.value = 0;
+            }
+            calculateAndUpdate();
         });
     }
+
+    // Other checkboxes
+    ['plug', 'hole', 'box'].forEach(id => {
+        const checkbox = document.getElementById(id);
+        if (checkbox) {
+            checkbox.addEventListener('change', calculateAndUpdate);
+        }
+    });
+
+    // Extra toggle animations
+    document.querySelectorAll('.extra-toggle input').forEach(toggle => {
+        toggle.addEventListener('change', () => {
+            const item = toggle.closest('.extra-item');
+            if (item) {
+                item.classList.toggle('extra-item--active', toggle.checked);
+            }
+        });
+    });
+
+    // Order button
+    const orderBtn = document.querySelector('.calculator-order-btn');
+    if (orderBtn) {
+        orderBtn.addEventListener('click', () => {
+            const total = calculateAndUpdate();
+            const power = getSelectedPower();
+            const message = `Заявка на монтаж кондиціонера:\nПотужність: ${power} БТУ\nОрієнтовна вартість: ${formatNumber(total)} ₴`;
+            
+            // Try to use marketing module
+            if (typeof window.openWhatsAppWithMessage === 'function') {
+                window.openWhatsAppWithMessage(message);
+            } else if (typeof window.buildWhatsAppLink === 'function') {
+                window.open(window.buildWhatsAppLink(message), '_blank');
+            } else {
+                // Fallback - show toast
+                if (window.Toast) {
+                    window.Toast.show('Зв\'яжіться з нами для оформлення замовлення!', 'info');
+                }
+            }
+        });
+    }
+
+    // WhatsApp button
+    const waBtn = document.querySelector('.calculator-wa-btn');
+    if (waBtn) {
+        waBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const total = calculateAndUpdate();
+            const power = getSelectedPower();
+            const message = `Хочу розрахувати монтаж:\nПотужність: ${power} БТУ\nОрієнтовна вартість: ${formatNumber(total)} ₴`;
+            
+            if (typeof window.buildWhatsAppLink === 'function') {
+                window.open(window.buildWhatsAppLink(message), '_blank');
+            }
+        });
+    }
+
+    // Telegram button
+    const tgBtn = document.querySelector('.calculator-tg-btn');
+    if (tgBtn) {
+        tgBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const total = calculateAndUpdate();
+            const power = getSelectedPower();
+            const message = `Хочу розрахувати монтаж:\nПотужність: ${power} БТУ\nОрієнтовна вартість: ${formatNumber(total)} ₴`;
+            
+            if (typeof window.buildTelegramLink === 'function') {
+                window.open(window.buildTelegramLink(message), '_blank');
+            }
+        });
+    }
+
+    // Initial calculation
+    calculateAndUpdate();
 
     // Apply i18n if available
     if (typeof window.switchLanguage === 'function') {
         const lang = localStorage.getItem('language') || 'uk';
         window.switchLanguage(lang);
     }
+
+    isCalculatorInitialized = true;
+    console.log('Calculator initialized successfully');
+}
+
+/**
+ * Reset calculator state
+ */
+function resetCalculator() {
+    isCalculatorInitialized = false;
+}
+
+/**
+ * Legacy function for compatibility
+ */
+function calculateCost() {
+    return calculateAndUpdate();
+}
+
+function createCalculatorHTML() {
+    // Legacy function - returns empty as we now use component loading
+    return '';
 }
 
 function openCalculatorModal() {
-    if (!calculatorModal) {
-        import('./ui-patterns.js').then(mod => {
-            const Modal = mod.Modal;
-            calculatorModal = new Modal(createCalculatorHTML(), {
-                title: 'Калькулятор стоимости',
-                size: 'lg',
-                dismissible: true
-            });
-            calculatorModal.open().then(() => {
-                initCalculator();
-            });
-        });
-    } else {
-        calculatorModal.open().then(() => {
-            initCalculator();
-        });
+    // Navigate to calculator page instead
+    if (typeof window !== 'undefined') {
+        window.location.hash = '#calculator';
     }
 }
 
-export { initCalculator, openCalculatorModal };
+export { 
+    initCalculator, 
+    openCalculatorModal, 
+    calculateCost, 
+    calculateAndUpdate, 
+    resetCalculator,
+    prices,
+    formatNumber
+};

@@ -10,6 +10,7 @@ const contentConfig = (typeof window !== 'undefined' && window.contentConfig) ? 
 import { initMarketing } from './marketing.js';
 import { initNavigation } from './navigation.js';
 import { reinitLazyLoading } from './image-loader.js';
+import { mobileAnimations } from './mobile-animations.js';
 // Landing mode: services portfolio contacts only; disable products/cart flows
 const LANDING_MODE = true;
 
@@ -1916,11 +1917,25 @@ function setupServiceRouting() {
                 try {
                     const section = document.getElementById(targetContainerId)?.querySelector('.service-page');
                     if (section) {
-                        section.classList.add('service-page--slide-in-from-right');
-                        requestAnimationFrame(() => {
-                            section.classList.remove('service-page--slide-in-from-right');
-                            section.classList.add('service-page--slide-in');
-                        });
+                        // If we are returning from calculator, animate from left to create symmetric effect
+                        const fromCalc = sessionStorage.getItem('from_calculator') === 'true';
+                        if (fromCalc) {
+                            sessionStorage.removeItem('from_calculator');
+                            section.classList.add('service-page--slide-in-from-left');
+                            // ensure visible state and trigger composite animation
+                            requestAnimationFrame(() => {
+                                section.classList.remove('service-page--slide-in-from-left');
+                                section.classList.add('service-page--slide-in');
+                                section.classList.add('service-page--visible');
+                            });
+                        } else {
+                            section.classList.add('service-page--slide-in-from-right');
+                            requestAnimationFrame(() => {
+                                section.classList.remove('service-page--slide-in-from-right');
+                                section.classList.add('service-page--slide-in');
+                                section.classList.add('service-page--visible');
+                            });
+                        }
                     }
                 } catch(_) { /* noop */ }
                 scrollToSectionTop(targetContainerId);
@@ -1932,15 +1947,6 @@ function setupServiceRouting() {
                     import('./calculator.js').then(mod => {
                         if (mod && typeof mod.initCalculator === 'function') {
                             mod.initCalculator();
-                        }
-                        // Setup calculator button
-                        const calcBtn = document.querySelector('.service-page__calculator-btn');
-                        if (calcBtn) {
-                            calcBtn.addEventListener('click', () => {
-                                if (mod && typeof mod.openCalculatorModal === 'function') {
-                                    mod.openCalculatorModal();
-                                }
-                            });
                         }
                     }).catch(err => {
                         console.error('Error initializing calculator:', err);
@@ -2002,6 +2008,7 @@ function setupServiceRouting() {
                         requestAnimationFrame(() => {
                             section.classList.remove(`${sectionClass}--slide-in-from-right`);
                             section.classList.add(`${sectionClass}--slide-in`);
+                            section.classList.add('service-page--visible');
                         });
                     }
                 } catch(_) { /* noop */ }
@@ -2510,6 +2517,64 @@ document.addEventListener('click', (e) => {
         }
         return;
     }
+});
+
+// Global handler for calculator button
+document.addEventListener('click', (e) => {
+    const target = e.target;
+    if (!(target instanceof Element)) return;
+    const btn = target.closest('.service-page__calculator-btn');
+    if (!btn) return;
+    // If element is an <a href="#calculator">, prevent immediate navigation
+    try { e.preventDefault(); } catch(_) {}
+
+    // Find nearest high-level service section to animate out
+    const section = btn.closest('.service-page, .services, .portfolio, .reviews, .faq, .contacts, .welcome, .about-page');
+    // Respect reduced motion preference
+    const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    // Store previous section hash for symmetric return animation.
+    // Fallback to current location.hash when section lacks id.
+    try {
+        let prevHash = '';
+        if (section && section.id) {
+            prevHash = `#${section.id}`;
+        } else if (location.hash && location.hash !== '#') {
+            prevHash = location.hash;
+        }
+        if (prevHash) sessionStorage.setItem('prev_hash', prevHash);
+    } catch(_) {}
+    if (!section || reduced) {
+        location.hash = '#calculator';
+        return;
+    }
+
+    if (btn.getAttribute('aria-disabled')) return;
+    btn.setAttribute('aria-disabled', 'true');
+
+    // Clear old out class to re-trigger animation
+    section.classList.remove('service-page--slide-out-to-right', 'portfolio--slide-out-to-right', 'reviews--slide-out-to-right', 'faq--slide-out-to-right', 'contacts--slide-out-to-right', 'welcome--slide-out-to-right');
+
+    // Ensure we remove visible state so opacity animates out
+    section.classList.remove('service-page--visible');
+
+    const onEnd = (ev) => {
+        if (ev.target !== section) return;
+        section.removeEventListener('transitionend', onEnd);
+        btn.removeAttribute('aria-disabled');
+        location.hash = '#calculator';
+    };
+
+    section.addEventListener('transitionend', onEnd);
+    // start animation
+    section.classList.add('service-page--slide-out-to-right');
+    // safety fallback
+    setTimeout(() => {
+        try {
+            section.removeEventListener('transitionend', onEnd);
+        } catch(_) {}
+        btn.removeAttribute('aria-disabled');
+        location.hash = '#calculator';
+    }, 600);
 });
 
 // Global handlers for product card interactions (quantity, cart, navigation)
@@ -3596,43 +3661,55 @@ function showSection(id, show) {
     const el = document.getElementById(id);
     if (!el) return;
 
-    // Animated show/hide for main-container to allow smooth transitions
+    // Для мобільної версії використовуємо стандартизовану систему анімацій
+    const isMobile = window.innerWidth <= 768;
+
+    // Анімований show/hide для main-container
     if (id === 'main-container') {
         if (show) {
-            // Make visible then animate in
             el.dataset.lastShownAt = String(Date.now());
             el.style.display = '';
-            // Ensure classes are applied in next frame
-            requestAnimationFrame(() => {
-                el.classList.remove('is-hidden');
-                el.classList.add('is-visible');
-            });
-        } else {
-            // Avoid immediately hiding if we were just shown (race with other route handlers)
-            const last = parseInt(el.dataset.lastShownAt || '0', 10);
-            if (Date.now() - last < 700) {
-                // skip this hide; it is probably from a conflicting route handler fired earlier
-                return;
+            
+            if (isMobile) {
+                // Використовуємо нову систему анімацій
+                mobileAnimations.show('main-container', 'right');
+            } else {
+                // Десктоп: стара анімація
+                requestAnimationFrame(() => {
+                    el.classList.remove('is-hidden');
+                    el.classList.add('is-visible');
+                });
             }
-            // Animate out then hide on transition end
-            el.classList.remove('is-visible');
-            el.classList.add('is-hidden');
-            const onEnd = (ev) => {
-                if (ev && ev.target !== el) return;
-                // If element is no longer hidden (was re-shown), skip hiding
-                if (!el.classList.contains('is-hidden')) {
+        } else {
+            const last = parseInt(el.dataset.lastShownAt || '0', 10);
+            if (Date.now() - last < 700) return;
+            
+            if (isMobile) {
+                // Використовуємо нову систему анімацій
+                mobileAnimations.hide('main-container', 'right').then(() => {
+                    if (!el.classList.contains('is-hidden')) return;
+                    el.style.display = 'none';
+                });
+            } else {
+                // Десктоп: стара анімація
+                el.classList.remove('is-visible');
+                el.classList.add('is-hidden');
+                const onEnd = (ev) => {
+                    if (ev && ev.target !== el) return;
+                    if (!el.classList.contains('is-hidden')) {
+                        el.removeEventListener('transitionend', onEnd);
+                        return;
+                    }
+                    try { el.style.display = 'none'; } catch (_) {}
                     el.removeEventListener('transitionend', onEnd);
-                    return;
-                }
-                try { el.style.display = 'none'; } catch (_) {}
-                el.removeEventListener('transitionend', onEnd);
-            };
-            el.addEventListener('transitionend', onEnd);
+                };
+                el.addEventListener('transitionend', onEnd);
+            }
         }
         return;
     }
 
-    // Fallback immediate show/hide for other sections
+    // Fallback: миттєвий show/hide для інших секцій
     el.style.display = show ? '' : 'none';
 }
 
@@ -3745,6 +3822,60 @@ function setupHashRouting(initialLang) {
             }).catch(err => console.error('Error loading cart page component:', err));
             return;
         }
+
+        // Calculator page route
+        if (hash === '#calculator') {
+            loadComponent('main-container', 'components/calculator-page.html').then(async () => {
+                // Hide other sections, show main-container
+                showSection('hero-container', false);
+                showSection('services-container', false);
+                showSection('products-container', false);
+                showSection('portfolio-container', false);
+                showSection('contacts-container', false);
+                showSection('product-detail-container', false);
+                showSection('admin-page-container', false);
+                showSection('main-container', true);
+
+                // Add slide animation for main-container
+                const mainContainer = document.getElementById('main-container');
+                if (mainContainer) {
+                    // ensure no stale flags
+                    mainContainer.classList.remove('main-container--slide-out-to-right');
+                    mainContainer.classList.add('main-container--slide-in-from-right');
+                    requestAnimationFrame(() => {
+                        mainContainer.classList.remove('main-container--slide-in-from-right');
+                        mainContainer.classList.add('main-container--slide-in');
+                    });
+
+                    // focus heading when animation finished (or fallback)
+                    const onEnd = (e) => {
+                        if (e.target !== mainContainer) return;
+                        mainContainer.removeEventListener('transitionend', onEnd);
+                        try { focusSectionHeading('calculator-page', 'h2'); } catch(_) {}
+                    };
+                    mainContainer.addEventListener('transitionend', onEnd);
+                    setTimeout(() => {
+                        try { mainContainer.removeEventListener('transitionend', onEnd); } catch(_) {}
+                        try { focusSectionHeading('calculator-page', 'h2'); } catch(_) {}
+                    }, 600);
+                } else {
+                    try { focusSectionHeading('calculator-page', 'h2'); } catch(_) {}
+                }
+
+                // Initialize calculator
+                try {
+                    const mod = await import('./calculator.js');
+                    if (mod && typeof mod.initCalculator === 'function') {
+                        mod.initCalculator();
+                    }
+                } catch (err) {
+                    console.error('Error initializing calculator:', err);
+                }
+
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }).catch(err => console.error('Error loading calculator page component:', err));
+            return;
+        }
         
     const m = hash.match(/^#product-(.+)$/);
         if (!LANDING_MODE && m) {
@@ -3836,28 +3967,18 @@ function setupHashRouting(initialLang) {
                 showSection('mobile-main-nav-container', false); // Hide mobile navigation menu
                 showSection('main-container', true);
 
-                // Add slide-in animation for about page
+                // Додаємо swipe-анімацію для about page на мобільних
                 try {
                     const container = document.getElementById('main-container');
                     const section = container?.querySelector('.about-page');
-                    if (section) {
-                        // Clear old animation classes for re-animation on subsequent visits
-                        section.classList.remove('about-page--slide-in-from-right');
-                        section.classList.remove('about-page--slide-in');
-                        section.classList.remove('about-page--slide-out-to-right');
-                        
-                        // Trigger reflow to reset animation
-                        void section.offsetWidth;
-                        
-                        section.classList.add('about-page--slide-in-from-right');
-                        requestAnimationFrame(() => {
-                            section.classList.remove('about-page--slide-in-from-right');
-                            section.classList.add('about-page--slide-in');
-                        });
+                    if (section && window.innerWidth <= 768) {
+                        // Використовуємо стандартизовану систему анімацій
+                        mobileAnimations.registerSection('main-container');
+                        mobileAnimations.show('main-container', 'right');
                     }
                 } catch(_) { /* noop */ }
 
-                // Apply translations for the newly loaded content
+                // Застосовуємо переклади для нового контенту
                 try { const lang = getLangSafe(); if (typeof switchLanguage === 'function') switchLanguage(lang); } catch {}
 
                 window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -4112,7 +4233,63 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
         }
+        // If we are on calculator page and user pressed back-to-main, prefer returning to stored prev_hash
+        const isCalculator = section && section.id === 'calculator-page';
+        if (isCalculator) {
+            // Validate stored prev_hash: must be non-empty, start with '#', and target must exist
+            let prevRaw = null;
+            try { prevRaw = sessionStorage.getItem('prev_hash'); } catch(_) { prevRaw = null; }
+            let prev = '';
+            if (typeof prevRaw === 'string' && prevRaw) {
+                prev = prevRaw.startsWith('#') ? prevRaw : `#${prevRaw}`;
+                if (!document.querySelector(prev)) prev = '';
+            }
 
+            if (prev) {
+                const mainContainer = document.getElementById('main-container');
+                if (mainContainer) {
+                    const onEndMain = (e) => {
+                        if (e.target !== mainContainer) return;
+                        mainContainer.removeEventListener('transitionend', onEndMain);
+                        try { sessionStorage.removeItem('prev_hash'); } catch(_) {}
+                        try { sessionStorage.setItem('from_calculator', 'true'); } catch(_) {}
+                        location.hash = prev;
+                    };
+                    mainContainer.addEventListener('transitionend', onEndMain);
+                    mainContainer.classList.add('main-container--slide-out-to-right');
+                    // safety fallback
+                    setTimeout(() => {
+                        try { mainContainer.removeEventListener('transitionend', onEndMain); } catch(_){ }
+                        try { sessionStorage.removeItem('prev_hash'); } catch(_) {}
+                        try { sessionStorage.setItem('from_calculator', 'true'); } catch(_) {}
+                        location.hash = prev;
+                    }, 600);
+                    return;
+                }
+            }
+
+            // No valid prev_hash — fallback to services listing to avoid empty/unknown hash
+            try { sessionStorage.removeItem('prev_hash'); } catch(_) {}
+            try { sessionStorage.setItem('from_calculator', 'true'); } catch(_) {}
+            const mainContainer = document.getElementById('main-container');
+            if (mainContainer) {
+                const onEndFallback = (e) => {
+                    if (e.target !== mainContainer) return;
+                    mainContainer.removeEventListener('transitionend', onEndFallback);
+                    location.hash = '#services';
+                };
+                mainContainer.addEventListener('transitionend', onEndFallback);
+                mainContainer.classList.add('main-container--slide-out-to-right');
+                setTimeout(() => {
+                    try { mainContainer.removeEventListener('transitionend', onEndFallback); } catch(_) {}
+                    location.hash = '#services';
+                }, 600);
+                return;
+            }
+            // ultimate fallback
+            location.hash = '#services';
+            return;
+        }
         // Landing sections (portfolio, reviews, faq, contacts, welcome, services)
         if (section) {
             const sectionClass = section.classList.contains('portfolio') ? 'portfolio' :
@@ -4129,6 +4306,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     finalize();
                 };
                 section.addEventListener('transitionend', onEnd);
+                // ensure we remove visible state so opacity transforms out
+                section.classList.remove('service-page--visible');
                 // kick animation
                 section.classList.add(outClass);
                 // safety fallback in case transitionend doesn't fire

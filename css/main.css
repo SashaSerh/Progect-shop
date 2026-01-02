@@ -1600,7 +1600,7 @@ html { scroll-behavior: smooth; }
     padding: clamp(20px, 4vw, 32px);
     border: 1px solid var(--border, #e5e7eb);
     box-shadow: 0 4px 24px rgba(0,0,0,0.04);
-    margin-bottom: 24px;
+    margin-top: 12px;
     text-align: center;
 }
 
@@ -1658,6 +1658,7 @@ html { scroll-behavior: smooth; }
     padding: clamp(16px, 4vw, 28px);
     border: 1px solid var(--border, #e5e7eb);
     box-shadow: 0 4px 24px rgba(0,0,0,0.04);
+    margin-top: 12px;
 }
 
 /* Section styling */
@@ -2072,6 +2073,7 @@ html { scroll-behavior: smooth; }
     cursor: pointer;
     transition: all var(--motion-duration-fast, 0.15s) ease;
     box-shadow: 0 4px 12px rgba(37,99,235,0.25);
+    margin-top: 12px;
 }
 
 .calculator-order-btn:hover {
@@ -2086,6 +2088,7 @@ html { scroll-behavior: smooth; }
 .calculator-messengers {
     display: flex;
     gap: 12px;
+    margin-top: 12px;
 }
 
 .calculator-wa-btn,
@@ -2246,6 +2249,7 @@ html { scroll-behavior: smooth; }
 @media (max-width: 799px) {
     .calculator-result-wrapper {
         position: static;
+        margin-top: 12px;
     }
     
     .power-cards {

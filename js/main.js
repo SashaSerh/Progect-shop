@@ -3834,11 +3834,20 @@ function setupHashRouting(initialLang) {
                 showSection('contacts-container', false);
                 showSection('product-detail-container', false);
                 showSection('admin-page-container', false);
-                showSection('main-container', true);
-
-                // Add slide animation for main-container
+                
+                // Hide mobile nav on calculator page
+                const mobileNav = document.getElementById('mobile-main-nav-container');
+                if (mobileNav) {
+                    mobileNav.style.display = 'none';
+                }
+                
                 const mainContainer = document.getElementById('main-container');
                 if (mainContainer) {
+                    // Показуємо контейнер
+                    mainContainer.style.display = '';
+                    mainContainer.classList.remove('is-hidden');
+                    mainContainer.classList.add('is-visible');
+                    
                     // ensure no stale flags
                     mainContainer.classList.remove('main-container--slide-out-to-right');
                     mainContainer.classList.add('main-container--slide-in-from-right');

@@ -51,7 +51,6 @@ function calculateAndUpdate() {
     const power = getSelectedPower();
     const trunkLength = parseFloat(document.getElementById('trunk')?.value) || 0;
     const drainLength = parseFloat(document.getElementById('drain')?.value) || 0;
-    const cableChecked = document.getElementById('cable')?.checked || false;
     const cableLength = parseFloat(document.getElementById('cable-length')?.value) || 0;
     const plugChecked = document.getElementById('plug')?.checked || false;
     const holeChecked = document.getElementById('hole')?.checked || false;
@@ -95,7 +94,7 @@ function calculateAndUpdate() {
     }
 
     // Кабель
-    const cableCost = cableChecked && cableLength > 0 ? Math.round(cableLength * prices.cable) : 0;
+    const cableCost = cableLength > 0 ? Math.round(cableLength * prices.cable) : 0;
     const cableRow = document.getElementById('breakdown-cable-row');
     const cableEl = document.getElementById('breakdown-cable');
     if (cableRow && cableEl) {
@@ -257,24 +256,6 @@ function initCalculator() {
         input.addEventListener('change', calculateAndUpdate);
     });
 
-    // Cable checkbox toggle
-    const cableCheckbox = document.getElementById('cable');
-    const cableLengthInput = document.getElementById('cable-length');
-    const cableLengthWrapper = document.getElementById('cable-length-wrapper');
-    
-    if (cableCheckbox && cableLengthInput) {
-        cableCheckbox.addEventListener('change', () => {
-            cableLengthInput.disabled = !cableCheckbox.checked;
-            if (cableLengthWrapper) {
-                cableLengthWrapper.classList.toggle('extra-length--active', cableCheckbox.checked);
-            }
-            if (!cableCheckbox.checked) {
-                cableLengthInput.value = 0;
-            }
-            calculateAndUpdate();
-        });
-    }
-
     // Other checkboxes
     ['plug', 'hole', 'box'].forEach(id => {
         const checkbox = document.getElementById(id);
@@ -283,12 +264,26 @@ function initCalculator() {
         }
     });
 
-    // Extra toggle animations
-    document.querySelectorAll('.extra-toggle input').forEach(toggle => {
-        toggle.addEventListener('change', () => {
-            const item = toggle.closest('.extra-item');
+    // Extra item checkbox animations
+    document.querySelectorAll('.extra-item__checkbox').forEach(checkbox => {
+        checkbox.addEventListener('change', () => {
+            const item = checkbox.closest('.extra-item');
             if (item) {
-                item.classList.toggle('extra-item--active', toggle.checked);
+                item.classList.toggle('extra-item--active', checkbox.checked);
+            }
+        });
+    });
+
+    // Extra item content click handler to toggle checkbox
+    document.querySelectorAll('.extra-item__content').forEach(content => {
+        content.addEventListener('click', (e) => {
+            // Don't toggle if clicking on a link or button
+            if (e.target.closest('button, a')) return;
+            
+            const checkbox = content.querySelector('.extra-item__checkbox');
+            if (checkbox) {
+                checkbox.checked = !checkbox.checked;
+                checkbox.dispatchEvent(new Event('change', { bubbles: true }));
             }
         });
     });

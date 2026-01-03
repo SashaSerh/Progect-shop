@@ -109,8 +109,9 @@ export function openModal(translations, lang) {
         }
     }
 
-    // Show modal using unified classes instead of inline styles
+    // Show modal using unified classes and set inline display for compatibility
     profileModal.classList.add('modal--visible');
+    try { profileModal.style.display = 'flex'; } catch(_) {}
 
     lock();
 
@@ -151,6 +152,7 @@ export function closeModal() {
     const backdrop = document.querySelector('.modal-backdrop');
     if (profileModal) {
         profileModal.classList.remove('modal--visible');
+        try { profileModal.style.display = 'none'; } catch(_) {}
     }
     if (backdrop) {
         backdrop.classList.remove('modal-backdrop--visible');

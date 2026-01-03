@@ -9369,6 +9369,14 @@ img.img-error {
     box-shadow: none;
 }
 
+/* Dark theme: apply to all service card surfaces */
+.theme-dark .service-card-surface {
+    background: #000;
+    border: 1px solid rgba(255,255,255,0.06);
+    color: var(--text-primary, #f0f0f0);
+    box-shadow: none;
+}
+
 /* Dark theme: portfolio header title color */
 .theme-dark .service-card-surface.portfolio-header-card .portfolio__title {
     color: var(--text-primary, #f0f0f0);

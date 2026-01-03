@@ -116,51 +116,6 @@
 /* Dark theme overrides - Enhanced toning for better visual hierarchy */
 .theme-dark {
   /* Primary surface layers with warm blue tint for reduced eye strain */
-}
-
-/* ========================================
-   Utility helpers: Vertical/Horizontal stacks and gaps
-   ======================================== */
-
-/* .stack: vertical flow, uses gap if supported; fallback to adjacent sibling margin */
-.stack {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-md);
-}
-.stack > * + * {
-    /* fallback for browsers without flex gap */
-    margin-top: var(--spacing-md);
-}
-
-/* Horizontal stack */
-.hstack {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-md);
-}
-.hstack > * + * { margin-left: var(--spacing-md); }
-
-/* Gap size modifiers */
-.gap-xs { gap: var(--spacing-xs) !important; }
-.gap-sm { gap: var(--spacing-sm) !important; }
-.gap-md { gap: var(--spacing-md) !important; }
-.gap-lg { gap: var(--spacing-lg) !important; }
-.gap-xl { gap: var(--spacing-xl) !important; }
-
-/* Fallbacks for sibling margins when gap modifiers are used */
-.gap-xs > * + * { margin-top: var(--spacing-xs); }
-.gap-sm > * + * { margin-top: var(--spacing-sm); }
-.gap-md > * + * { margin-top: var(--spacing-md); }
-.gap-lg > * + * { margin-top: var(--spacing-lg); }
-.gap-xl > * + * { margin-top: var(--spacing-xl); }
-
-/* Ensure horizontal gap fallbacks */
-.hstack.gap-xs > * + * { margin-left: var(--spacing-xs); }
-.hstack.gap-sm > * + * { margin-left: var(--spacing-sm); }
-.hstack.gap-md > * + * { margin-left: var(--spacing-md); }
-.hstack.gap-lg > * + * { margin-left: var(--spacing-lg); }
-.hstack.gap-xl > * + * { margin-left: var(--spacing-xl); }
   --surface-0: #0f1419;          /* Pure black background */
   --surface-1: #28292d;          /* Deep navy for cards and elevated surfaces */
   --surface-2: #252d3d;          /* Mid navy for secondary surfaces */
@@ -1180,10 +1135,10 @@ section {
 .case__title { font-size: clamp(20px, 2.2vw, 28px); margin-bottom: 8px; }
 .case__summary { color: var(--color-muted, #555); margin-bottom: 16px; }
 .case__content { background: var(--color-surface, #f7f7f7); border-radius: 8px; padding: 16px; }
-.case__gallery { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; margin-top: 12px; }
+.case__gallery { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; margin-bottom: 12px; }
 .case__gallery img { width: 100%; height: auto; border-radius: 8px; object-fit: cover; }
 .case__gallery img:focus-visible { outline: 2px solid var(--color-accent, #4da3ff); outline-offset: 2px; }
-.case__actions { display: flex; gap: 8px; margin-top: 12px; }
+.case__actions { display: flex; gap: 8px; margin-bottom: 0; }
 .case__actions .btn:focus-visible { outline: 2px solid var(--color-accent, #4da3ff); outline-offset: 2px; }
 
 /* Anchor target highlight for sections */
@@ -1306,7 +1261,7 @@ html { scroll-behavior: smooth; }
 .service-benefits { list-style: none; padding: 0; margin: 16px 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; }
 .service-benefits__item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid var(--color-border, #e5e5e5); border-radius: 10px; background: var(--color-surface, #fff); }
 .service-benefits__item .icon { flex: 0 0 24px; }
-.service-page__gallery { margin-top: 8px; }
+.service-page__gallery { margin-bottom: 12px; }
 .service-gallery { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
 .service-gallery img { width: 100%; height: 100%; aspect-ratio: 4/3; object-fit: cover; border-radius: 10px; }
 .service-gallery__slider { position: relative; border-radius: 10px; overflow: hidden; aspect-ratio: 4 / 3; background: var(--color-surface, #f4f4f6); box-shadow: 0 6px 22px rgba(0,0,0,0.08); }
@@ -1326,7 +1281,7 @@ html { scroll-behavior: smooth; }
 .theme-dark .service-gallery__nav:hover { background: rgba(0,0,0,0.8); }
 .theme-dark .service-gallery__dot { background: rgba(255,255,255,0.4); }
 .theme-dark .service-gallery__dot.is-active { background: #fff; }
-.service-page__cta { margin-top: 16px; }
+.service-page__cta { margin-bottom: 16px; }
 .service-page .cta-group { display: flex; flex-wrap: wrap; gap: 8px; }
 .theme-dark .service-page__benefits {
     background: #0b0b0b; /* dark card surface for benefits container */
@@ -1444,13 +1399,13 @@ html { scroll-behavior: smooth; }
 .review-card__stars { margin-bottom:8px; }
 .review-card__text { font-size:14px; line-height:1.55; color: var(--on-surface,#222); }
 .theme-dark .review-card__text { color: var(--text-primary); }
-.reviews__form { margin-top: 8px; border-top:1px dashed var(--border,#ddd); padding-top: 16px; }
+.reviews__form { margin-bottom: 8px; border-top:1px dashed var(--border,#ddd); padding-top: 16px; }
 .reviews__form-title { margin:0 0 10px; font-size: clamp(16px, 3.2vw, 20px); font-weight:700; }
 .form--compact .form-field { margin-bottom: 10px; }
 .form--compact .form-input { width:100%; padding:8px 10px; border:1px solid var(--border,#ddd); border-radius:10px; background: var(--surface,#fff); color:inherit; }
 .form--compact .form-input:focus-visible { outline:2px solid var(--accent-color,#007aff); outline-offset:2px; }
 .form--compact .form-actions .btn { min-width: 160px; }
-.form-status { margin-top: 8px; font-size: 13px; }
+.form-status { margin-bottom: 8px; font-size: 13px; }
 .form-status.is-success { color: #207227; }
 .form-status.is-error { color: #b00020; }
 
@@ -1459,7 +1414,7 @@ html { scroll-behavior: smooth; }
 .faq-item { border:1px solid var(--border,#e5e5e5); border-radius:12px; padding:10px 12px; background: var(--surface,#fff); transition: background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease; }
 .faq-item__q { font-weight:700; cursor:pointer; }
 .faq-item__q:focus-visible { outline:2px solid var(--accent-color,#007aff); outline-offset:2px; border-radius:8px; }
-.faq-item__a { margin-top: 8px; font-size:14px; line-height:1.55; color: var(--on-surface,#222); }
+.faq-item__a { margin-bottom: 8px; font-size:14px; line-height:1.55; color: var(--on-surface,#222); }
 
 /* Dark theme: FAQ items */
 .theme-dark .faq-item {
@@ -1500,14 +1455,14 @@ html { scroll-behavior: smooth; }
 .product-detail__layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 380px); gap: clamp(16px, 3vw, 32px); align-items: start; margin-bottom: clamp(28px, 6vw, 52px); }
 @media (max-width: 900px) { .product-detail__layout { grid-template-columns: 1fr; } }
 
-.product-gallery__figure { margin:0; }
+.product-gallery__figure { margin:0 0 14px 0; }
 .product-gallery__image-wrap { border:1px solid var(--glass-border, rgba(0,0,0,0.08)); border-radius: 18px; background: var(--glass-bg, linear-gradient(145deg,#f8f8f8,#f1f1f1)); position:relative; overflow:hidden; min-height: clamp(260px, 42vw, 480px); display:flex; align-items:center; justify-content:center; }
 .product-gallery__image { width:100%; height:100%; object-fit:contain; display:block; }
 /* Hint that product card image is clickable */
 /* Image inherits cursor from the whole clickable card; no separate hover highlight */
 /* removed: .product-card__image { cursor: pointer } and image hover shadow */
 
-.product-gallery__thumbs { display:flex; gap:10px; margin-top:14px; overflow-x:auto; padding-bottom:4px; scrollbar-width: thin; }
+.product-gallery__thumbs { display:flex; gap:10px; margin-bottom:0; overflow-x:auto; padding-bottom:4px; scrollbar-width: thin; }
 .product-gallery__thumbs::-webkit-scrollbar { height:6px; }
 .product-gallery__thumbs::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.25); border-radius:4px; }
 .product-gallery__thumb { width:72px; height:56px; flex:0 0 auto; background: var(--thumb-bg, #e9e9e9); border:1px solid var(--thumb-border, rgba(0,0,0,0.08)); border-radius:10px; box-shadow: var(--shadow, 0 2px 6px rgba(0,0,0,0.08)); opacity:.85; transition:opacity .25s ease, transform .25s ease, box-shadow .25s ease; }
@@ -1576,7 +1531,7 @@ html { scroll-behavior: smooth; }
 .collapsible { position: relative; }
 .collapsible.is-collapsed { max-height: var(--desc-collapsed-max, 320px); overflow: hidden; }
 .collapsible.is-collapsed::after { content:""; position:absolute; left:0; right:0; bottom:0; height: 56px; pointer-events:none; background: linear-gradient(to bottom, rgba(255,255,255,0) 0%, var(--surface,#fff) 80%); }
-.collapsible__toggle { margin-top: 10px; background: none; border: 1px solid var(--border,#ddd); border-radius: 10px; padding: 8px 12px; font-weight: 600; color: var(--nav-text-color,#222); cursor: pointer; }
+.collapsible__toggle { margin-bottom: 10px; background: none; border: 1px solid var(--border,#ddd); border-radius: 10px; padding: 8px 12px; font-weight: 600; color: var(--nav-text-color,#222); cursor: pointer; }
 .collapsible__toggle:hover, .collapsible__toggle:focus { background: var(--button-bg, rgba(0,0,0,0.04)); outline: none; }
 .collapsible__toggle:focus-visible { box-shadow: var(--input-focus-shadow); }
 .collapsible__toggle:active {
@@ -1709,7 +1664,7 @@ html { scroll-behavior: smooth; }
 .admin-product-form input[type="number"],
 .admin-product-form textarea,
 .admin-product-form select { padding:8px 10px; border:1px solid var(--border, #ddd); border-radius:8px; background: var(--surface, #fff); color: var(--on-surface, #111); }
-.admin-product-form .form-actions { display:flex; gap:8px; align-items:center; margin-top:8px; }
+.admin-product-form .form-actions { display:flex; gap:8px; align-items:center; margin-bottom:8px; }
 .form-error { color: #c62828; font-size: 12px; min-height: 16px; }
 .is-invalid { border-color: #c62828 !important; outline-color: #c62828 !important; }
 
@@ -1723,7 +1678,7 @@ html { scroll-behavior: smooth; }
 .images-preview__item.gallery-item img { display:block; width: var(--admin-gallery-thumb-w, 128px); height: var(--admin-gallery-thumb-h, 96px); border-radius:8px; object-fit: cover; }
 .gallery-item__ctrls { position:absolute; left:4px; right:4px; bottom:4px; display:flex; justify-content:space-between; gap:6px; }
 .gallery-item__primary { position:absolute; top:4px; left:4px; background: var(--accent-color, #007aff); color:#fff; font-size:10px; line-height:1; padding:3px 6px; border-radius:4px; }
-.images-preview__hint { width:100%; text-align:center; font-size:12px; color: var(--muted, #777); padding:8px; border:1px dashed var(--border, #ccc); border-radius:6px; margin-top:6px; }
+.images-preview__hint { width:100%; text-align:center; font-size:12px; color: var(--muted, #777); padding:8px; border:1px dashed var(--border, #ccc); border-radius:6px; margin-bottom:6px; }
 
 /* =================================
    Calculator Page - Modern Design
@@ -1742,7 +1697,7 @@ html { scroll-behavior: smooth; }
     padding: clamp(20px, 4vw, 32px);
     border: 1px solid var(--border, #e5e7eb);
     box-shadow: 0 4px 24px rgba(0,0,0,0.04);
-    margin-top: 12px;
+    margin-bottom: 12px;
     text-align: center;
 }
 
@@ -1800,7 +1755,7 @@ html { scroll-behavior: smooth; }
     padding: clamp(16px, 4vw, 28px);
     border: 1px solid var(--border, #e5e7eb);
     box-shadow: 0 4px 24px rgba(0,0,0,0.04);
-    margin-top: 12px;
+    margin-bottom: 12px;
 }
 
 /* Section styling */
@@ -1862,7 +1817,7 @@ html { scroll-behavior: smooth; }
 .power-card__unit {
     font-size: 0.75rem;
     color: var(--text-secondary, #666);
-    margin-top: 4px;
+    margin-bottom: 4px;
 }
 
 .power-card:hover {
@@ -2108,7 +2063,7 @@ html { scroll-behavior: smooth; }
 
 /* Extra length input */
 .extra-length {
-    margin-top: 12px;
+    margin-bottom: 12px;
     opacity: 0.5;
     pointer-events: none;
     transition: opacity var(--motion-duration-fast, 0.15s) ease;
@@ -2215,7 +2170,7 @@ html { scroll-behavior: smooth; }
     cursor: pointer;
     transition: all var(--motion-duration-fast, 0.15s) ease;
     box-shadow: 0 4px 12px rgba(37,99,235,0.25);
-    margin-top: 12px;
+    margin-bottom: 12px;
 }
 
 .calculator-order-btn:hover {
@@ -2230,7 +2185,7 @@ html { scroll-behavior: smooth; }
 .calculator-messengers {
     display: flex;
     gap: 12px;
-    margin-top: 12px;
+    margin-bottom: 12px;
 }
 
 .calculator-wa-btn,
@@ -2391,7 +2346,7 @@ html { scroll-behavior: smooth; }
 @media (max-width: 799px) {
     .calculator-result-wrapper {
         position: static;
-        margin-top: 12px;
+        margin-bottom: 12px;
     }
     
     .power-cards {
@@ -2429,7 +2384,7 @@ html { scroll-behavior: smooth; }
 .form-group input[type="number"] { padding: 8px; border: 1px solid var(--border, #ddd); border-radius: 8px; }
 .form-group select { padding: 8px; border: 1px solid var(--border, #ddd); border-radius: 8px; }
 .form-group input[type="checkbox"] { margin-right: 8px; }
-.calculator__result { margin-top: 24px; padding: 16px; border: 1px solid var(--border, #ddd); border-radius: 8px; background: var(--surface, #fff); }
+.calculator__result { margin-bottom: 24px; padding: 16px; border: 1px solid var(--border, #ddd); border-radius: 8px; background: var(--surface, #fff); }
 .calculator__result h2 { margin-top: 0; }
 #breakdown { white-space: pre-line; }
 
@@ -3157,7 +3112,7 @@ body.compare-modal-open {
     color: var(--toast-text);
     border-radius: 14px;
     padding: 14px 18px;
-    margin-top: 8px;
+    margin-bottom: 8px;
     min-width: 220px;
     box-shadow: 0 12px 30px rgba(0,0,0,0.25);
     opacity: 0;
@@ -4663,7 +4618,7 @@ button:active, .btn:active, .fab:active, a:active {
     display: flex;
     gap: 12px;
     justify-content: flex-end;
-    margin-top: 8px;
+    margin-bottom: 8px;
 }
 
 .btn {
@@ -5195,7 +5150,7 @@ button:active, .btn:active, .fab:active, a:active {
     }
     
     .service-page__cta {
-        margin-top: 16px;
+        margin-bottom: 16px;
     }
     
     .service-page .cta-group {
@@ -5287,7 +5242,7 @@ button:active, .btn:active, .fab:active, a:active {
     display: flex;
     align-items: center;
     gap: 16px;
-    margin-top: 24px;
+    margin-bottom: 24px;
     padding: 20px 24px;
     border-radius: 20px;
     background: var(--surface, #fff);
@@ -5439,7 +5394,7 @@ button:active, .btn:active, .fab:active, a:active {
 /* Main nav mobile card styling */
 .main-nav-mobile-card {
     width: 100%;
-    margin-top: 20px;
+    margin-bottom: 20px;
     padding: 16px 18px;
     border-radius: 18px;
     background: var(--surface, #fff);
@@ -5546,7 +5501,7 @@ button:active, .btn:active, .fab:active, a:active {
 
     /* Mobile main nav card responsive */
     .main-nav-mobile-card {
-        margin-top: 18px;
+        margin-bottom: 18px;
         padding: 12px;
         border-radius: 14px;
     }
@@ -5631,6 +5586,7 @@ button:active, .btn:active, .fab:active, a:active {
 .service-card__title {
     font-size: 17px;
     font-weight: 600;
+    margin-bottom: 8px;
     color: var(--nav-text-color);
     /* Двухстрочное обрезание заголовка услуг с многоточием */
     display: -webkit-box;
@@ -5645,6 +5601,7 @@ button:active, .btn:active, .fab:active, a:active {
 .service-card__description {
     font-size: 14px;
     color: var(--nav-text-color);
+    margin-bottom: 12px;
     /* Трёхстрочное обрезание описания услуг с многоточием */
     display: -webkit-box;
     line-clamp: 3;
@@ -5654,10 +5611,6 @@ button:active, .btn:active, .fab:active, a:active {
     text-overflow: ellipsis;
     overflow-wrap: anywhere;
 }
-
-/* When using .stack on a .service-card, rely on gap utilities instead of per-element margins */
-.service-card.stack .service-card__title { margin-bottom: 0; }
-.service-card.stack .service-card__description { margin-bottom: 0; }
 
 .service-card__button {
     background: var(--background-color-secondary);
@@ -5677,7 +5630,7 @@ button:active, .btn:active, .fab:active, a:active {
 .service-card__more {
     border: none;
     display: inline-block;
-    margin-top: 8px;
+    margin-bottom: 8px;
     color: var(--nav-text-color);
     background: var(--button-bg);
     text-decoration: none;
@@ -5897,13 +5850,9 @@ button:active, .btn:active, .fab:active, a:active {
 .product-card__description {
     font-size: 14px;
     color: var(--nav-text-color);
+    margin-bottom: 10px;
     line-height: 1.5;
     min-height: calc(1.5em * 3);
-}
-
-/* When using .stack on product cards, avoid double spacing from element margins */
-.product-card.stack .product-card__description { margin-bottom: 0; }
-.product-card.stack .product-card__specs { margin-bottom: 0; }
     /* Трёхстрочное обрезание длинных описаний с многоточием */
     display: -webkit-box;
     line-clamp: 3; /* стандартное свойство для совместимости */
@@ -6493,7 +6442,7 @@ button:active, .btn:active, .fab:active, a:active {
 .cart-modal__footer {
     display: flex;
     justify-content: space-between;
-    margin-top: 16px;
+    margin-bottom: 16px;
 }
 
 .cart-button--clear,
@@ -6672,7 +6621,7 @@ button:active, .btn:active, .fab:active, a:active {
 
 textarea.form-input { resize: vertical; min-height: 120px; }
 
-.form-submit-btn { margin-top: 6px; }
+.form-submit-btn { margin-bottom: 6px; }
 /* Хелперы и ошибки на уровне поля */
 .form-field .helper { font-size: 12px; color: var(--input-placeholder); }
 .form-field.is-error .form-input { border-color: #ff6b6b; box-shadow: 0 0 0 3px rgba(255,107,107,0.2); }
@@ -6721,7 +6670,7 @@ textarea.form-input { resize: vertical; min-height: 120px; }
 }
 
 /* Статусы формы */
-.form-status { min-height: 1.25em; font-size: 14px; margin-top: 6px; color: var(--nav-text-color); }
+.form-status { min-height: 1.25em; font-size: 14px; margin-bottom: 6px; color: var(--nav-text-color); }
 .form-status.is-sending { opacity: .8; }
 .form-status.is-success { color: var(--accent-color); }
 .form-status.is-error { color: #ff6b6b; }
@@ -6912,7 +6861,7 @@ textarea.form-input { resize: vertical; min-height: 120px; }
 }
 
 .footer__copyright {
-    margin-top: 16px;
+    margin-bottom: 16px;
     text-align: center;
 }
 
@@ -6922,7 +6871,7 @@ textarea.form-input { resize: vertical; min-height: 120px; }
 }
 
 /* Footer social icons */
-.footer__social { display: flex; gap: 12px; align-items: center; margin-top: 12px; }
+.footer__social { display: flex; gap: 12px; align-items: center; margin-bottom: 12px; }
 .footer__social-link { color: var(--nav-text-color); line-height: 0; display: inline-flex; }
 .footer__social-link svg { width: 24px; height: 24px; display: block; }
 
@@ -7615,7 +7564,7 @@ textarea.form-input { resize: vertical; min-height: 120px; }
                 }
 
                 /* Отступы между пунктами меню — безопаснее, чем flex-gap (iOS <14) */
-                .mobile-nav__item + .mobile-nav__item { margin-top: 8px; }
+                .mobile-nav__item + .mobile-nav__item { margin-bottom: 8px; }
 
                         /* Учитываем вырезы экрана iOS */
                                     @supports (padding: max(0px)) {
@@ -7946,7 +7895,7 @@ body.theme-transition, body.theme-transition * {
 .light-theme .mobile-nav .mobile-nav__link:hover { background: var(--button-bg); }
 .mobile-nav .mobile-nav__link:active { transform: translateX(4px); }
 
-.mobile-nav .mobile-nav__section { margin-top: 20px; }
+.mobile-nav .mobile-nav__section { margin-bottom: 20px; }
 .mobile-nav .mobile-nav__divider { height:1px; background: rgba(255,255,255,0.1); margin:18px 0; }
 .light-theme .mobile-nav .mobile-nav__divider { background: rgba(0,0,0,0.12); }
 
@@ -8002,7 +7951,7 @@ body.nav-open { overflow:hidden; touch-action:none; }
 .product-detail__specs-list { list-style: none; padding: 0; margin: 6px 0 0; display: grid; gap: 6px; }
 .product-detail__specs-list li { background: var(--primary-color); border-radius: 10px; padding: 8px 10px; box-shadow: var(--shadow); color: var(--nav-text-color); }
 
-.product-detail__actions { margin-top: 6px; }
+.product-detail__actions { margin-bottom: 6px; }
 .product-detail__addtocart { background: var(--background-color-secondary); color: #fff; border: none; border-radius: 12px; padding: 12px 16px; font-weight: 700; cursor: pointer; box-shadow: var(--shadow); transition: background-color .2s ease; }
 .product-detail__addtocart:hover { background: var(--background-color-secondary-hover); }
 
@@ -8037,7 +7986,7 @@ body.nav-open { overflow:hidden; touch-action:none; }
 
 /* Category Products */
 .category-products {
-    margin-top: 40px;
+    margin-bottom: 40px;
 }
 
 .category-products h2 {
@@ -8255,7 +8204,7 @@ body.nav-open { overflow:hidden; touch-action:none; }
     flex-direction: column;
     gap: 16px;
     align-items: center;
-    margin-top: 32px;
+    margin-bottom: 32px;
     padding: 24px;
 }
 
@@ -9722,12 +9671,6 @@ img.img-error {
 
 /* Ensure the content block has rounded bottom corners and clips children */
 .service-card-surface .service-page__content {
-
-/* When using .stack on service card surfaces, avoid extra margins on titles */
-.service-card-surface.stack .reviews__title,
-.service-card-surface.stack .faq__title { margin-bottom: 0; }
-
-
     border-bottom-left-radius: 20px;
     border-bottom-right-radius: 20px;
     overflow: hidden;

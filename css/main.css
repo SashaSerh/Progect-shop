@@ -5631,7 +5631,6 @@ button:active, .btn:active, .fab:active, a:active {
 .service-card__title {
     font-size: 17px;
     font-weight: 600;
-    margin-bottom: 8px;
     color: var(--nav-text-color);
     /* Двухстрочное обрезание заголовка услуг с многоточием */
     display: -webkit-box;
@@ -5646,7 +5645,6 @@ button:active, .btn:active, .fab:active, a:active {
 .service-card__description {
     font-size: 14px;
     color: var(--nav-text-color);
-    margin-bottom: 12px;
     /* Трёхстрочное обрезание описания услуг с многоточием */
     display: -webkit-box;
     line-clamp: 3;
@@ -5656,6 +5654,10 @@ button:active, .btn:active, .fab:active, a:active {
     text-overflow: ellipsis;
     overflow-wrap: anywhere;
 }
+
+/* When using .stack on a .service-card, rely on gap utilities instead of per-element margins */
+.service-card.stack .service-card__title { margin-bottom: 0; }
+.service-card.stack .service-card__description { margin-bottom: 0; }
 
 .service-card__button {
     background: var(--background-color-secondary);
@@ -5895,9 +5897,13 @@ button:active, .btn:active, .fab:active, a:active {
 .product-card__description {
     font-size: 14px;
     color: var(--nav-text-color);
-    margin-bottom: 10px;
     line-height: 1.5;
     min-height: calc(1.5em * 3);
+}
+
+/* When using .stack on product cards, avoid double spacing from element margins */
+.product-card.stack .product-card__description { margin-bottom: 0; }
+.product-card.stack .product-card__specs { margin-bottom: 0; }
     /* Трёхстрочное обрезание длинных описаний с многоточием */
     display: -webkit-box;
     line-clamp: 3; /* стандартное свойство для совместимости */
@@ -9716,6 +9722,12 @@ img.img-error {
 
 /* Ensure the content block has rounded bottom corners and clips children */
 .service-card-surface .service-page__content {
+
+/* When using .stack on service card surfaces, avoid extra margins on titles */
+.service-card-surface.stack .reviews__title,
+.service-card-surface.stack .faq__title { margin-bottom: 0; }
+
+
     border-bottom-left-radius: 20px;
     border-bottom-right-radius: 20px;
     overflow: hidden;

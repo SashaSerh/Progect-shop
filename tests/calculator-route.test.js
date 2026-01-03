@@ -71,4 +71,84 @@ describe('Calculator route integration', () => {
 
     initSpy.mockRestore();
   });
+
+  it('returns to previous section when clicking back from calculator (uses prev_hash)', async () => {
+    // Prepare DOM: main container with calculator page and a back button
+    document.body.innerHTML = `
+      <div id="main-container">
+        <section class="calculator-page" id="calculator-page">
+          <div class="calculator-page__back">
+            <a href="#" class="back-to-main" aria-label="Назад">←</a>
+          </div>
+          <h2 id="calculator-page-title">Калькулятор</h2>
+        </section>
+      </div>
+      <div id="service-ac-install-container">
+        <section class="service-page" id="service-ac-install"></section>
+      </div>
+    `;
+    // set prev hash
+    try { sessionStorage.setItem('prev_hash', '#service-ac-install'); } catch(_) {}
+
+    // spy on mobileAnimations.hide so it resolves immediately
+    const hideSpy = vi.spyOn(window.mobileAnimations, 'hide').mockResolvedValue();
+
+    dispatchDOMContentLoaded();
+
+    const back = document.querySelector('.back-to-main');
+    back.click();
+
+    // wait for location to update to prev
+    const ok = await waitFor(() => location.hash === '#service-ac-install', 1000);
+    expect(ok).toBe(true);
+
+    // cleaned up prev_hash and from_calculator set
+    expect(sessionStorage.getItem('prev_hash')).toBeNull();
+    expect(sessionStorage.getItem('from_calculator')).toBe('true');
+
+    hideSpy.mockRestore();
+  });
+
+  it('handles multiple quick clicks on calculator button without duplicating navigation', async () => {
+    // Prepare a service section with a calculator button
+    document.body.innerHTML = `
+      <div id="main-container" hidden></div>
+      <div id="service-ac-install-container">
+        <section class="service-page" id="service-ac-install">
+          <a href="#calculator" role="button" class="back-to-main service-page__calculator-btn">Калькулятор</a>
+        </section>
+      </div>
+    `;
+
+    // Spy initCalculator
+    const initSpy = vi.spyOn(calculator, 'initCalculator').mockImplementation(() => {});
+
+    dispatchDOMContentLoaded();
+
+    const btn = document.querySelector('.service-page__calculator-btn');
+    const section = document.querySelector('.service-page');
+
+    // click rapidly multiple times
+    btn.click();
+    btn.click();
+    btn.click();
+
+    // after first click button should be disabled
+    expect(btn.getAttribute('aria-disabled')).toBe('true');
+
+    // simulate transitionend on the section to finish animation
+    section.dispatchEvent(new Event('transitionend', { bubbles: true }));
+
+    // wait for navigation and component load
+    const ok = await waitFor(() => location.hash === '#calculator' && !!document.getElementById('calculator-page-title'), 1500);
+    expect(ok).toBe(true);
+
+    // initCalculator should be called once
+    expect(initSpy).toHaveBeenCalled();
+
+    // ensure aria-disabled is removed after navigation (button restored)
+    expect(btn.getAttribute('aria-disabled')).toBeNull();
+
+    initSpy.mockRestore();
+  });
 });

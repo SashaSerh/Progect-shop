@@ -3852,7 +3852,9 @@ function setupHashRouting(initialLang) {
                     try { mobileAnimations.registerSection('main-container'); } catch(_) {}
 
                     // Make container visible then run slide-in animation from right
-                    mainContainer.style.display = '';
+                    // Use 'block' explicitly because index.html has inline display:none
+                    mainContainer.style.display = 'block';
+                    mainContainer.removeAttribute('hidden');
                     mainContainer.classList.remove('is-hidden');
                     mainContainer.classList.add('is-visible');
                     try {
@@ -4206,7 +4208,7 @@ document.addEventListener('DOMContentLoaded', () => {
         btn.setAttribute('aria-disabled', 'true');
 
         // Find nearest high-level section
-        const section = btn.closest('.portfolio, .reviews, .faq, .contacts, .welcome, .services, .service-page, .about-page');
+        const section = btn.closest('.portfolio, .reviews, .faq, .contacts, .welcome, .services, .service-page, .about-page, .calculator-page');
 
         // Helper to finalize navigation (safety fallback)
         let finished = false;
@@ -4250,7 +4252,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
         // If we are on calculator page and user pressed back-to-main, prefer returning to stored prev_hash
-        const isCalculator = section && section.id === 'calculator-page';
+        const isCalculator = (section && (section.id === 'calculator-page' || section.classList.contains('calculator-page'))) || (!!btn.closest && !!btn.closest('.calculator-page'));
         if (isCalculator) {
             // Validate stored prev_hash: must be non-empty, start with '#', and target must exist
             let prevRaw = null;

@@ -9231,7 +9231,8 @@ img.img-error {
 .service-card-surface .service-page__banner,
 .service-card-surface .service-page__content,
 .service-card-surface .service-page__gallery,
-.service-card-surface .service-page__cta {
+.service-card-surface .service-page__cta,
+.service-card-surface > .portfolio__grid {
     background: var(--surface, #fff);
     border: 1px solid var(--border, #e5e7eb);
     border-radius: 16px;
@@ -9247,8 +9248,26 @@ img.img-error {
     overflow: hidden;
 }
 
-/* Dark theme: apply same bottom rounding to content block */
-.theme-dark .service-card-surface .service-page__content {
+/* Make .service-card-surface itself behave as a card (used on various blocks incl. case content and portfolio grid wrapper) */
+.service-card-surface {
+    background: var(--surface, #fff);
+    border: 1px solid var(--border, #e5e7eb);
+    border-radius: 16px;
+    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+    padding: clamp(16px, 3vw, 24px);
+    margin-bottom: 16px;
+}
+
+/* Ensure case content has rounded bottom corners and clips children */
+.service-card-surface .case__content {
+    border-bottom-left-radius: 20px;
+    border-bottom-right-radius: 20px;
+    overflow: hidden;
+}
+
+/* Dark theme: apply same bottom rounding to content blocks */
+.theme-dark .service-card-surface .service-page__content,
+.theme-dark .service-card-surface .case__content {
     border-bottom-left-radius: 20px;
     border-bottom-right-radius: 20px;
     overflow: hidden;

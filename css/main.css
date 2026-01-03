@@ -9062,3 +9062,38 @@ img.img-error {
         box-shadow: 0 0 0 2px var(--color-primary);
     }
 }
+
+/* Specific overrides for service install page to ensure card styling applies */
+#service-ac-install .service-page__header {
+    background: var(--surface, #fff);
+    border: 1px solid var(--border, #e5e7eb);
+    border-radius: 20px;
+    padding: clamp(20px, 4vw, 32px);
+    box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+    margin-bottom: 16px;
+    text-align: center;
+    color: var(--text, #111);
+}
+
+#service-ac-install .service-page__content {
+    background: var(--surface, #fff);
+    border: 1px solid var(--border, #e5e7eb);
+    border-radius: 16px;
+    padding: clamp(16px, 3vw, 24px);
+    margin-bottom: 16px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.04);
+}
+
+#service-ac-install .service-benefits__item {
+    background: var(--surface-alt, #f9fafb);
+    border: 1px solid var(--border, #e5e7eb);
+    border-radius: 12px;
+    padding: 14px 16px;
+    transition: all var(--motion-duration-normal, 0.3s) var(--motion-ease-standard, ease);
+}
+
+#service-ac-install .service-benefits__item:hover {
+    border-color: var(--primary-light, #60a5fa);
+    background: var(--surface, #fff);
+    box-shadow: 0 4px 12px rgba(37,99,235,0.12);
+}

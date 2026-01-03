@@ -5229,12 +5229,14 @@ button:active, .btn:active, .fab:active, a:active {
     font-size: 15px;
     font-weight: 600;
     transition: background var(--transition);
+    display: inline-block;
 }
 
 .hero__cta:hover {
     background: var(--background-color-secondary-hover);
 }
 
+/* CTA group for multiple buttons */
 .hero__cta-group {
     display: flex;
     gap: 12px;
@@ -5243,22 +5245,27 @@ button:active, .btn:active, .fab:active, a:active {
     margin-bottom: 16px;
 }
 
+/* Secondary calculator button with outline style */
 .hero__cta--secondary {
-    background: rgba(37, 99, 235, 0.12);
+    background: transparent;
     color: var(--background-color-secondary);
-    border: 1.5px solid var(--background-color-secondary);
+    border: 2px solid var(--background-color-secondary);
     padding: 10px 20px;
+    transition: all var(--transition);
 }
 
 .hero__cta--secondary:hover {
-    background: rgba(37, 99, 235, 0.2);
+    background: var(--background-color-secondary);
+    color: #FFFFFF;
 }
 
+/* Promotional text for calculator */
 .hero__calculator-text {
-    font-size: 13px;
-    color: var(--muted-text);
-    margin-top: 8px;
-    font-style: italic;
+    font-size: 14px;
+    color: var(--nav-text-color);
+    opacity: 0.85;
+    margin-top: 12px;
+    font-weight: 500;
 }
 
 /* Hero mobile typography adjustments */
@@ -5285,8 +5292,14 @@ button:active, .btn:active, .fab:active, a:active {
         margin-bottom: 12px;
     }
 
+    .hero__cta--secondary {
+        padding: 8px 16px;
+        font-size: 13px;
+    }
+
     .hero__calculator-text {
-        font-size: 12px;
+        font-size: 13px;
+        margin-top: 8px;
     }
 }
 
@@ -8921,6 +8934,10 @@ img.img-error {
 }
 
 .theme-dark .hero__subtitle {
+    color: var(--text-secondary);
+}
+
+.theme-dark .hero__calculator-text {
     color: var(--text-secondary);
 }
 

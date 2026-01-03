@@ -2352,6 +2352,52 @@ html { scroll-behavior: smooth; }
 .service-page__back { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
 .service-page__calculator-btn { display: flex; align-items: center; gap: 8px; }
 
+/* Mobile: make all 'back' buttons look like calculator/service back-to-main button */
+@media (max-width: 768px) {
+  .service-page__back a,
+  .case__actions a[data-i18n="back-to-portfolio"],
+  .admin-page__actions a[data-i18n="admin-back"],
+  .product-detail__back,
+  .about .back-to-main {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    min-height: 44px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #fff;
+    background: var(--accent-color, #2563eb);
+    border-radius: 8px;
+    border: none;
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  .service-page__back a svg,
+  .case__actions a[data-i18n="back-to-portfolio"] svg,
+  .admin-page__actions a[data-i18n="admin-back"] svg,
+  .product-detail__back svg,
+  .about .back-to-main svg {
+    width: 20px;
+    height: 20px;
+    stroke: #fff;
+    fill: none;
+    pointer-events: none;
+  }
+
+  .product-detail__back { padding: 8px 12px; }
+
+  .service-page__back a span,
+  .case__actions a span,
+  .admin-page__actions a span,
+  .product-detail__back span {
+    text-decoration: none;
+    color: inherit;
+  }
+}
+
 @media (max-width: 920px) {
     .admin-page__content { grid-template-columns: 1fr; }
 }

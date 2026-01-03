@@ -4263,6 +4263,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (!document.querySelector(prev)) prev = '';
             }
 
+            // If we're on a narrow viewport (mobile), prefer sending users to the welcome/start page
+            try {
+                if (window.matchMedia && window.matchMedia('(max-width: 768px)').matches) {
+                    prev = '#welcome';
+                }
+            } catch(_) {}
+
             if (prev) {
                 const mainContainer = document.getElementById('main-container');
                 if (mainContainer) {

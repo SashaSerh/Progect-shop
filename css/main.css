@@ -9392,6 +9392,16 @@ img.img-error {
     box-shadow: none;
 }
 
+/* Dark theme: ensure service-page headers inside card surfaces have proper background/border/color */
+.theme-dark .service-card-surface .service-page__header,
+.theme-dark .service-page__header {
+    background: rgba(22,22,22,0.8);
+    border: 1px solid rgba(255,255,255,0.08);
+    color: var(--text-primary, #f0f0f0);
+    border-radius: 12px;
+    padding: clamp(12px, 2.4vw, 16px);
+}
+
 /* Dark theme: portfolio header title color */
 .theme-dark .service-card-surface.portfolio-header-card .portfolio__title {
     color: var(--text-primary, #f0f0f0);

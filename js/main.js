@@ -4263,10 +4263,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (!document.querySelector(prev)) prev = '';
             }
 
-            // If we're on a narrow viewport (mobile), prefer sending users to the welcome/start page
+            // If we're on a narrow viewport (mobile), prefer sending users to the navigation/services page
             try {
                 if (window.matchMedia && window.matchMedia('(max-width: 768px)').matches) {
-                    prev = '#welcome';
+                    prev = '#services';
                 }
             } catch(_) {}
 

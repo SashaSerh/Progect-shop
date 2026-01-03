@@ -9381,6 +9381,23 @@ img.img-error {
 .theme-dark .service-card-surface.portfolio-header-card .portfolio__title {
     color: var(--text-primary, #f0f0f0);
 }
+
+/* Dark theme: portfolio grid card surface */
+.theme-dark .service-card-surface > .portfolio__grid {
+    background: #000;
+    border: 1px solid rgba(255,255,255,0.06);
+    color: var(--text-primary, #f0f0f0);
+    box-shadow: none;
+}
+
+/* Dark theme: individual portfolio items */
+.theme-dark .portfolio__item {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.04);
+    box-shadow: none;
+    color: var(--text-primary, #f0f0f0);
+}
+
 .theme-dark .service-card-surface .service-benefits__item:hover {
     background: linear-gradient(180deg, rgba(255,255,255,0.07), rgba(59,130,246,0.05));
     border-color: rgba(59,130,246,0.10);

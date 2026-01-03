@@ -247,7 +247,11 @@
     cursor: pointer;
     transition: background 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
     box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+    text-decoration: none;
 }
+
+.service-page__back a { text-decoration: none; }
+.service-page__back a span { text-decoration: none; }
 
 .back-to-main:hover {
     background: var(--accent-hover, #1d4ed8);

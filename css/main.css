@@ -9209,14 +9209,7 @@ img.img-error {
     color: var(--text, #111);
 }
 
-#service-ac-install .service-page__content {
-    background: var(--surface, #fff);
-    border: 1px solid var(--border, #e5e7eb);
-    border-radius: 16px;
-    padding: clamp(16px, 3vw, 24px);
-    margin-bottom: 16px;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.04);
-}
+
 
 .service-card-surface .service-benefits__item {
     background: var(--surface-alt, #f9fafb);
@@ -9230,6 +9223,32 @@ img.img-error {
     border-color: var(--primary-light, #60a5fa);
     background: var(--surface, #fff);
     box-shadow: 0 4px 12px rgba(37,99,235,0.12);
+}
+
+/* Card surfaces for service pages (light theme) */
+.service-card-surface .service-page__header,
+.service-card-surface .service-page__banner,
+.service-card-surface .service-page__content,
+.service-card-surface .service-page__gallery,
+.service-card-surface .service-page__cta {
+    background: var(--surface, #fff);
+    border: 1px solid var(--border, #e5e7eb);
+    border-radius: 16px;
+    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+    padding: clamp(16px, 3vw, 24px);
+    margin-bottom: 16px;
+}
+
+.service-card-surface .service-page__banner {
+    padding: 0;
+    overflow: hidden;
+}
+
+.service-card-surface .service-page__banner img {
+    display: block;
+    width: 100%;
+    height: auto;
+    object-fit: cover;
 }
 
 /* Text & icon typography for service page to match calculator */

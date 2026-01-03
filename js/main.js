@@ -4266,7 +4266,8 @@ document.addEventListener('DOMContentLoaded', () => {
             // If we're on a narrow viewport (mobile), prefer sending users to the navigation/services page
             try {
                 if (window.matchMedia && window.matchMedia('(max-width: 768px)').matches) {
-                    prev = '#services';
+                    // On mobile, return to the mobile navigation container so the menu is visible
+                    prev = '#mobile-main-nav-container';
                 }
             } catch(_) {}
 

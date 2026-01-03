@@ -2049,6 +2049,26 @@ function setupServiceRouting() {
                 setHiddenById(id, !alwaysVisible.includes(id));
             });
             setActiveNav('');
+
+            // Accessibility: if we are returning from calculator, focus first mobile menu item and highlight it
+            try {
+                if (sessionStorage.getItem('from_calculator') === 'true') {
+                    // Delay to ensure DOM is updated and visible
+                    setTimeout(() => {
+                        try {
+                            const firstLink = document.querySelector('.main-nav-mobile__link');
+                            if (firstLink) {
+                                firstLink.classList.add('focus-from-calc');
+                                try { firstLink.focus(); } catch(_) {}
+                                // remove highlight on blur
+                                firstLink.addEventListener('blur', () => firstLink.classList.remove('focus-from-calc'), { once: true });
+                            }
+                        } catch(_) {}
+                        try { sessionStorage.removeItem('from_calculator'); } catch(_) {}
+                    }, 40);
+                }
+            } catch(_) {}
+
             return;
         }
 

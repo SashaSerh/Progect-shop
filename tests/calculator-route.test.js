@@ -151,4 +151,34 @@ describe('Calculator route integration', () => {
 
     initSpy.mockRestore();
   });
+
+  it('focuses first mobile nav item when returning from calculator on mobile', async () => {
+    // Simulate mobile viewport
+    window.innerWidth = 375;
+
+    document.body.innerHTML = `
+      <div id="main-container">
+        <nav class="main-nav-mobile" role="navigation">
+          <ul class="main-nav-mobile__list">
+            <li class="main-nav-mobile__item"><a href="#services" class="main-nav-mobile__link">Услуги</a></li>
+            <li class="main-nav-mobile__item"><a href="#portfolio" class="main-nav-mobile__link">Наши работы</a></li>
+          </ul>
+        </nav>
+      </div>
+    `;
+
+    // Set flag from calculator
+    try { sessionStorage.setItem('from_calculator', 'true'); } catch(_) {}
+
+    // Trigger route to mobile nav (unknown hash leads to hero+menu, but we want mobile menu visible)
+    location.hash = '#mobile-main-nav-container';
+    window.dispatchEvent(new HashChangeEvent('hashchange'));
+
+    // wait for focus to move to first link
+    const ok = await waitFor(() => {
+      const first = document.querySelector('.main-nav-mobile__link');
+      return first && document.activeElement === first && first.classList.contains('focus-from-calc');
+    }, 1000);
+    expect(ok).toBe(true);
+  });
 });

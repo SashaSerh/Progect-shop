@@ -1256,9 +1256,23 @@ html { scroll-behavior: smooth; }
 .service-page__lead { color: var(--color-muted, #555); margin: 0; }
 .service-page__banner { margin: 16px 0; border-radius: 12px; overflow: hidden; background: var(--color-surface, #f5f5f5); }
 .service-page__banner img { display: block; width: 100%; height: auto; object-fit: cover; }
+.service-page__header,
+.service-page__content,
+.service-page__benefits,
+.service-page__gallery,
+.service-page__cta {
+    background: var(--surface, #fff);
+    border: 1px solid var(--color-border, #e5e5e5);
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(17, 24, 39, 0.12);
+    padding: clamp(16px, 3vw, 24px);
+    margin-top: 16px;
+}
+.service-page__header { margin-bottom: 12px; }
+.service-page__content { gap: 12px; }
 .service-page__content { line-height: 1.6; display: grid; gap: 8px; }
 .service-benefits { list-style: none; padding: 0; margin: 16px 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; }
-.service-benefits__item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid var(--color-border, #e5e5e5); border-radius: 10px; background: var(--color-surface, #fff); }
+.service-benefits__item { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border: 1px solid var(--color-border, #e5e5e5); border-radius: 12px; background: var(--color-surface, #fff); box-shadow: 0 6px 18px rgba(17, 24, 39, 0.06); }
 .service-benefits__item .icon { flex: 0 0 24px; }
 .service-page__gallery { margin-top: 8px; }
 .service-gallery { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
@@ -1282,9 +1296,17 @@ html { scroll-behavior: smooth; }
 .theme-dark .service-gallery__dot.is-active { background: #fff; }
 .service-page__cta { margin-top: 16px; }
 .service-page .cta-group { display: flex; flex-wrap: wrap; gap: 8px; }
-.theme-dark .service-benefits__item { background: rgba(22, 22, 22, 0.8); border-color: rgba(255,255,255,0.08); }
-.theme-dark .service-page__content { background: rgba(22, 22, 22, 0.8); border: 1px solid rgba(255,255,255,0.08); color: var(--text-primary); }
-.theme-dark .service-page__header { background: rgba(22, 22, 22, 0.8); border: 1px solid rgba(255,255,255,0.08); color: var(--text-primary); }
+.theme-dark .service-benefits__item { background: rgba(22, 22, 22, 0.8); border-color: rgba(255,255,255,0.08); box-shadow: 0 10px 26px rgba(0,0,0,0.35); }
+.theme-dark .service-page__header,
+.theme-dark .service-page__content,
+.theme-dark .service-page__benefits,
+.theme-dark .service-page__gallery,
+.theme-dark .service-page__cta {
+    background: rgba(22, 22, 22, 0.85);
+    border: 1px solid rgba(255,255,255,0.08);
+    color: var(--text-primary);
+    box-shadow: 0 12px 32px rgba(0,0,0,0.35);
+}
 .theme-dark .main-nav-mobile { background: rgba(22, 22, 22, 0.8); border: 1px solid rgba(255,255,255,0.08); color: var(--text-primary); }
 .theme-dark .hero .fade-in-section.visible { color: var(--text-primary); }
 .theme-dark .reviews__form { background: rgba(22, 22, 22, 0.8); border: 1px solid rgba(255,255,255,0.08); color: var(--text-primary); }
@@ -1686,53 +1708,6 @@ html { scroll-behavior: smooth; }
 }
 
 .calculator-page__subtitle {
-
-/* Универсальный стиль карточки — повторяет оформление заголовка калькулятора */
-.card-surface {
-    background: var(--surface, #fff);
-    border-radius: 20px;
-    padding: clamp(16px, 3vw, 28px);
-    border: 1px solid var(--border, #e5e7eb);
-    box-shadow: 0 6px 28px rgba(0,0,0,0.04);
-    margin-bottom: 20px;
-}
-
-.card-surface--tight {
-    padding: 12px 16px;
-    border-radius: 12px;
-}
-
-.card-surface .card-title {
-    margin: 0 0 8px 0;
-    font-size: clamp(1.1rem, 2.4vw, 1.4rem);
-    font-weight: 700;
-    color: var(--text, #111);
-}
-
-.card-surface .card-lead {
-    margin: 0;
-    color: var(--muted, #6b7280);
-}
-
-/* Gallery inside a card */
-.card-surface .service-gallery__track { border-radius: 12px; overflow: hidden; }
-
-/* CTA group alignment inside card */
-.card-surface .cta-group { display: flex; gap: 12px; flex-wrap: wrap; }
-
-/* Small helper for banner: full-bleed image with rounded corners */
-.card-surface .service-page__banner img { display:block; width:100%; height:auto; border-radius: 12px; }
-
-/* Dark theme tweak */
-.theme-dark .card-surface {
-    background: var(--surface-1, #222);
-    border-color: rgba(255,255,255,0.06);
-    box-shadow: 0 6px 28px rgba(0,0,0,0.18);
-}
-
-/* End card-surface */
-
-
     font-size: 0.95rem;
     color: var(--text-secondary, #666);
     margin-bottom: 0;

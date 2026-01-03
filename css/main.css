@@ -763,12 +763,20 @@
         display: flex;
         flex-direction: column;
         gap: 12px;
-        align-items: center;
+        align-items: stretch;
         width: 100%;
+        /* Mobile card surface to match other sections */
+        background: var(--surface-1);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-lg);
+        padding: 16px;
+        box-shadow: var(--shadow-md);
+        color: var(--text-primary);
+        transition: background var(--transition-normal), box-shadow var(--transition-normal), transform var(--transition-fast);
     }
     
     .footer {
-        padding: 24px 16px;
+        padding: 16px 16px 24px;
         text-align: center;
     }
     
@@ -918,6 +926,29 @@
     
     .footer__fab--tg { background: #229ED9; }
     .footer__fab--wa { background: #25D366; }
+
+    /* Stretch interactive rows inside the card to full width */
+    .footer__phones, .footer__fab-list {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+    }
+
+    /* Dark theme card adjustments */
+    .theme-dark .footer__mobile,
+    .theme-dark .footer-card {
+        background: var(--surface-1);
+        border-color: var(--border-color);
+        color: var(--text-primary);
+        box-shadow: 0 8px 28px rgba(0,0,0,0.36);
+    }
+
+    /* Make phone controls adapt inside the card */
+    .footer__phone {
+        width: 100%;
+        justify-content: flex-start;
+        padding-left: 12px;
+    }
     .footer__fab--ig { background: linear-gradient(135deg, #F58529, #DD2A7B, #8134AF, #515BD4); }
     .footer__fab--fb { background: #1877F2; }
     .footer__fab--mail { background: #374151; }
@@ -5417,18 +5448,20 @@ button:active, .btn:active, .fab:active, a:active {
 }
 
 .main-nav-mobile__link {
-    display: flex;
+    display: grid;
+    grid-template-columns: 40px 1fr 40px; /* icon | text | spacer */
     align-items: center;
     padding: 12px 14px;
     border-radius: 12px;
     text-decoration: none;
     color: var(--text-primary, #111827);
     transition: background 0.12s ease;
+    /* ensure full-width clickable area */
 }
 
 /* Icon stays static on the left */
 .main-nav-mobile__icon {
-    flex-shrink: 0;
+    grid-column: 1;
     width: 40px;
     height: 40px;
     display: inline-flex;
@@ -5436,8 +5469,8 @@ button:active, .btn:active, .fab:active, a:active {
     justify-content: center;
     border-radius: 10px;
     background: rgba(37,99,235,0.06);
-    margin-right: 12px;
     color: var(--accent-color, #2563eb);
+    margin: 0; /* spacing handled by grid */
 }
 
 .main-nav-mobile__icon svg {
@@ -5450,14 +5483,23 @@ button:active, .btn:active, .fab:active, a:active {
     background: rgba(37, 99, 235, 0.03);
 }
 
-/* Text is centered in the available space with underline */
+/* Text is centered within the middle grid column */
 .main-nav-mobile__text {
+    grid-column: 2;
     font-weight: 600;
     font-size: 15px;
-    flex: 1;
-    text-align: center;
+    justify-self: center;
     position: relative;
     padding-bottom: 6px; /* space for underline */
+}
+
+/* Pseudo-spacer on the right to balance icon on the left */
+.main-nav-mobile__link::after {
+    content: "";
+    grid-column: 3;
+    width: 100%;
+    height: 1px;
+    display: block;
 }
 
 /* Underline that adapts to theme (uses currentColor) */
@@ -5468,11 +5510,20 @@ button:active, .btn:active, .fab:active, a:active {
     transform: translateX(-50%);
     bottom: 0;
     height: 1px;
-    width: auto;
-    min-width: 36px;
-    max-width: 100%;
+    width: 60%;
+    max-width: calc(100% - 24px);
     background: currentColor;
     opacity: 0.18;
+}
+
+/* Focus highlight when returning from calculator */
+.main-nav-mobile__link.focus-from-calc {
+    background: rgba(37,99,235,0.06);
+    box-shadow: 0 0 0 4px rgba(37,99,235,0.10);
+}
+.theme-dark .main-nav-mobile__link.focus-from-calc {
+    background: rgba(59,130,246,0.06);
+    box-shadow: 0 0 0 4px rgba(59,130,246,0.08);
 }
 
 /* Dark theme */

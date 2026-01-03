@@ -52,13 +52,16 @@ export function openModal(translations, lang) {
         } catch (_) {}
     };
 
-    let backdrop = document.querySelector('.profile-backdrop');
+    // Reuse the shared modal-backdrop element
+    let backdrop = document.querySelector('.modal-backdrop');
+    let createdBackdrop = false;
     if (!backdrop) {
         backdrop = document.createElement('div');
-        backdrop.className = 'profile-backdrop';
+        backdrop.className = 'modal-backdrop';
         document.body.appendChild(backdrop);
+        createdBackdrop = true;
     }
-    backdrop.classList.add('is-visible');
+    backdrop.classList.add('modal-backdrop--visible');
     backdrop.addEventListener('click', () => closeModal(), { once: true });
 
     if (isLoggedIn) {
@@ -106,7 +109,9 @@ export function openModal(translations, lang) {
         }
     }
 
-    profileModal.style.display = 'flex';
+    // Show modal using unified classes instead of inline styles
+    profileModal.classList.add('modal--visible');
+
     lock();
 
     const escHandler = (e) => { if (e.key === 'Escape') closeModal(); };
@@ -143,13 +148,12 @@ export function openModal(translations, lang) {
 
 export function closeModal() {
     const profileModal = document.getElementById('profileModal');
-    const backdrop = document.querySelector('.profile-backdrop');
+    const backdrop = document.querySelector('.modal-backdrop');
     if (profileModal) {
-        profileModal.style.display = 'none';
+        profileModal.classList.remove('modal--visible');
     }
     if (backdrop) {
-        backdrop.classList.remove('is-visible');
-        backdrop.parentElement && backdrop.parentElement.removeChild(backdrop);
+        backdrop.classList.remove('modal-backdrop--visible');
     }
     // снять scroll-lock
     try {

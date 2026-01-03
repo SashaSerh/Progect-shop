@@ -1437,7 +1437,7 @@ async function initApp() {
             }
         });
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && profileModal.style.display === 'flex') {
+            if (e.key === 'Escape' && profileModal.classList.contains('modal--visible')) {
                 closeModal();
             }
         });

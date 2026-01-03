@@ -4521,16 +4521,7 @@ button:active, .btn:active, .fab:active, a:active {
 }
 
 /* Подложка под модалку профиля */
-.profile-backdrop {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.4);
-    opacity: 0;
-    transition: opacity .2s ease;
-    z-index: 3001; /* под .modal (3002), но над контентом */
-    pointer-events: none;
-}
-.profile-backdrop.is-visible { opacity: 1; pointer-events: auto; }
+/* legacy .profile-backdrop removed — use .modal-backdrop and .modal-backdrop--visible instead */
 
 .modal__button--logout {
     background: var(--cart-red);
@@ -8352,6 +8343,128 @@ body.nav-open { overflow:hidden; touch-action:none; }
   font-size: var(--font-size-xl);
   font-weight: var(--font-weight-bold);
   color: var(--text-primary);
+}
+
+/* Unified modal content + controls (moved from legacy section) */
+.modal__content {
+  color: var(--nav-text-color);
+  background: var(--surface-0);
+  border-radius: 14px;
+  padding: 20px;
+  max-width: 600px;
+  width: 90%;
+  box-shadow: var(--shadow-elevation);
+  border: none;
+  position: relative;
+}
+
+.light-theme .modal__content {
+  background: rgba(242, 242, 247, 0.9);
+}
+
+.modal__close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  font-size: 20px;
+  cursor: pointer;
+  transition: color var(--transition);
+  background: transparent;
+  border: none;
+}
+
+.modal__close:hover {
+  color: var(--cart-red);
+}
+
+.modal__field {
+  margin: 12px 0;
+}
+
+.modal__field label {
+  display: block;
+  font-size: 15px;
+  color: var(--nav-text-color);
+  margin-bottom: 6px;
+}
+
+.modal__field input {
+  width: 100%;
+  padding: 10px;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  background: var(--button-bg);
+  color: var(--nav-text-color);
+  backdrop-filter: blur(8px);
+}
+
+.modal__button {
+  background: var(--accent-color);
+  color: #FFFFFF;
+  border: none;
+  border-radius: 14px;
+  padding: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--transition);
+}
+
+.modal__button:hover {
+  background: #005BB5;
+}
+.modal__button:active {
+  transform: translateY(1px) scale(0.98);
+  animation: btn-press var(--motion-duration-press) var(--motion-ease-press) both;
+}
+
+.modal__button--logout {
+  background: var(--cart-red);
+}
+
+.modal__button--logout:hover {
+  background: #D32F2F;
+}
+
+.light-theme .modal__button {
+  color: var(--nav-text-color);
+}
+
+/* Admin Login Modal small variant */
+.modal__content--small {
+  max-width: 400px;
+}
+
+.admin-login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.admin-login-form .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.admin-login-form label {
+  font-weight: 600;
+  color: var(--nav-text-color);
+}
+
+.admin-login-form input[type="password"] {
+  padding: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.02);
+  color: var(--nav-text-color);
+  font-size: 16px;
+}
+
+.admin-login-form input[type="password"]:focus {
+  outline: none;
+  border-color: var(--accent-color);
 }
 
 .modal__close {

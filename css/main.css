@@ -2479,6 +2479,7 @@ html { scroll-behavior: smooth; }
   .admin-page__actions a[data-i18n="admin-back"],
   .product-detail__back,
   .about .back-to-main,
+  .portfolio .back-to-main,
   .reviews .back-to-main,
   .faq .back-to-main,
   .contacts .back-to-main,
@@ -2505,7 +2506,8 @@ html { scroll-behavior: smooth; }
   .case__actions a[data-i18n="back-to-portfolio"] svg,
   .admin-page__actions a[data-i18n="admin-back"] svg,
   .product-detail__back svg,
-  .about .back-to-main svg {
+  .about .back-to-main svg,
+  .portfolio .back-to-main svg {
     width: 20px;
     height: 20px;
     stroke: #fff;

@@ -9218,7 +9218,7 @@ img.img-error {
     box-shadow: 0 8px 32px rgba(0,0,0,0.04);
 }
 
-#service-ac-install .service-benefits__item {
+.service-card-surface .service-benefits__item {
     background: var(--surface-alt, #f9fafb);
     border: 1px solid var(--border, #e5e7eb);
     border-radius: 12px;
@@ -9226,42 +9226,42 @@ img.img-error {
     transition: all var(--motion-duration-normal, 0.3s) var(--motion-ease-standard, ease);
 }
 
-#service-ac-install .service-benefits__item:hover {
+.service-card-surface .service-benefits__item:hover {
     border-color: var(--primary-light, #60a5fa);
     background: var(--surface, #fff);
     box-shadow: 0 4px 12px rgba(37,99,235,0.12);
 }
 
 /* Text & icon typography for service page to match calculator */
-#service-ac-install .service-page__title {
+.service-card-surface .service-page__title {
     font-size: clamp(1.5rem, 4vw, 2rem);
     font-weight: 700;
     color: var(--text, #111);
     margin-bottom: 8px;
 }
 
-#service-ac-install .service-page__lead {
+.service-card-surface .service-page__lead {
     font-size: 0.95rem;
     color: var(--text-secondary, #666);
     max-width: 720px;
     margin: 0 auto;
 }
 
-#service-ac-install .service-page__content p {
+.service-card-surface .service-page__content p {
     font-size: 1rem;
     line-height: 1.6;
     color: var(--text, #111);
     margin: 0 0 12px 0;
 }
 
-#service-ac-install .service-benefits__item span {
+.service-card-surface .service-benefits__item span {
     font-size: 0.95rem;
     font-weight: 600;
     color: var(--text, #111);
 }
 
 /* Icon style in benefits */
-#service-ac-install .service-benefits__item .icon {
+.service-card-surface .service-benefits__item .icon {
     width: 40px;
     height: 40px;
     border-radius: 10px;
@@ -9273,25 +9273,25 @@ img.img-error {
 }
 
 /* Dark theme overrides */
-.theme-dark #service-ac-install .service-page__title,
-.theme-dark #service-ac-install .service-page__lead,
-.theme-dark #service-ac-install .service-page__content p,
-.theme-dark #service-ac-install .service-benefits__item span {
+.theme-dark .service-card-surface .service-page__title,
+.theme-dark .service-card-surface .service-page__lead,
+.theme-dark .service-card-surface .service-page__content p,
+.theme-dark .service-card-surface .service-benefits__item span {
     color: var(--text-primary, #f0f0f0);
 }
 
-.theme-dark #service-ac-install .service-benefits__item .icon {
+.theme-dark .service-card-surface .service-benefits__item .icon {
     background: rgba(59,130,246,0.12);
     color: var(--accent-color, #3b82f6);
 }
 
 /* Dark theme: make card surfaces fully black for service-ac-install */
-.theme-dark #service-ac-install .service-page__header,
-.theme-dark #service-ac-install .service-page__content,
-.theme-dark #service-ac-install .service-benefits__item,
-.theme-dark #service-ac-install .service-page__banner,
-.theme-dark #service-ac-install .service-page__gallery,
-.theme-dark #service-ac-install .service-page__cta {
+.theme-dark .service-card-surface .service-page__header,
+.theme-dark .service-card-surface .service-page__content,
+.theme-dark .service-card-surface .service-benefits__item,
+.theme-dark .service-card-surface .service-page__banner,
+.theme-dark .service-card-surface .service-page__gallery,
+.theme-dark .service-card-surface .service-page__cta {
     background: #000;
     border-color: rgba(255,255,255,0.06);
     box-shadow: none;

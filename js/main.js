@@ -3841,41 +3841,46 @@ function setupHashRouting(initialLang) {
                     mobileNav.style.display = 'none';
                 }
                 
+                // Ensure main-container is not hidden via [hidden]
+                try { setHiddenById('main-container', false); } catch(_) {}
+
                 const mainContainer = document.getElementById('main-container');
                 if (mainContainer) {
-                    // Показуємо контейнер
+                    // Ensure section is registered for mobile animations
+                    try { mobileAnimations.registerSection('main-container'); } catch(_) {}
+
+                    // Make container visible then run slide-in animation from right
                     mainContainer.style.display = '';
                     mainContainer.classList.remove('is-hidden');
                     mainContainer.classList.add('is-visible');
-                    
-                    // ensure no stale flags
-                    mainContainer.classList.remove('main-container--slide-out-to-right');
-                    mainContainer.classList.add('main-container--slide-in-from-right');
-                    requestAnimationFrame(() => {
-                        mainContainer.classList.remove('main-container--slide-in-from-right');
-                        mainContainer.classList.add('main-container--slide-in');
-                    });
+                    try {
+                        await mobileAnimations.show('main-container', 'right');
+                    } catch (_) {
+                        // Fallback to manual class toggles if animation manager fails
+                        mainContainer.classList.remove('main-container--slide-out-to-right');
+                        mainContainer.classList.add('main-container--slide-in-from-right');
+                        requestAnimationFrame(() => {
+                            mainContainer.classList.remove('main-container--slide-in-from-right');
+                            mainContainer.classList.add('main-container--slide-in');
+                        });
+                    }
 
-                    // focus heading when animation finished (or fallback)
-                    const onEnd = (e) => {
-                        if (e.target !== mainContainer) return;
-                        mainContainer.removeEventListener('transitionend', onEnd);
-                        try { focusSectionHeading('calculator-page', 'h2'); } catch(_) {}
-                    };
-                    mainContainer.addEventListener('transitionend', onEnd);
-                    setTimeout(() => {
-                        try { mainContainer.removeEventListener('transitionend', onEnd); } catch(_) {}
-                        try { focusSectionHeading('calculator-page', 'h2'); } catch(_) {}
-                    }, 600);
+                    // focus heading after animation
+                    try { focusSectionHeading('calculator-page', 'h2'); } catch(_) {}
                 } else {
                     try { focusSectionHeading('calculator-page', 'h2'); } catch(_) {}
                 }
 
-                // Initialize calculator
+                // Initialize calculator (force re-init on each load)
                 try {
                     const mod = await import('./calculator.js');
-                    if (mod && typeof mod.initCalculator === 'function') {
-                        mod.initCalculator();
+                    if (mod) {
+                        if (typeof mod.resetCalculator === 'function') {
+                            try { mod.resetCalculator(); } catch(_) {}
+                        }
+                        if (typeof mod.initCalculator === 'function') {
+                            mod.initCalculator();
+                        }
                     }
                 } catch (err) {
                     console.error('Error initializing calculator:', err);
@@ -4257,22 +4262,29 @@ document.addEventListener('DOMContentLoaded', () => {
             if (prev) {
                 const mainContainer = document.getElementById('main-container');
                 if (mainContainer) {
-                    const onEndMain = (e) => {
-                        if (e.target !== mainContainer) return;
-                        mainContainer.removeEventListener('transitionend', onEndMain);
+                    // Prefer using mobileAnimations.hide for consistent behavior
+                    mobileAnimations.hide('main-container', 'right').then(() => {
                         try { sessionStorage.removeItem('prev_hash'); } catch(_) {}
                         try { sessionStorage.setItem('from_calculator', 'true'); } catch(_) {}
                         location.hash = prev;
-                    };
-                    mainContainer.addEventListener('transitionend', onEndMain);
-                    mainContainer.classList.add('main-container--slide-out-to-right');
-                    // safety fallback
-                    setTimeout(() => {
-                        try { mainContainer.removeEventListener('transitionend', onEndMain); } catch(_){ }
-                        try { sessionStorage.removeItem('prev_hash'); } catch(_) {}
-                        try { sessionStorage.setItem('from_calculator', 'true'); } catch(_) {}
-                        location.hash = prev;
-                    }, 600);
+                    }).catch(() => {
+                        // Fallback to manual animation if manager fails
+                        const onEndMain = (e) => {
+                            if (e.target !== mainContainer) return;
+                            mainContainer.removeEventListener('transitionend', onEndMain);
+                            try { sessionStorage.removeItem('prev_hash'); } catch(_) {}
+                            try { sessionStorage.setItem('from_calculator', 'true'); } catch(_) {}
+                            location.hash = prev;
+                        };
+                        mainContainer.addEventListener('transitionend', onEndMain);
+                        mainContainer.classList.add('main-container--slide-out-to-right');
+                        setTimeout(() => {
+                            try { mainContainer.removeEventListener('transitionend', onEndMain); } catch(_){ }
+                            try { sessionStorage.removeItem('prev_hash'); } catch(_) {}
+                            try { sessionStorage.setItem('from_calculator', 'true'); } catch(_) {}
+                            location.hash = prev;
+                        }, 600);
+                    });
                     return;
                 }
             }

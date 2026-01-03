@@ -9430,6 +9430,17 @@ img.img-error {
     transform: translateY(-2px);
 }
 
+/* Ensure dark theme overrides for specific service install header (more specific selector to win cascade) */
+.theme-dark #service-ac-install .service-page__header {
+    background: rgba(22,22,22,0.8);
+    border: 1px solid rgba(255,255,255,0.08);
+    color: var(--text-primary, #f0f0f0);
+    box-shadow: none;
+    border-radius: 20px;
+    padding: clamp(20px, 4vw, 32px);
+    text-align: center;
+}
+
 .theme-dark #service-ac-install .service-gallery__slider,
 .theme-dark #service-ac-install .service-gallery img {
     background: #000;

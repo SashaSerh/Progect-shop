@@ -364,8 +364,7 @@ export const translations = {
         "guarantee-text": "2 года на монтажные работы",
         "speed-title": "Скорость",
         "speed-text": "Монтаж за 2-4 часа",
-        "back-btn": "Назад",
-        "calculator-btn": "Калькулятор"
+        "back-btn": "Назад"
     },
     uk: {
         "site-title": "ClimaTech",
@@ -733,8 +732,7 @@ export const translations = {
         "guarantee-text": "2 роки на монтажні роботи",
         "speed-title": "Швидкість",
         "speed-text": "Монтаж за 2-4 години",
-        "back-btn": "Назад",
-        "calculator-btn": "Калькулятор"
+        "back-btn": "Назад"
     }
 };
 

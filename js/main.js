@@ -3825,6 +3825,8 @@ function setupHashRouting(initialLang) {
 
         // Calculator page route
         if (hash === '#calculator') {
+            // Ensure main-container not hidden before loading
+            try { setHiddenById('main-container', false); } catch(_) {}
             loadComponent('main-container', 'components/calculator-page.html').then(async () => {
                 // Hide other sections, show main-container
                 showSection('hero-container', false);

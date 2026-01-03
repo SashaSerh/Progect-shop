@@ -5235,6 +5235,32 @@ button:active, .btn:active, .fab:active, a:active {
     background: var(--background-color-secondary-hover);
 }
 
+.hero__cta-group {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.hero__cta--secondary {
+    background: rgba(37, 99, 235, 0.12);
+    color: var(--background-color-secondary);
+    border: 1.5px solid var(--background-color-secondary);
+    padding: 10px 20px;
+}
+
+.hero__cta--secondary:hover {
+    background: rgba(37, 99, 235, 0.2);
+}
+
+.hero__calculator-text {
+    font-size: 13px;
+    color: var(--muted-text);
+    margin-top: 8px;
+    font-style: italic;
+}
+
 /* Hero mobile typography adjustments */
 
 @media (max-width: 768px) {
@@ -5252,6 +5278,15 @@ button:active, .btn:active, .fab:active, a:active {
     .hero__cta {
         padding: 10px 20px;
         font-size: 14px;
+    }
+
+    .hero__cta-group {
+        gap: 10px;
+        margin-bottom: 12px;
+    }
+
+    .hero__calculator-text {
+        font-size: 12px;
     }
 }
 

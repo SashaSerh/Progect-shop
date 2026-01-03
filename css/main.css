@@ -7895,6 +7895,77 @@ body.nav-open { overflow:hidden; touch-action:none; }
   background-color: var(--color-primary-light);
 }
 
+.btn--glass {
+  position: relative;
+  background: rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(16px) saturate(1.4);
+  -webkit-backdrop-filter: blur(16px) saturate(1.4);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 14px;
+  box-shadow:
+      inset 0 1px 2px rgba(255, 255, 255, 0.25),
+      inset 0 -1px 2px rgba(0, 0, 0, 0.06),
+      0 4px 16px rgba(0, 0, 0, 0.12);
+  overflow: hidden;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+.btn--glass::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+      145deg,
+      rgba(255, 255, 255, 0.35) 0%,
+      rgba(255, 255, 255, 0.12) 35%,
+      transparent 55%,
+      rgba(0, 0, 0, 0.04) 75%,
+      rgba(0, 0, 0, 0.08) 100%
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
+.btn--glass::after {
+  content: '';
+  position: absolute;
+  inset: 2px;
+  border-radius: calc(14px - 2px);
+  box-shadow:
+      inset 1px 1px 3px rgba(255, 255, 255, 0.15),
+      inset -1px -1px 3px rgba(0, 0, 0, 0.05);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.btn--glass:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.28);
+  box-shadow:
+      inset 0 1px 2px rgba(255, 255, 255, 0.3),
+      inset 0 -1px 2px rgba(0, 0, 0, 0.08),
+      0 6px 20px rgba(0, 0, 0, 0.16);
+  transform: translateY(-2px);
+}
+
+.btn--glass:active:not(:disabled) {
+  transform: translateY(0) scale(0.97);
+  box-shadow:
+      inset 0 1px 1px rgba(255, 255, 255, 0.1),
+      inset 0 -1px 1px rgba(0, 0, 0, 0.1),
+      0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.theme-dark .btn--glass {
+  background: rgba(40, 40, 50, 0.55);
+  border-color: rgba(255, 255, 255, 0.12);
+  color: var(--nav-text-color, #f0f0f0);
+}
+
+.theme-dark .btn--glass:hover:not(:disabled) {
+  background: rgba(60, 60, 75, 0.65);
+}
+
 /* Button Sizes */
 .btn--xs {
   padding: var(--spacing-xs) var(--spacing-sm);

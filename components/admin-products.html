@@ -7,7 +7,10 @@
         <span class="admin-breadcrumbs__current" data-i18n="admin-breadcrumbs-current">Админ: Товары</span>
       </nav>
       <div class="admin-page__actions">
-        <a href="#products" class="btn btn--ghost" aria-label="Назад в каталог" data-i18n="admin-back">← Назад</a>
+        <a href="#products" class="back-to-main" aria-label="Назад в каталог" data-i18n="admin-back" title="Назад в каталог">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          <span data-i18n="admin-back">Назад</span>
+        </a>
         <button id="adminExportBtn" type="button" class="btn" data-i18n="admin-export-json">Экспорт JSON</button>
         <label class="btn btn--secondary" for="adminImportInput" data-i18n="admin-import-json">Импорт JSON</label>
         <input id="adminImportInput" type="file" accept="application/json" hidden>

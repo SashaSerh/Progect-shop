@@ -1,6 +1,5 @@
 <section class="case fade-in-section" id="case-3">
   <div class="container">
-    <a href="#portfolio" class="back-to-main btn btn--ghost glass" aria-label="Назад" title="Назад">←</a>
     <h2 class="case__title" data-i18n="portfolio-item-3-title">Сезонное обслуживание</h2>
     <p class="case__summary" data-i18n="portfolio-item-3-description">Очистка теплообменника, диагностика узлов, гарантия — 6 месяцев.</p>
     <div class="case__content service-card-surface">
@@ -13,7 +12,12 @@
     <div class="case__actions">
       <a href="#contacts" class="btn btn--primary" data-i18n="cta-call">Позвонить</a>
       <a href="#reviews" class="btn" data-i18n="reviews-title">Отзывы клиентов</a>
-      <a href="#portfolio" class="btn btn--ghost" data-i18n="back-to-portfolio">Назад к работам</a>
+      <a href="#portfolio" class="back-to-main" aria-label="Назад" title="Назад">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M19 12H5M12 19l-7-7 7-7"/>
+        </svg>
+        <span>Назад</span>
+      </a>
     </div>
   </div>
 </section>

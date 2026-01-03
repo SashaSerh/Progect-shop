@@ -9150,3 +9150,28 @@ img.img-error {
     background: rgba(59,130,246,0.12);
     color: var(--accent-color, #3b82f6);
 }
+
+/* Dark theme: make card surfaces fully black for service-ac-install */
+.theme-dark #service-ac-install .service-page__header,
+.theme-dark #service-ac-install .service-page__content,
+.theme-dark #service-ac-install .service-benefits__item,
+.theme-dark #service-ac-install .service-page__banner,
+.theme-dark #service-ac-install .service-page__gallery,
+.theme-dark #service-ac-install .service-page__cta {
+    background: #000;
+    border-color: rgba(255,255,255,0.06);
+    box-shadow: none;
+}
+
+.theme-dark #service-ac-install .service-gallery__slider,
+.theme-dark #service-ac-install .service-gallery img {
+    background: #000;
+}
+
+.theme-dark #service-ac-install .service-benefits__item {
+    background: rgba(255,255,255,0.02);
+}
+
+.theme-dark #service-ac-install .service-page__banner img {
+    filter: brightness(0.95) contrast(0.95);
+}

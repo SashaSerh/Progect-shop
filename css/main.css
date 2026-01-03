@@ -1841,17 +1841,17 @@ html { scroll-behavior: smooth; }
 .length-inputs {
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 12px; /* более компактная группа */
 }
 
 .length-input-group {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 12px;
-    padding: 12px 16px;
+    gap: 10px;
+    padding: 10px 12px; /* уменьшенная обводка для компактности */
     background: var(--surface-alt, #f9fafb);
-    border-radius: 14px;
+    border-radius: 12px; /* согласовано с темной темой */
     border: 1px solid var(--border, #e5e7eb);
     margin-bottom: 12px
 }
@@ -1865,17 +1865,17 @@ html { scroll-behavior: smooth; }
 .length-input-wrapper {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px; /* чуть меньше расстояние между контролами */
 }
 
 .length-btn {
-    width: 36px;
-    height: 36px;
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
     border: 1px solid var(--border, #e5e7eb);
     background: var(--surface, #fff);
     color: var(--text, #111);
-    font-size: 1.2rem;
+    font-size: 1rem;
     font-weight: 600;
     display: flex;
     align-items: center;
@@ -1891,16 +1891,16 @@ html { scroll-behavior: smooth; }
 }
 
 .length-btn:active {
-    transform: scale(0.92);
+    transform: scale(0.96);
 }
 
 .length-input {
-    width: 64px;
-    height: 36px;
+    width: 56px;
+    height: 32px;
     text-align: center;
     border: 1px solid var(--border, #e5e7eb);
-    border-radius: 10px;
-    font-size: 1rem;
+    border-radius: 8px;
+    font-size: 0.95rem;
     font-weight: 600;
     color: var(--text, #111);
     background: var(--surface, #fff);
@@ -1909,7 +1909,7 @@ html { scroll-behavior: smooth; }
 .length-input:focus {
     outline: none;
     border-color: var(--primary, #2563eb);
-    box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
+    box-shadow: 0 0 0 3px rgba(37,99,235,0.08);
 }
 
 .length-unit {

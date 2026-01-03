@@ -5423,9 +5423,10 @@ button:active, .btn:active, .fab:active, a:active {
     border-radius: 12px;
     text-decoration: none;
     color: var(--text-primary, #111827);
-    transition: background 0.12s ease, transform 0.08s ease;
+    transition: background 0.12s ease;
 }
 
+/* Icon stays static on the left */
 .main-nav-mobile__icon {
     flex-shrink: 0;
     width: 40px;
@@ -5444,14 +5445,34 @@ button:active, .btn:active, .fab:active, a:active {
     height: 20px;
 }
 
+/* Hover should not move icons; apply subtle background only */
 .main-nav-mobile__link:hover {
-    background: rgba(37, 99, 235, 0.06);
-    transform: translateY(-1px);
+    background: rgba(37, 99, 235, 0.03);
 }
 
+/* Text is centered in the available space with underline */
 .main-nav-mobile__text {
     font-weight: 600;
     font-size: 15px;
+    flex: 1;
+    text-align: center;
+    position: relative;
+    padding-bottom: 6px; /* space for underline */
+}
+
+/* Underline that adapts to theme (uses currentColor) */
+.main-nav-mobile__text::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 0;
+    height: 1px;
+    width: auto;
+    min-width: 36px;
+    max-width: 100%;
+    background: currentColor;
+    opacity: 0.18;
 }
 
 /* Dark theme */
@@ -5466,7 +5487,7 @@ button:active, .btn:active, .fab:active, a:active {
 }
 
 .theme-dark .main-nav-mobile__link:hover {
-    background: rgba(59, 130, 246, 0.08);
+    background: rgba(59, 130, 246, 0.03);
 }
 
 .theme-dark .main-nav-mobile__icon {

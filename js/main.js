@@ -5339,21 +5339,25 @@ function showServicesList(navList) {
         const servicesHTML = `
             <li class="main-nav-mobile__item">
                 <a href="#service-ac-install" class="main-nav-mobile__link">
+                    <span class="main-nav-mobile__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 6h18M3 12h12M3 18h18"/></svg></span>
                     <span class="main-nav-mobile__text" data-i18n="service-ac-install-title">Монтаж кондиционеров</span>
                 </a>
             </li>
             <li class="main-nav-mobile__item">
                 <a href="#service-recuperator-install" class="main-nav-mobile__link">
+                    <span class="main-nav-mobile__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 6h16M4 12h16M4 18h16"/></svg></span>
                     <span class="main-nav-mobile__text" data-i18n="service-recuperator-install-title">Монтаж рекуператоров</span>
                 </a>
             </li>
             <li class="main-nav-mobile__item">
                 <a href="#service-maintenance" class="main-nav-mobile__link">
+                    <span class="main-nav-mobile__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2v6M12 16v6M4 12h6M14 12h6"/></svg></span>
                     <span class="main-nav-mobile__text" data-i18n="service-maintenance-title">Обслуживание систем</span>
                 </a>
             </li>
             <li class="main-nav-mobile__item">
                 <a href="#back-to-menu" class="main-nav-mobile__link main-nav-mobile__link--back">
+                    <span class="main-nav-mobile__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg></span>
                     <span class="main-nav-mobile__text">← Назад к меню</span>
                 </a>
             </li>
@@ -5382,31 +5386,37 @@ function restoreMainMenu(navList) {
         const menuHTML = `
             <li class="main-nav-mobile__item">
                 <a href="#services-page" class="main-nav-mobile__link">
+                    <span class="main-nav-mobile__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 6h16M4 12h16M4 18h16"/></svg></span>
                     <span class="main-nav-mobile__text" data-i18n="nav-services">Услуги</span>
                 </a>
             </li>
             <li class="main-nav-mobile__item">
                 <a href="#portfolio-page" class="main-nav-mobile__link">
+                    <span class="main-nav-mobile__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="5" width="18" height="14" rx="2"/></svg></span>
                     <span class="main-nav-mobile__text" data-i18n="nav-portfolio">Наши работы</span>
                 </a>
             </li>
             <li class="main-nav-mobile__item">
                 <a href="#reviews-page" class="main-nav-mobile__link">
+                    <span class="main-nav-mobile__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 17.3L5.3 21l1-6.1L1 9.5l6.2-.9L12 3l2.8 5.6 6.2.9-4.3 5.4 1 6.1z"/></svg></span>
                     <span class="main-nav-mobile__text" data-i18n="nav-reviews">Отзывы клиентов</span>
                 </a>
             </li>
             <li class="main-nav-mobile__item">
                 <a href="#faq-page" class="main-nav-mobile__link">
+                    <span class="main-nav-mobile__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 9a3 3 0 016 0c0 3-3 3-3 6"/><circle cx="12" cy="20" r="1"/></svg></span>
                     <span class="main-nav-mobile__text" data-i18n="nav-faq">Вопросы и ответы</span>
                 </a>
             </li>
             <li class="main-nav-mobile__item">
                 <a href="#about" class="main-nav-mobile__link">
+                    <span class="main-nav-mobile__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/></svg></span>
                     <span class="main-nav-mobile__text" data-i18n="nav-about">О нас</span>
                 </a>
             </li>
             <li class="main-nav-mobile__item">
                 <a href="#contacts" class="main-nav-mobile__link">
+                    <span class="main-nav-mobile__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 16.92V21a1 1 0 0 1-1 1 19 19 0 0 1-18-18 1 1 0 0 1 1-1h4.09a1 1 0 0 1 1 .75 12.79 12.79 0 0 0 .7 2.65 1 1 0 0 1-.23 1L8 9.91a16 16 0 0 0 6.09 6.09l1.5-1.5a1 1 0 0 1 1-.23c.92.25 1.93.53 2.65.7A1 1 0 0 1 22 16.92z"/></svg></span>
                     <span class="main-nav-mobile__text" data-i18n="nav-contacts">Контакты</span>
                 </a>
             </li>
@@ -5424,4 +5434,10 @@ function restoreMainMenu(navList) {
             });
         });
     }, 250);
+}
+
+// expose helpers for testing
+if (typeof window !== 'undefined') {
+    window.showServicesList = showServicesList;
+    window.restoreMainMenu = restoreMainMenu;
 }

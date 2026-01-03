@@ -116,6 +116,51 @@
 /* Dark theme overrides - Enhanced toning for better visual hierarchy */
 .theme-dark {
   /* Primary surface layers with warm blue tint for reduced eye strain */
+}
+
+/* ========================================
+   Utility helpers: Vertical/Horizontal stacks and gaps
+   ======================================== */
+
+/* .stack: vertical flow, uses gap if supported; fallback to adjacent sibling margin */
+.stack {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+.stack > * + * {
+    /* fallback for browsers without flex gap */
+    margin-top: var(--spacing-md);
+}
+
+/* Horizontal stack */
+.hstack {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+.hstack > * + * { margin-left: var(--spacing-md); }
+
+/* Gap size modifiers */
+.gap-xs { gap: var(--spacing-xs) !important; }
+.gap-sm { gap: var(--spacing-sm) !important; }
+.gap-md { gap: var(--spacing-md) !important; }
+.gap-lg { gap: var(--spacing-lg) !important; }
+.gap-xl { gap: var(--spacing-xl) !important; }
+
+/* Fallbacks for sibling margins when gap modifiers are used */
+.gap-xs > * + * { margin-top: var(--spacing-xs); }
+.gap-sm > * + * { margin-top: var(--spacing-sm); }
+.gap-md > * + * { margin-top: var(--spacing-md); }
+.gap-lg > * + * { margin-top: var(--spacing-lg); }
+.gap-xl > * + * { margin-top: var(--spacing-xl); }
+
+/* Ensure horizontal gap fallbacks */
+.hstack.gap-xs > * + * { margin-left: var(--spacing-xs); }
+.hstack.gap-sm > * + * { margin-left: var(--spacing-sm); }
+.hstack.gap-md > * + * { margin-left: var(--spacing-md); }
+.hstack.gap-lg > * + * { margin-left: var(--spacing-lg); }
+.hstack.gap-xl > * + * { margin-left: var(--spacing-xl); }
   --surface-0: #0f1419;          /* Pure black background */
   --surface-1: #28292d;          /* Deep navy for cards and elevated surfaces */
   --surface-2: #252d3d;          /* Mid navy for secondary surfaces */
@@ -4817,7 +4862,7 @@ button:active, .btn:active, .fab:active, a:active {
 }
 
 .hero {
-    padding: 40px 0;
+    padding: 2px 0;
     /* Full width - counteract body padding */
     margin-left: calc(-1 * var(--body-gutter, 0px));
     margin-right: calc(-1 * var(--body-gutter, 0px));
@@ -5391,6 +5436,89 @@ button:active, .btn:active, .fab:active, a:active {
     box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
 }
 
+/* Main nav mobile card styling */
+.main-nav-mobile-card {
+    width: 100%;
+    margin-top: 20px;
+    padding: 16px 18px;
+    border-radius: 18px;
+    background: var(--surface, #fff);
+    border: 1px solid var(--border, #e6e9ef);
+    box-shadow: 0 6px 24px rgba(0,0,0,0.04);
+}
+
+.main-nav-mobile-card__inner {
+    max-width: var(--container-width);
+    margin: 0 auto;
+}
+
+.main-nav-mobile__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.main-nav-mobile__link {
+    display: flex;
+    align-items: center;
+    padding: 12px 14px;
+    border-radius: 12px;
+    text-decoration: none;
+    color: var(--text-primary, #111827);
+    transition: background 0.12s ease, transform 0.08s ease;
+}
+
+.main-nav-mobile__icon {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    background: rgba(37,99,235,0.06);
+    margin-right: 12px;
+    color: var(--accent-color, #2563eb);
+}
+
+.main-nav-mobile__icon svg {
+    width: 20px;
+    height: 20px;
+}
+
+.main-nav-mobile__link:hover {
+    background: rgba(37, 99, 235, 0.06);
+    transform: translateY(-1px);
+}
+
+.main-nav-mobile__text {
+    font-weight: 600;
+    font-size: 15px;
+}
+
+/* Dark theme */
+.theme-dark .main-nav-mobile-card {
+    background: linear-gradient(180deg, rgba(15, 23, 42, 0.95), rgba(17, 24, 39, 0.94));
+    border-color: rgba(255,255,255,0.04);
+    box-shadow: 0 6px 24px rgba(0,0,0,0.5);
+}
+
+.theme-dark .main-nav-mobile__link {
+    color: var(--text-primary, #f8fafc);
+}
+
+.theme-dark .main-nav-mobile__link:hover {
+    background: rgba(59, 130, 246, 0.08);
+}
+
+.theme-dark .main-nav-mobile__icon {
+    background: rgba(59,130,246,0.08);
+    color: #60a5fa;
+}
+
 /* Hero mobile typography adjustments */
 
 @media (max-width: 768px) {
@@ -5409,7 +5537,62 @@ button:active, .btn:active, .fab:active, a:active {
         padding: 10px 20px;
         font-size: 14px;
     }
+
+    /* hero header card responsive */
+    .hero-header-card {
+        padding: 16px;
+        border-radius: 14px;
+    }
+
+    /* Mobile main nav card responsive */
+    .main-nav-mobile-card {
+        margin-top: 18px;
+        padding: 12px;
+        border-radius: 14px;
+    }
 }
+
+/* ========================================
+   Hero Header Card (title + subtitle)
+   ======================================== */
+.hero-header-card {
+    display: block;
+    width: 100%;
+    margin: 12px 0 0 0;
+    padding: 20px 24px;
+    border-radius: 20px;
+    background: var(--surface, #ffffff);
+    border: 1px solid var(--border, #e5e7eb);
+    box-shadow: 0 6px 24px rgba(0,0,0,0.04);
+}
+
+.hero-header-card__inner {
+    max-width: var(--container-width);
+    margin: 0 auto;
+}
+
+.hero__title {
+    font-size: clamp(28px, 5vw, 34px);
+    font-weight: 700;
+    margin: 0 0 6px 0;
+    color: var(--text-primary, #111827);
+}
+
+.hero__subtitle {
+    font-size: clamp(15px, 3vw, 17px);
+    color: var(--text-secondary, #6b7280);
+    margin: 0;
+}
+
+/* dark theme variants */
+.theme-dark .hero-header-card {
+    background: linear-gradient(180deg, rgba(15, 23, 42, 0.95), rgba(17, 24, 39, 0.94));
+    border-color: rgba(255,255,255,0.06);
+    box-shadow: 0 6px 24px rgba(0,0,0,0.5);
+}
+
+.theme-dark .hero__title { color: var(--text-primary, #f8fafc); }
+.theme-dark .hero__subtitle { color: var(--text-secondary, #94a3b8); }
 
 .services {
     padding: 40px 0;

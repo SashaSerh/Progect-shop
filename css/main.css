@@ -8293,8 +8293,9 @@ body.nav-open { overflow:hidden; touch-action:none; }
   backdrop-filter: blur(4px);
 }
 
-.modal-backdrop--visible {
+..modal-backdrop--visible {
   opacity: 1;
+  pointer-events: auto;
 }
 
 .modal {
@@ -8313,11 +8314,13 @@ body.nav-open { overflow:hidden; touch-action:none; }
   opacity: 0;
   transition: all var(--transition-normal);
   border: 1px solid var(--border-color);
+  pointer-events: none; /* prevent invisible overlay from intercepting events */
 }
 
 .modal--visible {
   opacity: 1;
   transform: translate(-50%, -50%) scale(1);
+  pointer-events: auto;
 }
 
 .modal--sm {

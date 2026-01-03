@@ -9296,6 +9296,28 @@ img.img-error {
 .theme-dark .info-card:hover,
 .theme-dark .calculator-info-card:hover { box-shadow: 0 6px 18px rgba(0,0,0,0.45); }
 
+/* Calculator info cards - dark theme */
+.theme-dark .calculator-info {
+    background: var(--calc-card-surface-alt);
+    border-top: 1px solid rgba(255,255,255,0.04);
+}
+
+.theme-dark .calculator-info-card,
+.theme-dark .calculator-info-card__content,
+.theme-dark .info-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    color: var(--text-primary, #f0f0f0);
+    box-shadow: none;
+}
+
+.theme-dark .calculator-info-card__icon {
+    background: rgba(59,130,246,0.06);
+    color: var(--accent-color, #3b82f6);
+}
+
+.theme-dark .calculator-info-card:hover { box-shadow: 0 6px 18px rgba(29,78,216,0.06); }
+
 /* Ensure accessible focus in dark theme */
 .theme-dark .btn:focus-visible,
 .theme-dark .back-to-main:focus-visible { box-shadow: 0 0 0 4px rgba(59,130,246,0.12); outline: none; }

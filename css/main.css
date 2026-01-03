@@ -9175,3 +9175,52 @@ img.img-error {
 .theme-dark #service-ac-install .service-page__banner img {
     filter: brightness(0.95) contrast(0.95);
 }
+
+/* Dark theme overrides for Calculator page card surfaces */
+.theme-dark .calculator-page__header,
+.theme-dark .calculator-form-wrapper,
+.theme-dark .calculator-result-wrapper,
+.theme-dark .calculator-info-card,
+.theme-dark .calculator-info-cards,
+.theme-dark .calculator-page,
+.theme-dark .calculator-cta {
+    background: #000;
+    border-color: rgba(255,255,255,0.06);
+    box-shadow: none;
+    color: var(--text-primary, #f0f0f0);
+}
+
+.theme-dark .calculator-page__header {
+    border-radius: 20px; /* keep same radius */
+}
+
+.theme-dark .calculator-page__icon {
+    background: rgba(59,130,246,0.08);
+    color: var(--accent-color, #3b82f6);
+}
+
+.theme-dark .calculator-info-card,
+.theme-dark .calculator-info-card .calculator-info-card__content,
+.theme-dark .info-card {
+    background: rgba(255,255,255,0.02);
+    border-color: rgba(255,255,255,0.06);
+}
+
+.theme-dark .calculator-order-btn {
+    box-shadow: none;
+}
+
+/* Ensure text in calculator sections is readable */
+.theme-dark .calculator-page__title,
+.theme-dark .calculator-page__subtitle,
+.theme-dark .calculator-form-wrapper,
+.theme-dark .calculator-form-wrapper p,
+.theme-dark .calculator-result {
+    color: var(--text-primary, #f0f0f0);
+}
+
+/* Slightly dim images in gallery to match dark surface */
+.theme-dark .service-gallery__slide img,
+.theme-dark .calculator-page__banner img {
+    filter: brightness(0.9) contrast(0.95);
+}

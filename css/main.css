@@ -2,36 +2,6 @@
    DESIGN SYSTEM TOKENS (Spacing, Typography, Colors, Shadows)
    ======================================== */
 :root {
-
-}
-
-/* Global site background underlay — placed at the very back (lowest z-index) */
-.site-bg {
-    position: fixed;
-    inset: 0;
-    z-index: -1; /* lowest layer */
-    pointer-events: none;
-    background: var(--site-bg-overlay);
-    opacity: var(--site-bg-opacity, 1);
-    transition: opacity .25s ease;
-}
-
-/* Use backdrop-filter when available for true blur effect */
-@supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
-    .site-bg {
-        background: var(--site-bg-overlay);
-        backdrop-filter: blur(var(--site-bg-blur)) saturate(1.05);
-        -webkit-backdrop-filter: blur(var(--site-bg-blur)) saturate(1.05);
-    }
-}
-
-/* Dark theme variant */
-.theme-dark .site-bg { background: var(--site-bg-overlay-dark); }
-
-/* Respect reduced transparency preference */
-@media (prefers-reduced-transparency: reduce) {
-    .site-bg { backdrop-filter: none; -webkit-backdrop-filter: none; }
-}
   /* Spacing Scale */
   --spacing-xs: 4px;
   --spacing-sm: 8px;
@@ -88,11 +58,6 @@
   --color-success: #10B981;
   --color-success-light: #D1F4E8;
   
-  /* Global background underlay (site-bg) */
-  --site-bg-blur: 8px; /* blur radius applied when backdrop-filter is supported */
-  --site-bg-overlay: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.02));
-  --site-bg-overlay-dark: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.06));
-  --site-bg-opacity: 1;
   --color-error: #EF4444;
   --color-error-light: #FEE2E2;
   
@@ -9391,18 +9356,23 @@ img.img-error {
     color: var(--accent-color, #3b82f6);
 }
 
-/* Dark theme: make card surfaces fully black for service-ac-install */
+/* Dark theme: make card surfaces fully black for service-ac-install + portfolio header */
 .theme-dark .service-card-surface .service-page__header,
 .theme-dark .service-card-surface .service-page__content,
 .theme-dark .service-card-surface .service-benefits__item,
 .theme-dark .service-card-surface .service-page__banner,
 .theme-dark .service-card-surface .service-page__gallery,
-.theme-dark .service-card-surface .service-page__cta {
+.theme-dark .service-card-surface .service-page__cta,
+.theme-dark .service-card-surface.portfolio-header-card {
     background: #000;
     border-color: rgba(255,255,255,0.06);
     box-shadow: none;
 }
 
+/* Dark theme: portfolio header title color */
+.theme-dark .service-card-surface.portfolio-header-card .portfolio__title {
+    color: var(--text-primary, #f0f0f0);
+}
 .theme-dark .service-card-surface .service-benefits__item:hover {
     background: linear-gradient(180deg, rgba(255,255,255,0.07), rgba(59,130,246,0.05));
     border-color: rgba(59,130,246,0.10);

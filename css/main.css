@@ -9227,10 +9227,10 @@ img.img-error {
 
 /* Refined dark shades for calculator elements — soft contrast */
 .theme-dark {
-    --calc-card-bg: #070707; /* deep black base for cards */
-    --calc-card-surface-alt: rgba(255,255,255,0.02); /* subtle surface contrast */
-    --calc-card-border: rgba(255,255,255,0.06);
-    --calc-muted-text: rgba(255,255,255,0.72);
+    --calc-card-bg: #0f0f0f; /* slightly lighter deep black for cards */
+    --calc-card-surface-alt: rgba(255,255,255,0.03); /* a bit more surface contrast */
+    --calc-card-border: rgba(255,255,255,0.08);
+    --calc-muted-text: rgba(255,255,255,0.75);
     --calc-accent-weak: rgba(59,130,246,0.06);
     --calc-accent-medium: rgba(59,130,246,0.12);
     --calc-accent-strong: rgba(59,130,246,0.18);

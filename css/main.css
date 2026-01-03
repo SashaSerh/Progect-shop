@@ -9247,10 +9247,15 @@ img.img-error {
 /* Specific padding for portfolio header card to make title stand out */
 .service-card-surface.portfolio-header-card .portfolio__header {
     padding: 6px 0 0 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
 }
 
 .service-card-surface.portfolio-header-card .portfolio__title {
     margin: 0;
+    width: 100%;
 }
 
 /* Ensure the content block has rounded bottom corners and clips children */

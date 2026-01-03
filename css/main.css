@@ -2358,7 +2358,13 @@ html { scroll-behavior: smooth; }
   .case__actions a[data-i18n="back-to-portfolio"],
   .admin-page__actions a[data-i18n="admin-back"],
   .product-detail__back,
-  .about .back-to-main {
+  .about .back-to-main,
+  .reviews .back-to-main,
+  .faq .back-to-main,
+  .contacts .back-to-main,
+  .reviews__back a,
+  .faq__back a,
+  .contacts__back a {
     display: inline-flex;
     align-items: center;
     gap: 8px;

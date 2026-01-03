@@ -6499,23 +6499,6 @@ textarea.form-input { resize: vertical; min-height: 120px; }
     text-overflow: ellipsis;
     overflow-wrap: anywhere;
 }
-
-/* Portfolio card header: when the portfolio title is placed inside a card */
-.service-card-surface .portfolio__header {
-    margin-bottom: 8px;
-}
-
-.service-card-surface .portfolio__title {
-    font-size: clamp(1.25rem, 3.5vw, 1.75rem);
-    font-weight: 700;
-    color: var(--text, #111);
-    margin: 0 0 8px 0;
-}
-
-/* Ensure the portfolio grid inside the card inherits padding correctly */
-.service-card-surface > .portfolio__grid {
-    padding-top: 8px;
-}
 .portfolio__item-description {
     font-size: 14px;
     margin: 0 12px 12px;
@@ -9251,13 +9234,23 @@ img.img-error {
 .service-card-surface .service-page__content,
 .service-card-surface .service-page__gallery,
 .service-card-surface .service-page__cta,
-.service-card-surface > .portfolio__grid {
+.service-card-surface > .portfolio__grid,
+.service-card-surface.portfolio-header-card {
     background: var(--surface, #fff);
     border: 1px solid var(--border, #e5e7eb);
     border-radius: 16px;
     box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
     padding: clamp(16px, 3vw, 24px);
     margin-bottom: 16px;
+}
+
+/* Specific padding for portfolio header card to make title stand out */
+.service-card-surface.portfolio-header-card .portfolio__header {
+    padding: 6px 0 0 0;
+}
+
+.service-card-surface.portfolio-header-card .portfolio__title {
+    margin: 0;
 }
 
 /* Ensure the content block has rounded bottom corners and clips children */

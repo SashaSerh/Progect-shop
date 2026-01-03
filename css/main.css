@@ -9274,6 +9274,31 @@ img.img-error {
     width: 100%;
 }
 
+/* Reviews header card */
+.service-card-surface.reviews-header-card {
+    padding: clamp(12px, 3vw, 20px);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.service-card-surface.reviews-header-card .reviews__title {
+    margin: 0;
+    font-size: clamp(1.25rem, 3.5vw, 1.5rem);
+}
+
+.theme-dark .service-card-surface.reviews-header-card {
+    background: #000;
+    border: 1px solid rgba(255,255,255,0.06);
+    color: var(--text-primary, #f0f0f0);
+}
+
+.theme-dark .service-card-surface.reviews-header-card .reviews__title {
+    color: var(--text-primary, #f0f0f0);
+}
+
 /* Reviews card: align with other service-card surfaces */
 .service-card-surface.reviews-card {
     padding: clamp(12px, 3vw, 20px);

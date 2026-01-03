@@ -2,6 +2,36 @@
    DESIGN SYSTEM TOKENS (Spacing, Typography, Colors, Shadows)
    ======================================== */
 :root {
+
+}
+
+/* Global site background underlay — placed at the very back (lowest z-index) */
+.site-bg {
+    position: fixed;
+    inset: 0;
+    z-index: -1; /* lowest layer */
+    pointer-events: none;
+    background: var(--site-bg-overlay);
+    opacity: var(--site-bg-opacity, 1);
+    transition: opacity .25s ease;
+}
+
+/* Use backdrop-filter when available for true blur effect */
+@supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+    .site-bg {
+        background: var(--site-bg-overlay);
+        backdrop-filter: blur(var(--site-bg-blur)) saturate(1.05);
+        -webkit-backdrop-filter: blur(var(--site-bg-blur)) saturate(1.05);
+    }
+}
+
+/* Dark theme variant */
+.theme-dark .site-bg { background: var(--site-bg-overlay-dark); }
+
+/* Respect reduced transparency preference */
+@media (prefers-reduced-transparency: reduce) {
+    .site-bg { backdrop-filter: none; -webkit-backdrop-filter: none; }
+}
   /* Spacing Scale */
   --spacing-xs: 4px;
   --spacing-sm: 8px;
@@ -58,6 +88,11 @@
   --color-success: #10B981;
   --color-success-light: #D1F4E8;
   
+  /* Global background underlay (site-bg) */
+  --site-bg-blur: 8px; /* blur radius applied when backdrop-filter is supported */
+  --site-bg-overlay: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.02));
+  --site-bg-overlay-dark: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.06));
+  --site-bg-opacity: 1;
   --color-error: #EF4444;
   --color-error-light: #FEE2E2;
   
@@ -111,11 +146,7 @@
   
   /* Body gutter (side padding) - responsive */
   --body-gutter: 0px;
-
-  /* Global backdrop blur for main background overlay (use small values for performance) */
-  --global-backdrop-blur: 6px; /* used in body overlay */
-  --global-backdrop-color: rgba(255,255,255,0.02);
-} 
+}
 
 /* Dark theme overrides - Enhanced toning for better visual hierarchy */
 .theme-dark {
@@ -124,10 +155,6 @@
   --surface-1: #28292d;          /* Deep navy for cards and elevated surfaces */
   --surface-2: #252d3d;          /* Mid navy for secondary surfaces */
   --surface-3: #0000008a;          /* Light navy for interactive surfaces */
-
-  /* Backdrop tweaks for dark theme */
-  --global-backdrop-color: rgba(0,0,0,0.06);
-  --global-backdrop-blur: 8px;
   
   /* Enhanced borders with subtle tint */
   --border-color: #404a5c;       /* Subtle navy-tinted border */
@@ -1558,31 +1585,6 @@ html { scroll-behavior: smooth; }
     .confirm-modal__panel { width: min(96vw, 460px); padding: 24px 20px 20px; }
     .confirm-modal__actions { flex-wrap:wrap; }
     .confirm-modal__actions .btn { flex:1 1 auto; }
-}
-
-/* Global background overlay with backdrop blur (feature-detected). */
-@supports ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
-  body::before {
-    content: "";
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    background: var(--global-backdrop-color, rgba(255,255,255,0.02));
-    backdrop-filter: blur(var(--global-backdrop-blur, 6px));
-    -webkit-backdrop-filter: blur(var(--global-backdrop-blur, 6px));
-    z-index: 50;
-  }
-
-  /* Ensure main structural layers render above the backdrop overlay */
-  header, .container, .main, #main-container, .service-card-surface, .portfolio, .case {
-    position: relative;
-    z-index: 100;
-  }
-
-  /* Respect reduced-transparency and reduced-motion preferences */
-  @media (prefers-reduced-transparency: reduce), (prefers-reduced-motion: reduce) {
-    body::before { backdrop-filter: none; -webkit-backdrop-filter: none; background: transparent; }
-  }
 }
 
 /* Reviews block */

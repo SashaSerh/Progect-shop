@@ -6499,6 +6499,23 @@ textarea.form-input { resize: vertical; min-height: 120px; }
     text-overflow: ellipsis;
     overflow-wrap: anywhere;
 }
+
+/* Portfolio card header: when the portfolio title is placed inside a card */
+.service-card-surface .portfolio__header {
+    margin-bottom: 8px;
+}
+
+.service-card-surface .portfolio__title {
+    font-size: clamp(1.25rem, 3.5vw, 1.75rem);
+    font-weight: 700;
+    color: var(--text, #111);
+    margin: 0 0 8px 0;
+}
+
+/* Ensure the portfolio grid inside the card inherits padding correctly */
+.service-card-surface > .portfolio__grid {
+    padding-top: 8px;
+}
 .portfolio__item-description {
     font-size: 14px;
     margin: 0 12px 12px;

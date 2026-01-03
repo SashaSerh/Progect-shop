@@ -9318,6 +9318,45 @@ img.img-error {
 
 .theme-dark .calculator-info-card:hover { box-shadow: 0 6px 18px rgba(29,78,216,0.06); }
 
+/* Form length input group - dark theme */
+.theme-dark .length-input-group {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.04);
+    border-radius: 12px;
+    padding: 10px 12px;
+}
+
+.theme-dark .length-input-group .length-input {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    color: var(--text-primary, #f0f0f0);
+}
+
+.theme-dark .length-input-group .length-btn {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    color: var(--text-primary, #f0f0f0);
+}
+
+.theme-dark .length-input-group .length-btn:hover {
+    background: rgba(59,130,246,0.08);
+    color: #fff;
+    border-color: rgba(59,130,246,0.12);
+}
+
+.theme-dark .length-input:focus {
+    outline: none;
+    box-shadow: 0 0 0 4px rgba(59,130,246,0.08);
+    border-color: rgba(59,130,246,0.18);
+}
+
+/* Small polish for extra length area */
+.theme-dark .extra-length {
+    background: rgba(255,255,255,0.02);
+    border-radius: 10px;
+    padding: 10px;
+}
+
 /* Ensure accessible focus in dark theme */
 .theme-dark .btn:focus-visible,
 .theme-dark .back-to-main:focus-visible { box-shadow: 0 0 0 4px rgba(59,130,246,0.12); outline: none; }

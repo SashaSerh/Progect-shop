@@ -3686,6 +3686,7 @@ function showSection(id, show) {
 
     // Анімований show/hide для main-container
     if (id === 'main-container') {
+        console.log(`showSection main-container show=${show}, classes: ${el.className}, hidden attr: ${el.hasAttribute('hidden')}`);
         if (show) {
             console.log('Showing main-container');
             el.dataset.lastShownAt = String(Date.now());
@@ -4032,6 +4033,14 @@ function setupHashRouting(initialLang) {
                 showSection('admin-page-container', false);
                 showSection('mobile-main-nav-container', false); // Hide mobile navigation menu
                 showSection('main-container', true);
+                // Force show
+                const mainEl = document.getElementById('main-container');
+                if (mainEl) {
+                    mainEl.style.display = 'block';
+                    mainEl.style.opacity = '1';
+                    mainEl.classList.remove('is-hidden');
+                    mainEl.classList.add('is-visible');
+                }
 
                 // Додаємо swipe-анімацію для about page на мобільних
                 try {

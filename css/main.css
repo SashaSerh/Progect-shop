@@ -1996,22 +1996,14 @@ html { scroll-behavior: smooth; }
     color: var(--text-secondary, #666);
 }
 
-/* Extras Grid */
-.extras-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
+/* Extras items using same flex layout as length inputs */
 
 .extra-item {
-    padding: 8px 10px;
-    background: var(--surface-alt, #f9fafb);
-    border: 1px solid var(--border, #e5e7eb);
-    border-radius: 10px;
-    transition: all var(--motion-duration-normal, 0.3s) var(--motion-ease-standard, ease);
     display: flex;
     align-items: center;
-    gap: 12px;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 10px 0;
 }
 
 .extra-item--active {
@@ -2442,10 +2434,6 @@ html { scroll-behavior: smooth; }
     .power-cards {
         grid-template-columns: repeat(3, 1fr);
     }
-    
-    .extras-grid {
-        grid-template-columns: 1fr 1fr;
-    }
 }
 
 @media (max-width: 520px) {
@@ -2455,10 +2443,6 @@ html { scroll-behavior: smooth; }
     
     .power-card:last-child {
         grid-column: span 2;
-    }
-    
-    .extras-grid {
-        grid-template-columns: 1fr;
     }
     
     .calculator-info-cards {

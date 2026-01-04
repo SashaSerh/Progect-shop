@@ -5386,14 +5386,20 @@ function showServicesList(navList) {
             <li class="main-nav-mobile__item">
                 <a href="#back-to-menu" class="main-nav-mobile__link main-nav-mobile__link--back">
                     <span class="main-nav-mobile__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg></span>
-                    <span class="main-nav-mobile__text"><span aria-hidden="true" class="back-arrow">←</span> <span data-i18n="back-btn">Назад</span></span>
+                    <span class="main-nav-mobile__text">← Назад к меню</span>
                 </a>
             </li>
         `;
         
         navList.innerHTML = servicesHTML;
-        // Ensure newly-inserted items get translated to current language
-        try { if (typeof switchLanguage === 'function') switchLanguage(localStorage.getItem('language') || 'uk'); } catch (err) { /* ignore */ }
+        // Ensure i18n keys are translated to current language after HTML insertion
+        const currentLang = localStorage.getItem('language') || 'uk';
+        navList.querySelectorAll('[data-i18n]').forEach(element => {
+            const key = element.getAttribute('data-i18n');
+            const value = (translations?.[currentLang]?.[key]) || (translations?.uk?.[key]) || element.textContent;
+            if (value && typeof value === 'string') element.textContent = value;
+        });
+        
         navList.classList.remove('main-nav-mobile__list--slide-out');
         navList.classList.add('main-nav-mobile__list--slide-in-from-right');
         
@@ -5453,6 +5459,14 @@ function restoreMainMenu(navList) {
         `;
         
         navList.innerHTML = menuHTML;
+        // Ensure i18n keys are translated to current language after HTML insertion
+        const currentLang = localStorage.getItem('language') || 'uk';
+        navList.querySelectorAll('[data-i18n]').forEach(element => {
+            const key = element.getAttribute('data-i18n');
+            const value = (translations?.[currentLang]?.[key]) || (translations?.uk?.[key]) || element.textContent;
+            if (value && typeof value === 'string') element.textContent = value;
+        });
+        
         navList.classList.remove('main-nav-mobile__list--slide-in-from-right');
         navList.classList.add('main-nav-mobile__list--slide-out');
         

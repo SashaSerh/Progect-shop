@@ -2010,8 +2010,21 @@ html { scroll-behavior: smooth; }
     border-radius: 14px;
     transition: all var(--motion-duration-normal, 0.3s) var(--motion-ease-standard, ease);
     display: flex;
+    flex-direction: row;
     align-items: center;
     gap: 12px;
+}
+
+/* Hole item with vertical layout */
+.extra-item[data-extra="hole"] {
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.extra-item[data-extra="hole"] .extra-item__content {
+    width: 100%;
+    flex-direction: column;
+    align-items: flex-start;
 }
 
 .extra-item--active {
@@ -2025,6 +2038,10 @@ html { scroll-behavior: smooth; }
     gap: 12px;
     flex: 1;
     cursor: pointer;
+}
+
+.extra-item[data-extra="hole"] .extra-item__input-wrapper {
+    width: 100%;
 }
 
 .extra-item__checkbox-wrapper {
@@ -2073,6 +2090,7 @@ html { scroll-behavior: smooth; }
     font-size: 0.9rem;
     font-weight: 500;
     cursor: pointer;
+    flex: 1;
 }
 
 .extra-item__label svg {

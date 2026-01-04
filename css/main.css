@@ -6948,43 +6948,6 @@ textarea.form-input { resize: vertical; min-height: 120px; }
     gap: 4px;
 }
 
-/* About page back button styling similar to length-input-group */
-.about-page .back-to-main {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 8px 10px;
-    background: var(--surface-alt, #f9fafb);
-    border-radius: 10px;
-    border: 1px solid var(--border, #e5e7eb);
-    margin-bottom: 10px;
-    transition: all var(--motion-duration-fast, 0.15s) ease;
-    text-decoration: none;
-    color: var(--text, #111);
-    font-weight: 600;
-    font-size: 1rem;
-}
-
-.about-page .back-to-main:hover {
-    background: var(--surface, #fff);
-    border-color: var(--primary, #2563eb);
-    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.1);
-    text-decoration: none;
-    color: var(--text, #111);
-}
-
-.about-page .back-to-main svg {
-    width: 48px;
-    height: 48px;
-    flex-shrink: 0;
-    stroke: var(--text, #111);
-}
-
-.about-page .back-to-main span {
-    flex: 1;
-    text-align: center;
-}
-
 .portfolio__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px,1fr)); gap: 16px; }
 .portfolio__item { border-radius: 16px; 
     overflow: hidden; 
@@ -10267,26 +10230,12 @@ img.img-error {
     box-shadow: 0 2px 8px rgba(59,130,246,0.06);
 }
 
+.theme-dark .about-values__item h3 {
+    color: var(--text-primary, #f0f0f0);
+}
+
 .theme-dark .about-values__item p {
     color: var(--calc-muted-text, #a0aec0);
-}
-
-/* About page back button - dark theme */
-.theme-dark .about-page .back-to-main {
-    background: rgba(255,255,255,0.02);
-    border: 1px solid rgba(255,255,255,0.04);
-    color: var(--text-primary, #f0f0f0);
-}
-
-.theme-dark .about-page .back-to-main:hover {
-    background: rgba(255,255,255,0.03);
-    border-color: rgba(59,130,246,0.12);
-    box-shadow: 0 2px 8px rgba(59,130,246,0.06);
-    color: var(--text-primary, #f0f0f0);
-}
-
-.theme-dark .about-page .back-to-main svg {
-    stroke: var(--text-primary, #f0f0f0);
 }
 
 /* Small polish for extra length area */

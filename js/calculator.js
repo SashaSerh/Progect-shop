@@ -242,7 +242,7 @@ function initCalculator() {
         if (parentCard) parentCard.classList.add('power-card--active');
     }
 
-    // Length +/- buttons
+    // Length +/- buttons (includes trunk, drain, cable, hole, box)
     document.querySelectorAll('.length-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
             e.preventDefault();
@@ -252,24 +252,8 @@ function initCalculator() {
         });
     });
 
-    // Extra item buttons (hole and box)
-    document.querySelectorAll('.extra-item__btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            e.preventDefault();
-            const target = btn.dataset.target;
-            const delta = btn.classList.contains('extra-item__btn--plus') ? 1 : -1;
-            handleLengthButton(target, delta);
-        });
-    });
-
-    // Number inputs real-time update
+    // Number inputs real-time update (includes trunk, drain, cable, hole, box)
     document.querySelectorAll('.length-input').forEach(input => {
-        input.addEventListener('input', calculateAndUpdate);
-        input.addEventListener('change', calculateAndUpdate);
-    });
-
-    // Extra item number inputs (hole-count, box-length)
-    document.querySelectorAll('.extra-item__input').forEach(input => {
         input.addEventListener('input', calculateAndUpdate);
         input.addEventListener('change', calculateAndUpdate);
     });

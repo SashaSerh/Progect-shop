@@ -3871,6 +3871,29 @@ function setupHashRouting(initialLang) {
                     // Ensure section is registered for mobile animations
                     try { mobileAnimations.registerSection('main-container'); } catch(_) {}
 
+                    // Animate calculator cards and info-cards with a small stagger
+                    try {
+                        const cards = Array.from(mainContainer.querySelectorAll('.calculator-card'));
+                        const infos = Array.from(mainContainer.querySelectorAll('.calculator-info .info-card'));
+                        const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+                        if (!prefersReduced) {
+                            cards.forEach((c, i) => {
+                                c.classList.remove('is-visible');
+                                c.style.transitionDelay = `${i * 80}ms`;
+                                setTimeout(() => c.classList.add('is-visible'), 50 + i * 80);
+                            });
+                            infos.forEach((ic, j) => {
+                                ic.classList.remove('is-visible');
+                                ic.style.transitionDelay = `${(cards.length * 80) + j * 80}ms`;
+                                setTimeout(() => ic.classList.add('is-visible'), 100 + (cards.length * 80) + j * 80);
+                            });
+                        } else {
+                            // If reduced motion is requested, just make elements visible immediately
+                            cards.forEach(c => c.classList.add('is-visible'));
+                            infos.forEach(ic => ic.classList.add('is-visible'));
+                        }
+                    } catch (err) { /* noop */ }
+
                     // Make container visible then run slide-in animation from right
                     // Use 'block' explicitly because index.html has inline display:none
                     mainContainer.style.display = 'block';

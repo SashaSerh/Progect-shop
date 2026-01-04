@@ -1716,7 +1716,7 @@ html { scroll-behavior: smooth; }
 
 /* Page layout */
 .calculator-page {
-    padding: clamp(16px, 4vw, 32px);
+    /* padding: clamp(16px, 4vw, 32px); */
     max-width: 1200px;
     margin: 0 auto;
 }
@@ -1783,7 +1783,7 @@ html { scroll-behavior: smooth; }
     /* keep spacing but let inner sections be individual cards */
     background: transparent; /* removed to avoid nested card look */
     border-radius: 0;
-    padding: clamp(12px, 3vw, 20px);
+    /* padding: clamp(12px, 3vw, 20px); */
     border: none;
     box-shadow: none;
     margin-bottom: 12px;
@@ -2085,6 +2085,74 @@ html { scroll-behavior: smooth; }
     font-weight: 600;
     color: var(--primary, #2563eb);
     white-space: nowrap;
+}
+
+/* Input wrapper for hole and box items */
+.extra-item__input-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: var(--surface, #fff);
+    border: 1px solid var(--border, #e5e7eb);
+    border-radius: 8px;
+    padding: 4px 6px;
+}
+
+.extra-item__btn {
+    background: none;
+    border: none;
+    color: var(--text-secondary, #666);
+    font-size: 16px;
+    font-weight: 600;
+    padding: 4px 6px;
+    min-width: 28px;
+    height: 28px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all var(--motion-duration-fast, 0.15s) ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.extra-item__btn:hover {
+    background: var(--surface-alt, #f9fafb);
+    color: var(--primary, #2563eb);
+}
+
+.extra-item__btn:active {
+    background: var(--border, #e5e7eb);
+    transform: scale(0.95);
+}
+
+.extra-item__input {
+    width: 50px;
+    height: 28px;
+    border: none;
+    background: transparent;
+    text-align: center;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text, #111);
+    padding: 0 4px;
+}
+
+.extra-item__input::-webkit-outer-spin-button,
+.extra-item__input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.extra-item__input[type=number] {
+    -moz-appearance: textfield;
+}
+
+.extra-item__unit {
+    font-size: 0.8rem;
+    color: var(--text-secondary, #666);
+    font-weight: 500;
+    min-width: 20px;
+    text-align: center;
 }
 
 /* Legacy styles for compatibility */

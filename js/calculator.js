@@ -53,8 +53,8 @@ function calculateAndUpdate() {
     const drainLength = parseFloat(document.getElementById('drain')?.value) || 0;
     const cableLength = parseFloat(document.getElementById('cable-length')?.value) || 0;
     const plugChecked = document.getElementById('plug')?.checked || false;
-    const holeChecked = document.getElementById('hole')?.checked || false;
-    const boxChecked = document.getElementById('box')?.checked || false;
+    const holeCount = parseFloat(document.getElementById('hole-count')?.value) || 0;
+    const boxLength = parseFloat(document.getElementById('box-length')?.value) || 0;
 
     // Базова вартість
     let total = prices.base[power] || 5000;
@@ -120,27 +120,29 @@ function calculateAndUpdate() {
         }
     }
 
-    // Отвір
+    // Отверстие (штуки)
+    const holeCost = holeCount > 0 ? Math.round(holeCount * prices.hole) : 0;
     const holeRow = document.getElementById('breakdown-hole-row');
     const holeEl = document.getElementById('breakdown-hole');
     if (holeRow && holeEl) {
-        if (holeChecked) {
+        if (holeCost > 0) {
             holeRow.style.display = '';
-            holeEl.textContent = `+${formatNumber(prices.hole)} ₴`;
-            total += prices.hole;
+            holeEl.textContent = `+${formatNumber(holeCost)} ₴`;
+            total += holeCost;
         } else {
             holeRow.style.display = 'none';
         }
     }
 
-    // Короб
+    // Короб (метры)
+    const boxCost = boxLength > 0 ? Math.round(boxLength * prices.box) : 0;
     const boxRow = document.getElementById('breakdown-box-row');
     const boxEl = document.getElementById('breakdown-box');
     if (boxRow && boxEl) {
-        if (boxChecked) {
+        if (boxCost > 0) {
             boxRow.style.display = '';
-            boxEl.textContent = `+${formatNumber(prices.box)} ₴`;
-            total += prices.box;
+            boxEl.textContent = `+${formatNumber(boxCost)} ₴`;
+            total += boxCost;
         } else {
             boxRow.style.display = 'none';
         }
@@ -250,21 +252,35 @@ function initCalculator() {
         });
     });
 
+    // Extra item buttons (hole and box)
+    document.querySelectorAll('.extra-item__btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const target = btn.dataset.target;
+            const delta = btn.classList.contains('extra-item__btn--plus') ? 1 : -1;
+            handleLengthButton(target, delta);
+        });
+    });
+
     // Number inputs real-time update
     document.querySelectorAll('.length-input').forEach(input => {
         input.addEventListener('input', calculateAndUpdate);
         input.addEventListener('change', calculateAndUpdate);
     });
 
-    // Other checkboxes
-    ['plug', 'hole', 'box'].forEach(id => {
-        const checkbox = document.getElementById(id);
-        if (checkbox) {
-            checkbox.addEventListener('change', calculateAndUpdate);
-        }
+    // Extra item number inputs (hole-count, box-length)
+    document.querySelectorAll('.extra-item__input').forEach(input => {
+        input.addEventListener('input', calculateAndUpdate);
+        input.addEventListener('change', calculateAndUpdate);
     });
 
-    // Extra item checkbox animations
+    // Plug checkbox
+    const plugCheckbox = document.getElementById('plug');
+    if (plugCheckbox) {
+        plugCheckbox.addEventListener('change', calculateAndUpdate);
+    }
+
+    // Extra item checkbox animations (for plug only now)
     document.querySelectorAll('.extra-item__checkbox').forEach(checkbox => {
         checkbox.addEventListener('change', () => {
             const item = checkbox.closest('.extra-item');
@@ -274,11 +290,11 @@ function initCalculator() {
         });
     });
 
-    // Extra item content click handler to toggle checkbox
+    // Extra item content click handler to toggle plug checkbox
     document.querySelectorAll('.extra-item__content').forEach(content => {
         content.addEventListener('click', (e) => {
-            // Don't toggle if clicking on a link or button
-            if (e.target.closest('button, a')) return;
+            // Don't toggle if clicking on a button, input, or link
+            if (e.target.closest('button, input, a')) return;
             
             const checkbox = content.querySelector('.extra-item__checkbox');
             if (checkbox) {

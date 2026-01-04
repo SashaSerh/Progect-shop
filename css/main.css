@@ -1790,7 +1790,7 @@ html { scroll-behavior: smooth; }
 }
 
 /* Individual calculator section as a card */
-.calculator-section.card, .calculator-layout .calculator-card {
+.calculator-section.card, .calculator-card {
     background: var(--surface-0);
     border-radius: 20px;
     padding: clamp(20px, 4vw, 32px);
@@ -1804,13 +1804,13 @@ html { scroll-behavior: smooth; }
 }
 
 /* Visible state when animated in */
-.calculator-section.card.is-visible, .calculator-layout .calculator-card.is-visible {
+.calculator-section.card.is-visible, .calculator-card.is-visible {
     opacity: 1;
     transform: translateY(0);
 }
 
 /* Dark theme variant */
-.theme-dark .calculator-section.card, .theme-dark .calculator-layout .calculator-card {
+.theme-dark .calculator-section.card, .theme-dark .calculator-card {
     background: var(--surface-1);
     border-color: var(--border-color);
     box-shadow: 0 8px 28px rgba(0,0,0,0.36);
@@ -1830,7 +1830,7 @@ html { scroll-behavior: smooth; }
 
 /* Reduced motion respect */
 @media (prefers-reduced-motion: reduce) {
-    .calculator-section.card, .calculator-layout .calculator-card, .calculator-info .info-card {
+    .calculator-section.card, .calculator-card, .calculator-info .info-card {
         transition: none !important;
         transform: none !important;
         opacity: 1 !important;
@@ -1932,7 +1932,7 @@ html { scroll-behavior: smooth; }
     background: var(--surface-alt, #f9fafb);
     border-radius: 10px;
     border: 1px solid var(--border, #e5e7eb);
-    
+    margin-bottom: 10px;
 }
 
 .length-input-group__label {
@@ -3671,8 +3671,8 @@ button:active, .btn:active, .fab:active, a:active {
     .share-btn,
     input[type="checkbox"],
     input[type="radio"] {
-        min-height: 20px;
-        min-width: 20px;
+        min-height: 44px;
+        min-width: 44px;
     }
     
     /* Larger buttons for primary actions */
@@ -6901,6 +6901,53 @@ textarea.form-input { resize: vertical; min-height: 120px; }
         opacity: 0;
     }
 }
+
+/* About page values items styling similar to calculator length-input-group */
+.about-values__item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 10px;
+    background: var(--surface-alt, #f9fafb);
+    border-radius: 10px;
+    border: 1px solid var(--border, #e5e7eb);
+    margin-bottom: 10px;
+    transition: all var(--motion-duration-fast, 0.15s) ease;
+}
+
+.about-values__item:hover {
+    background: var(--surface, #fff);
+    border-color: var(--primary, #2563eb);
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.1);
+}
+
+.about-values__item img {
+    width: 48px;
+    height: 48px;
+    flex-shrink: 0;
+}
+
+.about-values__item h3 {
+    font-size: 1rem;
+    color: var(--text, #111);
+    margin: 0;
+    font-weight: 600;
+}
+
+.about-values__item p {
+    font-size: 0.85rem;
+    color: var(--text-secondary, #666);
+    margin: 0;
+    line-height: 1.4;
+}
+
+.about-values__content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
 .portfolio__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px,1fr)); gap: 16px; }
 .portfolio__item { border-radius: 16px; 
     overflow: hidden; 
@@ -10171,6 +10218,26 @@ img.img-error {
     border-color: rgba(59,130,246,0.18);
 }
 
+/* About values items - dark theme */
+.theme-dark .about-values__item {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.04);
+}
+
+.theme-dark .about-values__item:hover {
+    background: rgba(255,255,255,0.03);
+    border-color: rgba(59,130,246,0.12);
+    box-shadow: 0 2px 8px rgba(59,130,246,0.06);
+}
+
+.theme-dark .about-values__item h3 {
+    color: var(--text-primary, #f0f0f0);
+}
+
+.theme-dark .about-values__item p {
+    color: var(--calc-muted-text, #a0aec0);
+}
+
 /* Small polish for extra length area */
 .theme-dark .extra-length {
     background: rgba(255,255,255,0.02);
@@ -10181,6 +10248,3 @@ img.img-error {
 /* Ensure accessible focus in dark theme */
 .theme-dark .btn:focus-visible,
 .theme-dark .back-to-main:focus-visible { box-shadow: 0 0 0 4px rgba(59,130,246,0.12); outline: none; }
-.calc-additional-services-text{
-    margin-bottom: 12px;
-}

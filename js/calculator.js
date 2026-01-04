@@ -285,30 +285,6 @@ function initCalculator() {
         glassDismountCheckbox.addEventListener('change', calculateAndUpdate);
     }
 
-    // Extra item checkbox animations (for plug only now)
-    document.querySelectorAll('.extra-item__checkbox').forEach(checkbox => {
-        checkbox.addEventListener('change', () => {
-            const item = checkbox.closest('.extra-item');
-            if (item) {
-                item.classList.toggle('extra-item--active', checkbox.checked);
-            }
-        });
-    });
-
-    // Extra item content click handler to toggle plug checkbox
-    document.querySelectorAll('.extra-item__content').forEach(content => {
-        content.addEventListener('click', (e) => {
-            // Don't toggle if clicking on a button, input, or link
-            if (e.target.closest('button, input, a')) return;
-            
-            const checkbox = content.querySelector('.extra-item__checkbox');
-            if (checkbox) {
-                checkbox.checked = !checkbox.checked;
-                checkbox.dispatchEvent(new Event('change', { bubbles: true }));
-            }
-        });
-    });
-
     // Order button
     const orderBtn = document.querySelector('.calculator-order-btn');
     if (orderBtn) {

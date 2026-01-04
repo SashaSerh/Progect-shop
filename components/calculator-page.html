@@ -213,69 +213,46 @@
                   <span class="length-unit">м</span>
                 </div>
               </div>
-            </div>
 
-            <div class="length-inputs">
-              
-              <!-- Вилка -->
-              <div class="extra-item" data-extra="plug">
-                <div class="extra-item__content">
-                  <div class="extra-item__checkbox-wrapper">
-                    <input type="checkbox" id="plug" name="plug" class="extra-item__checkbox">
-                    <span class="extra-item__checkbox-visual">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="20 6 9 17 4 12"/>
-                      </svg>
-                    </span>
-                  </div>
-                  <label for="plug" class="extra-item__label">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/>
-                      <path d="M9 9h.01M15 9h.01M8 13a4 4 0 0 0 8 0"/>
-                    </svg>
-                    <span data-i18n="plug-label">Вилка</span>
-                  </label>
+              <!-- Отверстие -->
+              <div class="length-input-group">
+                <label for="hole-count" class="length-input-label">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <circle cx="12" cy="12" r="4"/>
+                  </svg>
+                  <span data-i18n="hole-label">Отверстие 40мм</span>
+                </label>
+                <div class="length-input-wrapper">
+                  <button type="button" class="length-btn length-btn--minus" data-target="hole-count" aria-label="Уменьшить">−</button>
+                  <input type="number" id="hole-count" name="hole-count" min="0" max="50" value="0" step="1" class="length-input">
+                  <button type="button" class="length-btn length-btn--plus" data-target="hole-count" aria-label="Увеличить">+</button>
+                  <span class="length-unit" data-i18n="hole-unit">шт</span>
                 </div>
               </div>
 
-              <!-- Отверстие -->
-              <div class="extra-item" data-extra="hole">
-                <div class="extra-item__content">
-                  <label for="hole-count" class="extra-item__label">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <circle cx="12" cy="12" r="10"/>
-                      <circle cx="12" cy="12" r="4"/>
-                    </svg>
-                    <span data-i18n="hole-label">Отверстие 40мм</span>
-                  </label>
-                  <div class="extra-item__input-wrapper">
-                    <button type="button" class="length-btn length-btn--minus" data-target="hole-count" aria-label="Уменьшить">−</button>
-                    <input type="number" id="hole-count" name="hole-count" min="0" max="50" value="0" step="1" class="length-input">
-                    <button type="button" class="length-btn length-btn--plus" data-target="hole-count" aria-label="Увеличить">+</button>
-                    <span class="length-unit" data-i18n="hole-unit">шт</span>
-                  </div>
-                </div>
+              <!-- Вилка -->
+              <div class="length-input-group">
+                <label class="length-input-label length-input-label--checkbox">
+                  <input type="checkbox" id="plug" name="plug" class="length-checkbox">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/>
+                    <path d="M9 9h.01M15 9h.01M8 13a4 4 0 0 0 8 0"/>
+                  </svg>
+                  <span data-i18n="plug-label">Вилка</span>
+                </label>
               </div>
 
               <!-- Демонтаж стеклопакета -->
-              <div class="extra-item" data-extra="glass-dismount">
-                <div class="extra-item__content">
-                  <div class="extra-item__checkbox-wrapper">
-                    <input type="checkbox" id="glass-dismount" name="glass-dismount" class="extra-item__checkbox">
-                    <span class="extra-item__checkbox-visual">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="20 6 9 17 4 12"/>
-                      </svg>
-                    </span>
-                  </div>
-                  <label for="glass-dismount" class="extra-item__label">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <rect x="2" y="4" width="20" height="14" rx="2" ry="2"/>
-                      <path d="M2 18h20M6 4v14M18 4v14"/>
-                    </svg>
-                    <span data-i18n="glass-dismount-label">Демонтаж стеклопакета</span>
-                  </label>
-                </div>
+              <div class="length-input-group">
+                <label class="length-input-label length-input-label--checkbox">
+                  <input type="checkbox" id="glass-dismount" name="glass-dismount" class="length-checkbox">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="2" y="4" width="20" height="14" rx="2" ry="2"/>
+                    <path d="M2 18h20M6 4v14M18 4v14"/>
+                  </svg>
+                  <span data-i18n="glass-dismount-label">Демонтаж стеклопакета</span>
+                </label>
               </div>
             </div>
           </div>

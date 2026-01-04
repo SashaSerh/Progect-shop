@@ -1996,14 +1996,36 @@ html { scroll-behavior: smooth; }
     color: var(--text-secondary, #666);
 }
 
-/* Extras items using same flex layout as length inputs */
+/* Checkbox in length-input-group */
+.length-checkbox {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--primary, #2563eb);
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.length-input-label--checkbox {
+    cursor: pointer;
+    flex: 1;
+}
+
+/* Extras Grid */
+.extras-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+}
 
 .extra-item {
+    padding: 14px 16px;
+    background: var(--surface-alt, #f9fafb);
+    border: 1px solid var(--border, #e5e7eb);
+    border-radius: 14px;
+    transition: all var(--motion-duration-normal, 0.3s) var(--motion-ease-standard, ease);
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-    padding: 10px 0;
+    gap: 12px;
 }
 
 .extra-item--active {
@@ -2434,6 +2456,10 @@ html { scroll-behavior: smooth; }
     .power-cards {
         grid-template-columns: repeat(3, 1fr);
     }
+    
+    .extras-grid {
+        grid-template-columns: 1fr 1fr;
+    }
 }
 
 @media (max-width: 520px) {
@@ -2443,6 +2469,10 @@ html { scroll-behavior: smooth; }
     
     .power-card:last-child {
         grid-column: span 2;
+    }
+    
+    .extras-grid {
+        grid-template-columns: 1fr;
     }
     
     .calculator-info-cards {

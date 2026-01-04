@@ -1790,7 +1790,7 @@ html { scroll-behavior: smooth; }
 }
 
 /* Individual calculator section as a card */
-.calculator-section.card, .calculator-card {
+.calculator-section.card, .calculator-layout .calculator-card {
     background: var(--surface-0);
     border-radius: 20px;
     padding: clamp(20px, 4vw, 32px);
@@ -1804,13 +1804,13 @@ html { scroll-behavior: smooth; }
 }
 
 /* Visible state when animated in */
-.calculator-section.card.is-visible, .calculator-card.is-visible {
+.calculator-section.card.is-visible, .calculator-layout .calculator-card.is-visible {
     opacity: 1;
     transform: translateY(0);
 }
 
 /* Dark theme variant */
-.theme-dark .calculator-section.card, .theme-dark .calculator-card {
+.theme-dark .calculator-section.card, .theme-dark .calculator-layout .calculator-card {
     background: var(--surface-1);
     border-color: var(--border-color);
     box-shadow: 0 8px 28px rgba(0,0,0,0.36);
@@ -1830,7 +1830,7 @@ html { scroll-behavior: smooth; }
 
 /* Reduced motion respect */
 @media (prefers-reduced-motion: reduce) {
-    .calculator-section.card, .calculator-card, .calculator-info .info-card {
+    .calculator-section.card, .calculator-layout .calculator-card, .calculator-info .info-card {
         transition: none !important;
         transform: none !important;
         opacity: 1 !important;
@@ -1932,7 +1932,7 @@ html { scroll-behavior: smooth; }
     background: var(--surface-alt, #f9fafb);
     border-radius: 10px;
     border: 1px solid var(--border, #e5e7eb);
-    margin-bottom: 10px;
+    
 }
 
 .length-input-group__label {
@@ -3671,8 +3671,8 @@ button:active, .btn:active, .fab:active, a:active {
     .share-btn,
     input[type="checkbox"],
     input[type="radio"] {
-        min-height: 44px;
-        min-width: 44px;
+        min-height: 20px;
+        min-width: 20px;
     }
     
     /* Larger buttons for primary actions */
@@ -10181,3 +10181,6 @@ img.img-error {
 /* Ensure accessible focus in dark theme */
 .theme-dark .btn:focus-visible,
 .theme-dark .back-to-main:focus-visible { box-shadow: 0 0 0 4px rgba(59,130,246,0.12); outline: none; }
+.calc-additional-services-text{
+    margin-bottom: 12px;
+}

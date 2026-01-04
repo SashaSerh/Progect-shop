@@ -4016,6 +4016,8 @@ function setupHashRouting(initialLang) {
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             }).catch(err => console.error('Error loading admin page component:', err));
         } else if (hash === '#about') {
+            // Ensure main-container not hidden before loading
+            try { setHiddenById('main-container', false); } catch(_) {}
             loadComponent('main-container', 'components/about.html').then(() => {
                 // Hide other sections and show about page in main-container
                 showSection('hero-container', false);

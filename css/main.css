@@ -946,7 +946,6 @@
     /* Make phone controls adapt inside the card */
     .footer__phone {
         width: 100%;
-        justify-content: flex-start;
         padding-left: 12px;
     }
     .footer__fab--ig { background: linear-gradient(135deg, #F58529, #DD2A7B, #8134AF, #515BD4); }
@@ -1336,7 +1335,7 @@ html { scroll-behavior: smooth; }
 
 .theme-dark .service-page__content { background: rgba(22, 22, 22, 0.8); border: 1px solid rgba(255,255,255,0.08); color: var(--text-primary); }
 .theme-dark .service-page__header { background: rgba(22, 22, 22, 0.8); border: 1px solid rgba(255,255,255,0.08); color: var(--text-primary); }
-.theme-dark .main-nav-mobile { background: rgba(22, 22, 22, 0.8); border: 1px solid rgba(255,255,255,0.08); color: var(--text-primary); }
+.theme-dark .main-nav-mobile {border-radius: 16px; background: rgba(22, 22, 22, 0.8); border: 1px solid rgba(255,255,255,0.08); color: var(--text-primary); }
 .theme-dark .hero .fade-in-section.visible { color: var(--text-primary); }
 .theme-dark .reviews__form { background: rgba(22, 22, 22, 0.8); border: 1px solid rgba(255,255,255,0.08); color: var(--text-primary); }
 .service-card[role="link"] { cursor: pointer; }
@@ -1781,12 +1780,30 @@ html { scroll-behavior: smooth; }
 
 /* Form Wrapper */
 .calculator-form-wrapper {
-    background: var(--surface, #fff);
-    border-radius: 20px;
-    padding: clamp(16px, 4vw, 28px);
-    border: 1px solid var(--border, #e5e7eb);
-    box-shadow: 0 4px 24px rgba(0,0,0,0.04);
+    /* keep spacing but let inner sections be individual cards */
+    background: transparent; /* removed to avoid nested card look */
+    border-radius: 0;
+    padding: clamp(12px, 3vw, 20px);
+    border: none;
+    box-shadow: none;
     margin-bottom: 12px;
+}
+
+/* Individual calculator section as a card */
+.calculator-section.card, .calculator-card {
+    background: var(--surface-0);
+    border-radius: var(--radius-md);
+    padding: 16px;
+    border: 1px solid var(--border-color, #e5e7eb);
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 16px;
+}
+
+/* Dark theme variant */
+.theme-dark .calculator-section.card, .theme-dark .calculator-card {
+    background: var(--surface-1);
+    border-color: var(--border-color);
+    box-shadow: 0 8px 28px rgba(0,0,0,0.36);
 }
 
 /* Section styling */
@@ -5490,7 +5507,6 @@ button:active, .btn:active, .fab:active, a:active {
     font-weight: 600;
     font-size: 15px;
     justify-self: center;
-    text-align: center;
     position: relative;
     padding-bottom: 6px; /* space for underline */
 }
@@ -5537,7 +5553,6 @@ button:active, .btn:active, .fab:active, a:active {
 
 .theme-dark .main-nav-mobile__link {
     color: var(--text-primary, #f8fafc);
-    text-align: center;
 }
 
 .theme-dark .main-nav-mobile__link:hover {
@@ -9373,6 +9388,7 @@ img.img-error {
 .theme-dark .nav-item,
 .theme-dark [class*="nav"] a {
     color: var(--text-secondary);
+    display: grid;
 }
 
 .theme-dark .nav-item:hover,

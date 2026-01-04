@@ -6968,17 +6968,40 @@ textarea.form-input { resize: vertical; min-height: 120px; }
 }
 
 .about-page__title {
-    font-size: 2rem;
+    font-size:  clamp(28px, 5vw, 34px);
     font-weight: 700;
     color: var(--text, #111);
     margin: 0;
 }
 
 .about-page__lead {
-    font-size: 1.1rem;
+    font-size: clamp(15px, 3vw, 17px);
     color: var(--text-secondary, #666);
     line-height: 1.5;
     margin: 0;
+}
+
+/* About page banner styling as a card */
+.about-page__banner {
+    padding: 16px;
+    background: var(--surface-alt, #f9fafb);
+    border-radius: 12px;
+    border: 1px solid var(--border, #e5e7eb);
+    margin-bottom: 24px;
+    transition: all var(--motion-duration-fast, 0.15s) ease;
+    overflow: hidden;
+}
+
+.about-page__banner:hover {
+    background: var(--surface, #fff);
+    border-color: var(--primary, #2563eb);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1);
+}
+
+.about-page__banner img {
+    border-radius: 8px;
+    width: 100%;
+    height: auto;
 }
 
 .portfolio__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px,1fr)); gap: 16px; }
@@ -10300,4 +10323,16 @@ img.img-error {
 
 .theme-dark .about-page__lead {
     color: var(--calc-muted-text, #a0aec0);
+}
+
+/* About page banner - dark theme */
+.theme-dark .about-page__banner {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.04);
+}
+
+.theme-dark .about-page__banner:hover {
+    background: rgba(255,255,255,0.03);
+    border-color: rgba(59,130,246,0.12);
+    box-shadow: 0 4px 12px rgba(59,130,246,0.06);
 }

@@ -1998,16 +1998,16 @@ html { scroll-behavior: smooth; }
 
 /* Extras Grid */
 .extras-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    gap: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
 
 .extra-item {
-    padding: 14px 16px;
+    padding: 8px 10px;
     background: var(--surface-alt, #f9fafb);
     border: 1px solid var(--border, #e5e7eb);
-    border-radius: 14px;
+    border-radius: 10px;
     transition: all var(--motion-duration-normal, 0.3s) var(--motion-ease-standard, ease);
     display: flex;
     align-items: center;

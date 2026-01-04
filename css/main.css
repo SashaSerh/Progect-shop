@@ -6948,6 +6948,39 @@ textarea.form-input { resize: vertical; min-height: 120px; }
     gap: 4px;
 }
 
+/* About page header styling as a card */
+.about-page__header {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 20px;
+    background: var(--surface-alt, #f9fafb);
+    border-radius: 12px;
+    border: 1px solid var(--border, #e5e7eb);
+    margin-bottom: 24px;
+    transition: all var(--motion-duration-fast, 0.15s) ease;
+}
+
+.about-page__header:hover {
+    background: var(--surface, #fff);
+    border-color: var(--primary, #2563eb);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1);
+}
+
+.about-page__title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text, #111);
+    margin: 0;
+}
+
+.about-page__lead {
+    font-size: 1.1rem;
+    color: var(--text-secondary, #666);
+    line-height: 1.5;
+    margin: 0;
+}
+
 .portfolio__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px,1fr)); gap: 16px; }
 .portfolio__item { border-radius: 16px; 
     overflow: hidden; 
@@ -10248,3 +10281,23 @@ img.img-error {
 /* Ensure accessible focus in dark theme */
 .theme-dark .btn:focus-visible,
 .theme-dark .back-to-main:focus-visible { box-shadow: 0 0 0 4px rgba(59,130,246,0.12); outline: none; }
+
+/* About page header - dark theme */
+.theme-dark .about-page__header {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.04);
+}
+
+.theme-dark .about-page__header:hover {
+    background: rgba(255,255,255,0.03);
+    border-color: rgba(59,130,246,0.12);
+    box-shadow: 0 4px 12px rgba(59,130,246,0.06);
+}
+
+.theme-dark .about-page__title {
+    color: var(--text-primary, #f0f0f0);
+}
+
+.theme-dark .about-page__lead {
+    color: var(--calc-muted-text, #a0aec0);
+}

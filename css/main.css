@@ -1792,11 +1792,21 @@ html { scroll-behavior: smooth; }
 /* Individual calculator section as a card */
 .calculator-section.card, .calculator-card {
     background: var(--surface-0);
-    border-radius: var(--radius-md);
-    padding: 16px;
+    border-radius: 20px;
+    padding: clamp(20px, 4vw, 32px);
     border: 1px solid var(--border-color, #e5e7eb);
-    box-shadow: var(--shadow-sm);
+    box-shadow: 0 4px 24px rgba(0,0,0,0.04);
     margin-bottom: 16px;
+    /* Animation starting state */
+    opacity: 0;
+    transform: translateY(10px);
+    transition: transform var(--motion-duration-normal) var(--motion-ease-emphasized), opacity var(--motion-duration-normal) var(--motion-ease-emphasized);
+}
+
+/* Visible state when animated in */
+.calculator-section.card.is-visible, .calculator-card.is-visible {
+    opacity: 1;
+    transform: translateY(0);
 }
 
 /* Dark theme variant */
@@ -1804,6 +1814,27 @@ html { scroll-behavior: smooth; }
     background: var(--surface-1);
     border-color: var(--border-color);
     box-shadow: 0 8px 28px rgba(0,0,0,0.36);
+}
+
+/* Also animate info-cards on the right */
+.calculator-info .info-card {
+    opacity: 0;
+    transform: translateY(10px);
+    transition: transform var(--motion-duration-normal) var(--motion-ease-emphasized), opacity var(--motion-duration-normal) var(--motion-ease-emphasized);
+}
+
+.calculator-info .info-card.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Reduced motion respect */
+@media (prefers-reduced-motion: reduce) {
+    .calculator-section.card, .calculator-card, .calculator-info .info-card {
+        transition: none !important;
+        transform: none !important;
+        opacity: 1 !important;
+    }
 }
 
 /* Section styling */

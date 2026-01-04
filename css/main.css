@@ -5541,7 +5541,14 @@ button:active, .btn:active, .fab:active, a:active {
 }
 
 /* Force centered text inside card variant as well */
-.theme-dark .main-nav-mobile__text { justify-self: center; text-align: center; }
+.theme-dark .main-nav-mobile__text { justify-self: center !important; text-align: center !important; }
+
+/* Additional high-specificity rule to cover both card and non-card nav variants */
+.theme-dark .main-nav-mobile-card .main-nav-mobile__text,
+.theme-dark .main-nav-mobile .main-nav-mobile__text {
+    justify-self: center !important;
+    text-align: center !important;
+}
 .theme-dark .main-nav-mobile__link:hover {
     background: rgba(59, 130, 246, 0.03);
 }

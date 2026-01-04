@@ -3687,6 +3687,7 @@ function showSection(id, show) {
     // Анімований show/hide для main-container
     if (id === 'main-container') {
         if (show) {
+            console.log('Showing main-container');
             el.dataset.lastShownAt = String(Date.now());
             el.style.display = '';
             
@@ -4016,9 +4017,11 @@ function setupHashRouting(initialLang) {
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             }).catch(err => console.error('Error loading admin page component:', err));
         } else if (hash === '#about') {
+            console.log('Handling #about route');
             // Ensure main-container not hidden before loading
             try { setHiddenById('main-container', false); } catch(_) {}
             loadComponent('main-container', 'components/about.html').then(() => {
+                console.log('About component loaded');
                 // Hide other sections and show about page in main-container
                 showSection('hero-container', false);
                 showSection('services-container', false);

@@ -1336,9 +1336,7 @@ html { scroll-behavior: smooth; }
 
 .theme-dark .service-page__content { background: rgba(22, 22, 22, 0.8); border: 1px solid rgba(255,255,255,0.08); color: var(--text-primary); }
 .theme-dark .service-page__header { background: rgba(22, 22, 22, 0.8); border: 1px solid rgba(255,255,255,0.08); color: var(--text-primary); }
-.theme-dark .main-nav-mobile { background: rgba(22, 22, 22, 0.8); border: 1px solid rgba(255,255,255,0.08); color: var(--text-primary); text-align: center; }
-/* Ensure nav text remains centered in dark theme (covers non-card variant) */
-.theme-dark .main-nav-mobile__text { justify-self: center; text-align: center; }
+.theme-dark .main-nav-mobile { background: rgba(22, 22, 22, 0.8); border: 1px solid rgba(255,255,255,0.08); color: var(--text-primary); }
 .theme-dark .hero .fade-in-section.visible { color: var(--text-primary); }
 .theme-dark .reviews__form { background: rgba(22, 22, 22, 0.8); border: 1px solid rgba(255,255,255,0.08); color: var(--text-primary); }
 .service-card[role="link"] { cursor: pointer; }
@@ -5492,6 +5490,7 @@ button:active, .btn:active, .fab:active, a:active {
     font-weight: 600;
     font-size: 15px;
     justify-self: center;
+    text-align: center;
     position: relative;
     padding-bottom: 6px; /* space for underline */
 }
@@ -5538,17 +5537,9 @@ button:active, .btn:active, .fab:active, a:active {
 
 .theme-dark .main-nav-mobile__link {
     color: var(--text-primary, #f8fafc);
+    text-align: center;
 }
 
-/* Force centered text inside card variant as well */
-.theme-dark .main-nav-mobile__text { justify-self: center !important; text-align: center !important; }
-
-/* Additional high-specificity rule to cover both card and non-card nav variants */
-.theme-dark .main-nav-mobile-card .main-nav-mobile__text,
-.theme-dark .main-nav-mobile .main-nav-mobile__text {
-    justify-self: center !important;
-    text-align: center !important;
-}
 .theme-dark .main-nav-mobile__link:hover {
     background: rgba(59, 130, 246, 0.03);
 }

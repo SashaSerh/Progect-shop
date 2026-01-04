@@ -23,7 +23,8 @@ const prices = {
     cable: 80,
     plug: 150,
     hole: 350,
-    box: 400
+    box: 400,
+    glassDismount: 300
 };
 
 let calculatorModal = null;
@@ -55,6 +56,7 @@ function calculateAndUpdate() {
     const plugChecked = document.getElementById('plug')?.checked || false;
     const holeCount = parseFloat(document.getElementById('hole-count')?.value) || 0;
     const boxLength = parseFloat(document.getElementById('box-length')?.value) || 0;
+    const glassDismountChecked = document.getElementById('glass-dismount')?.checked || false;
 
     // Базова вартість
     let total = prices.base[power] || 5000;
@@ -145,6 +147,19 @@ function calculateAndUpdate() {
             total += boxCost;
         } else {
             boxRow.style.display = 'none';
+        }
+    }
+
+    // Демонтаж стеклопакета
+    const glassDismountRow = document.getElementById('breakdown-glass-dismount-row');
+    const glassDismountEl = document.getElementById('breakdown-glass-dismount');
+    if (glassDismountRow && glassDismountEl) {
+        if (glassDismountChecked) {
+            glassDismountRow.style.display = '';
+            glassDismountEl.textContent = `+${formatNumber(prices.glassDismount)} ₴`;
+            total += prices.glassDismount;
+        } else {
+            glassDismountRow.style.display = 'none';
         }
     }
 
@@ -262,6 +277,12 @@ function initCalculator() {
     const plugCheckbox = document.getElementById('plug');
     if (plugCheckbox) {
         plugCheckbox.addEventListener('change', calculateAndUpdate);
+    }
+
+    // Glass dismount checkbox
+    const glassDismountCheckbox = document.getElementById('glass-dismount');
+    if (glassDismountCheckbox) {
+        glassDismountCheckbox.addEventListener('change', calculateAndUpdate);
     }
 
     // Extra item checkbox animations (for plug only now)

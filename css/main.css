@@ -2087,6 +2087,17 @@ html { scroll-behavior: smooth; }
     white-space: nowrap;
 }
 
+/* Input wrapper for hole in extras grid */
+.extra-item__input-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: var(--surface, #fff);
+    border: 1px solid var(--border, #e5e7eb);
+    border-radius: 8px;
+    padding: 4px 6px;
+}
+
 /* Legacy styles for compatibility */
 .extra-toggle {
     display: flex;

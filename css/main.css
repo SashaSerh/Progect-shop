@@ -1857,6 +1857,7 @@ html { scroll-behavior: smooth; }
     height: 20px;
     color: var(--primary, #2563eb);
     flex-shrink: 0;
+    margin-bottom: 8px;
 }
 
 /* Power Cards Grid */
@@ -6707,9 +6708,7 @@ button:active, .btn:active, .fab:active, a:active {
     }
 }
 
-.contacts {
-    padding: 40px 0;
-}
+
 
 .contacts__title {
     font-size: clamp(28px, 5vw, 34px);
@@ -6863,7 +6862,7 @@ textarea.form-input { resize: vertical; min-height: 120px; }
 .form-status.is-error { color: #ff6b6b; }
 
 /* Портфолио: базовая сетка под общий стиль карточек */
-.portfolio { padding: 40px 0; }
+
 .portfolio__title { font-size: 28px; margin-bottom: 16px; }
 
 /* ========================================
@@ -10000,7 +9999,7 @@ img.img-error {
     border-radius: 16px;
     box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
     padding: clamp(16px, 3vw, 24px);
-    margin-bottom: 16px;
+    margin-bottom: 12px;
 }
 
 /* Ensure case content has rounded bottom corners and clips children */
@@ -10445,4 +10444,9 @@ img.img-error {
     background: rgba(255,255,255,0.03);
     border-color: rgba(59,130,246,0.12);
     box-shadow: 0 4px 12px rgba(59,130,246,0.06);
+}
+.calculator-note{
+    font-size: 0.875rem;
+    color: var(--text-secondary, #666);
+    margin-bottom: 8px;
 }

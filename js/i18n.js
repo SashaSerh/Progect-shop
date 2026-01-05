@@ -444,7 +444,7 @@ export const translations = {
         "filter-high-to-low": "Від високої до низкої",
         "contacts-title": "Зв’яжіться з нами",
     "contacts-email": "Email: climatechprovent@gmail.com",
-        "contacts-phone": "Телефон: +380-800-555-1234",
+        "contacts-phone": "Телефон: +380-63-335-34-10",
     "contacts-address": "Адреса: вул. Кліматична, 123, Київ",
         "form-name": "Ваше ім’я",
         "form-email": "Ваш email",

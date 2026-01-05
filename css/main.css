@@ -1068,7 +1068,7 @@ main {
 
 /* Section padding - mobile compact */
 section {
-    padding: 32px 0;
+    padding: 0px 0;
 }
 
 @media (min-width: 769px) {
@@ -2008,6 +2008,9 @@ html { scroll-behavior: smooth; }
 .length-input-label--checkbox {
     cursor: pointer;
     flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 }
 
 /* Extras Grid */
@@ -3671,8 +3674,8 @@ button:active, .btn:active, .fab:active, a:active {
     .share-btn,
     input[type="checkbox"],
     input[type="radio"] {
-        min-height: 44px;
-        min-width: 44px;
+        min-height: 24px;
+        min-width: 24px;
     }
     
     /* Larger buttons for primary actions */
@@ -4911,7 +4914,7 @@ button:active, .btn:active, .fab:active, a:active {
 @media (max-width: 480px) {
     .container {
         max-width: 100%;
-        padding: 35px 8px 0;
+        padding: 0 0px 0;
         margin: 0 8px;
     }
 
@@ -6957,7 +6960,7 @@ textarea.form-input { resize: vertical; min-height: 120px; }
     background: var(--surface-alt, #f9fafb);
     border-radius: 12px;
     border: 1px solid var(--border, #e5e7eb);
-    margin-bottom: 24px;
+    margin-bottom: 10px;
     transition: all var(--motion-duration-fast, 0.15s) ease;
 }
 
@@ -6987,7 +6990,7 @@ textarea.form-input { resize: vertical; min-height: 120px; }
    
     border-radius: 12px;
  
-    margin-bottom: 24px;
+    margin-bottom: 3px;
     transition: all var(--motion-duration-fast, 0.15s) ease;
     overflow: hidden;
 }
@@ -7013,7 +7016,7 @@ textarea.form-input { resize: vertical; min-height: 120px; }
     background: var(--surface-alt, #f9fafb);
     border-radius: 12px;
     border: 1px solid var(--border, #e5e7eb);
-    margin-bottom: 24px;
+    margin-bottom: 10px;
     transition: all var(--motion-duration-fast, 0.15s) ease;
 }
 
@@ -10377,4 +10380,7 @@ img.img-error {
 
 .theme-dark .about-page__content p {
     color: var(--calc-muted-text, #a0aec0);
+}
+.about-page{
+    padding: 16px;
 }

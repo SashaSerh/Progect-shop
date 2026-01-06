@@ -1487,10 +1487,11 @@ to {
 .service-page__title {
     font-size: clamp(20px, 2.4vw, 32px);
     margin: 0 0 8px;
+    color: var(--text-primary);
 }
 
 .service-page__lead {
-    color: var(--color-muted, #555);
+    color: var(--text-secondary);
     margin: 0;
 }
 
@@ -1512,6 +1513,36 @@ to {
     line-height: 1.6;
     display: grid;
     gap: 8px;
+    color: var(--text-primary);
+}
+
+.service-page__content p,
+.service-page__content li {
+    color: var(--text-primary);
+}
+
+.service-page__content ul,
+.service-page__content ol {
+    color: var(--text-primary);
+}
+
+/* Card Component - ensures proper text color in both themes */
+.card {
+    color: var(--text-primary);
+    background: var(--surface-0);
+    border-color: var(--border-color);
+}
+
+.card p,
+.card li,
+.card h1,
+.card h2,
+.card h3,
+.card h4,
+.card h5,
+.card h6,
+.card span {
+    color: var(--text-primary);
 }
 
 .service-benefits {
@@ -13645,28 +13676,28 @@ img.img-loaded {
 .pricelist-section {
     margin-bottom: 16px;
     padding: 20px;
-    background: var(--surface-alt, #f9fafb);
+    background: var(--surface-1);
     border-radius: 12px;
-    border: 1px solid var(--border, #e5e7eb);
+    border: 1px solid var(--border-color);
     transition: all var(--motion-duration-fast, 0.15s) ease;
 }
 
 .pricelist-section:hover {
-    background: var(--surface, #fff);
-    border-color: var(--primary, #2563eb);
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1);
+    background: var(--surface-0);
+    border-color: var(--color-primary);
+    box-shadow: 0 4px 12px rgba(77, 163, 255, 0.1);
 }
 
 .pricelist-section__title {
     font-size: clamp(18px, 4vw, 22px);
     font-weight: 600;
-    color: var(--text, #111);
+    color: var(--text-primary);
     margin: 0 0 8px 0;
 }
 
 .pricelist-section__hint {
     font-size: 14px;
-    color: var(--text-secondary, #666);
+    color: var(--text-secondary);
     margin: 0 0 16px 0;
 }
 
@@ -13685,13 +13716,14 @@ img.img-loaded {
 .pricelist-table td {
     padding: 12px 16px;
     text-align: left;
-    border-bottom: 1px solid var(--border, #e5e7eb);
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-primary);
 }
 
 .pricelist-table th {
-    background: var(--surface-2, #f3f4f6);
+    background: var(--surface-2);
     font-weight: 600;
-    color: var(--text, #111);
+    color: var(--text-primary);
     position: sticky;
     top: 0;
 }
@@ -13700,11 +13732,11 @@ img.img-loaded {
     text-align: right;
     font-weight: 600;
     white-space: nowrap;
-    color: var(--primary, #2563eb);
+    color: var(--color-primary);
 }
 
 .pricelist-table tbody tr:hover {
-    background: rgba(37, 99, 235, 0.04);
+    background: rgba(77, 163, 255, 0.08);
 }
 
 .pricelist-table tbody tr:last-child td {
@@ -13720,8 +13752,8 @@ img.img-loaded {
 .pricelist-included-list li {
     position: relative;
     padding: 10px 0 10px 28px;
-    border-bottom: 1px solid var(--border, #e5e7eb);
-    color: var(--text, #111);
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-primary);
     font-size: 14px;
     line-height: 1.5;
 }

@@ -11784,7 +11784,7 @@ to {
     justify-content: center;
     gap: var(--spacing-sm);
     padding: var(--spacing-md) var(--spacing-lg);
-    font-size: var(--font-size-base);
+    /* font-size: var(--font-size-base); */
     font-weight: var(--font-weight-semibold);
     border: 1px solid transparent;
     border-radius: var(--radius-md);
@@ -13943,3 +13943,6 @@ img.img-loaded {
     margin-bottom: 16px;
 }
 
+.portfolio__back {
+    margin-bottom: 16px;
+}

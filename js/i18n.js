@@ -448,7 +448,8 @@ export const translations = {
         "pricelist-incl-8": "Пуско-наладочные работы и тестирование",
         "pricelist-incl-9": "Ознакомление клиента с правилами эксплуатации",
         "pricelist-calc-btn": "Рассчитать стоимость",
-        "pricelist-contact-btn": "Заказать консультацию"
+        "pricelist-contact-btn": "Заказать консультацию",
+        "pricelist-from": "от"
     },
     uk: {
         "site-title": "ClimaTech",
@@ -900,7 +901,8 @@ export const translations = {
         "pricelist-incl-8": "Пуско-налагоджувальні роботи та тестування",
         "pricelist-incl-9": "Ознайомлення клієнта з правилами експлуатації",
         "pricelist-calc-btn": "Розрахувати вартість",
-        "pricelist-contact-btn": "Замовити консультацію"
+        "pricelist-contact-btn": "Замовити консультацію",
+        "pricelist-from": "від"
     }
 };
 

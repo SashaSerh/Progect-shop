@@ -1979,13 +1979,14 @@ function setupServiceRouting() {
                 LANDING_CONTAINERS.forEach(id => {
                     setHiddenById(id, ![targetPage, 'footer-container'].includes(id));
                 });
-                // Добавить кнопку возврата (в стиле btn btn--ghost), если нет
+                // Добавить кнопку возврата (вариант: ghost), если нет
                 try {
                     const container = document.getElementById(targetPage);
                     const section = container?.querySelector('.portfolio, .reviews, .faq, .contacts, .welcome, .about-page');
                     if (section && !section.querySelector('.back-to-main')) {
                         const btn = document.createElement('a');
-                        btn.className = 'back-to-main btn btn--ghost service-page__back glass';
+                        btn.className = 'back-to-main btn service-page__back glass';
+                        btn.setAttribute('data-variant','ghost');
                         btn.href = '#';
                         btn.setAttribute('aria-label', 'Назад на главную');
                         btn.title = 'Назад';
@@ -2029,13 +2030,14 @@ function setupServiceRouting() {
                 LANDING_CONTAINERS.forEach(id => {
                     setHiddenById(id, !['services-container', 'footer-container'].includes(id));
                 });
-                // Добавить кнопку возврата (в стиле btn btn--ghost), если нет
+                // Добавить кнопку возврата (вариант: ghost), если нет
                 try {
                     const container = document.getElementById('services-container');
                     const section = container?.querySelector('.services');
                     if (section && !section.querySelector('.back-to-main')) {
                         const btn = document.createElement('a');
-                        btn.className = 'back-to-main btn btn--ghost service-page__back glass';
+                        btn.className = 'back-to-main btn service-page__back glass';
+                        btn.setAttribute('data-variant','ghost');
                         btn.href = '#';
                         btn.setAttribute('aria-label', 'Назад на главную');
                         btn.title = 'Назад';

@@ -89,7 +89,7 @@ export class Toast {
 
 // ============================================
 // Button normalization helper
-// Переносит классы вида btn--primary / btn--sm в data-атрибуты и удаляет старые классы
+// Переносит старые токены кнопок (например размеры или варианты) в data-атрибуты и удаляет устаревшие классы
 export function normalizeButtons(root = document) {
   const sizeTokens = new Set(['xs','sm','md','lg','xl','tiny']);
   const variantTokens = new Set(['primary','secondary','tertiary','ghost','outline','wa','tg','ig','fb','danger']);

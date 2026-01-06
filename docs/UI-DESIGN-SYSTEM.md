@@ -493,8 +493,8 @@ searchInput.addEventListener('input', (e) => {
 <button class="service-btn">Выбрать</button>
 
 <!-- ✅ Хорошо - единый btn класс -->
-<button class="btn btn--primary btn--md">Заказать</button>
-<button class="btn btn--primary btn--md">Выбрать</button>
+<button class="btn" data-variant="primary" data-size="md">Заказать</button>
+<button class="btn" data-variant="primary" data-size="md">Выбрать</button>
 ```
 
 ### 3. Валидируйте всегда
@@ -526,11 +526,11 @@ Toast.info('Операция выполняется...');
 ```javascript
 // ✅ Деактивируйте кнопку во время загрузки
 button.disabled = true;
-button.classList.add('btn--loading');
+button.setAttribute('data-loading','true');
 
 // Потом включите обратно
 button.disabled = false;
-button.classList.remove('btn--loading');
+button.removeAttribute('data-loading');
 ```
 
 ---

@@ -79,7 +79,7 @@ export async function initAdminPage(translations, lang = 'ru') {
     const ctr = document.createElement('div');
     ctr.className = 'gallery-item__ctrls';
     const btn = document.createElement('button');
-    btn.type = 'button'; btn.className = 'btn btn--tiny'; btn.textContent = t('admin-make-primary');
+    btn.type = 'button'; btn.className = 'btn'; btn.setAttribute('data-size','xs'); btn.textContent = t('admin-make-primary');
     btn.setAttribute('data-act', 'make-primary');
     ctr.appendChild(btn);
     wrap.appendChild(ctr);
@@ -209,9 +209,9 @@ export async function initAdminPage(translations, lang = 'ru') {
       const conflictBadge = conf ? `<span class="admin-badge admin-badge--conflict">${conf === 'both' ? t('admin-conflict-both') : (conf === 'sku' ? t('admin-conflict-sku') : t('admin-conflict-id'))}</span>` : '';
       const actions = conf ? `
         <div class="admin-conflict-actions" data-id="${pid}" data-type="${conf}">
-          <button type="button" class="btn btn--tiny" data-act="conf-merge">${t('admin-conf-merge')}</button>
-          <button type="button" class="btn btn--tiny" data-act="conf-keep-local">${t('admin-conf-keep-local')}</button>
-          <button type="button" class="btn btn--tiny btn--danger" data-act="conf-replace-git">${t('admin-conf-replace-git')}</button>
+          <button type="button" class="btn" data-size="xs" data-act="conf-merge">${t('admin-conf-merge')}</button>
+          <button type="button" class="btn" data-size="xs" data-act="conf-keep-local">${t('admin-conf-keep-local')}</button>
+          <button type="button" class="btn" data-size="xs" data-variant="danger" data-act="conf-replace-git">${t('admin-conf-replace-git')}</button>
         </div>` : '';
       li.innerHTML = `
         <div class="admin-list__meta">
@@ -226,7 +226,7 @@ export async function initAdminPage(translations, lang = 'ru') {
       if (conf) {
         // attach conflict actions UI
         const cont = document.createElement('div');
-        cont.innerHTML = actions + ` <button type="button" class="btn btn--tiny" data-act="conf-show-diff">${t('admin-conf-show-diff')}</button>`;
+        cont.innerHTML = actions + ` <button type="button" class="btn" data-size="xs" data-act="conf-show-diff">${t('admin-conf-show-diff')}</button>`;
         wrap.appendChild(cont);
       }
       listEl.appendChild(wrap);

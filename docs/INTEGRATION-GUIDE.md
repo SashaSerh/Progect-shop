@@ -70,7 +70,7 @@ Toast.error('Произошла ошибка');
       placeholder="your@email.com"
     />
   </div>
-  <button type="submit" class="btn btn--primary btn--block">Отправить</button>
+  <button type="submit" class="btn" data-variant="primary" data-block="true">Отправить</button>
 </form>
 ```
 
@@ -170,7 +170,7 @@ const validator = new FormValidator(form, {
     ></textarea>
   </div>
   
-  <button type="submit" class="btn btn--primary btn--block">Отправить</button>
+  <button type="submit" class="btn" data-variant="primary" data-block="true">Отправить</button>
 </form>
 
 <script>

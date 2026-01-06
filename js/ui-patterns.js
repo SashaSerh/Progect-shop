@@ -88,6 +88,36 @@ export class Toast {
 }
 
 // ============================================
+// Button normalization helper
+// Переносит классы вида btn--primary / btn--sm в data-атрибуты и удаляет старые классы
+export function normalizeButtons(root = document) {
+  const sizeTokens = new Set(['xs','sm','md','lg','xl','tiny']);
+  const variantTokens = new Set(['primary','secondary','tertiary','ghost','outline','wa','tg','ig','fb','danger']);
+  const specialTokens = new Set(['block','loading']);
+
+  const all = root.querySelectorAll('[class*=\"btn--\"]');
+  all.forEach(el => {
+    const classes = Array.from(el.classList);
+    classes.forEach(tok => {
+      if (!tok.startsWith('btn--')) return;
+      const key = tok.replace('btn--','');
+      if (sizeTokens.has(key)) {
+        el.setAttribute('data-size', key);
+      } else if (variantTokens.has(key)) {
+        el.setAttribute('data-variant', key);
+      } else if (specialTokens.has(key)) {
+        if (key === 'block') el.setAttribute('data-block','true');
+        if (key === 'loading') el.setAttribute('data-loading','true');
+      } else {
+        // fallback: prefer variant
+        el.setAttribute('data-variant', key);
+      }
+      el.classList.remove(tok);
+    });
+  });
+}
+
+// ============================================
 // MODAL DIALOG SYSTEM
 // ============================================
 

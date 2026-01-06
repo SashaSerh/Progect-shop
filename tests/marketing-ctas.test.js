@@ -33,8 +33,8 @@ describe('marketing CTAs', () => {
     document.body.innerHTML = `
       <div class="contacts__cta">
         <a class="btn" data-cta="call">Позвонить</a>
-        <a class="btn btn--wa">WhatsApp</a>
-        <a class="btn btn--tg">Telegram</a>
+        <a class="btn" data-variant="wa">WhatsApp</a>
+        <a class="btn" data-variant="tg">Telegram</a>
       </div>`;
   });
 
@@ -56,8 +56,8 @@ describe('marketing CTAs', () => {
   it('attachCTAs sets base hrefs and delegates clicks', () => {
     const open = vi.spyOn(window, 'open').mockImplementation(() => {});
     attachCTAs();
-    const wa = document.querySelector('.btn--wa');
-    const tg = document.querySelector('.btn--tg');
+    const wa = document.querySelector('[data-variant="wa"]');
+    const tg = document.querySelector('[data-variant="tg"]');
 
     // base href set
     expect(wa.getAttribute('href')).toMatch(/^https:\/\/wa\.me\//);

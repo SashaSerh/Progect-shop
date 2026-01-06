@@ -49,12 +49,13 @@ export function attachCTAs() {
   });
 
   // Проставим базовые href для кнопок WA/TG, чтобы сработало даже без JS-предзаполнения текста
-  document.querySelectorAll('.btn--wa').forEach(a => {
+  // Support both legacy classes and new data-variant attributes
+  document.querySelectorAll('.btn--wa, [data-variant="wa"]').forEach(a => {
     a.setAttribute('href', buildWhatsAppLink(''));
     a.setAttribute('target','_blank');
     a.setAttribute('rel','noopener');
   });
-  document.querySelectorAll('.btn--tg').forEach(a => {
+  document.querySelectorAll('.btn--tg, [data-variant="tg"]').forEach(a => {
     const raw = (getContentConfig().contacts.telegram || '').trim();
     const digits = raw.replace(/\D/g, '');
     const href = (raw.startsWith('+') || /^\d+$/.test(raw))
@@ -85,21 +86,21 @@ export function attachCTAs() {
       return;
     }
 
-    // Кнопка WhatsApp в контактах
-    const waBtn = target.closest('.btn--wa');
+    // Кнопка WhatsApp в контактах (legacy class OR data-variant)
+    const waBtn = target.closest('.btn--wa, [data-variant="wa"]');
     if (waBtn) {
       e.preventDefault();
-  const lang = localStorage.getItem('language') || 'uk';
+      const lang = localStorage.getItem('language') || 'uk';
       const msg = lang === 'uk' ? 'Доброго дня! Потрібна консультація.' : 'Здравствуйте! Нужна консультация.';
       safeOpen(buildWhatsAppLink(msg + ' #utm_source=site&utm_medium=cta&utm_campaign=whatsapp'));
       return;
     }
 
     // Кнопка Telegram в контактах
-    const tgBtn = target.closest('.btn--tg');
+    const tgBtn = target.closest('.btn--tg, [data-variant="tg"]');
     if (tgBtn) {
       e.preventDefault();
-  const lang = localStorage.getItem('language') || 'uk';
+      const lang = localStorage.getItem('language') || 'uk';
       const msg = lang === 'uk' ? 'Доброго дня! Потрібна консультація.' : 'Здравствуйте! Нужна консультация.';
       safeOpen(buildTelegramLink(msg + ' #utm_source=site&utm_medium=cta&utm_campaign=telegram'));
       return;

@@ -938,6 +938,9 @@ async function initApp() {
     // Применяем тему по умолчанию (теперь светлая) и синхронизируем иконки/ARIA
     try { initTheme(); } catch(_) {}
 
+    // Normalize legacy button classes into data-* attributes for uniform .btn usage
+    import('./ui-patterns.js').then(mod => { if (mod.normalizeButtons) mod.normalizeButtons(document); }).catch(()=>{});
+
     // Простая маршрутизация для сервисных страниц: показываем только выбранную секцию
     setupServiceRouting();
 

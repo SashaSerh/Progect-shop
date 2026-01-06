@@ -11803,8 +11803,7 @@ to {
     color: var(--text, #111);
 }
 
-.btn[data-variant="wa"] { /* WhatsApp */ }
-.btn[data-variant="tg"] { /* Telegram */ }
+
 
 /* Sizes via data-size */
 .btn[data-size="xs"] { padding: var(--spacing-xs) var(--spacing-sm); font-size: var(--font-size-xs); min-height: 32px; }
@@ -13843,5 +13842,9 @@ img.img-loaded {
 }
 
 .portfolio__back {
+    margin-bottom: 16px;
+}
+
+.faq__back {
     margin-bottom: 16px;
 }

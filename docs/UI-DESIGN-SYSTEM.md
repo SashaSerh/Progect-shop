@@ -90,45 +90,45 @@
 
 ```html
 <!-- Primary кнопка -->
-<button class="btn btn--primary btn--md">Заказать</button>
+<button class="btn" data-variant="primary" data-size="md">Заказать</button>
 
 <!-- Secondary кнопка -->
-<button class="btn btn--secondary btn--md">Отмена</button>
+<button class="btn" data-variant="secondary" data-size="md">Отмена</button>
 
 <!-- Success кнопка -->
-<button class="btn btn--success btn--md">Подтвердить</button>
+<button class="btn" data-variant="success" data-size="md">Подтвердить</button>
 
 <!-- Error кнопка -->
-<button class="btn btn--error btn--md">Удалить</button>
+<button class="btn" data-variant="error" data-size="md">Удалить</button>
 
 <!-- Ghost кнопка -->
-<button class="btn btn--ghost btn--md">Подробнее</button>
+<button class="btn" data-variant="ghost" data-size="md">Подробнее</button>
 ```
 
 #### Размеры кнопок
 
 ```html
-<button class="btn btn--primary btn--xs">Extra Small</button>
-<button class="btn btn--primary btn--sm">Small</button>
-<button class="btn btn--primary btn--md">Medium</button>
-<button class="btn btn--primary btn--lg">Large</button>
-<button class="btn btn--primary btn--xl">Extra Large</button>
+<button class="btn" data-variant="primary" data-size="xs">Extra Small</button>
+<button class="btn" data-variant="primary" data-size="sm">Small</button>
+<button class="btn" data-variant="primary" data-size="md">Medium</button>
+<button class="btn" data-variant="primary" data-size="lg">Large</button>
+<button class="btn" data-variant="primary" data-size="xl">Extra Large</button>
 ```
 
 #### Состояния
 
 ```html
 <!-- Disabled -->
-<button class="btn btn--primary" disabled>Заказать</button>
+<button class="btn" data-variant="primary" disabled>Заказать</button>
 
 <!-- Loading -->
-<button class="btn btn--primary btn--loading">
+<button class="btn" data-variant="primary" data-loading="true">
   <span class="btn__label">Сохранение...</span>
   <span class="btn__loader"></span>
 </button>
 
 <!-- Block (полная ширина) -->
-<button class="btn btn--primary btn--block">Полная ширина</button>
+<button class="btn" data-variant="primary" data-block="true">Полная ширина</button>
 ```
 
 ### Toast уведомления
@@ -173,7 +173,7 @@ await Modal.open('Содержимое modal', {
 const content = `
   <div class="custom-content">
     <p>Это может быть любой HTML</p>
-    <button class="btn btn--primary">Действие</button>
+    <button class="btn" data-variant="primary">Действие</button>
   </div>
 `;
 
@@ -266,7 +266,7 @@ loader.remove();
     />
   </div>
   
-  <button type="submit" class="btn btn--primary btn--block">
+  <button type="submit" class="btn" data-variant="primary" data-block="true">
     Отправить
   </button>
 </form>
@@ -364,7 +364,7 @@ emailField.addEventListener('blur', () => {
     <input type="number" name="quantity" class="form-input" min="1" max="99" value="1" />
   </div>
   
-  <button type="submit" class="btn btn--primary btn--block btn--lg">
+  <button type="submit" class="btn" data-variant="primary" data-block="true" data-size="lg">
     Добавить в корзину
   </button>
 </form>

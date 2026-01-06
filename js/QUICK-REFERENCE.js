@@ -27,18 +27,18 @@ toast.close();
 
 // HTML примеры
 /*
-<button class="btn btn--primary btn--md">Primary</button>
-<button class="btn btn--secondary btn--md">Secondary</button>
-<button class="btn btn--success btn--sm">Success</button>
-<button class="btn btn--error btn--lg">Delete</button>
-<button class="btn btn--ghost btn--xl">Ghost</button>
+<button class="btn" data-variant="primary" data-size="md">Primary</button>
+<button class="btn" data-variant="secondary" data-size="md">Secondary</button>
+<button class="btn" data-variant="success" data-size="sm">Success</button>
+<button class="btn" data-variant="error" data-size="lg">Delete</button>
+<button class="btn" data-variant="ghost" data-size="xl">Ghost</button>
 
 <!-- Размеры: xs, sm, md (default), lg, xl -->
 <!-- Блочная кнопка (полная ширина) -->
-<button class="btn btn--primary btn--block">Полная ширина</button>
+<button class="btn" data-variant="primary" data-block="true">Полная ширина</button>
 
 <!-- С loading состоянием -->
-<button class="btn btn--primary btn--loading" disabled>
+<button class="btn" data-variant="primary" data-loading="true" disabled>
   <span class="btn__label">Отправка...</span>
   <span class="btn__loader"></span>
 </button>

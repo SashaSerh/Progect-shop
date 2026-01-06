@@ -50,12 +50,12 @@ export function attachCTAs() {
 
   // Проставим базовые href для кнопок WA/TG, чтобы сработало даже без JS-предзаполнения текста
   // Support both legacy classes and new data-variant attributes
-  document.querySelectorAll('.btn--wa, [data-variant="wa"]').forEach(a => {
+  document.querySelectorAll('[data-variant="wa"]').forEach(a => {
     a.setAttribute('href', buildWhatsAppLink(''));
     a.setAttribute('target','_blank');
     a.setAttribute('rel','noopener');
   });
-  document.querySelectorAll('.btn--tg, [data-variant="tg"]').forEach(a => {
+  document.querySelectorAll('[data-variant="tg"]').forEach(a => {
     const raw = (getContentConfig().contacts.telegram || '').trim();
     const digits = raw.replace(/\D/g, '');
     const href = (raw.startsWith('+') || /^\d+$/.test(raw))
@@ -86,8 +86,8 @@ export function attachCTAs() {
       return;
     }
 
-    // Кнопка WhatsApp в контактах (legacy class OR data-variant)
-    const waBtn = target.closest('.btn--wa, [data-variant="wa"]');
+    // Кнопка WhatsApp в контактах
+    const waBtn = target.closest('[data-variant="wa"]');
     if (waBtn) {
       e.preventDefault();
       const lang = localStorage.getItem('language') || 'uk';
@@ -97,7 +97,7 @@ export function attachCTAs() {
     }
 
     // Кнопка Telegram в контактах
-    const tgBtn = target.closest('.btn--tg, [data-variant="tg"]');
+    const tgBtn = target.closest('[data-variant="tg"]');
     if (tgBtn) {
       e.preventDefault();
       const lang = localStorage.getItem('language') || 'uk';
@@ -107,7 +107,7 @@ export function attachCTAs() {
     }
 
     // Социальные: Instagram и Facebook
-    const igBtn = target.closest('.btn--ig');
+    const igBtn = target.closest('[data-variant="ig"]');
     if (igBtn) {
       e.preventDefault();
       const url = getContentConfig().social?.instagram;
@@ -117,7 +117,7 @@ export function attachCTAs() {
       igBtn.setAttribute('aria-describedby','contacts-newtab-hint');
       return;
     }
-    const fbBtn = target.closest('.btn--fb');
+    const fbBtn = target.closest('[data-variant="fb"]');
     if (fbBtn) {
       e.preventDefault();
       const url = getContentConfig().social?.facebook;

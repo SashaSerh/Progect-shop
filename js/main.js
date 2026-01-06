@@ -2178,7 +2178,7 @@ function setupServiceRouting() {
 
     // Обработчик для кнопки "Назад" на страницах услуг
     document.addEventListener('click', (e) => {
-        if (e.target.closest('.service-page .btn.btn--ghost')) {
+        if (e.target.closest('.service-page .btn[data-variant="ghost"]')) {
             e.preventDefault();
             location.hash = '';
         }

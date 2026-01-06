@@ -153,7 +153,7 @@ a {
     --border-color-light: #606a7d;
     
     /* Фокус состояние с чёрной обводкой */
-    .btn--primary {
+    .btn[data-variant="primary"] {
         box-shadow: 0 0 0 2px #4da3ff;
     }
 }

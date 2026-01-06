@@ -102,7 +102,9 @@ export function normalizeButtons(root = document) {
       if (!tok.startsWith('btn--')) return;
       const key = tok.replace('btn--','');
       if (sizeTokens.has(key)) {
-        el.setAttribute('data-size', key);
+        // legacy `btn--tiny` maps to `xs`
+        const sizeKey = key === 'tiny' ? 'xs' : key;
+        el.setAttribute('data-size', sizeKey);
       } else if (variantTokens.has(key)) {
         el.setAttribute('data-variant', key);
       } else if (specialTokens.has(key)) {
@@ -285,8 +287,8 @@ export class ConfirmDialog {
       <div class="confirm-dialog">
         <p class="confirm-dialog__message">${this.#escapeHtml(message)}</p>
         <div class="confirm-dialog__actions">
-          <button type="button" class="btn btn--secondary btn--md" data-action="cancel">${cancelText}</button>
-          <button type="button" class="btn btn--${type === 'danger' ? 'error' : 'primary'} btn--md" data-action="confirm">${confirmText}</button>
+          <button type="button" class="btn" data-variant="secondary" data-size="md" data-action="cancel">${cancelText}</button>
+          <button type="button" class="btn" data-variant="${type === 'danger' ? 'error' : 'primary'}" data-size="md" data-action="confirm">${confirmText}</button>
         </div>
       </div>
       `,

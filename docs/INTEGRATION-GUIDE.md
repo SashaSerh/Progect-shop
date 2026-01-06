@@ -29,9 +29,9 @@ window.ValidationRules = ValidationRules;
 
 **Стало:**
 ```html
-<button class="btn btn--primary btn--md">Заказать</button>
-<button class="btn btn--primary btn--md">Выбрать</button>
-<button class="btn btn--secondary btn--sm">← Назад</button>
+<button class="btn" data-variant="primary" data-size="md">Заказать</button>
+<button class="btn" data-variant="primary" data-size="md">Выбрать</button>
+<button class="btn" data-variant="secondary" data-size="sm">← Назад</button>
 ```
 
 ### 3. Заменить старые Toast уведомления
@@ -118,7 +118,7 @@ const validator = new FormValidator(form, {
   <img src="{image}" alt="{name}" class="product-card__image">
   <h3 class="product-card__title">{name}</h3>
   <p class="product-card__price">${price}</p>
-  <button class="btn btn--primary btn--md" data-id="{id}">Заказать</button>
+  <button class="btn" data-variant="primary" data-size="md" data-id="{id}">Заказать</button>
 </div>
 ```
 
@@ -210,7 +210,7 @@ npm test
 <div class="component">
   <h1 class="component__title">Заголовок</h1>
   <p class="component__description">Описание</p>
-  <button class="btn btn--primary btn--md">Действие</button>
+  <button class="btn" data-variant="primary" data-size="md">Действие</button>
 </div>
 ```
 
@@ -283,16 +283,16 @@ ValidationRules.customRule = {
 
 ### Q: Как сделать кнопку полной ширины?
 
-**A:** Добавьте класс `btn--block`:
+**A:** Установите атрибут `data-block="true"`:
 ```html
-<button class="btn btn--primary btn--block">Полная ширина</button>
+<button class="btn" data-variant="primary" data-block="true">Полная ширина</button>
 ```
 
 ### Q: Как показать loading в кнопке?
 
-**A:** Добавьте класс `btn--loading`:
+**A:** Установите атрибут `data-loading="true"`:
 ```html
-<button class="btn btn--primary btn--loading" disabled>
+<button class="btn" data-variant="primary" data-loading="true" disabled>
   <span class="btn__label">Сохранение...</span>
   <span class="btn__loader"></span>
 </button>

@@ -47,7 +47,7 @@ export async function modalExamples() {
   const htmlContent = `
     <div class="custom-modal-content">
       <p>Это может быть любой HTML контент</p>
-      <button class="btn btn--primary">Кнопка внутри modal</button>
+      <button class="btn" data-variant="primary">Кнопка внутри modal</button>
     </div>
   `;
   
@@ -209,19 +209,19 @@ export function productActionsExample() {
   
   addToCartBtn?.addEventListener('click', async () => {
     // Показываем состояние загрузки
-    addToCartBtn.classList.add('btn--loading');
+    addToCartBtn.setAttribute('data-loading','true');
     addToCartBtn.disabled = true;
     
     try {
       // Имитация добавления в корзину
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      addToCartBtn.classList.remove('btn--loading');
+      addToCartBtn.removeAttribute('data-loading');
       addToCartBtn.disabled = false;
       
       Toast.success('Товар добавлен в корзину');
     } catch (error) {
-      addToCartBtn.classList.remove('btn--loading');
+      addToCartBtn.removeAttribute('data-loading');
       addToCartBtn.disabled = false;
       
       Toast.error('Ошибка при добавлении');
@@ -242,7 +242,7 @@ export function productActionsExample() {
     );
     
     if (confirmed) {
-      deleteBtn.classList.add('btn--loading');
+      deleteBtn.setAttribute('data-loading','true');
       deleteBtn.disabled = true;
       
       setTimeout(() => {
@@ -332,7 +332,7 @@ export function dynamicFormExample() {
           class="form-input"
           placeholder="Введите значение"
         />
-        <button type="button" class="btn btn--sm btn--secondary remove-field-btn">
+        <button type="button" class="btn remove-field-btn" data-variant="secondary" data-size="sm">
           Удалить
         </button>
       </div>
@@ -389,7 +389,7 @@ export function searchExample() {
             <div class="search-result-item">
               <h3>${item.name}</h3>
               <p>${item.description}</p>
-              <a href="${item.url}" class="btn btn--sm btn--ghost">Подробнее</a>
+              <a href="${item.url}" class="btn" data-variant="ghost" data-size="sm">Подробнее</a>
             </div>
           `)
           .join('');

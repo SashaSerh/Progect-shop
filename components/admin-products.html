@@ -7,11 +7,11 @@
         <span class="admin-breadcrumbs__current" data-i18n="admin-breadcrumbs-current">Админ: Товары</span>
       </nav>
       <div class="admin-page__actions">
-        <a href="#products" class="btn btn--ghost" aria-label="Назад в каталог" data-i18n="admin-back">← Назад</a>
+        <a href="#products" class="btn" data-variant="ghost" aria-label="Назад в каталог" data-i18n="admin-back">← Назад</a>
         <button id="adminExportBtn" type="button" class="btn" data-i18n="admin-export-json">Экспорт JSON</button>
-        <label class="btn btn--secondary" for="adminImportInput" data-i18n="admin-import-json">Импорт JSON</label>
+        <label class="btn" data-variant="secondary" for="adminImportInput" data-i18n="admin-import-json">Импорт JSON</label>
         <input id="adminImportInput" type="file" accept="application/json" hidden>
-        <button id="clearConflictsBtn" type="button" class="btn btn--ghost" title="Сбросить конфликты" data-i18n="admin-clear-conflicts">Очистить конфликты</button>
+        <button id="clearConflictsBtn" type="button" class="btn" data-variant="ghost" title="Сбросить конфликты" data-i18n="admin-clear-conflicts">Очистить конфликты</button>
       </div>
       <details class="admin-gitcms" id="gitcmsSettingsAdmin">
         <summary data-i18n="admin-remote-title">Удалённые данные</summary>
@@ -167,10 +167,10 @@
           </div>
           <div class="form-actions">
             <button type="submit" id="adminProductSave" class="btn" data-variant="primary" data-i18n="admin-save">Сохранить</button>
-            <button type="button" id="adminSaveImageBtn" class="btn btn--secondary" data-i18n="admin-save-image" title="Сохранить выбранное изображение в picture/conditioners">Сохранить изображение</button>
-            <button type="button" id="adminSaveImagesBtn" class="btn btn--secondary" data-i18n="admin-save-images" title="Сохранить выбранные изображения (галерею) в picture/conditioners">Сохранить изображения</button>
+            <button type="button" id="adminSaveImageBtn" class="btn" data-variant="secondary" data-i18n="admin-save-image" title="Сохранить выбранное изображение в picture/conditioners">Сохранить изображение</button>
+            <button type="button" id="adminSaveImagesBtn" class="btn" data-variant="secondary" data-i18n="admin-save-images" title="Сохранить выбранные изображения (галерею) в picture/conditioners">Сохранить изображения</button>
             <button type="button" id="adminExportToProductsBtn" class="btn" data-i18n="admin-export-to-productsjson" title="Добавить текущий товар в data/products.json (локально, через доступ к файлам)">Добавить в products.json</button>
-            <button type="reset" id="adminProductCancel" class="btn btn--secondary" data-i18n="admin-reset">Сброс</button>
+            <button type="reset" id="adminProductCancel" class="btn" data-variant="secondary" data-i18n="admin-reset">Сброс</button>
           </div>
         </form>
       </main>

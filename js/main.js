@@ -67,6 +67,12 @@ async function loadComponent(containerId, componentPath) {
             }
             // Reinit lazy loading for images in loaded component
             reinitLazyLoading();
+            
+            // Apply i18n translations to the newly loaded content
+            const currentLang = localStorage.getItem('language') || 'uk';
+            if (typeof switchLanguage === 'function') {
+                switchLanguage(currentLang);
+            }
         } else {
             console.error(`Container ${containerId} not found`);
         }

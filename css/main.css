@@ -1516,6 +1516,7 @@ to {
     color: var(--text-primary);
 }
 
+.service-page__content h3,
 .service-page__content p,
 .service-page__content li {
     color: var(--text-primary);
@@ -1524,6 +1525,13 @@ to {
 .service-page__content ul,
 .service-page__content ol {
     color: var(--text-primary);
+}
+
+/* Ensure component list headings are visually distinct */
+.service-page__content h3 {
+    font-size: 18px;
+    margin: 0 0 0.5rem 0;
+    font-weight: 600;
 }
 
 /* Card Component - ensures proper text color in both themes */

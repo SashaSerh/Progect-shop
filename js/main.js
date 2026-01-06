@@ -920,6 +920,7 @@ async function initApp() {
         loadComponent('service-ac-install-container', 'components/service-ac-install.html'),
         loadComponent('service-recuperator-install-container', 'components/service-recuperator-install.html'),
         loadComponent('service-maintenance-container', 'components/service-maintenance.html'),
+        loadComponent('pricelist-container', 'components/pricelist.html'),
         loadComponent('case-1-container', 'components/case-1.html'),
         loadComponent('case-2-container', 'components/case-2.html'),
         loadComponent('case-3-container', 'components/case-3.html'),
@@ -1832,7 +1833,8 @@ function setupServiceRouting() {
     const SERVICE_MAP = {
         'service-ac-install': 'service-ac-install-container',
         'service-recuperator-install': 'service-recuperator-install-container',
-        'service-maintenance': 'service-maintenance-container'
+        'service-maintenance': 'service-maintenance-container',
+        'pricelist': 'pricelist-container'
     };
     const LANDING_CONTAINERS = [
         'hero-container',
@@ -1844,7 +1846,8 @@ function setupServiceRouting() {
         'contacts-container',
         'about-page-container',
         'breadcrumbs-container',
-        'welcome-container'
+        'welcome-container',
+        'pricelist-container'
     ];
     const CASE_CONTAINERS = [
         'case-1-container',

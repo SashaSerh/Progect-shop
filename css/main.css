@@ -2497,8 +2497,31 @@ html { scroll-behavior: smooth; }
 #breakdown { white-space: pre-line; }
 
 /* Service page back with calculator button */
-.service-page__back { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+.service-page__back { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; gap: 12px; flex-wrap: wrap; }
 .service-page__calculator-btn { display: flex; align-items: center; gap: 8px; }
+
+/* Pricelist link button */
+.pricelist-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+    padding: 8px 14px;
+}
+
+.pricelist-link svg {
+    flex-shrink: 0;
+}
+
+/* Calculator page back with pricelist */
+.calculator-page__back {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    gap: 12px;
+    flex-wrap: wrap;
+}
 
 /* Service page cards (align with calculator card surfaces) */
 .service-page__header {
@@ -10449,4 +10472,222 @@ img.img-error {
     font-size: 0.875rem;
     color: var(--text-secondary, #666);
     margin-bottom: 8px;
+}
+
+/* ========================================
+   PRICELIST PAGE STYLES
+   ======================================== */
+.pricelist-page {
+    padding: 16px;
+    min-height: 100vh;
+}
+
+.pricelist-page__back {
+    margin-bottom: 16px;
+}
+
+.pricelist-page__header {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 20px;
+    background: var(--surface-alt, #f9fafb);
+    border-radius: 12px;
+    border: 1px solid var(--border, #e5e7eb);
+    margin-bottom: 16px;
+    transition: all var(--motion-duration-fast, 0.15s) ease;
+}
+
+.pricelist-page__header:hover {
+    background: var(--surface, #fff);
+    border-color: var(--primary, #2563eb);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1);
+}
+
+.pricelist-page__title {
+    font-size: clamp(24px, 5vw, 32px);
+    font-weight: 700;
+    color: var(--text, #111);
+    margin: 0;
+}
+
+.pricelist-page__lead {
+    font-size: clamp(14px, 3vw, 16px);
+    color: var(--text-secondary, #666);
+    line-height: 1.5;
+    margin: 0;
+}
+
+.pricelist-section {
+    margin-bottom: 16px;
+    padding: 20px;
+    background: var(--surface-alt, #f9fafb);
+    border-radius: 12px;
+    border: 1px solid var(--border, #e5e7eb);
+    transition: all var(--motion-duration-fast, 0.15s) ease;
+}
+
+.pricelist-section:hover {
+    background: var(--surface, #fff);
+    border-color: var(--primary, #2563eb);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1);
+}
+
+.pricelist-section__title {
+    font-size: clamp(18px, 4vw, 22px);
+    font-weight: 600;
+    color: var(--text, #111);
+    margin: 0 0 8px 0;
+}
+
+.pricelist-section__hint {
+    font-size: 14px;
+    color: var(--text-secondary, #666);
+    margin: 0 0 16px 0;
+}
+
+.pricelist-table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.pricelist-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+.pricelist-table th,
+.pricelist-table td {
+    padding: 12px 16px;
+    text-align: left;
+    border-bottom: 1px solid var(--border, #e5e7eb);
+}
+
+.pricelist-table th {
+    background: var(--surface-2, #f3f4f6);
+    font-weight: 600;
+    color: var(--text, #111);
+    position: sticky;
+    top: 0;
+}
+
+.pricelist-table td:last-child {
+    text-align: right;
+    font-weight: 600;
+    white-space: nowrap;
+    color: var(--primary, #2563eb);
+}
+
+.pricelist-table tbody tr:hover {
+    background: rgba(37, 99, 235, 0.04);
+}
+
+.pricelist-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.pricelist-included-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.pricelist-included-list li {
+    position: relative;
+    padding: 10px 0 10px 28px;
+    border-bottom: 1px solid var(--border, #e5e7eb);
+    color: var(--text, #111);
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.pricelist-included-list li:last-child {
+    border-bottom: none;
+}
+
+.pricelist-included-list li::before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    color: var(--color-success, #10B981);
+    font-weight: 700;
+}
+
+.pricelist-cta {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 24px;
+    justify-content: center;
+}
+
+.pricelist-cta .btn {
+    min-width: 200px;
+}
+
+@media (max-width: 600px) {
+    .pricelist-table th,
+    .pricelist-table td {
+        padding: 10px 12px;
+        font-size: 13px;
+    }
+    
+    .pricelist-cta .btn {
+        flex: 1 1 100%;
+    }
+}
+
+/* Pricelist dark theme */
+.theme-dark .pricelist-page__header {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.04);
+}
+
+.theme-dark .pricelist-page__header:hover {
+    background: rgba(255,255,255,0.03);
+    border-color: rgba(59,130,246,0.12);
+    box-shadow: 0 4px 12px rgba(59,130,246,0.06);
+}
+
+.theme-dark .pricelist-page__title {
+    color: var(--text-primary, #f0f0f0);
+}
+
+.theme-dark .pricelist-page__lead {
+    color: var(--calc-muted-text, #a0aec0);
+}
+
+.theme-dark .pricelist-section {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.04);
+}
+
+.theme-dark .pricelist-section:hover {
+    background: rgba(255,255,255,0.03);
+    border-color: rgba(59,130,246,0.12);
+    box-shadow: 0 4px 12px rgba(59,130,246,0.06);
+}
+
+.theme-dark .pricelist-section__title {
+    color: var(--text-primary, #f0f0f0);
+}
+
+.theme-dark .pricelist-table th {
+    background: rgba(255,255,255,0.04);
+    color: var(--text-primary, #f0f0f0);
+}
+
+.theme-dark .pricelist-table td {
+    color: var(--text-primary, #f0f0f0);
+    border-bottom-color: rgba(255,255,255,0.06);
+}
+
+.theme-dark .pricelist-table tbody tr:hover {
+    background: rgba(59,130,246,0.06);
+}
+
+.theme-dark .pricelist-included-list li {
+    color: var(--text-primary, #f0f0f0);
+    border-bottom-color: rgba(255,255,255,0.06);
 }

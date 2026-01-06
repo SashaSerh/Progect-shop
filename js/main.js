@@ -4063,6 +4063,29 @@ function setupHashRouting(initialLang) {
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             }).catch(err => console.error('Error loading about component:', err));
             return;
+        } else if (hash === '#pricelist') {
+            // Load pricelist page into main container
+            try { setHiddenById('main-container', false); } catch(_) {}
+            loadComponent('main-container', 'components/pricelist.html').then(() => {
+                // Hide other sections, show main-container
+                showSection('hero-container', false);
+                showSection('services-container', false);
+                showSection('products-container', false);
+                showSection('portfolio-container', false);
+                showSection('contacts-container', false);
+                showSection('product-detail-container', false);
+                showSection('admin-page-container', false);
+                showSection('mobile-main-nav-container', false);
+                showSection('main-container', true);
+
+                // Apply translations for new content
+                try { const lang = getLangSafe(); if (typeof switchLanguage === 'function') switchLanguage(lang); } catch {}
+
+                // Focus the heading and scroll to top
+                try { focusSectionHeading('pricelist', 'h2'); } catch(_) {}
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }).catch(err => console.error('Error loading pricelist component:', err));
+            return;
         } else if (hash === '#welcome') {
             // Show welcome overlay as an explicit route
             loadComponent('welcome-container', 'components/welcome.html').then(() => {

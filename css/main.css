@@ -11792,12 +11792,6 @@ to {
     background: rgba(255, 255, 255, 0.2);
 }
 
-.btn[data-variant="outline"] {
-    background: transparent;
-    border: 1px solid var(--border, #e5e7eb);
-    color: var(--text, #111);
-}
-
 .btn[data-variant="ghost"] {
     background: transparent;
     color: var(--text, #111);
@@ -11806,14 +11800,14 @@ to {
 
 
 /* Sizes via data-size */
-.btn[data-size="xs"] { padding: var(--spacing-xs) var(--spacing-sm); font-size: var(--font-size-xs); min-height: 32px; }
+/* .btn[data-size="xs"] { padding: var(--spacing-xs) var(--spacing-sm); font-size: var(--font-size-xs); min-height: 32px; }
 .btn[data-size="sm"] { padding: var(--spacing-md) var(--spacing-lg); min-height: 36px; }
 .btn[data-size="md"] { padding: var(--spacing-md) var(--spacing-lg); font-size: var(--font-size-base); min-height: 44px; }
 .btn[data-size="lg"] { padding: var(--spacing-lg) var(--spacing-xl); font-size: var(--font-size-lg); min-height: 48px; }
 .btn[data-size="xl"] { padding: var(--spacing-xl) var(--spacing-2xl); font-size: var(--font-size-xl); min-height: 56px; }
 
 .btn[data-block="true"] { width: 100%; }
-
+ */
 
 
 .btn[data-loading="true"] {

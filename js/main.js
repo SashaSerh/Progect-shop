@@ -920,6 +920,8 @@ async function initApp() {
         loadComponent('service-ac-install-container', 'components/service-ac-install.html'),
         loadComponent('service-recuperator-install-container', 'components/service-recuperator-install.html'),
         loadComponent('service-maintenance-container', 'components/service-maintenance.html'),
+        loadComponent('service-ac-removal-container', 'components/service-ac-removal.html'),
+        loadComponent('service-ac-laying-container', 'components/service-ac-laying.html'),
         loadComponent('pricelist-container', 'components/pricelist.html'),
         loadComponent('case-1-container', 'components/case-1.html'),
         loadComponent('case-2-container', 'components/case-2.html'),
@@ -1855,6 +1857,8 @@ function setupServiceRouting() {
         'service-ac-install': 'service-ac-install-container',
         'service-recuperator-install': 'service-recuperator-install-container',
         'service-maintenance': 'service-maintenance-container',
+        'service-ac-removal': 'service-ac-removal-container',
+        'service-ac-laying': 'service-ac-laying-container',
         'pricelist': 'pricelist-container'
     };
     const LANDING_CONTAINERS = [
@@ -5469,6 +5473,18 @@ function showServicesList(navList) {
                 <a href="#service-maintenance" class="main-nav-mobile__link">
                     <span class="main-nav-mobile__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2v6M12 16v6M4 12h6M14 12h6"/></svg></span>
                     <span class="main-nav-mobile__text" data-i18n="service-maintenance-title">Обслуживание систем</span>
+                </a>
+            </li>
+            <li class="main-nav-mobile__item">
+                <a href="#service-ac-removal" class="main-nav-mobile__link">
+                    <span class="main-nav-mobile__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 9l6 6 6-6"/></svg></span>
+                    <span class="main-nav-mobile__text" data-i18n="service-ac-removal-title">Демонтаж кондиционера</span>
+                </a>
+            </li>
+            <li class="main-nav-mobile__item">
+                <a href="#service-ac-laying" class="main-nav-mobile__link">
+                    <span class="main-nav-mobile__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 6h20M2 12h20M2 18h20"/></svg></span>
+                    <span class="main-nav-mobile__text" data-i18n="service-ac-laying-title">Закладка трассы</span>
                 </a>
             </li>
             <li class="main-nav-mobile__item">

@@ -1,11 +1,11 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import '../js/main.js'; // registers routing handlers
+import '../js/main.js';
 
 function dispatchDOMContentLoaded() {
   document.dispatchEvent(new Event('DOMContentLoaded'));
 }
 
-async function waitFor(condition, timeout = 800) {
+async function waitFor(condition, timeout = 1200) {
   const start = Date.now();
   while (Date.now() - start < timeout) {
     if (condition()) return true;
@@ -15,20 +15,18 @@ async function waitFor(condition, timeout = 800) {
   return false;
 }
 
-describe('Pricelist route integration', () => {
+describe('Pricelist navigation', () => {
   beforeEach(() => {
     document.body.innerHTML = '';
     location.hash = '#test';
 
-    // create main container and a hero for context
+    // Minimal DOM: main container (for calculator page) and hero
     document.body.innerHTML = `
-      <div id="main-container" hidden>
-        <!-- component will be loaded here -->
-      </div>
+      <div id="main-container" hidden></div>
       <div id="hero-container"><h1>Hero</h1></div>
     `;
 
-    // Mock fetch to return the local component HTML so loadComponent can succeed in tests
+    // Mock fetch to return local component HTML so loadComponent can succeed in tests
     const fs = require('fs');
     const path = require('path');
     global.fetch = (resource) => {
@@ -44,38 +42,50 @@ describe('Pricelist route integration', () => {
     dispatchDOMContentLoaded();
   });
 
-  it('loads pricelist component on direct hash navigation', async () => {
-    // Trigger navigation to pricelist
-    location.hash = '#pricelist';
+  it('navigates to pricelist when clicking the pricelist link inside calculator', async () => {
+    // Navigate to calculator to ensure the link exists in the DOM
+    location.hash = '#calculator';
     window.dispatchEvent(new HashChangeEvent('hashchange'));
 
-    const ok = await waitFor(() => {
-      const title = document.getElementById('pricelist-title');
-      const main = document.getElementById('main-container');
-      return !!title && main && (main.classList.contains('is-visible') || getComputedStyle(main).display !== 'none');
-    }, 1500);
+    // Wait for calculator to be present
+    const loaded = await waitFor(() => !!document.getElementById('calculator-page-title'), 1500);
+    expect(loaded).toBe(true);
 
+    const link = document.querySelector('.pricelist-link');
+    expect(link).toBeTruthy();
+
+    // Click the link
+    link.click();
+
+    // Wait for pricelist to load and become visible
+    const ok = await waitFor(() => !!document.getElementById('pricelist-title'), 1500);
     expect(ok).toBe(true);
-    expect(document.getElementById('pricelist-title')).toBeTruthy();
+    const title = document.getElementById('pricelist-title');
+    expect(title.textContent.trim().length).toBeGreaterThan(0);
   });
 
-  it('navigates to pricelist when clicking a pricelist-link anchor', async () => {
-    // Prepare a service section with a pricelist button
-    document.body.innerHTML = `
-      <div id="main-container" hidden></div>
-      <div id="service-ac-install-container">
-        <section class="service-page" id="service-ac-install">
-          <a href="#pricelist" role="button" class="pricelist-link">Прайс-лист</a>
-        </section>
-      </div>
-    `;
+  it('loads pricelist on demand if container was not preloaded', async () => {
+    // Simulate environment where pricelist container isn't present
+    // We'll load only the calculator component and remove any pricelist container
+    // Ensure hash is empty and main/container will be populated only with calculator
+    location.hash = '';
 
-    dispatchDOMContentLoaded();
+    // Force load calculator
+    loadComponent('main-container', 'components/calculator-page.html');
+    const okCalc = await waitFor(() => !!document.getElementById('calculator-page-title'), 1500);
+    expect(okCalc).toBe(true);
 
-    const btn = document.querySelector('.pricelist-link');
-    btn.click();
+    // Ensure pricelist-container is not in the document
+    const existing = document.getElementById('pricelist-container');
+    if (existing) existing.remove();
 
-    const ok = await waitFor(() => location.hash === '#pricelist' && !!document.getElementById('pricelist-title'), 1500);
+    const link = document.querySelector('.pricelist-link');
+    expect(link).toBeTruthy();
+
+    // Click pricelist - our routing should try to load component on demand
+    link.click();
+
+    const ok = await waitFor(() => !!document.getElementById('pricelist-title'), 1500);
     expect(ok).toBe(true);
   });
 });

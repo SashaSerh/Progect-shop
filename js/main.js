@@ -1032,6 +1032,24 @@ async function initApp() {
             if (!a) return;
             const href = a.getAttribute('href') || '';
             if (!href || href.length < 2) return;
+
+            // If the target anchor exists on the CURRENT visible page, perform smooth scroll
+            // Otherwise, allow default navigation (hash change) so SPA routing can handle it
+            try {
+                const targetEl = document.querySelector(href);
+                const isOnPage = !!targetEl && !targetEl.closest('[hidden]') && window.getComputedStyle(targetEl).display !== 'none';
+                if (!isOnPage) {
+                    // If anchor target isn't present on the current visible page, trigger SPA navigation.
+                    // This ensures clicks on links like "#pricelist" reliably navigate (and also fixes JSDOM test behaviour).
+                    try { e.preventDefault(); } catch(_) {}
+                    location.hash = href;
+                    return;
+                }
+            } catch (_) {
+                // On error, let default behavior happen
+                return;
+            }
+
             e.preventDefault();
             scrollToId(href);
             history.replaceState(null, '', href);
@@ -1915,6 +1933,24 @@ function setupServiceRouting() {
             const targetContainerId = SERVICE_MAP[hash];
             const isServiceView = Boolean(targetContainerId);
 
+            // Если контейнер сервиса ещё не загружен — попробуем подгрузить его на лету и повторно применить маршрут
+            if (isServiceView && !document.getElementById(targetContainerId)) {
+                try {
+                    const base = targetContainerId.replace(/-container$/, '');
+                    console.log('Routing: dynamically loading', targetContainerId, `components/${base}.html`);
+                    // Создадим контейнер, если его нет, чтобы loadComponent могла вставить разметку
+                    const container = document.createElement('div');
+                    container.id = targetContainerId;
+                    const footer = document.getElementById('footer-container');
+                    if (footer && footer.parentNode) footer.parentNode.insertBefore(container, footer); else document.body.appendChild(container);
+                    loadComponent(targetContainerId, `components/${base}.html`).then(() => {
+                        console.log('Routing: loaded', targetContainerId);
+                        applyRoute();
+                    }).catch(() => {});
+                } catch (_) {}
+                return;
+            }
+
             if (isServiceView) {
                 // На внутренних страницах: скрыть hero и меню, показать только нужную секцию и футер
                 LANDING_CONTAINERS.forEach(id => setHiddenById(id, ![targetContainerId, 'footer-container'].includes(id)));
@@ -2083,6 +2119,17 @@ function setupServiceRouting() {
         // Десктопная логика маршрутизации
         const targetContainerId = SERVICE_MAP[hash];
         const isServiceView = Boolean(targetContainerId);
+
+        // Если контейнер сервиса ещё не загружен — попробуем подгрузить его на лету и повторно применить маршрут
+        if (isServiceView && !document.getElementById(targetContainerId)) {
+            try {
+                const base = targetContainerId.replace(/-container$/, '');
+                loadComponent(targetContainerId, `components/${base}.html`).then(() => {
+                    applyRoute();
+                }).catch(() => {});
+            } catch (_) {}
+            return;
+        }
 
         // На главной (нет хеша или не сервис/кейс) показываем все лендинговые секции
         if (!isServiceView && !CASE_HASHES.includes(hash)) {
@@ -4062,29 +4109,6 @@ function setupHashRouting(initialLang) {
 
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             }).catch(err => console.error('Error loading about component:', err));
-            return;
-        } else if (hash === '#pricelist') {
-            // Load pricelist page into main container
-            try { setHiddenById('main-container', false); } catch(_) {}
-            loadComponent('main-container', 'components/pricelist.html').then(() => {
-                // Hide other sections, show main-container
-                showSection('hero-container', false);
-                showSection('services-container', false);
-                showSection('products-container', false);
-                showSection('portfolio-container', false);
-                showSection('contacts-container', false);
-                showSection('product-detail-container', false);
-                showSection('admin-page-container', false);
-                showSection('mobile-main-nav-container', false);
-                showSection('main-container', true);
-
-                // Apply translations for new content
-                try { const lang = getLangSafe(); if (typeof switchLanguage === 'function') switchLanguage(lang); } catch {}
-
-                // Focus the heading and scroll to top
-                try { focusSectionHeading('pricelist', 'h2'); } catch(_) {}
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            }).catch(err => console.error('Error loading pricelist component:', err));
             return;
         } else if (hash === '#welcome') {
             // Show welcome overlay as an explicit route

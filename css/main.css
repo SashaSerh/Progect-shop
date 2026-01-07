@@ -7370,32 +7370,33 @@ body {
     overflow: hidden;
 }
 
-.service-page__content {
+/* Dark-themed surface for service-page content */
+.theme-dark .service-page__content {
     position: relative;
     background: rgba(0, 0, 0, 0.2);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border-radius: 16px;
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    border: 1px solid var(--border-color);
     padding: 16px;
     margin: 16px 0;
-    color: rgba(255, 255, 255, 0.9);
+    color: var(--text-primary);
     line-height: 1.6;
-    box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.12),
+    box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.06),
             inset 0 -1px 1px 0 rgba(0, 0, 0, 0.08),
             0 8px 32px rgba(0, 0, 0, 0.25);
     overflow: hidden;
 }
 
-.service-page__content::before {
+.theme-dark .service-page__content::before {
     content: '';
     position: absolute;
     inset: 0;
     border-radius: inherit;
     background: linear-gradient(
             135deg,
-            rgba(255, 255, 255, 0.12) 0%,
-            rgba(255, 255, 255, 0.04) 40%,
+            rgba(255, 255, 255, 0.06) 0%,
+            rgba(255, 255, 255, 0.03) 40%,
             transparent 50%,
             rgba(0, 0, 0, 0.04) 100%
         );
@@ -7424,7 +7425,7 @@ body {
     gap: 10px;
 }
 
-.service-benefits__item {
+.theme-dark .service-benefits__item {
     position: relative;
     display: flex;
     align-items: center;

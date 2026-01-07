@@ -1565,15 +1565,27 @@ to {
 .service-benefits__item {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 10px 12px;
-    border: 1px solid var(--color-border, #e5e5e5);
+    gap: 12px;
+    padding: 12px 14px;
+    border: 1px solid var(--border-color);
     border-radius: 10px;
-    background: var(--color-surface, #fff);
+    background: var(--surface-0);
+    color: var(--text-primary);
+    transition: background var(--transition-fast), border-color var(--transition-fast);
 }
 
 .service-benefits__item .icon {
-    flex: 0 0 24px;
+    flex: 0 0 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-primary);
+}
+
+.theme-dark .service-benefits__item {
+    background: var(--surface-1);
+    border-color: var(--border-color);
+    color: var(--text-primary);
 }
 
 .service-page__gallery {
@@ -4208,12 +4220,37 @@ to {
     align-items: center;
     gap: 12px;
     transition: all var(--motion-duration-normal, 0.3s) var(--motion-ease-standard, ease);
+    /* Ensure readable text in light theme */
+    color: var(--text-primary);
+}
+
+.service-benefits__item .icon {
+    flex: 0 0 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-primary);
+}
+
+.service-benefits__item .benefit-text {
+    color: inherit;
 }
 
 .service-benefits__item:hover {
     border-color: var(--primary-light, #60a5fa);
     background: var(--surface, #fff);
     box-shadow: 0 4px 12px rgba(37,99,235,0.12);
+}
+
+/* Dark theme adjustments (explicit) */
+.theme-dark .service-benefits__item {
+    background: var(--surface-1);
+    border-color: var(--border-color);
+    color: var(--text-primary);
+}
+
+.theme-dark .service-benefits__item .icon {
+    color: var(--color-primary);
 }
 
 .service-page__gallery {
@@ -12597,6 +12634,14 @@ img.img-loaded {
 
 .theme-dark .hero__subtitle {
     color: var(--text-secondary);
+}
+
+/* Hide hero CTA on mobile when dark theme is active */
+@media (max-width: 768px) {
+    .theme-dark .hero__cta,
+    .theme-dark .hero .hero__cta {
+        display: none;
+    }
 }
 
 /* Card and Surface Enhancements */

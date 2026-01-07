@@ -11,6 +11,7 @@ import { initMarketing } from './marketing.js';
 import { initNavigation } from './navigation.js';
 import { reinitLazyLoading } from './image-loader.js';
 import { mobileAnimations } from './mobile-animations.js';
+import { initPricelistAnimations } from './pricelist-scroll-animation.js';
 // Landing mode: services portfolio contacts only; disable products/cart flows
 const LANDING_MODE = true;
 
@@ -1119,6 +1120,9 @@ async function initApp() {
 
     // Инициализируем маркетинговые CTA и форму контактов (кнопки позвонить/WhatsApp/Telegram)
     try { initMarketing(); } catch (e) { /* no-op */ }
+    
+    // Инициализируем анимации для прайс-листа
+    try { initPricelistAnimations(); } catch (e) { /* no-op */ }
 
     // Рендер портфолио по конфигу (поддержка заголовков/описаний, локализация ru/uk)
     const portfolioGrid = document.querySelector('.portfolio__grid');

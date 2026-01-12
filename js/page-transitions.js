@@ -463,6 +463,21 @@ export function initPageTransitionHandlers() {
         e.preventDefault();
         
         const targetId = href.substring(1);
+        const targetContainerId = 'pricelist-container'; // Контейнер, который нужно показать
+        
+        // Проверить, виден ли контейнер прайс-листа
+        const containerEl = document.getElementById(targetContainerId);
+        const isContainerVisible = containerEl && !containerEl.hasAttribute('hidden') && 
+                                  window.getComputedStyle(containerEl).display !== 'none';
+        
+        // Если контейнер не виден, сначала вызвать навигацию
+        if (!isContainerVisible) {
+            location.hash = `#${targetId}`;
+            // Подождать немного, пока контейнер загрузится и покажется
+            await new Promise(resolve => setTimeout(resolve, 100));
+        }
+        
+        // Теперь выполнить анимацию скролла к элементу
         await pageTransitions.scrollToWithAnimation(targetId, 'top');
     });
 

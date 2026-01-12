@@ -329,7 +329,15 @@ class PageTransitions {
         sessionStorage.setItem('scrollReturnTarget', targetId);
 
         if (this.prefersReducedMotion || !this.isMobile) {
-            targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            // Рассчитываем позицию для центрирования
+            const rect = targetEl.getBoundingClientRect();
+            const viewportHeight = window.innerHeight;
+            const elementHeight = rect.height;
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            
+            // Центрируем элемент в viewport
+            const targetScrollTop = scrollTop + rect.top - (viewportHeight / 2) + (elementHeight / 2);
+            window.scrollTo({ top: Math.max(0, targetScrollTop), behavior: 'smooth' });
             return;
         }
 
@@ -349,8 +357,15 @@ class PageTransitions {
         
         void targetEl.offsetWidth;
         
-        // Скролл + анимация
-        targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        // Скролл + анимация - рассчитываем позицию для центрирования
+        const rect = targetEl.getBoundingClientRect();
+        const viewportHeight = window.innerHeight;
+        const elementHeight = rect.height;
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        
+        // Центрируем элемент в viewport
+        const targetScrollTop = scrollTop + rect.top - (viewportHeight / 2) + (elementHeight / 2);
+        window.scrollTo({ top: Math.max(0, targetScrollTop), behavior: 'smooth' });
         
         await new Promise(resolve => setTimeout(resolve, 100));
         

@@ -31,7 +31,8 @@ export async function loadModule(modulePath) {
     }
     
     // Создаём промис загрузки
-    const loadPromise = import(modulePath)
+    // Vite can't statically analyze dynamic import vars; suppress its warning with @vite-ignore
+    const loadPromise = import(/* @vite-ignore */ modulePath)
         .then(module => {
             moduleCache.set(modulePath, module);
             loadingStatus.delete(modulePath);

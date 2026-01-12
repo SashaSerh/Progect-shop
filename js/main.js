@@ -932,6 +932,7 @@ async function initApp() {
         loadComponent('service-ac-install-container', 'components/service-ac-install.html'),
         loadComponent('service-recuperator-install-container', 'components/service-recuperator-install.html'),
         loadComponent('service-maintenance-container', 'components/service-maintenance.html'),
+        loadComponent('service-maintenance-pricelist-container', 'components/service-maintenance-pricelist.html'),
         loadComponent('service-ac-removal-container', 'components/service-ac-removal.html'),
         loadComponent('service-ac-laying-container', 'components/service-ac-laying.html'),
         loadComponent('pricelist-container', 'components/pricelist.html'),
@@ -1875,6 +1876,7 @@ function setupServiceRouting() {
         'service-ac-install': 'service-ac-install-container',
         'service-recuperator-install': 'service-recuperator-install-container',
         'service-maintenance': 'service-maintenance-container',
+        'service-maintenance-pricelist': 'service-maintenance-pricelist-container',
         'service-ac-removal': 'service-ac-removal-container',
         'service-ac-laying': 'service-ac-laying-container',
         'pricelist': 'pricelist-container'
@@ -1981,25 +1983,21 @@ function setupServiceRouting() {
                 try {
                     const section = document.getElementById(targetContainerId)?.querySelector('.service-page');
                     if (section) {
+                        const navDir = sessionStorage.getItem('service_nav_direction');
+                        if (navDir) sessionStorage.removeItem('service_nav_direction');
                         // If we are returning from calculator, animate from left to create symmetric effect
                         const fromCalc = sessionStorage.getItem('from_calculator') === 'true';
+                        const enterFromLeft = fromCalc || navDir === 'back-to-maintenance';
                         if (fromCalc) {
                             sessionStorage.removeItem('from_calculator');
-                            section.classList.add('service-page--slide-in-from-left');
-                            // ensure visible state and trigger composite animation
-                            requestAnimationFrame(() => {
-                                section.classList.remove('service-page--slide-in-from-left');
-                                section.classList.add('service-page--slide-in');
-                                section.classList.add('service-page--visible');
-                            });
-                        } else {
-                            section.classList.add('service-page--slide-in-from-right');
-                            requestAnimationFrame(() => {
-                                section.classList.remove('service-page--slide-in-from-right');
-                                section.classList.add('service-page--slide-in');
-                                section.classList.add('service-page--visible');
-                            });
                         }
+                        const enterClass = enterFromLeft ? 'service-page--slide-in-from-left' : 'service-page--slide-in-from-right';
+                        section.classList.add(enterClass);
+                        requestAnimationFrame(() => {
+                            section.classList.remove(enterClass);
+                            section.classList.add('service-page--slide-in');
+                            section.classList.add('service-page--visible');
+                        });
                     }
                 } catch(_) { /* noop */ }
                 scrollToSectionTop(targetContainerId);
@@ -2176,9 +2174,13 @@ function setupServiceRouting() {
             try {
                 const section = document.getElementById(onlyId)?.querySelector('.service-page');
                 if (section) {
-                    section.classList.add('service-page--slide-in-from-right');
+                    const navDir = sessionStorage.getItem('service_nav_direction');
+                    if (navDir) sessionStorage.removeItem('service_nav_direction');
+                    const enterFromLeft = navDir === 'back-to-maintenance';
+                    const enterClass = enterFromLeft ? 'service-page--slide-in-from-left' : 'service-page--slide-in-from-right';
+                    section.classList.add(enterClass);
                     requestAnimationFrame(() => {
-                        section.classList.remove('service-page--slide-in-from-right');
+                        section.classList.remove(enterClass);
                         section.classList.add('service-page--slide-in');
                     });
                 }

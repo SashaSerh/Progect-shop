@@ -1,7 +1,16 @@
-## Инструкции для AI-агентов (Progect-shop)
+# Инструкции для AI-агентов (Progect-shop)
 
-## Ключевая архитектура
-- **Точка входа**: `js/main.js` (ESM). Компоненты HTML из `components/` подгружаются через `loadComponent(containerId, path)`.
+Краткий ориентир — что важно знать, чтобы быстро вносить безопасные изменения.
+
+1) Быстрый старт (dev / build / test)
+- Разработка: `npm run dev` (Vite, ESM project).
+- Сборка/превью: `npm run build` / `npm run preview` (или `python3 -m http.server 5173` для статического артефакта).
+- Unit/Integration: `npm test` (Vitest + JSDOM).
+- Visual tests: `npm run visual:test` / `npm run visual:create-baseline` (Playwright + pixelmatch). Установите браузеры: `npx playwright install chromium`.
+- Картинки: `npm run images:gen`, `npm run images:watch`, `npm run images:cleanup`.
+
+2) Архитектура и основные паттерны
+- Точка входа: `js/main.js` (ESM). Компоненты HTML из `components/` подгружаются через `loadComponent(containerId, path)`.
   - После вставки HTML автоматически вызывается `reinitLazyLoading()` из `js/image-loader.js` для инициализации ленивой загрузки картинок.
 - **Навигация**: hash-based роутинг (`location.hash`) — `#products`, `#cart`, `#product-<id>`, `#category-<slug>`.
   - Основные контейнеры: `#main-container`, `#products-container`, `#product-detail-container`, `#comparison-container`, `#compare-modal-container`.
@@ -43,7 +52,7 @@
 - Використовуйте CSS-переменні в `css/main.css` (`:root`). Не хардкодьте новые цвета/тени — добавляйте токены.
 - Переиспользуемые UI-паттерны: `js/ui-patterns.js` (toasts, modals), валидация форм — `js/form-validation.js`.
 - Модули для бизнес-логики: `js/marketing.js` (WhatsApp/Telegram/email ссылки из `contentConfig`), `js/calculator.js` (калькулятор стоимости монтажа), `js/auth.js` (mock-логин, использует `localStorage['isLoggedIn']`/`'username']`).
-- **Мобільні анімації**: `js/mobile-animations.js` — стандартизована система swipe-переходів для всіх секцій (використовує motion-токени, hardware acceleration). Приклад: `mobileAnimations.show('main-container', 'right')`. Детально: `docs/MOBILE-ANIMATIONS.md`.
+- **Мобільні анімації**: `js/mobile-animations.js` — стандартизована система swipe-переходов для всіх секцій (використовує motion-токени, hardware acceleration). Приклад: `mobileAnimations.show('main-container', 'right')`. Детально: `docs/MOBILE-ANIMATIONS.md`.
 
 ## Картинки и PWA
 - Responsive images: генерируются со суффиксами `-320w/-480w/-768w/-1200w` — используйте `npm run images:gen`; watch: `npm run images:watch` (зависит от `sharp`).
@@ -58,3 +67,11 @@
   - Регенерация baseline после UI-изменений: `npm run visual:create-baseline`, проверьте скриншоты в `tests/visual/baseline/` и закоммитьте.
 - Генерация картинок: `npm run images:gen` / `npm run images:watch`.
 - Локальный сервер: `python3 -m http.server 5173`.
+
+## PR-checklist ✅
+- Запустить unit tests: `npm test`
+- Перегенерировать визуальные baseline при UI-изменениях: `npm run visual:create-baseline` (проверьте `tests/visual/baseline/`)
+- Перегенерировать изображения при изменениях в `picture/`: `npm run images:gen`
+- Проверить `window.validateProduct` при изменениях модели товара
+- Проверить локальную сборку/preview: `npm run build && npm run preview` (или `python3 -m http.server 5173`)
+

@@ -329,10 +329,7 @@ class PageTransitions {
         sessionStorage.setItem('scrollReturnTarget', targetId);
 
         if (this.prefersReducedMotion || !this.isMobile) {
-            // Учитываем высоту хедера при скролле
-            const headerH = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--header-height')) || 60;
-            const top = Math.max(0, targetEl.getBoundingClientRect().top + window.scrollY - headerH);
-            window.scrollTo({ top, behavior: 'smooth' });
+            targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
             return;
         }
 
@@ -352,10 +349,8 @@ class PageTransitions {
         
         void targetEl.offsetWidth;
         
-        // Скролл + анимация (учитываем высоту хедера, чтобы секция отображалась под хедером)
-        const headerH = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--header-height')) || 60;
-        const top = Math.max(0, targetEl.getBoundingClientRect().top + window.scrollY - headerH);
-        window.scrollTo({ top, behavior: 'smooth' });
+        // Скролл + анимация
+        targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
         
         await new Promise(resolve => setTimeout(resolve, 100));
         
@@ -447,13 +442,18 @@ export function initPageTransitionHandlers() {
     document.addEventListener('click', async (e) => {
         const backBtn = e.target.closest('.back-to-main');
         if (!backBtn) return;
-        
+
+        const serviceNav = backBtn.dataset.serviceNav;
+        if (serviceNav === 'back-to-maintenance') {
+            e.preventDefault();
+            try { sessionStorage.setItem('service_nav_direction', 'back-to-maintenance'); } catch (_) {}
+            location.hash = '#service-maintenance';
+            return;
+        }
+
         e.preventDefault();
-        
-        // Находим текущий контейнер
         const container = backBtn.closest('[id$="-container"], .service-page, .calculator-page, .about-page');
         const containerId = container?.id || 'main-container';
-        
         await pageTransitions.navigateBack(containerId);
     });
 
@@ -461,28 +461,29 @@ export function initPageTransitionHandlers() {
     document.addEventListener('click', async (e) => {
         const pricelistLink = e.target.closest('.pricelist-link');
         if (!pricelistLink) return;
-        
+
         const href = pricelistLink.getAttribute('href');
         if (!href || !href.startsWith('#')) return;
-        
+
         e.preventDefault();
-        
+
         const targetId = href.substring(1);
-        const targetContainerId = 'pricelist-container'; // Контейнер, который нужно показать
-        
-        // Проверить, виден ли контейнер прайс-листа
+        const targetContainerId = pricelistLink.dataset.targetContainer || (targetId === 'pricelist' ? 'pricelist-container' : `${targetId}-container`);
+
+        // Сохранить направление перехода для сервисных страниц (чтобы анимация отрабатывала в обе стороны)
+        if (pricelistLink.dataset.nav === 'service-maintenance') {
+            try { sessionStorage.setItem('service_nav_direction', 'to-service-maintenance-pricelist'); } catch (_) {}
+        }
+
         const containerEl = document.getElementById(targetContainerId);
-        const isContainerVisible = containerEl && !containerEl.hasAttribute('hidden') && 
+        const isContainerVisible = containerEl && !containerEl.hasAttribute('hidden') &&
                                   window.getComputedStyle(containerEl).display !== 'none';
-        
-        // Если контейнер не виден, сначала вызвать навигацию
+
         if (!isContainerVisible) {
             location.hash = `#${targetId}`;
-            // Подождать немного, пока контейнер загрузится и покажется
-            await new Promise(resolve => setTimeout(resolve, 100));
+            await new Promise(resolve => setTimeout(resolve, 120));
         }
-        
-        // Теперь выполнить анимацию скролла к элементу
+
         await pageTransitions.scrollToWithAnimation(targetId, 'top');
     });
 

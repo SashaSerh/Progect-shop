@@ -2143,7 +2143,11 @@ function setupServiceRouting() {
                                     if (!el) return;
                                     el.classList.remove('service-page--slide-out-to-right', 'service-page--slide-out-to-left', 'service-page--slide-in', 'service-page--slide-in-from-right', 'service-page--slide-in-from-left');
                                 });
+                                // Ensure portfolio grid is rendered (fixes mobile re-entry where grid may be empty)
+                                try { renderPortfolio(); } catch(_) {}
                             } catch(_) {}
+                            // Ensure DOM render completed before running animations
+                            try { renderPortfolio(); } catch(_) {}
                             animatePortfolioEntrance(section);
                             section.classList.add('service-page--visible');
                         }
@@ -2311,8 +2315,11 @@ function setupServiceRouting() {
                         if (!el) return;
                         el.classList.remove('service-page--slide-out-to-right', 'service-page--slide-out-to-left', 'service-page--slide-in', 'service-page--slide-in-from-right', 'service-page--slide-in-from-left');
                     });
+                    // Ensure portfolio grid is rendered for desktop as well
+                    try { renderPortfolio(); } catch(_) {}
                 } catch(_) {}
                 const portfolioSection = document.getElementById(desktopTargetPage)?.querySelector('.portfolio');
+                try { renderPortfolio(); } catch(_) {}
                 animatePortfolioEntrance(portfolioSection);
             }
             return;

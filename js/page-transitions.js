@@ -356,6 +356,16 @@ class PageTransitions {
         
         const toTransform = fromDirection === 'top' ? 'translate3d(0, 0%, 0)' : 'translate3d(0%, 0, 0)';
         await this._animateSlide(targetEl, fromTransform, toTransform);
+        
+        // Фокус на заголовок для страницы прайс-листа
+        if (targetId === 'pricelist') {
+            const headerEl = targetEl.querySelector('.pricelist-page__header');
+            if (headerEl) {
+                headerEl.focus({ preventScroll: true });
+                // Для screen readers - aria-live region
+                headerEl.setAttribute('tabindex', '-1');
+            }
+        }
     }
 
     /**

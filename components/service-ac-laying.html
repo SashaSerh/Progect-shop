@@ -7,6 +7,16 @@
         </svg>
         <span>Назад</span>
       </a>
+      <a href="#service-laying-pricelist" class="pricelist-link" aria-label="Перейти к прайс-листу" title="Прайс-лист">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
+          <polyline points="10 9 9 9 8 9"></polyline>
+        </svg>
+        <span data-i18n="service-pricelist-btn">Прайс-лист</span>
+      </a>
     </div>
     <header class="service-page__header">
       <h2 id="service-ac-laying-title" class="service-page__title" data-i18n="service-ac-laying-title">Закладка трассы кондиционера</h2>
@@ -22,7 +32,7 @@
       
       <p data-i18n="service-laying-p2">Цель данного процесса – спрятать трубы фреонового контура в стену в самом начале ремонта квартиры, что позволит получить следующие преимущества:</p>
       
-      <div class="service-benefits" role="list" aria-label="Преимущества" style="margin: 1.5rem 0;">
+      <div class="service-benefits" role="list" aria-label="Преимущества">
         <div class="service-benefits__item">
           <span class="icon" aria-hidden="true">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
@@ -49,19 +59,12 @@
         </div>
       </div>
       
-      <p data-i18n="service-laying-p3">Часто бывает, что ремонт уже начат, а покупку кондиционера хотелось бы отложить на последний этап, так как много денег уходит на строительные материалы. Никаких проблем! Главное, закажите закладку трассы, а сам кондиционер оплачивайте, когда будет удобно! Смонтировать его на подготовленную магистраль не составит труда в любой момент.</p>
+      
     </section>
 
     <!-- Прайс-лист на закладку трассы -->
     <section class="pricelist-section card" id="service-laying-pricelist" aria-labelledby="service-laying-pricelist-title">
       <h3 id="service-laying-pricelist-title" class="pricelist-section__title" data-i18n="service-laying-pricelist-title">Прайс-лист на закладку трассы</h3>
-      
-      <div class="service-page__content" style="margin-bottom: 1.5rem;">
-        <p data-i18n="service-laying-pricing-info">Базовая стоимость закладки длиной магистрали 3 м.п. составляет от 3 499 грн.</p>
-        <p data-i18n="service-laying-pricing-extra">Если длина трассы превышает 3 м.п., то цена каждого дополнительного метра фреонопровода будет стоить от 650 грн.</p>
-        <p data-i18n="service-laying-pricing-strobing">Работа по вырезанию штробы в стене расценивается по 300 грн./м.п. (стена из кирпича, газо-, пеноблока, гипсокартона) и по 400 грн./м.п. (стена бетон, монолит).</p>
-      </div>
-      
       <div class="pricelist-table-wrapper">
         <table class="pricelist-table">
           <thead>
@@ -91,13 +94,18 @@
             <tr><td data-i18n="service-laying-indoor-mount">Монтаж внутреннего блока после ремонта (с учетом выезда)</td><td>1 750</td></tr>
           </tbody>
         </table>
+          <div class="service-page__content" aria-label="Информация о ценообразовании">
+        <p data-i18n="service-laying-pricing-info">Базовая стоимость закладки длиной магистрали 3 м.п. составляет от 3 499 грн.</p>
+        <p data-i18n="service-laying-pricing-extra">Если длина трассы превышает 3 м.п., то цена каждого дополнительного метра фреонопровода будет стоить от 650 грн.</p>
+        <p data-i18n="service-laying-pricing-strobing">Работа по вырезанию штробы в стене расценивается по 300 грн./м.п. (стена из кирпича, газо-, пеноблока, гипсокартона) и по 400 грн./м.п. (стена бетон, монолит).</p>
+      </div>
       </div>
     </section>
 
     <!-- Комплектующие для закладки трассы -->
     <section class="service-page__content" aria-label="Комплектующие">
       <h3 data-i18n="service-laying-components-title">Комплектующие для закладки трассы под кондиционер:</h3>
-      <div class="service-benefits" role="list" aria-label="Комплектующие" style="margin: 1.5rem 0;">
+      <div class="service-benefits" role="list" aria-label="Комплектующие">
         <div class="service-benefits__item">
           <span class="icon" aria-hidden="true">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">

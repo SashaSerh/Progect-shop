@@ -1922,6 +1922,11 @@ function setupServiceRouting() {
                 const stack = new Error().stack.split('\n').slice(2,6).map(l => l.trim()).join(' | ');
                 console.log('[debug] setHiddenById stack:', stack);
             } catch(_) {}
+            // If container is currently protected for visibility during navigation, ignore attempts to hide it
+            if (hidden && el.dataset && el.dataset._forceVisible) {
+                console.log('[debug] setHiddenById: ignoring hide due to _forceVisible flag');
+                return;
+            }
         }
         if (hidden) el.setAttribute('hidden', ''); else el.removeAttribute('hidden');
     }
@@ -1985,6 +1990,8 @@ function setupServiceRouting() {
         }
         container.classList.remove('portfolio--animate-in');
         void container.offsetWidth;
+        // mark container protected to avoid accidental hiding by parallel route runs
+        try { container.dataset._forceVisible = '1'; } catch(_) {}
         container.classList.add('portfolio--animate-in');
         let items = Array.from(container.querySelectorAll('.portfolio__item'));
         if (items.length === 0) {
@@ -2000,6 +2007,7 @@ function setupServiceRouting() {
         container.__portfolioAnimationTimeout = window.setTimeout(() => {
             container.classList.remove('portfolio--animate-in');
             items.forEach((item) => item.style.removeProperty('--portfolio-item-index'));
+            try { delete container.dataset._forceVisible; } catch(_) {}
             container.__portfolioAnimationTimeout = null;
         }, 1100);
     }
@@ -2160,6 +2168,8 @@ function setupServiceRouting() {
                                 });
                                 // Ensure portfolio grid is rendered (fixes mobile re-entry where grid may be empty)
                                 try { renderPortfolio(); } catch(_) {}
+                                // Protect the container from being hidden by other concurrent routing calls until animation completes
+                                if (pc) pc.dataset._forceVisible = '1';
                             } catch(_) {}
                             // Ensure DOM render completed before running animations
                             try { renderPortfolio(); } catch(_) {}

@@ -2120,6 +2120,18 @@ function setupServiceRouting() {
                                 section.classList.add('service-page--visible');
                             });
                         } else {
+                            // Defensive: ensure the portfolio container is not hidden and there are no lingering
+                            // slide-out classes that could keep the content invisible on repeated entries.
+                            try {
+                                const pc = document.getElementById('portfolio-container');
+                                const ps = document.getElementById('portfolio');
+                                if (pc && pc.hasAttribute('hidden')) pc.removeAttribute('hidden');
+                                if (ps && ps.hasAttribute('hidden')) ps.removeAttribute('hidden');
+                                [pc, ps].forEach(el => {
+                                    if (!el) return;
+                                    el.classList.remove('service-page--slide-out-to-right', 'service-page--slide-out-to-left', 'service-page--slide-in', 'service-page--slide-in-from-right', 'service-page--slide-in-from-left');
+                                });
+                            } catch(_) {}
                             animatePortfolioEntrance(section);
                             section.classList.add('service-page--visible');
                         }
@@ -2277,6 +2289,17 @@ function setupServiceRouting() {
             setActiveNav(hash.replace('-page', ''));
             focusSectionHeading(desktopTargetPage, 'h2');
             if (hash === 'portfolio-page') {
+                // Defensive visibility cleanup for desktop transitions as well
+                try {
+                    const pc = document.getElementById('portfolio-container');
+                    const ps = document.getElementById('portfolio');
+                    if (pc && pc.hasAttribute('hidden')) pc.removeAttribute('hidden');
+                    if (ps && ps.hasAttribute('hidden')) ps.removeAttribute('hidden');
+                    [pc, ps].forEach(el => {
+                        if (!el) return;
+                        el.classList.remove('service-page--slide-out-to-right', 'service-page--slide-out-to-left', 'service-page--slide-in', 'service-page--slide-in-from-right', 'service-page--slide-in-from-left');
+                    });
+                } catch(_) {}
                 const portfolioSection = document.getElementById(desktopTargetPage)?.querySelector('.portfolio');
                 animatePortfolioEntrance(portfolioSection);
             }

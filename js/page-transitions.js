@@ -359,12 +359,25 @@ class PageTransitions {
         
         // Фокус на заголовок для страницы прайс-листа
         if (targetId === 'pricelist') {
-            const headerEl = targetEl.querySelector('.pricelist-page__header');
-            if (headerEl) {
-                headerEl.focus({ preventScroll: true });
-                // Для screen readers - aria-live region
-                headerEl.setAttribute('tabindex', '-1');
-            }
+            // Небольшая задержка после анимации для лучшего UX
+            setTimeout(() => {
+                const headerEl = targetEl.querySelector('.pricelist-page__header');
+                if (headerEl) {
+                    headerEl.focus({ preventScroll: true });
+                    // Для screen readers и программного фокуса
+                    headerEl.setAttribute('tabindex', '-1');
+                    
+                    // Визуальная индикация фокуса для accessibility
+                    headerEl.style.outline = '2px solid var(--color-primary)';
+                    headerEl.style.outlineOffset = '2px';
+                    
+                    // Убираем индикацию через 2 секунды
+                    setTimeout(() => {
+                        headerEl.style.outline = '';
+                        headerEl.style.outlineOffset = '';
+                    }, 2000);
+                }
+            }, 150);
         }
     }
 
@@ -398,14 +411,6 @@ class PageTransitions {
         
         sessionStorage.removeItem('scrollReturnPosition');
         sessionStorage.removeItem('scrollReturnTarget');
-        
-        // Фокус на кнопку прайс-листа при возврате с страницы прайс-листа
-        if (returnTarget === 'pricelist') {
-            const pricelistBtn = document.querySelector('.pricelist-link');
-            if (pricelistBtn) {
-                pricelistBtn.focus({ preventScroll: true });
-            }
-        }
     }
 
     /**

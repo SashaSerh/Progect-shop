@@ -91,8 +91,109 @@
     /* Page transition tokens (use site motion tokens for consistency) */
     --page-transition-duration: var(--motion-duration-normal);
     --page-transition-easing: var(--motion-ease-standard);
+    --page-transition-easing-back: var(--motion-ease-emphasized);
     /* Body gutter (side padding) - responsive */
     --body-gutter: 0px;
+}
+
+/* ========================================
+   PAGE TRANSITION ANIMATIONS
+   Unified slide animations for mobile navigation
+   ======================================== */
+
+@media (max-width: 768px) {
+    /* Base transition container styles */
+    .page-transition-container {
+        will-change: transform, opacity;
+        transform: translateZ(0);
+        backface-visibility: hidden;
+    }
+    
+    /* Slide in from right */
+    .slide-in-from-right {
+        animation: slideInFromRight var(--page-transition-duration) var(--page-transition-easing) forwards;
+    }
+    
+    /* Slide in from left */
+    .slide-in-from-left {
+        animation: slideInFromLeft var(--page-transition-duration) var(--page-transition-easing-back) forwards;
+    }
+    
+    /* Slide out to right */
+    .slide-out-to-right {
+        animation: slideOutToRight var(--page-transition-duration) var(--page-transition-easing-back) forwards;
+    }
+    
+    /* Slide out to left */
+    .slide-out-to-left {
+        animation: slideOutToLeft var(--page-transition-duration) var(--page-transition-easing) forwards;
+    }
+    
+    @keyframes slideInFromRight {
+        from {
+            transform: translate3d(100%, 0, 0);
+            opacity: 0;
+        }
+        to {
+            transform: translate3d(0, 0, 0);
+            opacity: 1;
+        }
+    }
+    
+    @keyframes slideInFromLeft {
+        from {
+            transform: translate3d(-30%, 0, 0);
+            opacity: 0.5;
+        }
+        to {
+            transform: translate3d(0, 0, 0);
+            opacity: 1;
+        }
+    }
+    
+    @keyframes slideOutToRight {
+        from {
+            transform: translate3d(0, 0, 0);
+            opacity: 1;
+        }
+        to {
+            transform: translate3d(100%, 0, 0);
+            opacity: 0;
+        }
+    }
+    
+    @keyframes slideOutToLeft {
+        from {
+            transform: translate3d(0, 0, 0);
+            opacity: 1;
+        }
+        to {
+            transform: translate3d(-30%, 0, 0);
+            opacity: 0.5;
+        }
+    }
+    
+    /* Pricelist section animation */
+    .pricelist-section.animating-in {
+        animation: slideInFromRight var(--page-transition-duration) var(--page-transition-easing) forwards;
+    }
+    
+    .pricelist-section.animating-out {
+        animation: slideOutToRight var(--page-transition-duration) var(--page-transition-easing-back) forwards;
+    }
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+    .slide-in-from-right,
+    .slide-in-from-left,
+    .slide-out-to-right,
+    .slide-out-to-left,
+    .pricelist-section.animating-in,
+    .pricelist-section.animating-out {
+        animation: none !important;
+        transition: none !important;
+    }
 }
 
 /* Dark theme overrides - Enhanced toning for better visual hierarchy */
@@ -13948,69 +14049,4 @@ img.img-loaded {
 
 .faq__back {
     margin-bottom: 16px;
-}
-
-/* ========================================
-   UNIFIED PAGE TRANSITIONS SYSTEM
-   Оптимизированные анимации для всех переходов
-   ======================================== */
-
-/* Hardware acceleration для всех анимируемых секций */
-.service-page,
-.calculator-page,
-.about-page,
-.pricelist-section,
-[id*="pricelist"] {
-    transform: translateZ(0);
-    -webkit-transform: translateZ(0);
-    backface-visibility: hidden;
-    -webkit-backface-visibility: hidden;
-}
-
-/* Pricelist section slide animations */
-.pricelist-section,
-[id*="pricelist"] {
-    transition: transform 280ms cubic-bezier(0.32, 0.72, 0, 1), 
-                opacity 280ms cubic-bezier(0.32, 0.72, 0, 1);
-}
-
-/* Active state for better visual feedback */
-.pricelist-link:active {
-    transform: scale(0.96);
-}
-
-/* Улучшенный scroll-behavior для мобильных */
-@media (max-width: 768px) {
-    html {
-        scroll-behavior: smooth;
-        -webkit-overflow-scrolling: touch;
-    }
-    
-    /* Предотвращение мерцания при анимациях */
-    body {
-        -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
-    }
-    
-    /* Оптимизация для прайс-листа */
-    .pricelist-section {
-        contain: layout style;
-    }
-}
-
-/* Reduced motion support */
-@media (prefers-reduced-motion: reduce) {
-    .service-page,
-    .calculator-page,
-    .about-page,
-    .pricelist-section,
-    [id*="pricelist"],
-    .main-container {
-        transition: opacity 150ms ease !important;
-        transform: none !important;
-    }
-    
-    html {
-        scroll-behavior: auto !important;
-    }
 }

@@ -28,16 +28,63 @@
         <meta name="twitter:image" content="/icons/icon-icon512x512.png">
                 <link rel="manifest" href="manifest.json">
                 <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-icon192x192.png">
+    
+    <!-- DNS Prefetch & Preconnect -->
     <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="dns-prefetch" href="//fonts.googleapis.com">
     <link rel="dns-prefetch" href="//fonts.gstatic.com">
+    
+    <!-- Preload critical resources -->
+    <link rel="preload" href="css/main.css" as="style">
+    <link rel="preload" href="js/main.js" as="script" crossorigin>
+    <link rel="preload" as="image" href="picture/hero-picture/background-blur-mobile.png" media="(max-width: 768px)">
+    <link rel="preload" as="image" href="picture/conditioners/cond-hero-picture.jpeg" imagesizes="100vw">
+    
+    <!-- Critical CSS (above-the-fold) - инлайн для быстрого FCP -->
+    <style id="critical-css">
+        /* Critical CSS для первого экрана */
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+        :root{--color-primary:#007AFF;--color-bg:#f5f5f7;--color-text:#1d1d1f;--color-surface:#fff;--header-height:60px;--transition-fast:150ms}
+        html{font-family:'Montserrat',system-ui,-apple-system,sans-serif;font-size:16px;line-height:1.5;scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+        body{background:var(--color-bg);color:var(--color-text);min-height:100vh;overflow-x:hidden}
+        
+        /* Progress bar */
+        #page-progress{position:fixed;top:0;left:0;width:0;height:3px;background:linear-gradient(90deg,var(--color-primary),#00d4ff);z-index:9999;transition:width .3s ease;pointer-events:none}
+        #page-progress.active{animation:progress-pulse 1.5s ease-in-out infinite}
+        @keyframes progress-pulse{0%,100%{opacity:1}50%{opacity:.6}}
+        
+        /* Skeleton loader */
+        .skeleton{background:linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%);background-size:200% 100%;animation:skeleton-wave 1.5s ease-in-out infinite;border-radius:8px}
+        @keyframes skeleton-wave{0%{background-position:200% 0}100%{background-position:-200% 0}}
+        .skeleton-header{height:var(--header-height);width:100%}
+        .skeleton-hero{height:60vh;min-height:400px}
+        .skeleton-card{height:200px;margin:1rem}
+        
+        /* Initial loading state */
+        .app-loading .skeleton{display:block}
+        .app-loading #header-container,.app-loading #hero-container{opacity:0}
+        .app-loaded .skeleton{display:none}
+        .app-loaded #header-container,.app-loaded #hero-container{opacity:1;transition:opacity .3s ease}
+        
+        /* Header placeholder */
+        #header-container{position:sticky;top:0;z-index:1000;}
+        
+        /* Pull-to-refresh indicator */
+        #pull-to-refresh{position:fixed;top:-50px;left:50%;transform:translateX(-50%);width:40px;height:40px;border-radius:50%;background:var(--color-surface);box-shadow:0 2px 8px rgba(0,0,0,.15);display:flex;align-items:center;justify-content:center;transition:top .3s ease,transform .3s ease;z-index:9998}
+        #pull-to-refresh.visible{top:10px}
+        #pull-to-refresh.refreshing{animation:spin .8s linear infinite}
+        @keyframes spin{to{transform:translateX(-50%) rotate(360deg)}}
+        #pull-to-refresh svg{width:24px;height:24px;stroke:var(--color-primary);stroke-width:2;fill:none}
+        
+        /* Dark theme critical */
+        @media(prefers-color-scheme:dark){:root{--color-bg:#1d1d1f;--color-text:#f5f5f7;--color-surface:#2d2d2f}.skeleton{background:linear-gradient(90deg,#2d2d2f 25%,#3d3d3f 50%,#2d2d2f 75%);background-size:200% 100%}}
+    </style>
+    
+    <!-- Main CSS (async loading) -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&display=swap">
     <link rel="stylesheet" href="css/main.css">
-    <!-- Preload hero image to improve LCP -->
-    <link rel="preload" as="image" href="picture/conditioners/cond-hero-picture.jpeg" imagesizes="100vw">
-    <!-- Preload mobile background for faster mobile load -->
-    <link rel="preload" as="image" href="picture/hero-picture/background-blur-mobile.png" media="(max-width: 768px)">
+    
         <!-- Organization & WebSite JSON-LD -->
             <script type="application/ld+json" id="org-jsonld">{
                 "@context": "https://schema.org",
@@ -63,7 +110,18 @@
             "name": "ClimaTech"
         }</script>
 </head>
-<body>
+<body class="app-loading">
+    <!-- Progress Bar для загрузки -->
+    <div id="page-progress"></div>
+    
+    <!-- Pull-to-Refresh indicator -->
+    <div id="pull-to-refresh" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 .79-.15 1.56-.44 2.25l1.52 1.52c.57-1.1.92-2.36.92-3.77 0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-.79.15-1.56.44-2.25L4.92 8.23C4.35 9.33 4 10.59 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/></svg>
+    </div>
+    
+    <!-- Skeleton loaders (показываются до загрузки) -->
+    <div class="skeleton skeleton-header" aria-hidden="true"></div>
+    
     <div id="header-container"></div>
     <div id="main-container"></div>
     <div id="hero-container"></div>
@@ -187,5 +245,137 @@
     <script src="js/product-schema.js"></script>
     <script src="js/data-provider.js"></script>
     <script type="module" src="js/main.js"></script>
+    
+    <!-- UX Enhancements: Progress Bar, Pull-to-Refresh, Haptic Feedback -->
+    <script>
+    (function() {
+        'use strict';
+        
+        // === Progress Bar ===
+        const progressBar = document.getElementById('page-progress');
+        let progressTimeout;
+        
+        window.showProgress = function(duration = 300) {
+            if (!progressBar) return;
+            progressBar.style.width = '0';
+            progressBar.classList.add('active');
+            
+            // Animate to 70%
+            requestAnimationFrame(() => {
+                progressBar.style.width = '70%';
+            });
+            
+            // Complete after duration
+            clearTimeout(progressTimeout);
+            progressTimeout = setTimeout(() => window.completeProgress(), duration);
+        };
+        
+        window.completeProgress = function() {
+            if (!progressBar) return;
+            progressBar.style.width = '100%';
+            progressBar.classList.remove('active');
+            
+            setTimeout(() => {
+                progressBar.style.width = '0';
+            }, 300);
+        };
+        
+        // === Pull-to-Refresh ===
+        const pullToRefresh = document.getElementById('pull-to-refresh');
+        let startY = 0;
+        let pulling = false;
+        const PULL_THRESHOLD = 80;
+        
+        if (pullToRefresh && 'ontouchstart' in window) {
+            document.addEventListener('touchstart', function(e) {
+                if (window.scrollY === 0) {
+                    startY = e.touches[0].pageY;
+                    pulling = true;
+                }
+            }, { passive: true });
+            
+            document.addEventListener('touchmove', function(e) {
+                if (!pulling) return;
+                
+                const currentY = e.touches[0].pageY;
+                const pullDistance = currentY - startY;
+                
+                if (pullDistance > 0 && window.scrollY === 0) {
+                    const progress = Math.min(pullDistance / PULL_THRESHOLD, 1);
+                    pullToRefresh.style.top = (pullDistance * 0.5 - 40) + 'px';
+                    pullToRefresh.style.opacity = progress;
+                    
+                    if (progress >= 1) {
+                        pullToRefresh.classList.add('visible');
+                    }
+                }
+            }, { passive: true });
+            
+            document.addEventListener('touchend', function() {
+                if (!pulling) return;
+                pulling = false;
+                
+                if (pullToRefresh.classList.contains('visible')) {
+                    // Trigger refresh
+                    pullToRefresh.classList.add('refreshing');
+                    window.haptic('medium');
+                    
+                    // Simulate refresh (replace with actual refresh logic)
+                    setTimeout(() => {
+                        location.reload();
+                    }, 500);
+                } else {
+                    // Reset
+                    pullToRefresh.style.top = '-50px';
+                    pullToRefresh.style.opacity = '0';
+                }
+            }, { passive: true });
+        }
+        
+        // === Haptic Feedback ===
+        window.haptic = function(type = 'light') {
+            if (!('vibrate' in navigator)) return;
+            
+            const patterns = {
+                light: 10,
+                medium: 20,
+                heavy: 30,
+                success: [10, 50, 10],
+                error: [50, 30, 50],
+                warning: [30, 50, 30]
+            };
+            
+            navigator.vibrate(patterns[type] || patterns.light);
+        };
+        
+        // Add haptic to buttons on mobile
+        if ('ontouchstart' in window) {
+            document.addEventListener('click', function(e) {
+                const btn = e.target.closest('button, .btn, [role="button"]');
+                if (btn && !btn.disabled) {
+                    window.haptic('light');
+                }
+            }, { passive: true });
+        }
+        
+        // === App Loaded State ===
+        window.addEventListener('DOMContentLoaded', function() {
+            // Show progress during initial load
+            window.showProgress(800);
+            
+            // Remove loading state when app is ready
+            setTimeout(() => {
+                document.body.classList.remove('app-loading');
+                document.body.classList.add('app-loaded');
+                window.completeProgress();
+            }, 100);
+        });
+        
+        // Progress bar for hash changes
+        window.addEventListener('hashchange', function() {
+            window.showProgress(300);
+        });
+    })();
+    </script>
 </body>
 </html>

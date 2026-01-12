@@ -264,3 +264,124 @@ async function animateSequence() {
 - [ ] Кастомізація easing функцій через API
 - [ ] Інтеграція з React/Vue (якщо знадобиться)
 - [ ] Analytics для відстеження UX метрик
+
+---
+
+## Page Transitions System (page-transitions.js)
+
+### Огляд
+
+Додаткова система для уніфікованих переходів між сторінками з підтримкою navigation stack та bidirectional animations.
+
+### NavigationStack
+
+Стек навігації для відстеження історії переходів у сесії.
+
+```javascript
+import { navigationStack } from './page-transitions.js';
+
+// Додати сторінку в історію
+navigationStack.push('/page');
+
+// Отримати попередню сторінку
+const prev = navigationStack.pop();
+
+// Подивитись попередню без видалення
+const peek = navigationStack.peek();
+
+// Очистити історію
+navigationStack.clear();
+```
+
+**Особливості:**
+- Зберігає історію в `sessionStorage` (очищується при закритті вкладки)
+- Запобігає дублюванню послідовних однакових записів
+- Максимум 50 записів у стеку
+
+### PageTransitions API
+
+```javascript
+import { pageTransitions } from './page-transitions.js';
+
+// Анімація переходу вперед (← slide in from right)
+await pageTransitions.navigateForward(fromElement, toElement);
+
+// Анімація повернення назад (→ slide in from left)
+await pageTransitions.navigateBack(fromElement, toElement);
+
+// Прокрутка з анімацією до елемента
+await pageTransitions.scrollToWithAnimation(targetSelector);
+
+// Повернення до попередньої позиції прокрутки
+await pageTransitions.scrollBack();
+```
+
+### Конфігурація
+
+```javascript
+pageTransitions.configure({
+  duration: 300,           // мс
+  easing: 'ease-out',      // CSS easing
+  easingBack: 'ease-in-out'  // для повернення назад
+});
+```
+
+### CSS токени для page-transitions
+
+```css
+:root {
+  --page-transition-duration: 300ms;
+  --page-transition-easing: cubic-bezier(0.4, 0.0, 0.2, 1);
+  --page-transition-easing-back: var(--motion-ease-emphasized);
+}
+```
+
+### CSS класи
+
+| Клас | Опис |
+|------|------|
+| `.slide-in-from-right` | Вхід справа (forward) |
+| `.slide-in-from-left` | Вхід зліва (back) |
+| `.slide-out-to-right` | Вихід вправо (back) |
+| `.slide-out-to-left` | Вихід вліво (forward) |
+
+### Ініціалізація
+
+```javascript
+import { initPageTransitionHandlers } from './page-transitions.js';
+
+document.addEventListener('DOMContentLoaded', () => {
+  initPageTransitionHandlers();
+});
+```
+
+### Hardware Acceleration
+
+Система автоматично застосовує hardware acceleration:
+- `will-change: transform, opacity`
+- `transform: translate3d(0, 0, 0)`
+- `backface-visibility: hidden`
+
+### Сумісність з mobile-animations.js
+
+Системи працюють разом:
+- `page-transitions.js` — високорівневі переходи між сторінками
+- `mobile-animations.js` — swipe-жести та анімації всередині секцій
+
+```javascript
+// Swipe для закриття секції
+mobileAnimations.show('service-section', 'right');
+
+// Page transition для переходу
+pageTransitions.navigateForward(fromEl, toEl);
+```
+
+### Тестування
+
+```bash
+# Unit тести page-transitions
+npm test -- --run tests/page-transitions.test.js
+
+# Всі тести анімацій
+npm test -- --run 'mobile-animations|page-transitions'
+```

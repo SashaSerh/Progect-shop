@@ -3,17 +3,22 @@ import { toggleTheme, initTheme } from './theme.js';
 import { translations, switchLanguage } from './i18n.js';
 import { initWelcomeOverlay, needsWelcomeOverlay } from './welcome.js';
 import { products, renderProducts, renderProductCard, filterProducts, toggleFavorite, toggleCompare, getFavoriteIds, getCompareIds, getProductsByCategory, isFavorite, isCompared, isAdminMode, getMergedProducts, setProducts, showProductsSkeleton } from './products.js';
-import { initCompareBar } from './compare-bar.js';
-import { initCompareModal } from './compare-modal.js';
+// Lazy-loaded modules (compare, admin) - see lazy-loader.js
+// import { initCompareBar } from './compare-bar.js';
+// import { initCompareModal } from './compare-modal.js';
+import { preloadOnIdle, loadCompareModules } from './lazy-loader.js';
 // content-config is loaded as a global (classic script tag)
 const contentConfig = (typeof window !== 'undefined' && window.contentConfig) ? window.contentConfig : {};
 import { initMarketing } from './marketing.js';
 import { initNavigation } from './navigation.js';
 import { reinitLazyLoading } from './image-loader.js';
 import { mobileAnimations } from './mobile-animations.js';
-import { pageTransitions } from './page-transitions.js';
+import { pageTransitions, initPageTransitionHandlers } from './page-transitions.js';
 // Landing mode: services portfolio contacts only; disable products/cart flows
 const LANDING_MODE = true;
+
+// Preload modules on idle for faster subsequent loads
+preloadOnIdle(['./calculator.js', './compare-bar.js', './compare-modal.js']);
 
 function hideProductsEntryPoints() {
     if (!LANDING_MODE) return;
@@ -1082,8 +1087,11 @@ async function initApp() {
         console.warn('Remote provider load failed, keeping local/merged products', e);
     }
     if (!LANDING_MODE) {
-        initCompareBar(savedLanguage);
-        initCompareModal(savedLanguage);
+        // Lazy load compare modules
+        loadCompareModules().then(({ compareBar, compareModal }) => {
+            if (compareBar?.initCompareBar) compareBar.initCompareBar(savedLanguage);
+            if (compareModal?.initCompareModal) compareModal.initCompareModal(savedLanguage);
+        }).catch(err => console.warn('Compare modules load failed:', err));
         initCollectionBadges();
     }
 
@@ -1121,7 +1129,8 @@ async function initApp() {
     // Инициализируем маркетинговые CTA и форму контактов (кнопки позвонить/WhatsApp/Telegram)
     try { initMarketing(); } catch (e) { /* no-op */ }
     
-    // Page transitions уже инициализируются автоматически при импорте
+    // Инициализируем единую систему анимаций переходов страниц
+    try { initPageTransitionHandlers(); } catch (e) { console.warn('[PageTransitions] Init failed:', e); }
 
     // Рендер портфолио по конфигу (поддержка заголовков/описаний, локализация ru/uk)
     const portfolioGrid = document.querySelector('.portfolio__grid');
@@ -2257,6 +2266,10 @@ function initServiceCardsNavigation() {
         if (!card) return;
         const target = card.getAttribute('data-target');
         if (target) {
+            // Сохраняем текущий хеш в навигационный стек перед переходом
+            if (window.pageTransitions) {
+                window.pageTransitions.navStack.push(location.hash || '#', window.scrollY);
+            }
             location.hash = target;
         }
     });
@@ -2268,7 +2281,13 @@ function initServiceCardsNavigation() {
         if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
             const target = card.getAttribute('data-target');
-            if (target) location.hash = target;
+            if (target) {
+                // Сохраняем текущий хеш в навигационный стек
+                if (window.pageTransitions) {
+                    window.pageTransitions.navStack.push(location.hash || '#', window.scrollY);
+                }
+                location.hash = target;
+            }
         }
     }, { passive: false });
 }

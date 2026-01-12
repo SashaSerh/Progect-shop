@@ -1,5 +1,5 @@
-const CACHE_VERSION = 'v76'; // Cache refresh for mobile hero blur + dark background tint
-const CACHE_NAME = 'climat-control-v107'; // include new assets
+const CACHE_VERSION = 'v78'; // Added lazy-loader.js
+const CACHE_NAME = 'climat-control-v109'; // include new assets
 const urlsToCache = [
     '/',
     '/index.html',
@@ -19,6 +19,9 @@ const urlsToCache = [
     '/js/flags-color.js',
     '/js/merge-utils.js',
     '/js/theme.js',
+    '/js/page-transitions.js',
+    '/js/mobile-animations.js',
+    '/js/lazy-loader.js',
     '/components/admin-products.html',
     '/components/header.html',
     '/components/hero.html',

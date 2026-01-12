@@ -1141,9 +1141,12 @@ async function initApp() {
         const portfolioGrid = document.querySelector('.portfolio__grid');
         if (!portfolioGrid || !Array.isArray(contentConfig.portfolio)) return;
         // If already rendered, skip
-        console.log('[debug] renderPortfolio: children before =', portfolioGrid.children ? portfolioGrid.children.length : 0);
+        console.log('[debug] renderPortfolio: children before =', portfolioGrid.children ? portfolioGrid.children.length : 0, 'contentConfig.portfolio.length=', Array.isArray(contentConfig.portfolio) ? contentConfig.portfolio.length : 'no-config');
         if (portfolioGrid.children.length) return;
         portfolioGrid.innerHTML = '';
+        // After clearing, populate
+        contentConfig.portfolio.forEach((_, i) => {});
+        console.log('[debug] renderPortfolio: will append items');
         // helper to build responsive srcset from placehold.co style URLs like 480x320
         const buildSrcset = (src) => {
             try {
@@ -1207,6 +1210,7 @@ async function initApp() {
             }
             portfolioGrid.appendChild(fig);
         });
+        console.log('[debug] renderPortfolio: children after =', portfolioGrid.children.length);
     }
 
     // Initial render
@@ -1979,8 +1983,10 @@ function setupServiceRouting() {
         let items = Array.from(container.querySelectorAll('.portfolio__item'));
         if (items.length === 0) {
             // Try to re-render portfolio if it was emptied or not yet populated
+            console.log('[debug] animatePortfolioEntrance: no items found, invoking renderPortfolio');
             try { renderPortfolio(); } catch(_) {}
             items = Array.from(container.querySelectorAll('.portfolio__item'));
+            console.log('[debug] animatePortfolioEntrance: items after render =', items.length);
         }
         items.forEach((item, index) => {
             item.style.setProperty('--portfolio-item-index', index);

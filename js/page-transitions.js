@@ -398,6 +398,14 @@ class PageTransitions {
         
         sessionStorage.removeItem('scrollReturnPosition');
         sessionStorage.removeItem('scrollReturnTarget');
+        
+        // Фокус на кнопку прайс-листа при возврате с страницы прайс-листа
+        if (returnTarget === 'pricelist') {
+            const pricelistBtn = document.querySelector('.pricelist-link');
+            if (pricelistBtn) {
+                pricelistBtn.focus({ preventScroll: true });
+            }
+        }
     }
 
     /**

@@ -1916,7 +1916,13 @@ function setupServiceRouting() {
     function setHiddenById(id, hidden) {
         const el = document.getElementById(id);
         if (!el) return;
-        if (id === 'portfolio-container') console.log('[debug] setHiddenById:', id, 'hidden=', hidden);
+        if (id === 'portfolio-container') {
+            console.log('[debug] setHiddenById:', id, 'hidden=', hidden);
+            try {
+                const stack = new Error().stack.split('\n').slice(2,6).map(l => l.trim()).join(' | ');
+                console.log('[debug] setHiddenById stack:', stack);
+            } catch(_) {}
+        }
         if (hidden) el.setAttribute('hidden', ''); else el.removeAttribute('hidden');
     }
 

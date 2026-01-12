@@ -1,98 +1,75 @@
 /**
- * Unified Page Transitions System
- * Оптимизированная система переходов между страницами для мобильной версии
+ * Unified Page Transitions Module
+ * Обеспечивает плавные слайд-анимации для всех переходов в мобильной версии
  * 
- * Features:
- * - Hardware-accelerated CSS transforms
- * - Bidirectional animations (forward/back)
- * - Navigation history stack
- * - Smooth 60fps animations
- * - Respects prefers-reduced-motion
+ * Особенности:
+ * - Стек навигации для корректного возврата
+ * - Hardware acceleration (transform3d, will-change)
+ * - Двунаправленные анимации (вперёд/назад)
+ * - Интеграция с hash-роутингом
  */
 
-// Guard for SSR/Node.js environments
-const isBrowser = typeof window !== 'undefined' && typeof document !== 'undefined';
-
-// ===== Configuration =====
-const CONFIG = {
-    // Animation timings (optimized for 60fps)
-    duration: 280,
-    easing: 'cubic-bezier(0.32, 0.72, 0, 1)', // iOS-like spring easing
-    
-    // Breakpoint for mobile
-    mobileBreakpoint: 768,
-    
-    // CSS classes
-    classes: {
-        entering: 'page-entering',
-        leaving: 'page-leaving',
-        enterFromRight: 'page-enter-from-right',
-        enterFromLeft: 'page-enter-from-left',
-        leaveToRight: 'page-leave-to-right',
-        leaveToLeft: 'page-leave-to-left',
-        active: 'page-active',
-        hidden: 'page-hidden'
-    }
+// Конфигурация анимаций
+const TRANSITION_CONFIG = {
+    duration: 300,
+    easing: 'cubic-bezier(0.4, 0, 0.2, 1)',
+    // Более плавный easing для возврата
+    easingBack: 'cubic-bezier(0.22, 0.9, 0.32, 1)',
+    // Минимальная ширина для мобильных анимаций
+    mobileBreakpoint: 768
 };
 
-// ===== Navigation History Stack =====
+// Стек навигации для отслеживания истории
 class NavigationStack {
     constructor() {
         this.stack = [];
         this.maxSize = 20;
+        this._loadFromSession();
     }
-    
-    push(entry) {
-        // Prevent duplicate consecutive entries
-        if (this.stack.length > 0) {
-            const last = this.stack[this.stack.length - 1];
-            if (last.hash === entry.hash) return;
+
+    push(hash, scrollY = 0) {
+        // Не добавляем дубликаты подряд
+        if (this.stack.length > 0 && this.stack[this.stack.length - 1].hash === hash) {
+            return;
         }
-        
-        this.stack.push({
-            hash: entry.hash,
-            scrollY: entry.scrollY || 0,
-            timestamp: Date.now()
-        });
-        
-        // Limit stack size
+        this.stack.push({ hash, scrollY, timestamp: Date.now() });
+        // Ограничиваем размер стека
         if (this.stack.length > this.maxSize) {
             this.stack.shift();
         }
-        
-        this._persist();
+        this._saveToSession();
     }
-    
+
     pop() {
-        const entry = this.stack.pop();
-        this._persist();
-        return entry;
+        const item = this.stack.pop();
+        this._saveToSession();
+        return item || null;
     }
-    
+
     peek() {
-        return this.stack[this.stack.length - 1] || null;
+        return this.stack.length > 0 ? this.stack[this.stack.length - 1] : null;
     }
-    
+
     clear() {
         this.stack = [];
-        this._persist();
+        this._saveToSession();
     }
-    
+
     get length() {
         return this.stack.length;
     }
-    
-    _persist() {
+
+    _saveToSession() {
         try {
-            sessionStorage.setItem('navStack', JSON.stringify(this.stack));
-        } catch (e) { /* quota exceeded or private mode */ }
+            sessionStorage.setItem('nav_stack', JSON.stringify(this.stack));
+        } catch (e) { /* ignore */ }
     }
-    
-    _restore() {
+
+    _loadFromSession() {
         try {
-            const stored = sessionStorage.getItem('navStack');
-            if (stored) {
-                this.stack = JSON.parse(stored);
+            const data = sessionStorage.getItem('nav_stack');
+            if (data) {
+                this.stack = JSON.parse(data);
             }
         } catch (e) {
             this.stack = [];
@@ -100,457 +77,371 @@ class NavigationStack {
     }
 }
 
-// ===== Page Transition Manager =====
-class PageTransitionManager {
+// Класс для управления переходами страниц
+class PageTransitions {
     constructor() {
         this.navStack = new NavigationStack();
-        this.navStack._restore();
         this.isAnimating = false;
-        this.isMobile = isBrowser ? window.innerWidth <= CONFIG.mobileBreakpoint : false;
-        this.prefersReducedMotion = isBrowser && window.matchMedia ? 
-            window.matchMedia('(prefers-reduced-motion: reduce)').matches : false;
+        this.currentContainer = null;
+        this.isMobile = window.innerWidth <= TRANSITION_CONFIG.mobileBreakpoint;
         
-        if (isBrowser) {
-            this._injectStyles();
-            this._initResizeHandler();
-            this._initReducedMotionHandler();
-        }
+        this._initResizeHandler();
+        this._initReducedMotionCheck();
     }
-    
+
     /**
-     * Navigate forward to a new page/section
-     * @param {string} targetHash - Target hash (e.g., '#service-ac-install', '#pricelist')
-     * @param {Object} options - Animation options
+     * Проверка предпочтений пользователя по анимациям
      */
-    async navigateTo(targetHash, options = {}) {
-        if (this.isAnimating) return false;
+    _initReducedMotionCheck() {
+        this.prefersReducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches || false;
         
-        const {
-            savePosition = true,
-            direction = 'right',
-            scrollToTop = true
-        } = options;
-        
-        // Save current position to stack
-        if (savePosition) {
-            this.navStack.push({
-                hash: location.hash || '#',
-                scrollY: window.scrollY
-            });
-        }
-        
-        // Find target element
-        const targetId = targetHash.replace('#', '');
-        const targetElement = document.getElementById(targetId);
-        
-        if (!targetElement) {
-            // Fallback: just change hash
-            location.hash = targetHash;
-            return true;
-        }
-        
-        // Animate if on mobile and motion allowed
-        if (this.isMobile && !this.prefersReducedMotion) {
-            await this._animateTransition(targetElement, direction, 'in');
-        } else {
-            targetElement.style.display = '';
-            targetElement.removeAttribute('hidden');
-        }
-        
-        // Scroll to element or top
-        if (scrollToTop) {
-            targetElement.scrollIntoView({ behavior: 'instant', block: 'start' });
-        }
-        
-        // Update hash without triggering hashchange
-        if (targetHash !== location.hash) {
-            history.pushState(null, '', targetHash);
-        }
-        
-        return true;
-    }
-    
-    /**
-     * Navigate back to previous page
-     */
-    async navigateBack() {
-        if (this.isAnimating) return false;
-        
-        const prevEntry = this.navStack.pop();
-        
-        if (!prevEntry) {
-            // No history, go to home
-            location.hash = '';
-            window.scrollTo({ top: 0, behavior: 'instant' });
-            return true;
-        }
-        
-        // Find current visible section to animate out
-        const currentSection = this._findCurrentSection();
-        
-        // Animate out current section
-        if (this.isMobile && !this.prefersReducedMotion && currentSection) {
-            await this._animateTransition(currentSection, 'right', 'out');
-        }
-        
-        // Navigate to previous hash
-        location.hash = prevEntry.hash;
-        
-        // Restore scroll position after navigation
-        requestAnimationFrame(() => {
-            window.scrollTo({
-                top: prevEntry.scrollY,
-                behavior: 'instant'
-            });
-        });
-        
-        return true;
-    }
-    
-    /**
-     * Scroll to a section within the same page with animation
-     */
-    async scrollToSection(targetId, options = {}) {
-        if (this.isAnimating) return false;
-        
-        const {
-            savePosition = true,
-            animate = true
-        } = options;
-        
-        const targetElement = document.getElementById(targetId);
-        if (!targetElement) return false;
-        
-        // Save current scroll position
-        if (savePosition) {
-            this.navStack.push({
-                hash: location.hash || '#',
-                scrollY: window.scrollY
-            });
-        }
-        
-        // Animate the target section
-        if (animate && this.isMobile && !this.prefersReducedMotion) {
-            // Slide in animation for the target
-            targetElement.classList.add(CONFIG.classes.enterFromRight);
-            
-            // Force reflow
-            void targetElement.offsetWidth;
-            
-            // Start animation
-            targetElement.classList.add(CONFIG.classes.entering);
-            targetElement.classList.remove(CONFIG.classes.enterFromRight);
-            
-            // Scroll to target
-            targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            
-            // Cleanup after animation
-            await this._waitForAnimation();
-            targetElement.classList.remove(CONFIG.classes.entering);
-        } else {
-            targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-        
-        return true;
-    }
-    
-    /**
-     * Return from section scroll (reverse of scrollToSection)
-     */
-    async returnFromSection() {
-        if (this.isAnimating) return false;
-        
-        const prevEntry = this.navStack.pop();
-        if (!prevEntry) {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-            return true;
-        }
-        
-        // Find current section to animate out
-        const visibleSections = document.querySelectorAll('[id*="pricelist"], .pricelist-section');
-        
-        if (this.isMobile && !this.prefersReducedMotion) {
-            visibleSections.forEach(section => {
-                const rect = section.getBoundingClientRect();
-                if (rect.top < window.innerHeight && rect.bottom > 0) {
-                    section.classList.add(CONFIG.classes.leaveToRight);
-                    section.classList.add(CONFIG.classes.leaving);
-                }
-            });
-            
-            await this._waitForAnimation();
-            
-            // Cleanup
-            visibleSections.forEach(section => {
-                section.classList.remove(CONFIG.classes.leaveToRight, CONFIG.classes.leaving);
-            });
-        }
-        
-        // Scroll back
-        window.scrollTo({
-            top: prevEntry.scrollY,
-            behavior: 'smooth'
-        });
-        
-        return true;
-    }
-    
-    /**
-     * Core animation method
-     */
-    async _animateTransition(element, direction, type) {
-        if (!element) return;
-        
-        this.isAnimating = true;
-        
-        const enterClass = direction === 'right' ? CONFIG.classes.enterFromRight : CONFIG.classes.enterFromLeft;
-        const leaveClass = direction === 'right' ? CONFIG.classes.leaveToRight : CONFIG.classes.leaveToLeft;
-        const animClass = type === 'in' ? CONFIG.classes.entering : CONFIG.classes.leaving;
-        const startClass = type === 'in' ? enterClass : '';
-        const endClass = type === 'out' ? leaveClass : '';
-        
-        // Setup initial state
-        if (type === 'in') {
-            element.style.display = '';
-            element.removeAttribute('hidden');
-            element.classList.add(startClass);
-        }
-        
-        // Force reflow for animation
-        void element.offsetWidth;
-        
-        // Start animation
-        element.classList.add(animClass);
-        if (startClass) element.classList.remove(startClass);
-        if (endClass) element.classList.add(endClass);
-        
-        // Wait for animation to complete
-        await this._waitForAnimation();
-        
-        // Cleanup
-        element.classList.remove(animClass, enterClass, leaveClass);
-        
-        if (type === 'out') {
-            element.style.display = 'none';
-        }
-        
-        this.isAnimating = false;
-    }
-    
-    /**
-     * Wait for animation duration
-     */
-    _waitForAnimation() {
-        return new Promise(resolve => {
-            setTimeout(resolve, CONFIG.duration + 20); // Small buffer
+        window.matchMedia?.('(prefers-reduced-motion: reduce)').addEventListener('change', (e) => {
+            this.prefersReducedMotion = e.matches;
         });
     }
-    
+
     /**
-     * Find currently visible section
-     */
-    _findCurrentSection() {
-        const sections = [
-            '.service-page:not([hidden])',
-            '.calculator-page:not([hidden])',
-            '.about-page:not([hidden])',
-            '#main-container:not(.is-hidden)'
-        ];
-        
-        for (const selector of sections) {
-            const el = document.querySelector(selector);
-            if (el && el.offsetParent !== null) {
-                return el;
-            }
-        }
-        return null;
-    }
-    
-    /**
-     * Inject CSS styles for animations
-     */
-    _injectStyles() {
-        if (document.getElementById('page-transitions-styles')) return;
-        
-        const style = document.createElement('style');
-        style.id = 'page-transitions-styles';
-        style.textContent = `
-            /* Page Transition Animations - Hardware Accelerated */
-            .page-entering,
-            .page-leaving {
-                will-change: transform, opacity;
-                backface-visibility: hidden;
-                -webkit-backface-visibility: hidden;
-            }
-            
-            .page-enter-from-right {
-                transform: translate3d(100%, 0, 0);
-                opacity: 0;
-            }
-            
-            .page-enter-from-left {
-                transform: translate3d(-100%, 0, 0);
-                opacity: 0;
-            }
-            
-            .page-leave-to-right {
-                transform: translate3d(100%, 0, 0);
-                opacity: 0;
-            }
-            
-            .page-leave-to-left {
-                transform: translate3d(-100%, 0, 0);
-                opacity: 0;
-            }
-            
-            .page-entering {
-                animation: pageEnter ${CONFIG.duration}ms ${CONFIG.easing} forwards;
-            }
-            
-            .page-leaving {
-                animation: pageLeave ${CONFIG.duration}ms ${CONFIG.easing} forwards;
-            }
-            
-            @keyframes pageEnter {
-                from {
-                    transform: translate3d(30%, 0, 0);
-                    opacity: 0;
-                }
-                to {
-                    transform: translate3d(0, 0, 0);
-                    opacity: 1;
-                }
-            }
-            
-            @keyframes pageLeave {
-                from {
-                    transform: translate3d(0, 0, 0);
-                    opacity: 1;
-                }
-                to {
-                    transform: translate3d(30%, 0, 0);
-                    opacity: 0;
-                }
-            }
-            
-            /* Reduced motion support */
-            @media (prefers-reduced-motion: reduce) {
-                .page-entering,
-                .page-leaving {
-                    animation: none !important;
-                    transition: opacity 0.15s ease !important;
-                }
-                
-                .page-enter-from-right,
-                .page-enter-from-left,
-                .page-leave-to-right,
-                .page-leave-to-left {
-                    transform: none !important;
-                }
-            }
-            
-            /* Smooth scroll behavior */
-            @media (max-width: ${CONFIG.mobileBreakpoint}px) {
-                html {
-                    scroll-behavior: smooth;
-                }
-            }
-        `;
-        
-        document.head.appendChild(style);
-    }
-    
-    /**
-     * Handle window resize
+     * Обработчик изменения размера окна
      */
     _initResizeHandler() {
         let resizeTimer;
         window.addEventListener('resize', () => {
             clearTimeout(resizeTimer);
             resizeTimer = setTimeout(() => {
-                this.isMobile = window.innerWidth <= CONFIG.mobileBreakpoint;
+                this.isMobile = window.innerWidth <= TRANSITION_CONFIG.mobileBreakpoint;
             }, 150);
         }, { passive: true });
     }
-    
+
     /**
-     * Handle reduced motion preference changes
+     * Применить стили для hardware acceleration
      */
-    _initReducedMotionHandler() {
-        const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
-        mq.addEventListener('change', (e) => {
-            this.prefersReducedMotion = e.matches;
+    _enableHardwareAcceleration(element) {
+        if (!element) return;
+        element.style.willChange = 'transform, opacity';
+        element.style.transform = 'translateZ(0)';
+        element.style.backfaceVisibility = 'hidden';
+    }
+
+    /**
+     * Убрать стили hardware acceleration
+     */
+    _disableHardwareAcceleration(element) {
+        if (!element) return;
+        element.style.willChange = '';
+        element.style.backfaceVisibility = '';
+    }
+
+    /**
+     * Анимация слайда элемента
+     */
+    _animateSlide(element, fromTransform, toTransform, duration = TRANSITION_CONFIG.duration, easing = TRANSITION_CONFIG.easing) {
+        return new Promise((resolve) => {
+            if (!element || this.prefersReducedMotion) {
+                if (element) {
+                    element.style.transform = toTransform;
+                    element.style.opacity = '1';
+                }
+                resolve();
+                return;
+            }
+
+            this._enableHardwareAcceleration(element);
+            
+            // Начальное состояние
+            element.style.transition = 'none';
+            element.style.transform = fromTransform;
+            element.style.opacity = '0';
+            
+            // Force reflow
+            void element.offsetWidth;
+            
+            // Анимация
+            element.style.transition = `transform ${duration}ms ${easing}, opacity ${duration}ms ${easing}`;
+            element.style.transform = toTransform;
+            element.style.opacity = '1';
+            
+            const onEnd = () => {
+                element.removeEventListener('transitionend', onEnd);
+                this._disableHardwareAcceleration(element);
+                element.style.transition = '';
+                resolve();
+            };
+            
+            element.addEventListener('transitionend', onEnd, { once: true });
+            
+            // Fallback timeout
+            setTimeout(() => {
+                element.removeEventListener('transitionend', onEnd);
+                this._disableHardwareAcceleration(element);
+                element.style.transition = '';
+                resolve();
+            }, duration + 50);
         });
     }
-    
+
     /**
-     * Clear navigation history
+     * Переход вперёд (к новой странице)
+     * @param {string} fromContainerId - ID контейнера откуда уходим
+     * @param {string} toContainerId - ID контейнера куда переходим
+     * @param {string} newHash - Новый hash для навигации
+     */
+    async navigateForward(fromContainerId, toContainerId, newHash = '') {
+        if (this.isAnimating) return;
+        this.isAnimating = true;
+
+        const fromEl = document.getElementById(fromContainerId);
+        const toEl = document.getElementById(toContainerId);
+
+        // Сохраняем текущую позицию в стек
+        const currentHash = location.hash || '#';
+        this.navStack.push(currentHash, window.scrollY);
+
+        if (!this.isMobile || this.prefersReducedMotion) {
+            // На десктопе или при reduced motion — без анимации
+            if (fromEl) fromEl.style.display = 'none';
+            if (toEl) toEl.style.display = '';
+            if (newHash) location.hash = newHash;
+            this.isAnimating = false;
+            return;
+        }
+
+        // Подготовка
+        if (toEl) {
+            toEl.style.display = '';
+            toEl.style.position = 'absolute';
+            toEl.style.top = '0';
+            toEl.style.left = '0';
+            toEl.style.width = '100%';
+            toEl.style.zIndex = '10';
+        }
+
+        // Параллельная анимация: текущая уходит влево, новая входит справа
+        await Promise.all([
+            this._animateSlide(fromEl, 'translate3d(0%, 0, 0)', 'translate3d(-30%, 0, 0)'),
+            this._animateSlide(toEl, 'translate3d(100%, 0, 0)', 'translate3d(0%, 0, 0)')
+        ]);
+
+        // Финализация
+        if (fromEl) fromEl.style.display = 'none';
+        if (toEl) {
+            toEl.style.position = '';
+            toEl.style.top = '';
+            toEl.style.left = '';
+            toEl.style.width = '';
+            toEl.style.zIndex = '';
+        }
+
+        // Скролл наверх
+        window.scrollTo({ top: 0, behavior: 'instant' });
+
+        // Обновляем hash
+        if (newHash) location.hash = newHash;
+
+        this.isAnimating = false;
+    }
+
+    /**
+     * Переход назад (к предыдущей странице)
+     * @param {string} currentContainerId - ID текущего контейнера
+     */
+    async navigateBack(currentContainerId) {
+        if (this.isAnimating) return;
+        
+        const prevState = this.navStack.pop();
+        if (!prevState) {
+            // Нет истории — переходим на главную
+            location.hash = '';
+            window.scrollTo({ top: 0, behavior: 'instant' });
+            return;
+        }
+
+        this.isAnimating = true;
+
+        const currentEl = document.getElementById(currentContainerId);
+        
+        // Определяем контейнер для возврата
+        let targetContainerId = 'main-container';
+        if (prevState.hash.includes('service-')) {
+            targetContainerId = 'main-container';
+        } else if (prevState.hash.includes('calculator')) {
+            targetContainerId = 'main-container';
+        }
+        
+        const targetEl = document.getElementById(targetContainerId);
+
+        if (!this.isMobile || this.prefersReducedMotion) {
+            if (currentEl) currentEl.style.display = 'none';
+            if (targetEl) targetEl.style.display = '';
+            location.hash = prevState.hash;
+            window.scrollTo({ top: prevState.scrollY, behavior: 'instant' });
+            this.isAnimating = false;
+            return;
+        }
+
+        // Подготовка
+        if (targetEl) {
+            targetEl.style.display = '';
+            targetEl.style.position = 'absolute';
+            targetEl.style.top = '0';
+            targetEl.style.left = '0';
+            targetEl.style.width = '100%';
+            targetEl.style.zIndex = '5';
+            targetEl.style.transform = 'translate3d(-30%, 0, 0)';
+            targetEl.style.opacity = '0.5';
+        }
+
+        // Параллельная анимация: текущая уходит вправо, предыдущая входит слева
+        await Promise.all([
+            this._animateSlide(currentEl, 'translate3d(0%, 0, 0)', 'translate3d(100%, 0, 0)', TRANSITION_CONFIG.duration, TRANSITION_CONFIG.easingBack),
+            this._animateSlide(targetEl, 'translate3d(-30%, 0, 0)', 'translate3d(0%, 0, 0)', TRANSITION_CONFIG.duration, TRANSITION_CONFIG.easingBack)
+        ]);
+
+        // Финализация
+        if (currentEl) currentEl.style.display = 'none';
+        if (targetEl) {
+            targetEl.style.position = '';
+            targetEl.style.top = '';
+            targetEl.style.left = '';
+            targetEl.style.width = '';
+            targetEl.style.zIndex = '';
+            targetEl.style.opacity = '';
+        }
+
+        // Обновляем hash и восстанавливаем скролл
+        location.hash = prevState.hash;
+        window.scrollTo({ top: prevState.scrollY, behavior: 'instant' });
+
+        this.isAnimating = false;
+    }
+
+    /**
+     * Скролл к элементу с анимацией появления
+     * @param {string} targetId - ID целевого элемента
+     * @param {string} fromDirection - Направление появления ('left' | 'right' | 'top')
+     */
+    async scrollToWithAnimation(targetId, fromDirection = 'right') {
+        const targetEl = document.getElementById(targetId);
+        if (!targetEl) return;
+
+        // Сохраняем позицию для возврата
+        sessionStorage.setItem('scrollReturnPosition', window.scrollY.toString());
+        sessionStorage.setItem('scrollReturnTarget', targetId);
+
+        if (this.prefersReducedMotion || !this.isMobile) {
+            targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            return;
+        }
+
+        // Анимация появления
+        let fromTransform;
+        if (fromDirection === 'top') {
+            fromTransform = 'translate3d(0, -100%, 0)';
+        } else {
+            const fromX = fromDirection === 'right' ? '100%' : '-100%';
+            fromTransform = `translate3d(${fromX}, 0, 0)`;
+        }
+        
+        this._enableHardwareAcceleration(targetEl);
+        targetEl.style.transition = 'none';
+        targetEl.style.transform = fromTransform;
+        targetEl.style.opacity = '0';
+        
+        void targetEl.offsetWidth;
+        
+        // Скролл + анимация
+        targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        const toTransform = fromDirection === 'top' ? 'translate3d(0, 0%, 0)' : 'translate3d(0%, 0, 0)';
+        await this._animateSlide(targetEl, fromTransform, toTransform);
+    }
+
+    /**
+     * Возврат от скролла к предыдущей позиции
+     */
+    async scrollBack() {
+        const returnPosition = sessionStorage.getItem('scrollReturnPosition');
+        const returnTarget = sessionStorage.getItem('scrollReturnTarget');
+        
+        if (!returnPosition) return;
+
+        const targetEl = returnTarget ? document.getElementById(returnTarget) : null;
+
+        if (this.prefersReducedMotion || !this.isMobile) {
+            window.scrollTo({ top: parseInt(returnPosition, 10), behavior: 'smooth' });
+            sessionStorage.removeItem('scrollReturnPosition');
+            sessionStorage.removeItem('scrollReturnTarget');
+            return;
+        }
+
+        // Анимация ухода
+        if (targetEl) {
+            await this._animateSlide(targetEl, 'translate3d(0%, 0, 0)', 'translate3d(100%, 0, 0)', TRANSITION_CONFIG.duration, TRANSITION_CONFIG.easingBack);
+            targetEl.style.transform = '';
+            targetEl.style.opacity = '';
+        }
+
+        // Возврат к позиции
+        window.scrollTo({ top: parseInt(returnPosition, 10), behavior: 'smooth' });
+        
+        sessionStorage.removeItem('scrollReturnPosition');
+        sessionStorage.removeItem('scrollReturnTarget');
+    }
+
+    /**
+     * Очистить стек навигации
      */
     clearHistory() {
         this.navStack.clear();
     }
-    
+
     /**
-     * Get navigation stack length
+     * Получить предыдущее состояние без удаления из стека
      */
-    get historyLength() {
-        return this.navStack.length;
+    getPreviousState() {
+        return this.navStack.peek();
     }
 }
 
-// ===== Create singleton instance =====
-const pageTransitions = new PageTransitionManager();
+// Создаём и экспортируем синглтон
+export const pageTransitions = new PageTransitions();
 
-// ===== Event Handlers =====
-function initPageTransitions() {
-    // Handle pricelist link clicks
-    document.addEventListener('click', (e) => {
-        const link = e.target.closest('.pricelist-link');
-        if (!link) return;
-        
-        const href = link.getAttribute('href');
-        if (!href || !href.startsWith('#')) return;
-        
-        e.preventDefault();
-        e.stopPropagation();
-        
-        const targetId = href.substring(1);
-        pageTransitions.scrollToSection(targetId);
-    }, { capture: true });
-    
-    // Handle back-to-main clicks for pricelist return
-    document.addEventListener('click', (e) => {
+// Экспорт в window для доступа из других скриптов
+if (typeof window !== 'undefined') {
+    window.pageTransitions = pageTransitions;
+}
+
+// Инициализация обработчиков для кнопок
+export function initPageTransitionHandlers() {
+    // Обработчик для кнопок "назад"
+    document.addEventListener('click', async (e) => {
         const backBtn = e.target.closest('.back-to-main');
         if (!backBtn) return;
         
-        // Check if we came from pricelist (have entries in stack)
-        if (pageTransitions.historyLength > 0) {
-            const lastEntry = pageTransitions.navStack.peek();
-            // Only intercept if returning from a scroll-based navigation (same page)
-            if (lastEntry && lastEntry.hash === location.hash) {
-                e.preventDefault();
-                e.stopPropagation();
-                pageTransitions.returnFromSection();
-                return;
-            }
-        }
-        // Otherwise let the default back-to-main handler work
-    }, { capture: true });
-}
+        e.preventDefault();
+        
+        // Находим текущий контейнер
+        const container = backBtn.closest('[id$="-container"], .service-page, .calculator-page, .about-page');
+        const containerId = container?.id || 'main-container';
+        
+        await pageTransitions.navigateBack(containerId);
+    });
 
-// Initialize when DOM is ready (only in browser)
-if (isBrowser) {
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initPageTransitions);
-    } else {
-        initPageTransitions();
-    }
-}
+    // Обработчик для кнопок "прайс-лист" (скролл с анимацией)
+    document.addEventListener('click', async (e) => {
+        const pricelistLink = e.target.closest('.pricelist-link');
+        if (!pricelistLink) return;
+        
+        const href = pricelistLink.getAttribute('href');
+        if (!href || !href.startsWith('#')) return;
+        
+        e.preventDefault();
+        
+        const targetId = href.substring(1);
+        await pageTransitions.scrollToWithAnimation(targetId, 'top');
+    });
 
-// ===== Exports =====
-export { pageTransitions, PageTransitionManager, CONFIG as transitionConfig };
-
-// Expose to window for global access
-if (isBrowser) {
-    window.pageTransitions = pageTransitions;
+    console.debug('[PageTransitions] Handlers initialized');
 }

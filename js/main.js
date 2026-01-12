@@ -1134,10 +1134,14 @@ async function initApp() {
     try { initPageTransitionHandlers(); } catch (e) { console.warn('[PageTransitions] Init failed:', e); }
 
     // Рендер портфолио по конфигу (поддержка заголовков/описаний, локализация ru/uk)
-    const portfolioGrid = document.querySelector('.portfolio__grid');
     const portfolioSection = document.querySelector('#portfolio');
     const portfolioBehavior = portfolioSection?.getAttribute('data-portfolio-behavior') || 'lightbox';
-    if (portfolioGrid && Array.isArray(contentConfig.portfolio)) {
+
+    function renderPortfolio() {
+        const portfolioGrid = document.querySelector('.portfolio__grid');
+        if (!portfolioGrid || !Array.isArray(contentConfig.portfolio)) return;
+        // If already rendered, skip
+        if (portfolioGrid.children.length) return;
         portfolioGrid.innerHTML = '';
         // helper to build responsive srcset from placehold.co style URLs like 480x320
         const buildSrcset = (src) => {
@@ -1203,6 +1207,9 @@ async function initApp() {
             portfolioGrid.appendChild(fig);
         });
     }
+
+    // Initial render
+    renderPortfolio();
 
     // Рендер отзывов + форма (лендинг)
     (function initLandingReviews(){
@@ -1966,7 +1973,12 @@ function setupServiceRouting() {
         container.classList.remove('portfolio--animate-in');
         void container.offsetWidth;
         container.classList.add('portfolio--animate-in');
-        const items = Array.from(container.querySelectorAll('.portfolio__item'));
+        let items = Array.from(container.querySelectorAll('.portfolio__item'));
+        if (items.length === 0) {
+            // Try to re-render portfolio if it was emptied or not yet populated
+            try { renderPortfolio(); } catch(_) {}
+            items = Array.from(container.querySelectorAll('.portfolio__item'));
+        }
         items.forEach((item, index) => {
             item.style.setProperty('--portfolio-item-index', index);
         });

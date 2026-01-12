@@ -1141,6 +1141,7 @@ async function initApp() {
         const portfolioGrid = document.querySelector('.portfolio__grid');
         if (!portfolioGrid || !Array.isArray(contentConfig.portfolio)) return;
         // If already rendered, skip
+        console.log('[debug] renderPortfolio: children before =', portfolioGrid.children ? portfolioGrid.children.length : 0);
         if (portfolioGrid.children.length) return;
         portfolioGrid.innerHTML = '';
         // helper to build responsive srcset from placehold.co style URLs like 480x320
@@ -1911,6 +1912,7 @@ function setupServiceRouting() {
     function setHiddenById(id, hidden) {
         const el = document.getElementById(id);
         if (!el) return;
+        if (id === 'portfolio-container') console.log('[debug] setHiddenById:', id, 'hidden=', hidden);
         if (hidden) el.setAttribute('hidden', ''); else el.removeAttribute('hidden');
     }
 
@@ -1966,6 +1968,7 @@ function setupServiceRouting() {
         const container = section?.matches?.('.portfolio') ? section : section?.querySelector?.('.portfolio');
         if (!container) return;
         const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        console.log('[debug] animatePortfolioEntrance start, prefersReducedMotion=', prefersReducedMotion, 'container exists=', !!container, 'items=', container.querySelectorAll ? container.querySelectorAll('.portfolio__item').length : 0);
         if (prefersReducedMotion) return;
         if (container.__portfolioAnimationTimeout) {
             clearTimeout(container.__portfolioAnimationTimeout);

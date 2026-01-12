@@ -329,15 +329,10 @@ class PageTransitions {
         sessionStorage.setItem('scrollReturnTarget', targetId);
 
         if (this.prefersReducedMotion || !this.isMobile) {
-            // Рассчитываем позицию для центрирования
-            const rect = targetEl.getBoundingClientRect();
-            const viewportHeight = window.innerHeight;
-            const elementHeight = rect.height;
-            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-            
-            // Центрируем элемент в viewport
-            const targetScrollTop = scrollTop + rect.top - (viewportHeight / 2) + (elementHeight / 2);
-            window.scrollTo({ top: Math.max(0, targetScrollTop), behavior: 'smooth' });
+            // Учитываем высоту хедера при скролле
+            const headerH = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--header-height')) || 60;
+            const top = Math.max(0, targetEl.getBoundingClientRect().top + window.scrollY - headerH);
+            window.scrollTo({ top, behavior: 'smooth' });
             return;
         }
 
@@ -357,15 +352,10 @@ class PageTransitions {
         
         void targetEl.offsetWidth;
         
-        // Скролл + анимация - рассчитываем позицию для центрирования
-        const rect = targetEl.getBoundingClientRect();
-        const viewportHeight = window.innerHeight;
-        const elementHeight = rect.height;
-        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-        
-        // Центрируем элемент в viewport
-        const targetScrollTop = scrollTop + rect.top - (viewportHeight / 2) + (elementHeight / 2);
-        window.scrollTo({ top: Math.max(0, targetScrollTop), behavior: 'smooth' });
+        // Скролл + анимация (учитываем высоту хедера, чтобы секция отображалась под хедером)
+        const headerH = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--header-height')) || 60;
+        const top = Math.max(0, targetEl.getBoundingClientRect().top + window.scrollY - headerH);
+        window.scrollTo({ top, behavior: 'smooth' });
         
         await new Promise(resolve => setTimeout(resolve, 100));
         
@@ -478,29 +468,15 @@ export function initPageTransitionHandlers() {
         e.preventDefault();
         
         const targetId = href.substring(1);
+        const targetContainerId = 'pricelist-container'; // Контейнер, который нужно показать
         
-        // Определить контейнер на основе targetId
-        let targetContainerId;
-        if (targetId === 'pricelist') {
-            targetContainerId = 'pricelist-container';
-        } else if (targetId.startsWith('service-maintenance-pricelist')) {
-            targetContainerId = 'service-maintenance-container';
-        } else {
-            // Для других случаев попробуем найти контейнер, содержащий элемент
-            const targetEl = document.getElementById(targetId);
-            if (targetEl) {
-                const container = targetEl.closest('[id$="-container"]');
-                targetContainerId = container?.id;
-            }
-        }
-        
-        // Проверить, виден ли контейнер
-        const containerEl = targetContainerId ? document.getElementById(targetContainerId) : null;
+        // Проверить, виден ли контейнер прайс-листа
+        const containerEl = document.getElementById(targetContainerId);
         const isContainerVisible = containerEl && !containerEl.hasAttribute('hidden') && 
                                   window.getComputedStyle(containerEl).display !== 'none';
         
         // Если контейнер не виден, сначала вызвать навигацию
-        if (!isContainerVisible && targetContainerId) {
+        if (!isContainerVisible) {
             location.hash = `#${targetId}`;
             // Подождать немного, пока контейнер загрузится и покажется
             await new Promise(resolve => setTimeout(resolve, 100));

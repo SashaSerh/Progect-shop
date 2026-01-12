@@ -463,15 +463,29 @@ export function initPageTransitionHandlers() {
         e.preventDefault();
         
         const targetId = href.substring(1);
-        const targetContainerId = 'pricelist-container'; // Контейнер, который нужно показать
         
-        // Проверить, виден ли контейнер прайс-листа
-        const containerEl = document.getElementById(targetContainerId);
+        // Определить контейнер на основе targetId
+        let targetContainerId;
+        if (targetId === 'pricelist') {
+            targetContainerId = 'pricelist-container';
+        } else if (targetId.startsWith('service-maintenance-pricelist')) {
+            targetContainerId = 'service-maintenance-container';
+        } else {
+            // Для других случаев попробуем найти контейнер, содержащий элемент
+            const targetEl = document.getElementById(targetId);
+            if (targetEl) {
+                const container = targetEl.closest('[id$="-container"]');
+                targetContainerId = container?.id;
+            }
+        }
+        
+        // Проверить, виден ли контейнер
+        const containerEl = targetContainerId ? document.getElementById(targetContainerId) : null;
         const isContainerVisible = containerEl && !containerEl.hasAttribute('hidden') && 
                                   window.getComputedStyle(containerEl).display !== 'none';
         
         // Если контейнер не виден, сначала вызвать навигацию
-        if (!isContainerVisible) {
+        if (!isContainerVisible && targetContainerId) {
             location.hash = `#${targetId}`;
             // Подождать немного, пока контейнер загрузится и покажется
             await new Promise(resolve => setTimeout(resolve, 100));

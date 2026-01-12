@@ -329,7 +329,7 @@ class PageTransitions {
         sessionStorage.setItem('scrollReturnTarget', targetId);
 
         if (this.prefersReducedMotion || !this.isMobile) {
-            targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
             return;
         }
 
@@ -350,7 +350,7 @@ class PageTransitions {
         void targetEl.offsetWidth;
         
         // Скролл + анимация
-        targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
         
         await new Promise(resolve => setTimeout(resolve, 100));
         

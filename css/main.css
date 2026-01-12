@@ -173,6 +173,45 @@
         }
     }
     
+    /* Portfolio entry animation (replaces the previous slide effect) */
+    .portfolio--animate-in .portfolio-header-card,
+    .portfolio--animate-in .portfolio__item {
+        opacity: 0;
+        transform: translate3d(0, 28px, 0);
+        will-change: transform, opacity;
+    }
+
+    .portfolio--animate-in .portfolio-header-card {
+        animation: portfolioHeaderEntrance var(--motion-duration-normal) var(--motion-ease-emphasized) forwards;
+    }
+
+    .portfolio--animate-in .portfolio__item {
+        animation: portfolioItemEntrance 360ms var(--motion-ease-standard) forwards;
+        animation-delay: calc(120ms + (var(--portfolio-item-index, 0) * 40ms));
+    }
+
+    @keyframes portfolioHeaderEntrance {
+        from {
+            opacity: 0;
+            transform: translate3d(0, 20px, 0);
+        }
+        to {
+            opacity: 1;
+            transform: translate3d(0, 0, 0);
+        }
+    }
+
+    @keyframes portfolioItemEntrance {
+        from {
+            opacity: 0;
+            transform: translate3d(0, 28px, 0);
+        }
+        to {
+            opacity: 1;
+            transform: translate3d(0, 0, 0);
+        }
+    }
+
     /* Pricelist section animation */
     .pricelist-section.animating-in {
         animation: slideInFromRight var(--page-transition-duration) var(--page-transition-easing) forwards;
@@ -193,6 +232,46 @@
     .pricelist-section.animating-out {
         animation: none !important;
         transition: none !important;
+    }
+    .service-page--content-animate-in .service-page__header,
+    .service-page--content-animate-in .service-page__banner {
+        animation: none !important;
+        transform: none !important;
+        opacity: 1 !important;
+    }
+    .service-page--recuperator-animate-in .service-page__header,
+    .service-page--recuperator-animate-in .service-page__banner,
+    .service-page--recuperator-animate-in .service-page__content {
+        animation: none !important;
+        transform: none !important;
+        opacity: 1 !important;
+    }
+    .service-page--maintenance-animate-in .service-page__header,
+    .service-page--maintenance-animate-in .service-page__banner,
+    .service-page--maintenance-animate-in .service-page__content {
+        animation: none !important;
+        transform: none !important;
+        opacity: 1 !important;
+    }
+    .service-page--removal-animate-in .service-page__header,
+    .service-page--removal-animate-in .service-page__banner,
+    .service-page--removal-animate-in .service-page__content {
+        animation: none !important;
+        transform: none !important;
+        opacity: 1 !important;
+    }
+    .service-page--laying-animate-in .service-page__header,
+    .service-page--laying-animate-in .service-page__banner,
+    .service-page--laying-animate-in .service-page__content {
+        animation: none !important;
+        transform: none !important;
+        opacity: 1 !important;
+    }
+    .portfolio--animate-in .portfolio-header-card,
+    .portfolio--animate-in .portfolio__item {
+        animation: none !important;
+        transform: none !important;
+        opacity: 1 !important;
     }
 }
 
@@ -13301,6 +13380,260 @@ img.img-loaded {
     box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
     padding: clamp(16px, 3vw, 24px);
     margin-bottom: 12px;
+}
+
+/* Animate header and banner when the AC installation page appears */
+.service-page--content-animate-in .service-page__header,
+.service-page--content-animate-in .service-page__banner {
+    opacity: 0;
+    transform: translate3d(0, 24px, 0);
+    will-change: transform, opacity;
+}
+
+.service-page--content-animate-in .service-page__header {
+    animation: servicePageHeaderEntrance var(--motion-duration-normal) var(--motion-ease-emphasized) forwards;
+}
+
+.service-page--content-animate-in .service-page__banner {
+    animation: servicePageBannerEntrance calc(var(--motion-duration-normal) + 100ms) var(--motion-ease-standard) 100ms forwards;
+}
+
+@keyframes servicePageHeaderEntrance {
+    from {
+        opacity: 0;
+        transform: translate3d(0, 24px, 0);
+    }
+    to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+    }
+}
+
+@keyframes servicePageBannerEntrance {
+    from {
+        opacity: 0;
+        transform: translate3d(0, 36px, 0);
+    }
+    to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+    }
+}
+
+/* Specific entrance animation for рекуператоры: header, banner, and content fade up together */
+.service-page--recuperator-animate-in .service-page__header,
+.service-page--recuperator-animate-in .service-page__banner,
+.service-page--recuperator-animate-in .service-page__content {
+    opacity: 0;
+    transform: translate3d(0, 32px, 0) scale(0.98);
+    will-change: transform, opacity;
+}
+
+.service-page--recuperator-animate-in .service-page__header {
+    animation: recuperatorHeaderEntrance var(--motion-duration-normal) var(--motion-ease-emphasized) forwards;
+}
+
+.service-page--recuperator-animate-in .service-page__banner {
+    animation: recuperatorBannerEntrance calc(var(--motion-duration-normal) + 120ms) var(--motion-ease-standard) 120ms forwards;
+}
+
+.service-page--recuperator-animate-in .service-page__content {
+    animation: recuperatorContentEntrance calc(var(--motion-duration-normal) + 220ms) var(--motion-ease-standard) 220ms forwards;
+}
+
+@keyframes recuperatorHeaderEntrance {
+    from {
+        opacity: 0;
+        transform: translate3d(0, 32px, 0) scale(0.98);
+    }
+    to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0) scale(1);
+    }
+}
+
+@keyframes recuperatorBannerEntrance {
+    from {
+        opacity: 0;
+        transform: translate3d(0, 40px, 0) scale(0.99);
+    }
+    to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0) scale(1);
+    }
+}
+
+/* Maintenance page entrance animation for header, banner, and content */
+.service-page--maintenance-animate-in .service-page__header,
+.service-page--maintenance-animate-in .service-page__banner,
+.service-page--maintenance-animate-in .service-page__content {
+    opacity: 0;
+    transform: translate3d(0, 28px, 0);
+    will-change: transform, opacity;
+}
+
+.service-page--maintenance-animate-in .service-page__header {
+    animation: maintenanceHeaderEntrance var(--motion-duration-normal) var(--motion-ease-emphasized) forwards;
+}
+
+.service-page--maintenance-animate-in .service-page__banner {
+    animation: maintenanceBannerEntrance calc(var(--motion-duration-normal) + 100ms) var(--motion-ease-emphasized) 100ms forwards;
+}
+
+.service-page--maintenance-animate-in .service-page__content {
+    animation: maintenanceContentEntrance calc(var(--motion-duration-normal) + 200ms) var(--motion-ease-standard) 200ms forwards;
+}
+
+@keyframes maintenanceHeaderEntrance {
+    from {
+        opacity: 0;
+        transform: translate3d(0, 28px, 0);
+    }
+    to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+    }
+}
+
+@keyframes maintenanceBannerEntrance {
+    from {
+        opacity: 0;
+        transform: translate3d(0, 34px, 0);
+    }
+    to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+    }
+}
+
+@keyframes maintenanceContentEntrance {
+    from {
+        opacity: 0;
+        transform: translate3d(0, 38px, 0);
+    }
+    to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+    }
+}
+
+/* Removal page entrance animation for header, banner, and content */
+.service-page--removal-animate-in .service-page__header,
+.service-page--removal-animate-in .service-page__banner,
+.service-page--removal-animate-in .service-page__content {
+    opacity: 0;
+    transform: translate3d(0, 30px, 0);
+    will-change: transform, opacity;
+}
+
+.service-page--removal-animate-in .service-page__header {
+    animation: removalHeaderEntrance var(--motion-duration-normal) var(--motion-ease-emphasized) forwards;
+}
+
+.service-page--removal-animate-in .service-page__banner {
+    animation: removalBannerEntrance calc(var(--motion-duration-normal) + 110ms) var(--motion-ease-standard) 110ms forwards;
+}
+
+.service-page--removal-animate-in .service-page__content {
+    animation: removalContentEntrance calc(var(--motion-duration-normal) + 210ms) var(--motion-ease-standard) 210ms forwards;
+}
+
+@keyframes removalHeaderEntrance {
+    from {
+        opacity: 0;
+        transform: translate3d(0, 30px, 0);
+    }
+    to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+    }
+}
+
+@keyframes removalBannerEntrance {
+    from {
+        opacity: 0;
+        transform: translate3d(0, 36px, 0);
+    }
+    to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+    }
+}
+
+@keyframes removalContentEntrance {
+    from {
+        opacity: 0;
+        transform: translate3d(0, 42px, 0);
+    }
+    to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+    }
+}
+
+/* Laying page entrance animation for header, banner, and content */
+.service-page--laying-animate-in .service-page__header,
+.service-page--laying-animate-in .service-page__banner,
+.service-page--laying-animate-in .service-page__content {
+    opacity: 0;
+    transform: translate3d(0, 26px, 0);
+    will-change: transform, opacity;
+}
+
+.service-page--laying-animate-in .service-page__header {
+    animation: layingHeaderEntrance var(--motion-duration-normal) var(--motion-ease-emphasized) forwards;
+}
+
+.service-page--laying-animate-in .service-page__banner {
+    animation: layingBannerEntrance calc(var(--motion-duration-normal) + 100ms) var(--motion-ease-standard) 100ms forwards;
+}
+
+.service-page--laying-animate-in .service-page__content {
+    animation: layingContentEntrance calc(var(--motion-duration-normal) + 180ms) var(--motion-ease-standard) 180ms forwards;
+}
+
+@keyframes layingHeaderEntrance {
+    from {
+        opacity: 0;
+        transform: translate3d(0, 26px, 0);
+    }
+    to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+    }
+}
+
+@keyframes layingBannerEntrance {
+    from {
+        opacity: 0;
+        transform: translate3d(0, 32px, 0);
+    }
+    to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+    }
+}
+
+@keyframes layingContentEntrance {
+    from {
+        opacity: 0;
+        transform: translate3d(0, 36px, 0);
+    }
+    to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+    }
+}
+
+@keyframes recuperatorContentEntrance {
+    from {
+        opacity: 0;
+        transform: translate3d(0, 48px, 0) scale(0.985);
+    }
+    to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0) scale(1);
+    }
 }
 
 /* Ensure case content has rounded bottom corners and clips children */

@@ -1930,6 +1930,53 @@ function setupServiceRouting() {
         if (prevTab === null) heading.removeAttribute('tabindex'); else heading.setAttribute('tabindex', prevTab);
     }
 
+    const SERVICE_ENTRANCE_ANIMATIONS = {
+        'service-ac-install': 'service-page--content-animate-in',
+        'service-recuperator-install': 'service-page--recuperator-animate-in',
+        'service-maintenance': 'service-page--maintenance-animate-in',
+        'service-ac-removal': 'service-page--removal-animate-in',
+        'service-ac-laying': 'service-page--laying-animate-in'
+    };
+
+    function animateServiceEntrance(section) {
+        if (!section) return;
+        const className = SERVICE_ENTRANCE_ANIMATIONS[section.id];
+        if (!className) return;
+        const timeoutKey = `__${className}Timeout`;
+        if (section[timeoutKey]) {
+            clearTimeout(section[timeoutKey]);
+        }
+        section.classList.remove(className);
+        void section.offsetWidth;
+        section.classList.add(className);
+        section[timeoutKey] = window.setTimeout(() => {
+            section.classList.remove(className);
+            section[timeoutKey] = null;
+        }, 900);
+    }
+
+    function animatePortfolioEntrance(section) {
+        const container = section?.matches?.('.portfolio') ? section : section?.querySelector?.('.portfolio');
+        if (!container) return;
+        const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (prefersReducedMotion) return;
+        if (container.__portfolioAnimationTimeout) {
+            clearTimeout(container.__portfolioAnimationTimeout);
+        }
+        container.classList.remove('portfolio--animate-in');
+        void container.offsetWidth;
+        container.classList.add('portfolio--animate-in');
+        const items = Array.from(container.querySelectorAll('.portfolio__item'));
+        items.forEach((item, index) => {
+            item.style.setProperty('--portfolio-item-index', index);
+        });
+        container.__portfolioAnimationTimeout = window.setTimeout(() => {
+            container.classList.remove('portfolio--animate-in');
+            items.forEach((item) => item.style.removeProperty('--portfolio-item-index'));
+            container.__portfolioAnimationTimeout = null;
+        }, 1100);
+    }
+
     function scrollToSectionTop(sectionId) {
         const el = document.getElementById(sectionId);
         if (!el) return;
@@ -1997,6 +2044,7 @@ function setupServiceRouting() {
                             section.classList.remove(enterClass);
                             section.classList.add('service-page--slide-in');
                             section.classList.add('service-page--visible');
+                            animateServiceEntrance(section);
                         });
                     }
                 } catch(_) { /* noop */ }
@@ -2058,21 +2106,23 @@ function setupServiceRouting() {
                                              section.classList.contains('contacts') ? 'contacts' :
                                              section.classList.contains('welcome') ? 'welcome' :
                                              section.classList.contains('about-page') ? 'about-page' : 'portfolio';
-                        
-                        // Clear old animation classes for re-animation on subsequent visits
-                        section.classList.remove(`${sectionClass}--slide-in-from-right`);
-                        section.classList.remove(`${sectionClass}--slide-in`);
-                        section.classList.remove(`${sectionClass}--slide-out-to-right`);
-                        
-                        // Trigger reflow to reset animation
-                        void section.offsetWidth;
-                        
-                        section.classList.add(`${sectionClass}--slide-in-from-right`);
-                        requestAnimationFrame(() => {
+                        const isPortfolioPage = hash === 'portfolio-page';
+                        const shouldUseSlide = sectionClass !== 'portfolio' || !isPortfolioPage;
+                        if (shouldUseSlide) {
                             section.classList.remove(`${sectionClass}--slide-in-from-right`);
-                            section.classList.add(`${sectionClass}--slide-in`);
+                            section.classList.remove(`${sectionClass}--slide-in`);
+                            section.classList.remove(`${sectionClass}--slide-out-to-right`);
+                            void section.offsetWidth;
+                            section.classList.add(`${sectionClass}--slide-in-from-right`);
+                            requestAnimationFrame(() => {
+                                section.classList.remove(`${sectionClass}--slide-in-from-right`);
+                                section.classList.add(`${sectionClass}--slide-in`);
+                                section.classList.add('service-page--visible');
+                            });
+                        } else {
+                            animatePortfolioEntrance(section);
                             section.classList.add('service-page--visible');
-                        });
+                        }
                     }
                 } catch(_) { /* noop */ }
                 scrollToSectionTop(targetPage);
@@ -2182,6 +2232,7 @@ function setupServiceRouting() {
                     requestAnimationFrame(() => {
                         section.classList.remove(enterClass);
                         section.classList.add('service-page--slide-in');
+                        animateServiceEntrance(section);
                     });
                 }
             } catch(_) { /* noop */ }
@@ -2225,6 +2276,10 @@ function setupServiceRouting() {
             scrollToSectionTop(desktopTargetPage);
             setActiveNav(hash.replace('-page', ''));
             focusSectionHeading(desktopTargetPage, 'h2');
+            if (hash === 'portfolio-page') {
+                const portfolioSection = document.getElementById(desktopTargetPage)?.querySelector('.portfolio');
+                animatePortfolioEntrance(portfolioSection);
+            }
             return;
         }
 

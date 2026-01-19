@@ -58,7 +58,7 @@ export async function modalExamples() {
     size: 'lg'
   });
   
-  console.log('Modal результат:', result);
+  if (import.meta.env.DEV) console.log('Modal результат:', result);
 }
 
 // ============================================
@@ -115,7 +115,7 @@ export function formValidationExamples() {
     
     if (validator.validate()) {
       const formData = validator.getFormData();
-      console.log('Данные формы:', formData);
+      if (import.meta.env.DEV) console.log('Данные формы:', formData);
       
       // Отправить данные на сервер
       Toast.success('Сообщение отправлено!');

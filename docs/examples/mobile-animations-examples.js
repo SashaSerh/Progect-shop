@@ -23,7 +23,7 @@ async function showAboutPage() {
         // Анімуємо появу
         await mobileAnimations.show('main-container', 'right');
         
-        console.log('About page показана з анімацією!');
+        if (import.meta.env.DEV) console.log('About page показана з анімацією!');
     } else {
         // На десктопі просто показуємо
         document.getElementById('main-container').style.display = '';
@@ -200,21 +200,21 @@ class AnimatedPage {
     
     // Хуки для розширення
     async onBeforeShow() {
-        console.log('Before show animation');
+        if (import.meta.env.DEV) console.log('Before show animation');
     }
     
     async onAfterShow() {
-        console.log('After show animation');
+        if (import.meta.env.DEV) console.log('After show animation');
         // Наприклад, фокус на першому елементі
         this.focusFirstElement();
     }
     
     async onBeforeHide() {
-        console.log('Before hide animation');
+        if (import.meta.env.DEV) console.log('Before hide animation');
     }
     
     async onAfterHide() {
-        console.log('After hide animation');
+        if (import.meta.env.DEV) console.log('After hide animation');
         // Очистка ресурсів
         this.cleanup();
     }
@@ -249,7 +249,7 @@ async function measureAnimationPerformance() {
     const endTime = performance.now();
     const duration = endTime - startTime;
     
-    console.log(`Animation took ${duration.toFixed(2)}ms`);
+    if (import.meta.env.DEV) console.log(`Animation took ${duration.toFixed(2)}ms`);
     
     // Відправити метрики в analytics
     if (window.gtag) {

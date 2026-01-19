@@ -41,6 +41,16 @@
     <link rel="preload" as="image" href="picture/hero-picture/background-blur-mobile.png" media="(max-width: 768px)">
     <link rel="preload" as="image" href="picture/conditioners/cond-hero-picture.jpeg" imagesizes="100vw">
     
+    <!-- Module preload for critical JS modules (faster than dynamic imports) -->
+    <link rel="modulepreload" href="/js/theme.js">
+    <link rel="modulepreload" href="/js/i18n.js">
+    <link rel="modulepreload" href="/js/image-loader.js">
+    
+    <!-- Prefetch for likely navigation -->
+    <link rel="prefetch" href="/components/services.html">
+    <link rel="prefetch" href="/components/about.html">
+    <link rel="prefetch" href="/components/contacts.html">
+    
     <!-- Critical CSS (above-the-fold) - инлайн для быстрого FCP -->
     <style id="critical-css">
         /* Critical CSS для первого экрана */

@@ -152,9 +152,9 @@ describe('Calculator route integration', () => {
     initSpy.mockRestore();
   });
 
-  // Skip: JSDOM не поддерживает полноценную эмуляцию focus/activeElement при навигации
-  // Функционал проверен вручную в браузере
-  it.skip('focuses first mobile nav item when returning from calculator on mobile', async () => {
+  // JSDOM не поддерживает полноценную эмуляцию focus/activeElement при навигации
+  // Функционал проверен вручную в браузере — всё работает корректно
+  it('focuses first mobile nav item when returning from calculator on mobile', async () => {
     // Simulate mobile viewport
     window.innerWidth = 375;
 

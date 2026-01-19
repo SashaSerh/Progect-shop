@@ -438,6 +438,9 @@ export function renderProducts(lang, translations, filteredProducts = products) 
     } catch {}
 }
 
+// Performance optimization: debounced filter
+import { debounce } from './performance.js';
+
 export function filterProducts(lang, translations) {
     // Check URL parameters first
     const urlParams = new URLSearchParams(window.location.search);
@@ -494,6 +497,9 @@ export function filterProducts(lang, translations) {
 
     renderProducts(lang, translations, filteredProducts);
 }
+
+// Debounced version for search/filter inputs
+export const filterProductsDebounced = debounce(filterProducts, 300);
 
 // Автоперерисовка товаров при смене языка (если секция уже на странице)
 if (typeof window !== 'undefined') {

@@ -139,7 +139,7 @@ form.addEventListener('submit', (e) => {
   
   if (validator.validate()) {
     const data = validator.getFormData();
-    console.log('Отправляем:', data);
+    if (import.meta.env.DEV) console.log('Отправляем:', data);
     
     // Отправить на сервер
     Toast.success('Отправлено!');

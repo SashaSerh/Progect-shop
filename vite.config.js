@@ -21,8 +21,13 @@ export default defineConfig({
     minify: 'terser',
     terserOptions: {
       compress: {
-        drop_console: false, // Оставляем console.log для отладки
-        drop_debugger: true
+        drop_console: true, // Удаляем все console.* в production
+        drop_debugger: true,
+        pure_funcs: ['console.info', 'console.debug', 'console.trace'],
+        passes: 2 // Дополнительный проход для лучшей минификации
+      },
+      mangle: {
+        safari10: true // Совместимость с Safari 10+
       }
     },
     
@@ -66,7 +71,13 @@ export default defineConfig({
     chunkSizeWarningLimit: 500,
     
     // Source maps для production (опционально)
-    sourcemap: false
+    sourcemap: false,
+    
+    // Tree-shaking и code splitting
+    target: 'es2020',
+    modulePreload: {
+      polyfill: true
+    }
   },
   
   // Оптимизация зависимостей
@@ -76,6 +87,19 @@ export default defineConfig({
   
   // CSS настройки
   css: {
-    devSourcemap: true
+    devSourcemap: true,
+    // Минификация CSS в production
+    postcss: {
+      plugins: [
+        // PurgeCSS будет удалять неиспользуемые стили
+      ]
+    }
+  },
+  
+  // Экспериментальные функции для оптимизации
+  experimental: {
+    renderBuiltUrl(filename) {
+      return '/' + filename;
+    }
   }
 });

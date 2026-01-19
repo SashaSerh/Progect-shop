@@ -347,7 +347,7 @@ function initCalculator() {
     }
 
     isCalculatorInitialized = true;
-    console.log('Calculator initialized successfully');
+    if (import.meta.env.DEV) console.log('Calculator initialized successfully');
 }
 
 /**

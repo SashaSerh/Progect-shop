@@ -50,6 +50,20 @@
 
 ## Стили та UI-паттерни
 - Використовуйте CSS-переменні в `css/main.css` (`:root`). Не хардкодьте новые цвета/тени — добавляйте токены.
+- **Унифицированная система кнопок**: Используйте `.btn` с модификаторами:
+  - Варианты: `.btn--primary`, `.btn--secondary`, `.btn--success`, `.btn--danger`, `.btn--outline`, `.btn--ghost`, `.btn--link`
+  - Размеры: `.btn--xs`, `.btn--sm`, `.btn--md` (default), `.btn--lg`, `.btn--xl`
+  - Модификаторы: `.btn--block` (100% ширина), `.btn--icon` (квадратная), `.btn--pill` (закруглённая), `.btn--loading` (лоадер)
+  - Токены в `:root`: `--btn-height-*`, `--btn-padding-x-*`, `--btn-font-size-*`, `--btn-radius`, `--btn-*-bg/text`
+- **Унифицированная система анимаций**: Все анимации вынесены в единые keyframes с префиксом `anim-`:
+  - Fade: `.anim-fade-in`, `.anim-fade-out`, `.anim-fade-up`, `.anim-fade-up-sm`, `.anim-fade-up-lg`, `.anim-fade-down`, `.anim-fade-left`, `.anim-fade-right`
+  - Scale: `.anim-scale-in`, `.anim-scale-out`, `.anim-fade-up-scale`
+  - Slide (page transitions): `.anim-slide-in-right`, `.anim-slide-in-left`, `.anim-slide-out-right`, `.anim-slide-out-left`
+  - Micro: `.anim-bounce`, `.anim-press`, `.anim-shake`
+  - Loading: `.anim-spin`, `.anim-pulse`, `.anim-shimmer`
+  - Модификаторы: `.anim--delay-1..5`, `.anim--delay-sm/md/lg`, `.anim--duration-fast/normal/slow`, `.anim--ease-standard/emphasized`
+  - Токены в `:root`: `--anim-distance-*`, `--anim-scale-*`, `--anim-stagger-*`
+  - Готовые состояния: `.anim-ready`, `.anim-ready--scale`
 - Переиспользуемые UI-паттерны: `js/ui-patterns.js` (toasts, modals), валидация форм — `js/form-validation.js`.
 - Модули для бизнес-логики: `js/marketing.js` (WhatsApp/Telegram/email ссылки из `contentConfig`), `js/calculator.js` (калькулятор стоимости монтажа), `js/auth.js` (mock-логин, использует `localStorage['isLoggedIn']`/`'username']`).
 - **Мобільні анімації**: `js/mobile-animations.js` — стандартизована система swipe-переходов для всіх секцій (використовує motion-токени, hardware acceleration). Приклад: `mobileAnimations.show('main-container', 'right')`. Детально: `docs/MOBILE-ANIMATIONS.md`.
@@ -67,6 +81,16 @@
   - Регенерация baseline после UI-изменений: `npm run visual:create-baseline`, проверьте скриншоты в `tests/visual/baseline/` и закоммитьте.
 - Генерация картинок: `npm run images:gen` / `npm run images:watch`.
 - Локальный сервер: `python3 -m http.server 5173`.
+
+## Performance оптимизации ⚡
+- **Production build**: `drop_console: true`, Terser 2 passes, tree-shaking (ES2020).
+- **Module preload**: Критичные модули (`theme.js`, `i18n.js`, `image-loader.js`) загружаются параллельно.
+- **Component caching**: `js/component-loader.js` — Map cache для повторных загрузок (0ms reload).
+- **Debounced filtering**: `filterProductsDebounced` (300ms) в `js/products.js` для search/filter.
+- **Web Vitals tracking**: `js/performance.js` — автоматический мониторинг FCP/LCP/FID/CLS/TTFB.
+- **Утилиты**: `window.performanceUtils.debounce()`, `.throttle()`, `.measure()` — доступны глобально.
+- **Размер bundle**: ~2.0MB (после code splitting: main 272KB + chunks).
+- Подробнее: `docs/PERFORMANCE-OPTIMIZATIONS.md` и `OPTIMIZATION-SUMMARY.md`.
 
 ## PR-checklist ✅
 - Запустить unit tests: `npm test`

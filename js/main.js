@@ -2,7 +2,7 @@ import { cart, saveCart, updateCartUI, addToCart, removeFromCart, clearCart, tog
 import { toggleTheme, initTheme } from './theme.js';
 import { translations, switchLanguage } from './i18n.js';
 import { initWelcomeOverlay, needsWelcomeOverlay } from './welcome.js';
-import { products, renderProducts, renderProductCard, filterProducts, toggleFavorite, toggleCompare, getFavoriteIds, getCompareIds, getProductsByCategory, isFavorite, isCompared, isAdminMode, getMergedProducts, setProducts, showProductsSkeleton } from './products.js';
+import { products, renderProducts, renderProductCard, filterProducts, filterProductsDebounced, toggleFavorite, toggleCompare, getFavoriteIds, getCompareIds, getProductsByCategory, isFavorite, isCompared, isAdminMode, getMergedProducts, setProducts, showProductsSkeleton } from './products.js';
 // Lazy-loaded modules (compare, admin) - see lazy-loader.js
 // import { initCompareBar } from './compare-bar.js';
 // import { initCompareModal } from './compare-modal.js';
@@ -14,6 +14,8 @@ import { initNavigation } from './navigation.js';
 import { reinitLazyLoading } from './image-loader.js';
 import { mobileAnimations } from './mobile-animations.js';
 import { pageTransitions, initPageTransitionHandlers } from './page-transitions.js';
+import { initPerformanceMonitoring, debounce, throttle } from './performance.js';
+
 // Landing mode: services portfolio contacts only; disable products/cart flows
 const LANDING_MODE = true;
 
@@ -922,6 +924,9 @@ function initCollectionBadges() {
 }
 
 async function initApp() {
+    // Initialize performance monitoring first
+    initPerformanceMonitoring();
+    
     await Promise.all([
         loadComponent('header-container', 'components/header.html'),
         loadComponent('hero-container', 'components/hero.html'),

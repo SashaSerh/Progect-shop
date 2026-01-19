@@ -103,8 +103,8 @@ function updateAllThemeIcons(theme) {
         }
     });
     
-    console.log(`Обновлено ${themeIcons.length} иконок тем для темы: ${theme}`);
-}
+    if (import.meta.env.DEV) console.log(`Обновлено ${themeIcons.length} иконок тем для темы: ${theme}`);
+} 
 
 /**
  * Привязка обработчиков событий ко всем кнопкам переключения тем

@@ -6174,24 +6174,7 @@ a:active {
    WCAG 2.5.5 / Apple HIG / Material Design
    ======================================== */
 
-/* @media (max-width: 768px) {
-.btn,
-button:not(.fab-trigger):not(.fab-action),
-.mobile-nav__link,
-.theme-toggle,
-.lang-toggle,
-.nav__link,
-.hero__cta,
-.service-card__more,
-.welcome-lang-btn,
-.product-tabs__tab,
-.collapsible__toggle,
-.share-btn,
-input[type="checkbox"],
-input[type="radio"] {
-  
-} */
-
+@media (max-width: 768px) {
 .btn,
 .hero__cta,
 .welcome-lang-btn,

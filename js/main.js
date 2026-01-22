@@ -20,7 +20,8 @@ import { initPerformanceMonitoring, debounce, throttle } from './performance.js'
 const LANDING_MODE = true;
 
 // Preload modules on idle for faster subsequent loads
-preloadOnIdle(['./calculator.js', './compare-bar.js', './compare-modal.js']);
+// Note: Removed calculator/compare modules preload to avoid 404 errors in dev
+// preloadOnIdle(['./calculator.js', './compare-bar.js', './compare-modal.js']);
 
 function hideProductsEntryPoints() {
     if (!LANDING_MODE) return;
@@ -1889,6 +1890,37 @@ function changeLogoColorScheme(scheme) {
 }
 
 function setupServiceRouting() {
+    // --- [PRICELIST NAVIGATION FIX] ---
+    // 1. Intercept clicks on links TO pricelist (to save return path)
+    document.addEventListener('click', (e) => {
+        const link = e.target.closest('.pricelist-link');
+        if (link) {
+            const currentHash = location.hash || '';
+            console.log('[Routing] Clicked pricelist link from:', currentHash);
+            // Don't save if we are already on pricelist (prevent self-loop)
+            if (currentHash && currentHash !== '#pricelist') {
+                sessionStorage.setItem('pricelist_return_hash', currentHash);
+                console.log('[Routing] Saved return hash:', currentHash);
+            }
+        }
+    });
+
+    // 2. Intercept clicks on BACK button from pricelist
+    document.addEventListener('click', (e) => {
+        const backBtn = e.target.closest('#pricelist .back-to-main');
+        if (backBtn) {
+            e.preventDefault();
+            const returnHash = sessionStorage.getItem('pricelist_return_hash');
+            console.log('[Routing] Back button clicked. Return to:', returnHash);
+            if (returnHash && returnHash !== '#' && returnHash !== '#pricelist') {
+                location.hash = returnHash;
+            } else {
+                location.hash = ''; // Fallback to main
+            }
+        }
+    });
+    // ----------------------------------
+
     const SERVICE_MAP = {
         'service-ac-install': 'service-ac-install-container',
         'service-recuperator-install': 'service-recuperator-install-container',

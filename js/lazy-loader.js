@@ -96,8 +96,15 @@ export async function loadFormValidation() {
 /**
  * Предзагрузить модуль (без выполнения)
  * Использует <link rel="modulepreload"> для браузерной оптимизации
+ * Отключено в dev режиме для избежания 404 ошибок
  */
 export function preloadModule(modulePath) {
+    // В dev режиме Vite может не правильно обрабатывать modulepreload
+    // Поэтому отключаем предзагрузку в dev
+    if (import.meta.env?.DEV) {
+        return;
+    }
+    
     // Проверяем, что модуль ещё не загружен
     if (moduleCache.has(modulePath)) return;
     

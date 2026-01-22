@@ -1893,7 +1893,7 @@ function setupServiceRouting() {
     // --- [PRICELIST NAVIGATION FIX] ---
     // 1. Intercept clicks on links TO pricelist (to save return path)
     document.addEventListener('click', (e) => {
-        const link = e.target.closest('.pricelist-link');
+        const link = e.target.closest('a[href="#pricelist"]');
         if (link) {
             const currentHash = location.hash || '';
             console.log('[Routing] Clicked pricelist link from:', currentHash);
@@ -1907,14 +1907,16 @@ function setupServiceRouting() {
 
     // 2. Intercept clicks on BACK button from pricelist
     document.addEventListener('click', (e) => {
-        const backBtn = e.target.closest('#pricelist .back-to-main');
+        const backBtn = e.target.closest('.pricelist-page__back .back-to-main');
         if (backBtn) {
             e.preventDefault();
             const returnHash = sessionStorage.getItem('pricelist_return_hash');
             console.log('[Routing] Back button clicked. Return to:', returnHash);
             if (returnHash && returnHash !== '#' && returnHash !== '#pricelist') {
+                console.log('[Routing] Navigating to:', returnHash);
                 location.hash = returnHash;
             } else {
+                console.log('[Routing] No return hash, going to main');
                 location.hash = ''; // Fallback to main
             }
         }

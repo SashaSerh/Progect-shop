@@ -1,5 +1,5 @@
-const CACHE_VERSION = 'v79'; // Added modular JS files
-const CACHE_NAME = 'climat-control-v110'; // include new modular assets
+const CACHE_VERSION = 'v80'; // Added service-winter-kit
+const CACHE_NAME = 'climat-control-v111'; // include winter kit service
 const urlsToCache = [
     '/',
     '/index.html',
@@ -40,6 +40,7 @@ const urlsToCache = [
     '/components/service-ac-install.html',
     '/components/service-recuperator-install.html',
     '/components/service-maintenance.html',
+    '/components/service-winter-kit.html',
     '/components/about.html',
     '/components/welcome.html',
     '/components/case-1.html',

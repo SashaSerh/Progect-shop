@@ -1,5 +1,5 @@
-const CACHE_VERSION = 'v78'; // Added lazy-loader.js
-const CACHE_NAME = 'climat-control-v109'; // include new assets
+const CACHE_VERSION = 'v79'; // Added modular JS files
+const CACHE_NAME = 'climat-control-v110'; // include new modular assets
 const urlsToCache = [
     '/',
     '/index.html',
@@ -22,6 +22,10 @@ const urlsToCache = [
     '/js/page-transitions.js',
     '/js/mobile-animations.js',
     '/js/lazy-loader.js',
+    '/js/toast.js',
+    '/js/catalog-dropdown.js',
+    '/js/component-loader.js',
+    '/js/search.js',
     '/components/admin-products.html',
     '/components/header.html',
     '/components/hero.html',

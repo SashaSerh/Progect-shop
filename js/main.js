@@ -16,12 +16,20 @@ import { mobileAnimations } from './mobile-animations.js';
 import { pageTransitions, initPageTransitionHandlers } from './page-transitions.js';
 import { initPerformanceMonitoring, debounce, throttle } from './performance.js';
 
+// ========================================
+// Modular imports (refactored modules)
+// ========================================
+import { showActionToast, toast } from './toast.js';
+// Note: catalog-dropdown.js, component-loader.js, search.js are available
+// but kept inline in main.js for backward compatibility during migration
+
 // Landing mode: services portfolio contacts only; disable products/cart flows
 const LANDING_MODE = true;
 
 // Preload modules on idle for faster subsequent loads
 // Note: Removed calculator/compare modules preload to avoid 404 errors in dev
 // preloadOnIdle(['./calculator.js', './compare-bar.js', './compare-modal.js']);
+
 
 function hideProductsEntryPoints() {
     if (!LANDING_MODE) return;
@@ -469,7 +477,7 @@ function renderCategoryProducts(categorySlug, lang, translations, sortBy = 'defa
     const fallbackDict = (translations && translations['ru']) || {};
 
     displayProducts.forEach(product => {
-        const productCard = renderCategoryProductCard(product, lang, translations);
+        const productCard = renderProductCard(product, lang, translations);
         grid.appendChild(productCard);
     });
 
@@ -584,10 +592,6 @@ function hydrateCollectionsFromStorage() {
     if (typeof localStorage === 'undefined') return;
     favoriteIds = loadStoredIds(FAVORITES_STORAGE_KEY);
     compareIds = loadStoredIds(COMPARE_STORAGE_KEY);
-}
-
-function renderCategoryProductCard(product, lang, translations) {
-    return renderProductCard(product, lang, translations);
 }
 
 
@@ -705,14 +709,8 @@ function getCartAddedMessage(lang) {
     return (translations?.[fallback]?.['cart-added']) || (translations?.uk?.['cart-added']) || 'Додано до кошика';
 }
 
-const MAX_TOAST_STACK = 3;
-const TOAST_TYPE_CLASS = {
-    cart: 'toast--success',
-    success: 'toast--success',
-    favorite: 'toast--favorite',
-    compare: 'toast--compare'
-};
-
+// Toast constants and function now imported from './toast.js'
+// Local constants kept for badge system
 let suppressFavoriteToast = false;
 let suppressCompareToast = false;
 let collectionBadgesInitialized = false;
@@ -739,84 +737,7 @@ function getProductDisplayName(productId, lang = savedLanguage) {
     return (product?.name?.[lang]) || (product?.name?.ru) || '';
 }
 
-function showActionToast({ message, type = 'success', actions = [], duration = 2600 } = {}) {
-    if (!message) return () => {};
-    const host = document.getElementById('toast-container');
-    if (!host) return () => {};
-
-    while (host.children.length >= MAX_TOAST_STACK) {
-        host.removeChild(host.firstElementChild);
-    }
-
-    const toast = document.createElement('div');
-    const typeClass = TOAST_TYPE_CLASS[type] || TOAST_TYPE_CLASS.success;
-    toast.className = ['toast', typeClass].filter(Boolean).join(' ');
-    toast.setAttribute('role', 'status');
-
-    const messageEl = document.createElement('div');
-    messageEl.className = 'toast__message';
-    messageEl.textContent = message;
-    toast.appendChild(messageEl);
-
-    if (Array.isArray(actions) && actions.length) {
-        const actionsWrap = document.createElement('div');
-        actionsWrap.className = 'toast__actions';
-        actions.forEach((action) => {
-            if (!action || !action.label) return;
-            const btn = document.createElement('button');
-            btn.type = 'button';
-            btn.className = 'toast__button';
-            btn.textContent = action.label;
-            if (action.ariaLabel) btn.setAttribute('aria-label', action.ariaLabel);
-            btn.addEventListener('click', () => {
-                try { action.handler?.(); } catch (_) { /* noop */ }
-                if (action.autoClose !== false) hideToast();
-            });
-            actionsWrap.appendChild(btn);
-        });
-        if (actionsWrap.childElementCount) {
-            toast.appendChild(actionsWrap);
-        }
-    }
-
-    host.appendChild(toast);
-
-    const reveal = () => toast.classList.add('is-visible');
-    if (typeof requestAnimationFrame === 'function') requestAnimationFrame(reveal);
-    else setTimeout(reveal, 16);
-
-    let removed = false;
-    let timerId = null;
-    const hideDelay = (typeof duration === 'number' && Number.isFinite(duration) && duration > 0) ? duration : null;
-    if (hideDelay !== null) {
-        timerId = setTimeout(() => hideToast(), hideDelay);
-    }
-
-    function hideToast() {
-        if (removed) return;
-        removed = true;
-        if (timerId) clearTimeout(timerId);
-        toast.classList.remove('is-visible');
-        const cleanup = () => toast.remove();
-        toast.addEventListener('transitionend', cleanup, { once: true });
-        setTimeout(cleanup, 320);
-    }
-
-    toast.addEventListener('mouseenter', () => {
-        if (timerId) {
-            clearTimeout(timerId);
-            timerId = null;
-        }
-    });
-
-    toast.addEventListener('mouseleave', () => {
-        if (!removed && hideDelay !== null && !timerId) {
-            timerId = setTimeout(() => hideToast(), 1200);
-        }
-    });
-
-    return hideToast;
-}
+// showActionToast is now imported from './toast.js'
 
 function ensureBadgeRefs(type) {
     const selectors = badgeSelectors[type];
@@ -1147,12 +1068,8 @@ async function initApp() {
         const portfolioGrid = document.querySelector('.portfolio__grid');
         if (!portfolioGrid || !Array.isArray(contentConfig.portfolio)) return;
         // If already rendered, skip
-        console.log('[debug] renderPortfolio: children before =', portfolioGrid.children ? portfolioGrid.children.length : 0, 'contentConfig.portfolio.length=', Array.isArray(contentConfig.portfolio) ? contentConfig.portfolio.length : 'no-config');
         if (portfolioGrid.children.length) return;
         portfolioGrid.innerHTML = '';
-        // After clearing, populate
-        contentConfig.portfolio.forEach((_, i) => {});
-        console.log('[debug] renderPortfolio: will append items');
         // helper to build responsive srcset from placehold.co style URLs like 480x320
         const buildSrcset = (src) => {
             try {
@@ -1216,7 +1133,6 @@ async function initApp() {
             }
             portfolioGrid.appendChild(fig);
         });
-        console.log('[debug] renderPortfolio: children after =', portfolioGrid.children.length);
     }
 
     // Initial render
@@ -1896,11 +1812,9 @@ function setupServiceRouting() {
         const link = e.target.closest('a[href="#pricelist"]');
         if (link) {
             const currentHash = location.hash || '';
-            console.log('[Routing] Clicked pricelist link from:', currentHash);
             // Don't save if we are already on pricelist (prevent self-loop)
             if (currentHash && currentHash !== '#pricelist') {
                 sessionStorage.setItem('pricelist_return_hash', currentHash);
-                console.log('[Routing] Saved return hash:', currentHash);
             }
         }
     });
@@ -1911,12 +1825,9 @@ function setupServiceRouting() {
         if (backBtn) {
             e.preventDefault();
             const returnHash = sessionStorage.getItem('pricelist_return_hash');
-            console.log('[Routing] Back button clicked. Return to:', returnHash);
             if (returnHash && returnHash !== '#' && returnHash !== '#pricelist') {
-                console.log('[Routing] Navigating to:', returnHash);
                 location.hash = returnHash;
             } else {
-                console.log('[Routing] No return hash, going to main');
                 location.hash = ''; // Fallback to main
             }
         }
@@ -1955,18 +1866,6 @@ function setupServiceRouting() {
     function setHiddenById(id, hidden) {
         const el = document.getElementById(id);
         if (!el) return;
-        if (id === 'portfolio-container') {
-            console.log('[debug] setHiddenById:', id, 'hidden=', hidden);
-            try {
-                const stack = new Error().stack.split('\n').slice(2,6).map(l => l.trim()).join(' | ');
-                console.log('[debug] setHiddenById stack:', stack);
-            } catch(_) {}
-            // If container is currently protected for visibility during navigation, ignore attempts to hide it
-            if (hidden && el.dataset && el.dataset._forceVisible) {
-                console.log('[debug] setHiddenById: ignoring hide due to _forceVisible flag');
-                return;
-            }
-        }
         if (hidden) el.setAttribute('hidden', ''); else el.removeAttribute('hidden');
     }
 
@@ -2022,7 +1921,6 @@ function setupServiceRouting() {
         const container = section?.matches?.('.portfolio') ? section : section?.querySelector?.('.portfolio');
         if (!container) return;
         const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-        console.log('[debug] animatePortfolioEntrance start, prefersReducedMotion=', prefersReducedMotion, 'container exists=', !!container, 'items=', container.querySelectorAll ? container.querySelectorAll('.portfolio__item').length : 0);
         if (prefersReducedMotion) return;
         if (container.__portfolioAnimationTimeout) {
             clearTimeout(container.__portfolioAnimationTimeout);
@@ -2035,10 +1933,8 @@ function setupServiceRouting() {
         let items = Array.from(container.querySelectorAll('.portfolio__item'));
         if (items.length === 0) {
             // Try to re-render portfolio if it was emptied or not yet populated
-            console.log('[debug] animatePortfolioEntrance: no items found, invoking renderPortfolio');
             try { renderPortfolio(); } catch(_) {}
             items = Array.from(container.querySelectorAll('.portfolio__item'));
-            console.log('[debug] animatePortfolioEntrance: items after render =', items.length);
         }
         items.forEach((item, index) => {
             item.style.setProperty('--portfolio-item-index', index);
@@ -2082,14 +1978,12 @@ function setupServiceRouting() {
             if (isServiceView && !document.getElementById(targetContainerId)) {
                 try {
                     const base = targetContainerId.replace(/-container$/, '');
-                    console.log('Routing: dynamically loading', targetContainerId, `components/${base}.html`);
                     // Создадим контейнер, если его нет, чтобы loadComponent могла вставить разметку
                     const container = document.createElement('div');
                     container.id = targetContainerId;
                     const footer = document.getElementById('footer-container');
                     if (footer && footer.parentNode) footer.parentNode.insertBefore(container, footer); else document.body.appendChild(container);
                     loadComponent(targetContainerId, `components/${base}.html`).then(() => {
-                        console.log('Routing: loaded', targetContainerId);
                         applyRoute();
                     }).catch(() => {});
                 } catch (_) {}
@@ -4793,7 +4687,6 @@ function initMobileHeader() {
     const mobileNavCloseBtn = document.querySelector('.mobile-nav__close');
 
     if (!hamburgerToggle || !mobileNav) {
-        console.log('Мобильный заголовок не найден');
         return;
     }
 
@@ -4999,8 +4892,6 @@ function initMobileHeader() {
             lastScrollTop = scrollTop;
         }, { passive: true });
     }
-
-    console.log('Мобильный заголовок инициализирован');
 
     // ——— helpers: жесты свайп‑to‑close для меню ———
     // Глобальный конфиг жестов (настраиваемый)
@@ -5329,8 +5220,6 @@ function initMobileToggles() {
             chip.setAttribute('aria-pressed', isActive);
         });
     });
-
-    console.log('Мобильные тоглы инициализированы (compact mode)');
 }
 
 // Экспорт функций

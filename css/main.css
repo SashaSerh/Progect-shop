@@ -196,6 +196,42 @@
 }
 
 /* ========================================
+   CONTENT VISIBILITY OPTIMIZATION
+   Improves rendering performance for off-screen content
+   ======================================== */
+
+/* Large sections benefit from content-visibility: auto */
+.services,
+.portfolio,
+.reviews,
+.faq,
+.contacts,
+.service-page,
+.pricelist-page {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 500px; /* Estimate height to prevent layout shift */
+}
+
+/* Smaller intrinsic size for mobile */
+@media (max-width: 768px) {
+    .services,
+    .portfolio,
+    .reviews,
+    .faq,
+    .contacts,
+    .service-page,
+    .pricelist-page {
+        contain-intrinsic-size: auto 400px;
+    }
+}
+
+/* Products grid optimization */
+.products__grid {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 800px;
+}
+
+/* ========================================
    UNIFIED ANIMATION KEYFRAMES
    Single source of truth for all animations
    ======================================== */
@@ -2883,7 +2919,7 @@ html {
 
 .share-btn:active {
     transform: translateY(1px) scale(0.98);
-    animation: btn-press var(--motion-duration-press) var(--motion-ease-press) both;
+    animation: anim-press var(--motion-duration-press) var(--motion-ease-press) both;
 }
 
 .share-btn--tg {
@@ -3108,7 +3144,7 @@ html {
 
 .collapsible__toggle:active {
     transform: translateY(1px) scale(0.98);
-    animation: btn-press var(--motion-duration-press) var(--motion-ease-press) both;
+    animation: anim-press var(--motion-duration-press) var(--motion-ease-press) both;
 }
 
 .product-trust {
@@ -5017,7 +5053,7 @@ html {
 
 .product-card__quick-btn:active {
     transform: translateY(1px) scale(0.95);
-    animation: btn-press var(--motion-duration-press) var(--motion-ease-press) both;
+    animation: anim-press var(--motion-duration-press) var(--motion-ease-press) both;
 }
 
 .product-card__quick-btn.is-active {
@@ -5237,7 +5273,7 @@ html {
 
 .compare-bar__button:active {
     transform: translateY(1px) scale(0.98);
-    animation: btn-press var(--motion-duration-press) var(--motion-ease-press) both;
+    animation: anim-press var(--motion-duration-press) var(--motion-ease-press) both;
 }
 
 .compare-bar__button:focus-visible {
@@ -5593,7 +5629,7 @@ html {
 
 .compare-modal__cta:active {
     transform: translateY(1px) scale(0.98);
-    animation: btn-press var(--motion-duration-press) var(--motion-ease-press) both;
+    animation: anim-press var(--motion-duration-press) var(--motion-ease-press) both;
 }
 
 .compare-modal__cta--secondary {
@@ -7197,7 +7233,7 @@ select {
 
 .catalog-button:active {
     transform: translateY(1px) scale(0.98);
-    animation: btn-press var(--motion-duration-press) var(--motion-ease-press) both;
+    animation: anim-press var(--motion-duration-press) var(--motion-ease-press) both;
 }
 
 .catalog-icon {
@@ -7450,7 +7486,7 @@ select {
 
 .modal__button:active {
     transform: translateY(1px) scale(0.98);
-    animation: btn-press var(--motion-duration-press) var(--motion-ease-press) both;
+    animation: anim-press var(--motion-duration-press) var(--motion-ease-press) both;
 }
 
 /* Подложка под модалку профиля */
@@ -12233,12 +12269,7 @@ body.nav-open {
     pointer-events: none;
 }
 
-/* Press animation keyframes */
-@keyframes btn-press {
-    0% { transform: translateY(0) scale(1); }
-    50% { transform: translateY(1px) scale(0.98); }
-    100% { transform: translateY(0.5px) scale(0.99); }
-}
+/* NOTE: Press animation uses unified @keyframes anim-press from Animation System */
 
 /* ----------------------------------------
    BUTTON VARIANTS (Color Schemes)
@@ -12396,7 +12427,7 @@ body.nav-open {
     border: 2px solid currentColor;
     border-top-color: transparent;
     border-radius: 50%;
-    animation: btn-spin 0.6s linear infinite;
+    animation: anim-spin 0.6s linear infinite;
 }
 
 .btn__loader {
@@ -12406,12 +12437,10 @@ body.nav-open {
     border: 2px solid rgba(255, 255, 255, 0.3);
     border-top-color: white;
     border-radius: 50%;
-    animation: btn-spin 0.6s linear infinite;
+    animation: anim-spin 0.6s linear infinite;
 }
 
-@keyframes btn-spin {
-    to { transform: rotate(360deg); }
-}
+/* NOTE: Spin animation uses unified @keyframes anim-spin from Animation System */
 
 /* Button with icon alignment */
 .btn__icon {
@@ -12732,7 +12761,7 @@ body.nav-open {
 
 .modal__button:active {
     transform: translateY(1px) scale(0.98);
-    animation: btn-press var(--motion-duration-press) var(--motion-ease-press) both;
+    animation: anim-press var(--motion-duration-press) var(--motion-ease-press) both;
 }
 
 .modal__button--logout {

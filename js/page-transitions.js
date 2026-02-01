@@ -329,7 +329,7 @@ class PageTransitions {
         sessionStorage.setItem('scrollReturnTarget', targetId);
 
         // Для элемента внутри страницы (не полная страница) - только плавный скролл без анимации
-        if (targetId === 'service-removal-pricelist') {
+        if (targetId === 'service-removal-pricelist' || targetId === 'service-laying-pricelist') {
             const headerSelector = '.pricelist-section__title';
             const headerEl = targetEl.querySelector(headerSelector);
             if (headerEl) {
@@ -347,6 +347,26 @@ class PageTransitions {
                     headerEl.style.outlineOffset = '';
                 }, 2000);
             }
+            return;
+        }
+
+        // Для прайс-листа монтажа с калькулятора - анимация появления без скролла
+        if (targetId === 'service-ac-install-pricelist' && location.hash.includes('calculator')) {
+            if (this.isMobile && !this.prefersReducedMotion) {
+                this._enableHardwareAcceleration(targetEl);
+                targetEl.style.transition = 'none';
+                targetEl.style.transform = 'translate3d(0, 100%, 0)';
+                targetEl.style.opacity = '0';
+                
+                void targetEl.offsetWidth;
+                
+                // Только анимация появления, без скролла
+                await this._animateSlide(targetEl, 'translate3d(0, 100%, 0)', 'translate3d(0, 0%, 0)');
+                
+                return;
+            }
+            // На десктопе просто прокручиваем
+            targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
             return;
         }
 

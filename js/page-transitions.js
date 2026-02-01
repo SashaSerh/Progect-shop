@@ -328,6 +328,28 @@ class PageTransitions {
         sessionStorage.setItem('scrollReturnPosition', window.scrollY.toString());
         sessionStorage.setItem('scrollReturnTarget', targetId);
 
+        // Для элемента внутри страницы (не полная страница) - только плавный скролл без анимации
+        if (targetId === 'service-removal-pricelist') {
+            const headerSelector = '.pricelist-section__title';
+            const headerEl = targetEl.querySelector(headerSelector);
+            if (headerEl) {
+                headerEl.setAttribute('tabindex', '-1');
+                headerEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                
+                await new Promise(resolve => setTimeout(resolve, 600));
+                
+                headerEl.focus({ preventScroll: true });
+                headerEl.style.outline = '2px solid var(--color-primary)';
+                headerEl.style.outlineOffset = '2px';
+                
+                setTimeout(() => {
+                    headerEl.style.outline = '';
+                    headerEl.style.outlineOffset = '';
+                }, 2000);
+            }
+            return;
+        }
+
         if (this.prefersReducedMotion || !this.isMobile) {
             targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
             return;
@@ -363,19 +385,19 @@ class PageTransitions {
             setTimeout(() => {
                 const headerEl = targetEl.querySelector('.pricelist-page__header');
                 if (headerEl) {
-                    headerEl.focus({ preventScroll: true });
-                    // Для screen readers и программного фокуса
                     headerEl.setAttribute('tabindex', '-1');
+                    headerEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
                     
-                    // Визуальная индикация фокуса для accessibility
-                    headerEl.style.outline = '2px solid var(--color-primary)';
-                    headerEl.style.outlineOffset = '2px';
-                    
-                    // Убираем индикацию через 2 секунды
                     setTimeout(() => {
-                        headerEl.style.outline = '';
-                        headerEl.style.outlineOffset = '';
-                    }, 2000);
+                        headerEl.focus({ preventScroll: true });
+                        headerEl.style.outline = '2px solid var(--color-primary)';
+                        headerEl.style.outlineOffset = '2px';
+                        
+                        setTimeout(() => {
+                            headerEl.style.outline = '';
+                            headerEl.style.outlineOffset = '';
+                        }, 2000);
+                    }, 300);
                 }
             }, 150);
         }

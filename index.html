@@ -121,6 +121,16 @@
         }</script>
 </head>
 <body class="app-loading">
+    <!-- Sticky CTA Banner -->
+    <div class="cta-banner" id="ctaBanner" role="banner">
+        <span class="cta-banner__text">
+            <span>🔥</span>
+            <span data-i18n="cta-banner-text">Скидка 15% на монтаж — до конца месяца!</span>
+        </span>
+        <button class="cta-banner__btn" data-i18n="cta-banner-btn" onclick="location.hash='#contacts'">Записаться</button>
+        <button class="cta-banner__close" id="ctaBannerClose" aria-label="Закрыть">✕</button>
+    </div>
+
     <!-- Progress Bar для загрузки -->
     <div id="page-progress"></div>
     
@@ -135,6 +145,17 @@
     <div id="header-container"></div>
     <div id="main-container"></div>
     <div id="hero-container"></div>
+
+    <!-- Testimonials Carousel (mini on landing) -->
+    <div class="testimonials-carousel scroll-reveal" id="testimonialsCarousel" aria-label="Отзывы клиентов" role="region">
+        <div class="testimonials-carousel__track" id="testimonialsTrack"></div>
+        <div class="testimonials-carousel__arrows">
+            <button class="testimonials-carousel__arrow" id="testimonialsPrev" aria-label="Предыдущий отзыв">‹</button>
+            <button class="testimonials-carousel__arrow" id="testimonialsNext" aria-label="Следующий отзыв">›</button>
+        </div>
+        <div class="testimonials-carousel__nav" id="testimonialsDots"></div>
+    </div>
+
     <!-- Мобильное меню на главной (под hero) -->
     <div id="mobile-main-nav-container"></div>
     <div id="services-container"></div>
@@ -207,6 +228,8 @@
         </div>
         <!-- FAB (Floating Action Button) для связи -->
         <div class="fab-container" id="fab-contact-mobile">
+            <span class="fab-badge" id="fabBadge" aria-hidden="true"></span>
+            <span class="fab-tooltip" id="fabTooltip" data-i18n="fab-tooltip" role="status">Есть вопросы? Напишите нам!</span>
             <button class="fab-trigger" aria-label="Связаться с нами" aria-expanded="false" aria-controls="fab-actions-mobile">
                 <svg class="fab-trigger__icon fab-trigger__icon--default" viewBox="0 0 24 24" width="28" height="28" aria-hidden="true">
                     <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H5.2L4 17.2V4h16v12z" fill="currentColor"/>

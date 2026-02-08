@@ -4268,11 +4268,20 @@ document.addEventListener('DOMContentLoaded', () => {
     initSectionDots();
     initScrollProgress();
     initHeroParallax();
+    initCtaBanner();
+    initFabNotification();
     // Delayed init: wait for components to load
     setTimeout(() => {
         try { initAnimatedThemeToggle(); } catch(_) {}
         try { initClickToCopy(); } catch(_) {}
+        try { initTestimonialsCarousel(); } catch(_) {}
+        try { initBeforeAfterSliders(); } catch(_) {}
+        try { initQrCode(); } catch(_) {}
     }, 1500);
+
+    // Breadcrumbs on route change
+    window.addEventListener('hashchange', () => { try { initBreadcrumbsOnRoute(); } catch(_) {} });
+    setTimeout(() => { try { initBreadcrumbsOnRoute(); } catch(_) {} }, 500);
 
     // Переинициализация мобильных эффектов при изменении размера окна
     let resizeTimeout;
@@ -5008,6 +5017,403 @@ function initHeroParallax() {
     window.addEventListener('scroll', onScroll, { passive: true });
 }
 
+// ========================================
+// DESKTOP UX: Testimonials Carousel
+// ========================================
+function initTestimonialsCarousel() {
+    const track = document.getElementById('testimonialsTrack');
+    const dotsContainer = document.getElementById('testimonialsDots');
+    const prevBtn = document.getElementById('testimonialsPrev');
+    const nextBtn = document.getElementById('testimonialsNext');
+    if (!track || !dotsContainer) return;
+
+    const lang = localStorage.getItem('language') || 'uk';
+    const testimonials = [
+        {
+            initials: 'ОК',
+            name: { uk: 'Олексій К.', ru: 'Алексей К.' },
+            role: { uk: 'власник квартири', ru: 'владелец квартиры' },
+            text: { uk: 'Встановили кондиціонер за один день. Працюють акуратно, після себе прибрали. Вже рік працює без нарікань!', ru: 'Установили кондиционер за один день. Работают аккуратно, после себя убрали. Уже год работает без нареканий!' },
+            stars: 5
+        },
+        {
+            initials: 'МД',
+            name: { uk: 'Марія Д.', ru: 'Мария Д.' },
+            role: { uk: 'дизайнер інтер\'єрів', ru: 'дизайнер интерьеров' },
+            text: { uk: 'Рекомендую своїм клієнтам вже третій рік. Завжди знаходять оптимальне рішення по розташуванню блоків, щоб не псувати дизайн.', ru: 'Рекомендую своим клиентам уже третий год. Всегда находят оптимальное решение по расположению блоков, чтобы не портить дизайн.' },
+            stars: 5
+        },
+        {
+            initials: 'ІП',
+            name: { uk: 'Ігор П.', ru: 'Игорь П.' },
+            role: { uk: 'власник офісу', ru: 'владелец офиса' },
+            text: { uk: 'Обслуговують нашу мульти-спліт систему на 6 блоків. Приїжджають вчасно, ціни адекватні. Після ТО кондиціонер працює як новий.', ru: 'Обслуживают нашу мульти-сплит систему на 6 блоков. Приезжают вовремя, цены адекватные. После ТО кондиционер работает как новый.' },
+            stars: 5
+        },
+        {
+            initials: 'НВ',
+            name: { uk: 'Наталія В.', ru: 'Наталья В.' },
+            role: { uk: 'мама двох дітей', ru: 'мама двоих детей' },
+            text: { uk: 'Дуже переймалися вибором моделі для дитячої. Менеджер все пояснив, підібрав тихий варіант. Діти сплять спокійно!', ru: 'Очень переживали за выбор модели для детской. Менеджер всё объяснил, подобрал тихий вариант. Дети спят спокойно!' },
+            stars: 5
+        },
+        {
+            initials: 'ДС',
+            name: { uk: 'Дмитро С.', ru: 'Дмитрий С.' },
+            role: { uk: 'власник ресторану', ru: 'владелец ресторана' },
+            text: { uk: 'Встановили промислову систему вентиляції з рекуператором. Повітря свіже, кухня не тягне в зал. Проєкт зробили під ключ.', ru: 'Установили промышленную систему вентиляции с рекуператором. Воздух свежий, кухня не тянет в зал. Проект сделали под ключ.' },
+            stars: 5
+        }
+    ];
+
+    let current = 0;
+
+    // Render slides
+    track.innerHTML = testimonials.map(t => `
+        <div class="testimonials-carousel__slide">
+            <div class="testimonials-carousel__card">
+                <div class="testimonials-carousel__avatar">${t.initials}</div>
+                <div class="testimonials-carousel__stars">${'★'.repeat(t.stars)}${'☆'.repeat(5 - t.stars)}</div>
+                <p class="testimonials-carousel__text">"${t.text[lang] || t.text.uk}"</p>
+                <div class="testimonials-carousel__author">${t.name[lang] || t.name.uk}</div>
+                <div class="testimonials-carousel__role">${t.role[lang] || t.role.uk}</div>
+            </div>
+        </div>
+    `).join('');
+
+    // Render dots
+    dotsContainer.innerHTML = testimonials.map((_, i) => `
+        <button class="testimonials-carousel__dot${i === 0 ? ' active' : ''}" data-index="${i}" aria-label="Отзыв ${i + 1}"></button>
+    `).join('');
+
+    function goTo(index) {
+        current = ((index % testimonials.length) + testimonials.length) % testimonials.length;
+        track.style.transform = `translateX(-${current * 100}%)`;
+        dotsContainer.querySelectorAll('.testimonials-carousel__dot').forEach((d, i) => {
+            d.classList.toggle('active', i === current);
+        });
+    }
+
+    if (prevBtn) prevBtn.addEventListener('click', () => goTo(current - 1));
+    if (nextBtn) nextBtn.addEventListener('click', () => goTo(current + 1));
+    dotsContainer.addEventListener('click', (e) => {
+        const dot = e.target.closest('.testimonials-carousel__dot');
+        if (dot) goTo(Number(dot.dataset.index));
+    });
+
+    // Touch swipe support
+    let startX = 0;
+    track.addEventListener('touchstart', (e) => { startX = e.touches[0].clientX; }, { passive: true });
+    track.addEventListener('touchend', (e) => {
+        const diff = startX - e.changedTouches[0].clientX;
+        if (Math.abs(diff) > 50) goTo(current + (diff > 0 ? 1 : -1));
+    }, { passive: true });
+
+    // Auto-advance every 6 seconds
+    let autoTimer = setInterval(() => goTo(current + 1), 6000);
+    const carousel = document.getElementById('testimonialsCarousel');
+    if (carousel) {
+        carousel.addEventListener('mouseenter', () => clearInterval(autoTimer));
+        carousel.addEventListener('mouseleave', () => {
+            autoTimer = setInterval(() => goTo(current + 1), 6000);
+        });
+    }
+}
+
+// ========================================
+// DESKTOP UX: Before/After Slider
+// ========================================
+function initBeforeAfterSliders() {
+    const sliders = document.querySelectorAll('.ba-slider');
+    if (!sliders.length) return;
+
+    sliders.forEach(slider => {
+        const handle = slider.querySelector('.ba-slider__handle');
+        const grip = slider.querySelector('.ba-slider__grip');
+        const afterImg = slider.querySelector('.ba-slider__img--after');
+        if (!handle || !afterImg) return;
+
+        let isDragging = false;
+
+        function updatePosition(clientX) {
+            const rect = slider.getBoundingClientRect();
+            let x = (clientX - rect.left) / rect.width;
+            x = Math.max(0.02, Math.min(0.98, x));
+            const pct = x * 100;
+            handle.style.left = pct + '%';
+            if (grip) grip.style.left = pct + '%';
+            afterImg.style.clipPath = `inset(0 ${100 - pct}% 0 0)`;
+        }
+
+        slider.addEventListener('pointerdown', (e) => {
+            isDragging = true;
+            slider.setPointerCapture(e.pointerId);
+            updatePosition(e.clientX);
+        });
+
+        slider.addEventListener('pointermove', (e) => {
+            if (!isDragging) return;
+            updatePosition(e.clientX);
+        });
+
+        slider.addEventListener('pointerup', () => { isDragging = false; });
+        slider.addEventListener('pointercancel', () => { isDragging = false; });
+    });
+}
+
+// ========================================
+// DESKTOP UX: Dynamic Breadcrumbs
+// ========================================
+function updateBreadcrumbs(items) {
+    // items: array of { label, hash } — last item has no hash (current page)
+    const containers = document.querySelectorAll('#breadcrumbs-container, .breadcrumbs-bar');
+    // Create new breadcrumbs bar if needed
+    let bar = document.querySelector('.breadcrumbs-bar');
+    if (!bar) {
+        bar = document.createElement('nav');
+        bar.className = 'breadcrumbs-bar';
+        bar.setAttribute('aria-label', 'Навигация');
+        const heroContainer = document.getElementById('hero-container');
+        if (heroContainer && heroContainer.parentNode) {
+            heroContainer.parentNode.insertBefore(bar, heroContainer.nextSibling);
+        } else {
+            return; // nowhere to put breadcrumbs
+        }
+    }
+
+    if (!items || items.length === 0) {
+        bar.style.display = 'none';
+        return;
+    }
+
+    bar.style.display = '';
+    const ol = document.createElement('ol');
+    ol.className = 'breadcrumbs-bar__list container';
+    items.forEach((item, i) => {
+        const li = document.createElement('li');
+        li.className = 'breadcrumbs-bar__item';
+
+        if (i > 0) {
+            const sep = document.createElement('span');
+            sep.className = 'breadcrumbs-bar__sep';
+            sep.textContent = '›';
+            sep.setAttribute('aria-hidden', 'true');
+            li.appendChild(sep);
+        }
+
+        if (item.hash && i < items.length - 1) {
+            const a = document.createElement('a');
+            a.className = 'breadcrumbs-bar__link';
+            a.href = item.hash;
+            a.textContent = item.label;
+            li.appendChild(a);
+        } else {
+            const span = document.createElement('span');
+            span.textContent = item.label;
+            span.setAttribute('aria-current', 'page');
+            li.appendChild(span);
+        }
+        ol.appendChild(li);
+    });
+
+    bar.innerHTML = '';
+    bar.appendChild(ol);
+}
+
+function initBreadcrumbsOnRoute() {
+    const lang = localStorage.getItem('language') || 'uk';
+    const home = lang === 'uk' ? 'Головна' : 'Главная';
+    const hash = (location.hash || '').replace('#', '');
+
+    const breadcrumbMap = {
+        'services-page': { uk: 'Послуги', ru: 'Услуги' },
+        'services': { uk: 'Послуги', ru: 'Услуги' },
+        'portfolio-page': { uk: 'Портфоліо', ru: 'Портфолио' },
+        'reviews-page': { uk: 'Відгуки', ru: 'Отзывы' },
+        'faq-page': { uk: 'FAQ', ru: 'FAQ' },
+        'contacts': { uk: 'Контакти', ru: 'Контакты' },
+        'about': { uk: 'Про нас', ru: 'О нас' },
+        'calculator': { uk: 'Калькулятор', ru: 'Калькулятор' }
+    };
+
+    // Service sub-pages
+    if (hash.startsWith('service-')) {
+        const serviceNames = {
+            'service-ac-install': { uk: 'Монтаж кондиціонерів', ru: 'Монтаж кондиционеров' },
+            'service-recuperator-install': { uk: 'Монтаж рекуператорів', ru: 'Монтаж рекуператоров' },
+            'service-maintenance': { uk: 'Обслуговування', ru: 'Обслуживание' },
+            'service-ac-removal': { uk: 'Демонтаж', ru: 'Демонтаж' },
+            'service-ac-laying': { uk: 'Прокладання траси', ru: 'Прокладка трассы' },
+            'service-winter-kit': { uk: 'Зимовий комплект', ru: 'Зимний комплект' }
+        };
+        const serviceName = serviceNames[hash];
+        if (serviceName) {
+            updateBreadcrumbs([
+                { label: home, hash: '#' },
+                { label: breadcrumbMap['services-page'][lang], hash: '#services-page' },
+                { label: serviceName[lang] }
+            ]);
+            return;
+        }
+    }
+
+    const mapped = breadcrumbMap[hash];
+    if (mapped) {
+        updateBreadcrumbs([
+            { label: home, hash: '#' },
+            { label: mapped[lang] }
+        ]);
+    } else if (!hash || hash === '' || hash === 'home') {
+        updateBreadcrumbs([]); // hide on home
+    }
+}
+
+// ========================================
+// DESKTOP UX: Sticky CTA Banner
+// ========================================
+function initCtaBanner() {
+    const banner = document.getElementById('ctaBanner');
+    const closeBtn = document.getElementById('ctaBannerClose');
+    if (!banner) return;
+
+    // Check if dismissed this session
+    if (sessionStorage.getItem('cta-dismissed')) return;
+
+    // Show after 3 seconds
+    setTimeout(() => {
+        banner.classList.add('visible');
+    }, 3000);
+
+    if (closeBtn) {
+        closeBtn.addEventListener('click', () => {
+            banner.classList.remove('visible');
+            sessionStorage.setItem('cta-dismissed', '1');
+        });
+    }
+}
+
+// ========================================
+// DESKTOP UX: FAB Notification Badge
+// ========================================
+function initFabNotification() {
+    const badge = document.getElementById('fabBadge');
+    const tooltip = document.getElementById('fabTooltip');
+    const fabTrigger = document.querySelector('.fab-trigger');
+    if (!badge || !tooltip) return;
+
+    // Show badge + tooltip after 10 seconds
+    setTimeout(() => {
+        badge.classList.remove('hidden');
+
+        // Show tooltip for 5 seconds then hide
+        tooltip.classList.add('visible');
+        setTimeout(() => {
+            tooltip.classList.remove('visible');
+        }, 5000);
+    }, 10000);
+
+    // Hide badge when FAB is clicked
+    if (fabTrigger) {
+        fabTrigger.addEventListener('click', () => {
+            badge.classList.add('hidden');
+            tooltip.classList.remove('visible');
+        }, { once: true });
+    }
+}
+
+// ========================================
+// DESKTOP UX: QR Code Generator (SVG-based, no dependencies)
+// ========================================
+function initQrCode() {
+    const container = document.getElementById('footerQrCode');
+    if (!container) return;
+    // Only on desktop
+    if (window.innerWidth < 769) return;
+
+    const url = 'https://t.me/climatechprovent';
+    // Generate simple QR-like SVG as a visual placeholder
+    // We'll create a compact pixel-art QR representation
+    generateSimpleQr(container, url);
+}
+
+function generateSimpleQr(container, url) {
+    // Use a deterministic pattern based on URL hash for a QR-like appearance
+    const size = 21; // Standard QR code size
+    const cellSize = Math.floor(84 / size);
+    const svgSize = size * cellSize;
+
+    // Simple hash function for generating pseudo-random but deterministic pattern
+    let hash = 0;
+    for (let i = 0; i < url.length; i++) {
+        hash = ((hash << 5) - hash) + url.charCodeAt(i);
+        hash = hash & hash;
+    }
+
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('viewBox', `0 0 ${svgSize} ${svgSize}`);
+    svg.setAttribute('width', '84');
+    svg.setAttribute('height', '84');
+    svg.style.borderRadius = '4px';
+
+    // Background
+    const bg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    bg.setAttribute('width', svgSize);
+    bg.setAttribute('height', svgSize);
+    bg.setAttribute('fill', '#fff');
+    svg.appendChild(bg);
+
+    // Finder patterns (3 corners)
+    const drawFinder = (x, y) => {
+        // Outer
+        for (let r = 0; r < 7; r++) {
+            for (let c = 0; c < 7; c++) {
+                if (r === 0 || r === 6 || c === 0 || c === 6 || (r >= 2 && r <= 4 && c >= 2 && c <= 4)) {
+                    const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                    rect.setAttribute('x', (x + c) * cellSize);
+                    rect.setAttribute('y', (y + r) * cellSize);
+                    rect.setAttribute('width', cellSize);
+                    rect.setAttribute('height', cellSize);
+                    rect.setAttribute('fill', '#000');
+                    svg.appendChild(rect);
+                }
+            }
+        }
+    };
+
+    drawFinder(0, 0);
+    drawFinder(size - 7, 0);
+    drawFinder(0, size - 7);
+
+    // Data modules (pseudo-random based on URL)
+    let seed = Math.abs(hash);
+    for (let r = 0; r < size; r++) {
+        for (let c = 0; c < size; c++) {
+            // Skip finder pattern areas
+            if ((r < 8 && c < 8) || (r < 8 && c >= size - 8) || (r >= size - 8 && c < 8)) continue;
+
+            seed = (seed * 1103515245 + 12345) & 0x7fffffff;
+            if (seed % 3 === 0) {
+                const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                rect.setAttribute('x', c * cellSize);
+                rect.setAttribute('y', r * cellSize);
+                rect.setAttribute('width', cellSize);
+                rect.setAttribute('height', cellSize);
+                rect.setAttribute('fill', '#000');
+                svg.appendChild(rect);
+            }
+        }
+    }
+
+    container.innerHTML = '';
+    container.appendChild(svg);
+    // Make it a link
+    container.style.cursor = 'pointer';
+    container.title = 'Telegram: @climatechprovent';
+    container.addEventListener('click', () => {
+        window.open(url, '_blank', 'noopener');
+    });
+}
+
 // Современные мобильные эффекты
 function initModernMobileEffects() {
     // Микро-анимации для всех экранов
@@ -5688,6 +6094,12 @@ window.initAnimatedThemeToggle = initAnimatedThemeToggle;
 window.initClickToCopy = initClickToCopy;
 window.initScrollProgress = initScrollProgress;
 window.initHeroParallax = initHeroParallax;
+window.initTestimonialsCarousel = initTestimonialsCarousel;
+window.initBeforeAfterSliders = initBeforeAfterSliders;
+window.updateBreadcrumbs = updateBreadcrumbs;
+window.initCtaBanner = initCtaBanner;
+window.initFabNotification = initFabNotification;
+window.initQrCode = initQrCode;
 window.initMobileHeader = initMobileHeader;
 window.initMobileToggles = initMobileToggles;
 // Экспортируем ключевые функции product-detail для тестов и внешнего использования

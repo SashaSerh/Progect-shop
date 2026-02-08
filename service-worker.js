@@ -1,5 +1,5 @@
-const CACHE_VERSION = 'v82'; // Added FAB to floating-buttons
-const CACHE_NAME = 'climat-control-v113'; // include FAB in floating-buttons
+const CACHE_VERSION = 'v82'; // FAB inside floating-buttons
+const CACHE_NAME = 'climat-control-v113'; // unified floating-buttons layout
 const urlsToCache = [
     '/',
     '/index.html',

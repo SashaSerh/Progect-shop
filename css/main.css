@@ -6766,8 +6766,9 @@ select {
 /* FAB (Floating Action Button) для связи */
 
 .fab-container {
-    /* Теперь внутри floating-buttons, позиционирование через flex */
     position: relative;
+    right: auto;
+    bottom: auto;
     z-index: 1000;
 }
 
@@ -10395,64 +10396,37 @@ textarea.form-input {
 .floating-buttons {
     position: fixed;
     right: var(--fab-right, 24px);
-    bottom: 90px;
-    /* Выше FAB кнопки */
+    bottom: 20px;
     display: flex;
     flex-direction: column;
     gap: var(--fab-gap, 12px);
-    z-index: 999;
-    /* Ниже FAB */
+    z-index: 1001;
     align-items: center;
-    /* Центрируем кнопки для идеального выравнивания */
-    transition: bottom 300ms ease, transform 300ms ease;
+    transition: bottom 300ms ease;
 }
 
-/* FAB container теперь внутри floating-buttons */
-.fab-container {
-    order: 1; /* FAB выше scroll-to-top */
-}
+/* Порядок элементов: scroll-to-top, settings, FAB снизу */
+.floating-buttons .scroll-to-top { order: 1; }
+.floating-buttons .settings-container { order: 2; }
+.floating-buttons .fab-container { order: 3; }
 
-/* Сдвиг вниз когда Bottom Tab Bar скрыт */
-.floating-buttons.tab-bar-hidden {
-    bottom: 20px; /* Сдвигаем вниз к обычному положению FAB */
-}
-
-.floating-buttons.tab-bar-hidden.fab-open {
-    bottom: 190px; /* Сдвигаем выше открытого FAB меню */
-}
-
-/* Смещение вверх при открытом FAB меню (только десктоп) */
-
+/* Десктоп */
 @media (min-width: 769px) {
 .floating-buttons.fab-open {
-    bottom: 460px;
-    /* Поднимаем выше открытого меню FAB (6 кнопок × ~60px + отступы) */
+    bottom: 20px;
+    /* FAB теперь внутри — не нужно двигать контейнер */
 }
-
-.floating-buttons.tab-bar-hidden.fab-open {
-    bottom: 460px; /* На десктопе не меняем */
-}
-
 }
 
 @media (max-width: 768px) {
 .floating-buttons {
-    bottom: 170px;
-    /* Поднимаем всю группу выше мобильной навигации и FAB */
+    bottom: calc(76px + env(safe-area-inset-bottom, 0px));
     gap: 12px;
 }
 
-.floating-buttons.fab-open {
-    bottom: 340px;
-    /* Поднимаем выше дуги кнопок FAB (радиус ~170px + отступы) */
-}
-
+/* Когда tab-bar скрыт — кнопки опускаются к низу экрана */
 .floating-buttons.tab-bar-hidden {
-    bottom: 20px; /* Сдвигаем вниз к обычному положению FAB */
-}
-
-.floating-buttons.tab-bar-hidden.fab-open {
-    bottom: 190px; /* Сдвигаем выше открытого FAB меню */
+    bottom: 20px;
 }
 
 }
@@ -14739,11 +14713,7 @@ body {
     padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px)) !important;
 }
 
-/* Move FAB and floating buttons above tab bar — теперь не нужно, FAB внутри floating-buttons */
-
-.floating-buttons.fab-open {
-    bottom: calc(320px + env(safe-area-inset-bottom, 0px)) !important;
-}
+/* floating-buttons position is now handled in the main .floating-buttons block */
 
 /* Toast above tab bar */
 #toast-container {

@@ -14,7 +14,6 @@ export function initBottomTabBar() {
     }
 
     const tabs = tabBar.querySelectorAll('.bottom-tab-bar__tab');
-    const floatingButtons = document.querySelector('.floating-buttons');
 
     // === Active Tab Tracking ===
     function updateActiveTab() {
@@ -57,6 +56,7 @@ export function initBottomTabBar() {
     let lastScrollY = window.scrollY;
     let ticking = false;
     const SCROLL_THRESHOLD = 10;
+    const floatingButtons = document.getElementById('floating-buttons') || document.querySelector('.floating-buttons');
 
     function onScroll() {
         if (ticking) return;
@@ -67,17 +67,13 @@ export function initBottomTabBar() {
             const diff = currentY - lastScrollY;
 
             if (diff > SCROLL_THRESHOLD && currentY > 100) {
-                // Scrolling down — hide
+                // Scrolling down — hide tab bar, slide floating buttons down
                 tabBar.classList.add('bottom-tab-bar--hidden');
-                if (floatingButtons) {
-                    floatingButtons.classList.add('tab-bar-hidden');
-                }
+                if (floatingButtons) floatingButtons.classList.add('tab-bar-hidden');
             } else if (diff < -SCROLL_THRESHOLD || currentY < 50) {
-                // Scrolling up or near top — show
+                // Scrolling up or near top — show tab bar, slide floating buttons up
                 tabBar.classList.remove('bottom-tab-bar--hidden');
-                if (floatingButtons) {
-                    floatingButtons.classList.remove('tab-bar-hidden');
-                }
+                if (floatingButtons) floatingButtons.classList.remove('tab-bar-hidden');
             }
 
             lastScrollY = currentY;

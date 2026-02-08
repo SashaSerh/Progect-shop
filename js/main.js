@@ -862,6 +862,7 @@ async function initApp() {
         loadComponent('service-maintenance-pricelist-container', 'components/service-maintenance-pricelist.html'),
         loadComponent('service-ac-removal-container', 'components/service-ac-removal.html'),
         loadComponent('service-ac-laying-container', 'components/service-ac-laying.html'),
+        loadComponent('service-winter-kit-container', 'components/service-winter-kit.html'),
         loadComponent('pricelist-container', 'components/pricelist.html'),
         loadComponent('case-1-container', 'components/case-1.html'),
         loadComponent('case-2-container', 'components/case-2.html'),
@@ -874,7 +875,8 @@ async function initApp() {
         ...(LANDING_MODE ? [] : [loadComponent('comparison-container', 'components/compare-bar.html')]),
         ...(LANDING_MODE ? [] : [loadComponent('compare-modal-container', 'components/compare-modal.html')]),
         loadComponent('breadcrumbs-container', 'components/breadcrumbs.html'),
-        loadComponent('footer-container', 'components/footer.html')
+        loadComponent('footer-container', 'components/footer.html'),
+        loadComponent('bottom-tab-bar-container', 'components/bottom-tab-bar.html')
     ]);
 
     // Применяем тему по умолчанию (теперь светлая) и синхронизируем иконки/ARIA
@@ -900,6 +902,13 @@ async function initApp() {
 
     // Инициализация мобильного главного меню
     initMobileMainNav();
+
+    // Bottom Tab Bar (mobile app navigation)
+    import('./bottom-tab-bar.js').then(mod => {
+        if (mod && typeof mod.initBottomTabBar === 'function') {
+            mod.initBottomTabBar();
+        }
+    }).catch(() => {});
 
     // Cart modal open is deprecated in favor of dedicated cart page
     const openCartModalButton = document.querySelector('#openCartModal');
@@ -1841,6 +1850,7 @@ function setupServiceRouting() {
         'service-maintenance-pricelist': 'service-maintenance-pricelist-container',
         'service-ac-removal': 'service-ac-removal-container',
         'service-ac-laying': 'service-ac-laying-container',
+        'service-winter-kit': 'service-winter-kit-container',
         'pricelist': 'pricelist-container'
     };
     const LANDING_CONTAINERS = [
@@ -5565,6 +5575,12 @@ function showServicesList(navList) {
                 <a href="#service-ac-laying" class="main-nav-mobile__link">
                     <span class="main-nav-mobile__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 6h20M2 12h20M2 18h20"/></svg></span>
                     <span class="main-nav-mobile__text" data-i18n="service-ac-laying-title">Закладка трассы</span>
+                </a>
+            </li>
+            <li class="main-nav-mobile__item">
+                <a href="#service-winter-kit" class="main-nav-mobile__link">
+                    <span class="main-nav-mobile__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 17.58A5 5 0 0 0 18 8h-1.26A8 8 0 1 0 4 16.25"/><path d="M8 16l-1.7-4.3a1 1 0 0 1 .9-1.4h9.6a1 1 0 0 1 .9 1.4L16 16"/></svg></span>
+                    <span class="main-nav-mobile__text" data-i18n="service-winter-kit-title">Зимний комплект</span>
                 </a>
             </li>
             <li class="main-nav-mobile__item">

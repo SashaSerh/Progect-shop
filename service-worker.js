@@ -1,5 +1,5 @@
-const CACHE_VERSION = 'v80'; // Added service-winter-kit
-const CACHE_NAME = 'climat-control-v111'; // include winter kit service
+const CACHE_VERSION = 'v82'; // Added FAB to floating-buttons
+const CACHE_NAME = 'climat-control-v113'; // include FAB in floating-buttons
 const urlsToCache = [
     '/',
     '/index.html',
@@ -40,7 +40,11 @@ const urlsToCache = [
     '/components/service-ac-install.html',
     '/components/service-recuperator-install.html',
     '/components/service-maintenance.html',
+    '/components/service-maintenance-pricelist.html',
+    '/components/service-ac-removal.html',
+    '/components/service-ac-laying.html',
     '/components/service-winter-kit.html',
+    '/components/pricelist.html',
     '/components/about.html',
     '/components/welcome.html',
     '/components/case-1.html',
@@ -49,6 +53,8 @@ const urlsToCache = [
         '/components/reviews.html',
         '/components/faq.html',
     '/components/footer.html',
+    '/components/bottom-tab-bar.html',
+    '/js/bottom-tab-bar.js',
     '/components/cart.html',
     '/offline.html',
     '/robots.txt',

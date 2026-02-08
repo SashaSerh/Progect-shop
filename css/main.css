@@ -6766,9 +6766,8 @@ select {
 /* FAB (Floating Action Button) для связи */
 
 .fab-container {
-    position: fixed;
-    right: 20px;
-    bottom: 20px;
+    /* Теперь внутри floating-buttons, позиционирование через flex */
+    position: relative;
     z-index: 1000;
 }
 
@@ -10408,12 +10407,30 @@ textarea.form-input {
     transition: bottom 300ms ease, transform 300ms ease;
 }
 
+/* FAB container теперь внутри floating-buttons */
+.fab-container {
+    order: 1; /* FAB выше scroll-to-top */
+}
+
+/* Сдвиг вниз когда Bottom Tab Bar скрыт */
+.floating-buttons.tab-bar-hidden {
+    bottom: 20px; /* Сдвигаем вниз к обычному положению FAB */
+}
+
+.floating-buttons.tab-bar-hidden.fab-open {
+    bottom: 190px; /* Сдвигаем выше открытого FAB меню */
+}
+
 /* Смещение вверх при открытом FAB меню (только десктоп) */
 
 @media (min-width: 769px) {
 .floating-buttons.fab-open {
     bottom: 460px;
     /* Поднимаем выше открытого меню FAB (6 кнопок × ~60px + отступы) */
+}
+
+.floating-buttons.tab-bar-hidden.fab-open {
+    bottom: 460px; /* На десктопе не меняем */
 }
 
 }
@@ -10428,6 +10445,14 @@ textarea.form-input {
 .floating-buttons.fab-open {
     bottom: 340px;
     /* Поднимаем выше дуги кнопок FAB (радиус ~170px + отступы) */
+}
+
+.floating-buttons.tab-bar-hidden {
+    bottom: 20px; /* Сдвигаем вниз к обычному положению FAB */
+}
+
+.floating-buttons.tab-bar-hidden.fab-open {
+    bottom: 190px; /* Сдвигаем выше открытого FAB меню */
 }
 
 }
@@ -14517,6 +14542,226 @@ img.img-loaded {
 .theme-dark .pricelist-included-list li {
     color: var(--text-primary, #f0f0f0);
     border-bottom-color: rgba(255,255,255,0.06);
+}
+
+/* ========================================
+   BOTTOM TAB BAR — Native App Navigation (mobile only)
+   iOS/Android-style bottom navigation bar
+   ======================================== */
+
+.bottom-tab-bar {
+    display: none; /* Hidden on desktop */
+}
+
+@media (max-width: 768px) {
+.bottom-tab-bar {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 2000;
+    height: calc(64px + env(safe-area-inset-bottom, 0px));
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    background: var(--mobile-header-bg, rgba(30, 30, 32, 0.92));
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    border-top: 0.5px solid rgba(255, 255, 255, 0.08);
+    align-items: stretch;
+    justify-content: space-around;
+    transition: transform 0.3s var(--motion-ease-standard);
+    will-change: transform;
+}
+
+/* Hide tab bar when scrolling down (JS toggles this class) */
+.bottom-tab-bar--hidden {
+    transform: translateY(100%);
+}
+
+.bottom-tab-bar__tab {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    gap: 2px;
+    padding: 6px 0 2px;
+    text-decoration: none;
+    color: var(--text-tertiary, rgba(255, 255, 255, 0.45));
+    -webkit-tap-highlight-color: transparent;
+    transition: color 0.2s ease, transform var(--motion-duration-press) var(--motion-ease-press);
+    position: relative;
+    min-height: 48px;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.bottom-tab-bar__tab:active {
+    transform: scale(0.88);
+}
+
+.bottom-tab-bar__icon {
+    width: 26px;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    transition: transform 0.25s var(--motion-ease-emphasized);
+}
+
+.bottom-tab-bar__icon svg {
+    width: 24px;
+    height: 24px;
+    transition: stroke-width 0.2s ease;
+}
+
+.bottom-tab-bar__label {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    line-height: 1;
+    transition: color 0.2s ease, font-weight 0.2s ease;
+}
+
+/* Active tab state */
+.bottom-tab-bar__tab.is-active {
+    color: var(--accent-color, #007AFF);
+}
+
+.bottom-tab-bar__tab.is-active .bottom-tab-bar__icon {
+    transform: scale(1.08);
+}
+
+.bottom-tab-bar__tab.is-active .bottom-tab-bar__icon svg {
+    stroke-width: 2.2;
+}
+
+.bottom-tab-bar__tab.is-active .bottom-tab-bar__label {
+    font-weight: 700;
+}
+
+/* Active indicator dot */
+.bottom-tab-bar__tab.is-active::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--accent-color, #007AFF);
+    animation: tab-dot-in 0.3s var(--motion-ease-emphasized);
+}
+
+@keyframes tab-dot-in {
+    from { transform: translateX(-50%) scale(0); opacity: 0; }
+    to { transform: translateX(-50%) scale(1); opacity: 1; }
+}
+
+/* Accent icon style (calculator tab) */
+.bottom-tab-bar__icon--accent {
+    background: var(--accent-color, #007AFF);
+    border-radius: 14px;
+    width: 44px;
+    height: 30px;
+    padding: 3px;
+    margin-top: -6px;
+}
+
+.bottom-tab-bar__icon--accent svg {
+    stroke: #fff !important;
+    width: 20px;
+    height: 20px;
+}
+
+.bottom-tab-bar__tab:has(.bottom-tab-bar__icon--accent).is-active .bottom-tab-bar__icon--accent {
+    background: var(--color-primary-dark, #0051D5);
+    box-shadow: 0 4px 12px rgba(0, 122, 255, 0.35);
+}
+
+} /* end @media (max-width: 768px) — Bottom Tab Bar */
+
+/* Light theme overrides for Bottom Tab Bar */
+.light-theme .bottom-tab-bar {
+    background: rgba(249, 249, 249, 0.94);
+    border-top-color: rgba(0, 0, 0, 0.08);
+}
+
+.light-theme .bottom-tab-bar__tab {
+    color: rgba(0, 0, 0, 0.4);
+}
+
+.light-theme .bottom-tab-bar__tab.is-active {
+    color: var(--accent-color, #007AFF);
+}
+
+/* ========================================
+   PRESS-STATE MICRO-ANIMATIONS (Mobile App Feel)
+   Native-like tap feedback for all interactive elements
+   ======================================== */
+
+@media (max-width: 768px) {
+/* Service cards, nav cards — spring-bounce on tap */
+.service-card,
+.service-card-surface,
+.main-nav-mobile__link,
+.hero-calculator-promo,
+.hero-header-card {
+    transition: transform var(--motion-duration-press) var(--motion-ease-press),
+                box-shadow var(--motion-duration-press) ease,
+                background var(--motion-duration-fast) ease;
+}
+
+.service-card:active,
+.service-card-surface:active,
+.hero-calculator-promo:active,
+.hero-header-card:active {
+    transform: scale(0.97);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+}
+
+/* All buttons — scale down on tap */
+.btn:active,
+button:active:not(.bottom-tab-bar__tab):not(.fab-trigger):not(.settings-trigger):not(.minimal-menu-btn) {
+    transform: scale(0.96) !important;
+}
+
+/* Cards inside service pages */
+.service-page__card:active {
+    transform: scale(0.98);
+    transition: transform var(--motion-duration-press) var(--motion-ease-press);
+}
+
+/* Body padding for tab bar space */
+body {
+    padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px)) !important;
+}
+
+/* Move FAB and floating buttons above tab bar — теперь не нужно, FAB внутри floating-buttons */
+
+.floating-buttons.fab-open {
+    bottom: calc(320px + env(safe-area-inset-bottom, 0px)) !important;
+}
+
+/* Toast above tab bar */
+#toast-container {
+    bottom: calc(80px + env(safe-area-inset-bottom, 0px)) !important;
+}
+
+} /* end @media — press states + tab bar spacing */
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+.bottom-tab-bar,
+.bottom-tab-bar__tab,
+.bottom-tab-bar__icon {
+    transition: none;
+}
+.bottom-tab-bar__tab:active {
+    transform: none;
+}
 }
 
 .reviews__back {

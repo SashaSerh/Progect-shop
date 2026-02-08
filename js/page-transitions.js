@@ -329,7 +329,7 @@ class PageTransitions {
         sessionStorage.setItem('scrollReturnTarget', targetId);
 
         // Для элемента внутри страницы (не полная страница) - только плавный скролл без анимации
-        if (targetId === 'service-removal-pricelist' || targetId === 'service-laying-pricelist') {
+        if (targetId === 'service-removal-pricelist' || targetId === 'service-laying-pricelist' || targetId === 'service-winter-kit-pricelist') {
             const headerSelector = '.pricelist-section__title';
             const headerEl = targetEl.querySelector(headerSelector);
             if (headerEl) {

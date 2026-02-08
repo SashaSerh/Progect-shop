@@ -1967,12 +1967,10 @@ function setupServiceRouting() {
 
     function applyRoute() {
         const hash = (location.hash || '').replace('#', '');
-        const isMobile = window.innerWidth <= 768;
 
-        if (isMobile) {
-            // Мобильная логика маршрутизации
-            // По умолчанию показать только hero, мобильное меню и футер
-            const alwaysVisible = ['hero-container', 'mobile-main-nav-container', 'footer-container'];
+        // Единая SPA-логика маршрутизации для всех экранов (mobile-first)
+        // По умолчанию показать только hero, меню навигации и футер
+        const alwaysVisible = ['hero-container', 'mobile-main-nav-container', 'footer-container'];
             LANDING_CONTAINERS.forEach(id => {
                 setHiddenById(id, !alwaysVisible.includes(id));
             });
@@ -2052,7 +2050,8 @@ function setupServiceRouting() {
                 'reviews-page': 'reviews-container',
                 'faq-page': 'faq-container',
                 'contacts': 'contacts-container',
-                'about-page': 'about-page-container'
+                'about-page': 'about-page-container',
+                'about': 'about-page-container'
             };
 
             const targetPage = pageMap[hash];
@@ -2127,8 +2126,8 @@ function setupServiceRouting() {
                 return;
             }
 
-            // Для services-page
-            if (hash === 'services') {
+            // Для services / services-page
+            if (hash === 'services' || hash === 'services-page') {
                 LANDING_CONTAINERS.forEach(id => {
                     setHiddenById(id, !['services-container', 'footer-container'].includes(id));
                 });
@@ -2180,134 +2179,6 @@ function setupServiceRouting() {
             } catch(_) {}
 
             return;
-        }
-
-        // Десктопная логика маршрутизации
-        const targetContainerId = SERVICE_MAP[hash];
-        const isServiceView = Boolean(targetContainerId);
-
-        // Если контейнер сервиса ещё не загружен — попробуем подгрузить его на лету и повторно применить маршрут
-        if (isServiceView && !document.getElementById(targetContainerId)) {
-            try {
-                const base = targetContainerId.replace(/-container$/, '');
-                loadComponent(targetContainerId, `components/${base}.html`).then(() => {
-                    applyRoute();
-                }).catch(() => {});
-            } catch (_) {}
-            return;
-        }
-
-        // На главной (нет хеша или не сервис/кейс) показываем все лендинговые секции
-        if (!isServiceView && !CASE_HASHES.includes(hash)) {
-            LANDING_CONTAINERS.forEach(id => setHiddenById(id, false));
-            CASE_CONTAINERS.forEach(id => setHiddenById(id, true));
-            setHiddenById('breadcrumbs-container', true);
-            Object.values(SERVICE_MAP).forEach(id => setHiddenById(id, true));
-            setActiveNav('');
-            return;
-        }
-
-        // Для сервисных страниц
-        LANDING_CONTAINERS.forEach(id => setHiddenById(id, !isServiceView));
-        CASE_CONTAINERS.forEach(id => setHiddenById(id, !isServiceView));
-        setHiddenById('breadcrumbs-container', !CASE_HASHES.includes(hash));
-        Object.values(SERVICE_MAP).forEach(id => setHiddenById(id, true));
-
-        if (isServiceView) {
-            // Показать только нужную сервисную секцию с анимацией
-            const onlyId = targetContainerId;
-            setHiddenById(onlyId, false);
-            try {
-                const section = document.getElementById(onlyId)?.querySelector('.service-page');
-                if (section) {
-                    const navDir = sessionStorage.getItem('service_nav_direction');
-                    if (navDir) sessionStorage.removeItem('service_nav_direction');
-                    const enterFromLeft = navDir === 'back-to-maintenance';
-                    const enterClass = enterFromLeft ? 'service-page--slide-in-from-left' : 'service-page--slide-in-from-right';
-                    section.classList.add(enterClass);
-                    requestAnimationFrame(() => {
-                        section.classList.remove(enterClass);
-                        section.classList.add('service-page--slide-in');
-                        animateServiceEntrance(section);
-                    });
-                }
-            } catch(_) { /* noop */ }
-            scrollToSectionTop(targetContainerId);
-            setActiveNav('services');
-            // Фокус на заголовке страницы услуги
-            focusSectionHeading(targetContainerId, 'h2');
-            return;
-        }
-
-        // Якорь секции услуг или возвращение на лендинг
-        if (hash === 'services') {
-            LANDING_CONTAINERS.forEach(id => setHiddenById(id, false));
-            // Скрыть сервисные разделы полностью
-            Object.values(SERVICE_MAP).forEach(id => setHiddenById(id, true));
-            // Кейсы скрываем на лендинге
-            CASE_CONTAINERS.forEach(id => setHiddenById(id, true));
-            // Хлебные крошки скрыть
-            setHiddenById('breadcrumbs-container', true);
-            scrollToSectionTop('services');
-            setActiveNav('services');
-            focusSectionHeading('services', 'h2');
-            return;
-        }
-
-        // Обработка переходов к секциям лендинга (portfolio, reviews, faq и т.д.)
-        // Landing-only page map: prefer explicit "-page" suffix to avoid collisions with SPA routes
-        const desktopPageMap = {
-            'portfolio-page': 'portfolio-container',
-            'reviews-page': 'reviews-container',
-            'faq-page': 'faq-container',
-            'contacts': 'contacts-container',
-            'about-page': 'about-page-container'
-        };
-        const desktopTargetPage = desktopPageMap[hash];
-        if (desktopTargetPage) {
-            LANDING_CONTAINERS.forEach(id => setHiddenById(id, false));
-            Object.values(SERVICE_MAP).forEach(id => setHiddenById(id, true));
-            CASE_CONTAINERS.forEach(id => setHiddenById(id, true));
-            setHiddenById('breadcrumbs-container', true);
-            scrollToSectionTop(desktopTargetPage);
-            setActiveNav(hash.replace('-page', ''));
-            focusSectionHeading(desktopTargetPage, 'h2');
-            if (hash === 'portfolio-page') {
-                // Defensive visibility cleanup for desktop transitions as well
-                try {
-                    const pc = document.getElementById('portfolio-container');
-                    const ps = document.getElementById('portfolio');
-                    if (pc && pc.hasAttribute('hidden')) pc.removeAttribute('hidden');
-                    if (ps && ps.hasAttribute('hidden')) ps.removeAttribute('hidden');
-                    [pc, ps].forEach(el => {
-                        if (!el) return;
-                        el.classList.remove('service-page--slide-out-to-right', 'service-page--slide-out-to-left', 'service-page--slide-in', 'service-page--slide-in-from-right', 'service-page--slide-in-from-left');
-                    });
-                    // Ensure portfolio grid is rendered for desktop as well
-                    try { renderPortfolio(); } catch(_) {}
-                } catch(_) {}
-                const portfolioSection = document.getElementById(desktopTargetPage)?.querySelector('.portfolio');
-                try { renderPortfolio(); } catch(_) {}
-                animatePortfolioEntrance(portfolioSection);
-            }
-            return;
-        }
-
-        // Прочие якоря лендинга: просто снять актив и ничего не прятать дополнительно
-        setActiveNav('');
-        // На главной скрываем подробные страницы услуг, показываем лендинг
-        LANDING_CONTAINERS.forEach(id => setHiddenById(id, false));
-        Object.values(SERVICE_MAP).forEach(id => {
-            setHiddenById(id, true);
-            try {
-                const section = document.getElementById(id)?.querySelector('.service-page');
-                if (section) section.classList.remove('service-page--slide-in');
-            } catch(_) {}
-        });
-        // Кейсы скрываем на главной
-        CASE_CONTAINERS.forEach(id => setHiddenById(id, true));
-        // Хлебные крошки скрыть
-        setHiddenById('breadcrumbs-container', true);
     }
 
     window.addEventListener('hashchange', applyRoute, { passive: true });
@@ -4388,6 +4259,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // Инициализация современных мобильных эффектов
     initModernMobileEffects();
     
+    // Desktop UX: scroll-reveal, counters, quick search, keyboard shortcuts
+    initScrollReveal();
+    initTrustCounters();
+    initQuickSearch();
+    initKeyboardShortcuts();
+    initKbdHint();
+
     // Переинициализация мобильных эффектов при изменении размера окна
     let resizeTimeout;
     window.addEventListener('resize', () => {
@@ -4561,12 +4439,307 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
+// ========================================
+// DESKTOP UX: Scroll-Reveal Animations
+// ========================================
+function initScrollReveal() {
+    if (!('IntersectionObserver' in window)) {
+        // Fallback: show everything immediately
+        document.querySelectorAll('.scroll-reveal, .scroll-reveal--scale').forEach(el => el.classList.add('revealed'));
+        return;
+    }
+
+    // Auto-tag service cards and main-nav cards with scroll-reveal + stagger
+    const serviceCards = document.querySelectorAll('.services__grid .service-card');
+    serviceCards.forEach((card, i) => {
+        card.classList.add('scroll-reveal');
+        card.setAttribute('data-reveal-delay', String(i));
+    });
+
+    const navCards = document.querySelectorAll('.main-nav-mobile__item');
+    navCards.forEach((card, i) => {
+        card.classList.add('scroll-reveal');
+        card.setAttribute('data-reveal-delay', String(i));
+    });
+
+    // Tag sections for reveal
+    const sectionSelectors = [
+        '.hero-calculator-promo',
+        '.hero-trust-stats',
+        '.reviews',
+        '.faq',
+        '.portfolio',
+        '.contacts',
+        '.footer__desktop-grid'
+    ];
+    sectionSelectors.forEach(sel => {
+        const el = document.querySelector(sel);
+        if (el && !el.classList.contains('scroll-reveal')) {
+            el.classList.add('scroll-reveal');
+        }
+    });
+
+    const revealObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('revealed');
+                revealObserver.unobserve(entry.target);
+            }
+        });
+    }, {
+        threshold: 0.08,
+        rootMargin: '0px 0px -40px 0px'
+    });
+
+    document.querySelectorAll('.scroll-reveal, .scroll-reveal--scale').forEach(el => {
+        revealObserver.observe(el);
+    });
+}
+
+// ========================================
+// DESKTOP UX: Trust Counter Animation
+// ========================================
+function initTrustCounters() {
+    const statsContainer = document.querySelector('.hero-trust-stats');
+    if (!statsContainer) return;
+
+    const items = statsContainer.querySelectorAll('.hero-trust-stats__item[data-count]');
+    if (!items.length) return;
+
+    let animated = false;
+
+    const animateCount = (el) => {
+        const target = parseInt(el.getAttribute('data-count'), 10);
+        const numberEl = el.querySelector('.hero-trust-stats__number');
+        if (!numberEl || isNaN(target)) return;
+
+        const duration = 1600; // ms
+        const start = performance.now();
+        const easeOutQuart = t => 1 - Math.pow(1 - t, 4);
+
+        const tick = (now) => {
+            const elapsed = now - start;
+            const progress = Math.min(elapsed / duration, 1);
+            const value = Math.round(easeOutQuart(progress) * target);
+            numberEl.textContent = value;
+            if (progress < 1) {
+                requestAnimationFrame(tick);
+            }
+        };
+        requestAnimationFrame(tick);
+    };
+
+    if (!('IntersectionObserver' in window)) {
+        items.forEach(animateCount);
+        return;
+    }
+
+    const counterObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting && !animated) {
+                animated = true;
+                items.forEach(animateCount);
+                counterObserver.disconnect();
+            }
+        });
+    }, { threshold: 0.3 });
+
+    counterObserver.observe(statsContainer);
+}
+
+// ========================================
+// DESKTOP UX: Quick Search (Cmd+K)
+// ========================================
+function initQuickSearch() {
+    const overlay = document.getElementById('quickSearchOverlay');
+    const input = document.getElementById('quickSearchInput');
+    const resultsList = document.getElementById('quickSearchResults');
+    if (!overlay || !input || !resultsList) return;
+
+    const currentLang = () => localStorage.getItem('language') || 'uk';
+
+    // Search items (all main sections)
+    const searchItems = [
+        { icon: '🏠', name: { uk: 'Головна', ru: 'Главная' }, hash: '', section: '' },
+        { icon: '🔧', name: { uk: 'Послуги', ru: 'Услуги' }, hash: '#services-page', section: '' },
+        { icon: '❄️', name: { uk: 'Монтаж кондиціонерів', ru: 'Монтаж кондиционеров' }, hash: '#service-ac-install', section: { uk: 'Послуги', ru: 'Услуги' } },
+        { icon: '🌬️', name: { uk: 'Монтаж рекуператорів', ru: 'Монтаж рекуператоров' }, hash: '#service-recuperator-install', section: { uk: 'Послуги', ru: 'Услуги' } },
+        { icon: '🛠️', name: { uk: 'Обслуговування систем', ru: 'Обслуживание систем' }, hash: '#service-maintenance', section: { uk: 'Послуги', ru: 'Услуги' } },
+        { icon: '📦', name: { uk: 'Демонтаж кондиціонера', ru: 'Демонтаж кондиционера' }, hash: '#service-ac-removal', section: { uk: 'Послуги', ru: 'Услуги' } },
+        { icon: '🔌', name: { uk: 'Закладка траси', ru: 'Закладка трассы' }, hash: '#service-ac-laying', section: { uk: 'Послуги', ru: 'Услуги' } },
+        { icon: '🧊', name: { uk: 'Зимовий комплект', ru: 'Зимний комплект' }, hash: '#service-winter-kit', section: { uk: 'Послуги', ru: 'Услуги' } },
+        { icon: '📸', name: { uk: 'Наші роботи', ru: 'Наши работы' }, hash: '#portfolio-page', section: '' },
+        { icon: '⭐', name: { uk: 'Відгуки клієнтів', ru: 'Отзывы клиентов' }, hash: '#reviews-page', section: '' },
+        { icon: '❓', name: { uk: 'Питання та відповіді', ru: 'Вопросы и ответы' }, hash: '#faq-page', section: '' },
+        { icon: 'ℹ️', name: { uk: 'Про нас', ru: 'О нас' }, hash: '#about', section: '' },
+        { icon: '📞', name: { uk: 'Контакти', ru: 'Контакты' }, hash: '#contacts', section: '' },
+        { icon: '🧮', name: { uk: 'Калькулятор', ru: 'Калькулятор' }, hash: '#calculator', section: '' },
+    ];
+
+    let activeIndex = 0;
+
+    function getItemName(item) {
+        const lang = currentLang();
+        return typeof item.name === 'string' ? item.name : (item.name[lang] || item.name.uk || '');
+    }
+
+    function getItemSection(item) {
+        const lang = currentLang();
+        if (!item.section) return '';
+        return typeof item.section === 'string' ? item.section : (item.section[lang] || item.section.uk || '');
+    }
+
+    function render(query) {
+        const q = (query || '').toLowerCase().trim();
+        const filtered = q
+            ? searchItems.filter(item => {
+                  const nameUk = (item.name.uk || '').toLowerCase();
+                  const nameRu = (item.name.ru || '').toLowerCase();
+                  return nameUk.includes(q) || nameRu.includes(q);
+              })
+            : searchItems;
+
+        activeIndex = 0;
+        resultsList.innerHTML = filtered.map((item, i) => `
+            <li class="quick-search__result ${i === 0 ? 'active' : ''}"
+                role="option" data-hash="${item.hash}" data-index="${i}">
+                <span class="quick-search__result-icon">${item.icon}</span>
+                <span class="quick-search__result-text">
+                    <span class="quick-search__result-name">${getItemName(item)}</span>
+                    ${getItemSection(item) ? `<span class="quick-search__result-section">${getItemSection(item)}</span>` : ''}
+                </span>
+            </li>
+        `).join('');
+    }
+
+    function openQuickSearch() {
+        overlay.style.display = 'flex';
+        input.value = '';
+        render('');
+        requestAnimationFrame(() => input.focus());
+    }
+
+    function closeQuickSearch() {
+        overlay.style.display = 'none';
+        input.value = '';
+    }
+
+    function navigate(hash) {
+        closeQuickSearch();
+        location.hash = hash;
+        if (!hash) {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    }
+
+    function updateActive(newIndex) {
+        const items = resultsList.querySelectorAll('.quick-search__result');
+        if (!items.length) return;
+        activeIndex = Math.max(0, Math.min(newIndex, items.length - 1));
+        items.forEach((el, i) => el.classList.toggle('active', i === activeIndex));
+        items[activeIndex]?.scrollIntoView({ block: 'nearest' });
+    }
+
+    // Event listeners
+    input.addEventListener('input', () => render(input.value));
+
+    input.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            updateActive(activeIndex + 1);
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            updateActive(activeIndex - 1);
+        } else if (e.key === 'Enter') {
+            e.preventDefault();
+            const active = resultsList.querySelector('.quick-search__result.active');
+            if (active) navigate(active.dataset.hash);
+        } else if (e.key === 'Escape') {
+            closeQuickSearch();
+        }
+    });
+
+    overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) closeQuickSearch();
+    });
+
+    resultsList.addEventListener('click', (e) => {
+        const item = e.target.closest('.quick-search__result');
+        if (item) navigate(item.dataset.hash);
+    });
+
+    // Global open handler
+    window._openQuickSearch = openQuickSearch;
+    window._closeQuickSearch = closeQuickSearch;
+}
+
+// ========================================
+// DESKTOP UX: Keyboard Shortcuts
+// ========================================
+function initKeyboardShortcuts() {
+    document.addEventListener('keydown', (e) => {
+        // Cmd+K or Ctrl+K → Quick Search
+        if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+            e.preventDefault();
+            if (typeof window._openQuickSearch === 'function') {
+                window._openQuickSearch();
+            }
+        }
+
+        // Escape → Home (only when no modal/overlay is open)
+        if (e.key === 'Escape') {
+            const overlay = document.getElementById('quickSearchOverlay');
+            if (overlay && overlay.style.display !== 'none') return; // handled by quick search
+            // Check for any open modals
+            const openModals = document.querySelectorAll('.modal[style*="display: block"], .modal[style*="display:block"]');
+            if (openModals.length) return;
+            // Go home
+            if (location.hash) {
+                location.hash = '';
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        // Number keys 1-6 for quick section navigation (only when not in input)
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable) return;
+        if (e.metaKey || e.ctrlKey || e.altKey) return;
+
+        const sectionMap = {
+            '1': '#services-page',
+            '2': '#portfolio-page',
+            '3': '#reviews-page',
+            '4': '#faq-page',
+            '5': '#about',
+            '6': '#contacts'
+        };
+
+        if (sectionMap[e.key]) {
+            location.hash = sectionMap[e.key];
+        }
+    });
+}
+
+// ========================================
+// DESKTOP UX: Keyboard Hint Badge
+// ========================================
+function initKbdHint() {
+    const hint = document.getElementById('kbdHint');
+    if (!hint) return;
+    // Only show on desktop with pointer device
+    if (window.innerWidth < 769) return;
+
+    // Show hint after 3 seconds, hide after 8 more
+    setTimeout(() => {
+        hint.classList.add('visible');
+        setTimeout(() => {
+            hint.classList.remove('visible');
+        }, 8000);
+    }, 3000);
+}
+
 // Современные мобильные эффекты
 function initModernMobileEffects() {
-    // Проверяем, что это мобильное устройство
-    if (window.innerWidth > 768) {
-        return; // Не применяем эффекты на десктопе
-    }
+    // Микро-анимации для всех экранов
     
     // Добавляем микро-анимации для кнопок
     const buttons = document.querySelectorAll('.modern-button');
@@ -5234,6 +5407,11 @@ function initMobileToggles() {
 
 // Экспорт функций
 window.initModernMobileEffects = initModernMobileEffects;
+window.initScrollReveal = initScrollReveal;
+window.initTrustCounters = initTrustCounters;
+window.initQuickSearch = initQuickSearch;
+window.initKeyboardShortcuts = initKeyboardShortcuts;
+window.initKbdHint = initKbdHint;
 window.initMobileHeader = initMobileHeader;
 window.initMobileToggles = initMobileToggles;
 // Экспортируем ключевые функции product-detail для тестов и внешнего использования

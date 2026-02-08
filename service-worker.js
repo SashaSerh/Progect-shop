@@ -1,5 +1,5 @@
 const CACHE_VERSION = 'v82'; // FAB inside floating-buttons
-const CACHE_NAME = 'climat-control-v113'; // unified floating-buttons layout
+const CACHE_NAME = 'climat-control-v115'; // desktop UX improvements (footer, scroll-reveal, glass, hovers, stats, quick-search)
 const urlsToCache = [
     '/',
     '/index.html',

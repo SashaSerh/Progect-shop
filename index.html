@@ -234,6 +234,28 @@
     
     <!-- Bottom Tab Bar (mobile app navigation) -->
     <div id="bottom-tab-bar-container"></div>
+
+    <!-- Quick Search Modal (Cmd+K) -->
+    <div class="quick-search-overlay" id="quickSearchOverlay" role="dialog" aria-modal="true" aria-label="Быстрый поиск" style="display:none">
+        <div class="quick-search">
+            <div class="quick-search__header">
+                <svg class="quick-search__icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+                <input type="text" class="quick-search__input" id="quickSearchInput" placeholder="Поиск по разделам..." data-i18n-placeholder="quick-search-placeholder" autocomplete="off" spellcheck="false">
+                <kbd class="quick-search__kbd">Esc</kbd>
+            </div>
+            <ul class="quick-search__results" id="quickSearchResults" role="listbox"></ul>
+            <div class="quick-search__footer">
+                <span><kbd>↑↓</kbd> <span data-i18n="quick-search-navigate">навигация</span></span>
+                <span><kbd>↵</kbd> <span data-i18n="quick-search-open">открыть</span></span>
+                <span><kbd>Esc</kbd> <span data-i18n="quick-search-close">закрыть</span></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Keyboard shortcut hint (desktop only) -->
+    <div class="kbd-hint" id="kbdHint" aria-hidden="true">
+        <kbd>⌘</kbd><kbd>K</kbd> <span data-i18n="kbd-hint-search">— быстрый поиск</span>
+    </div>
     
     <!-- Toast area for cart Undo messages -->
     <div id="toast-container" aria-live="polite" aria-atomic="true" class="toast-container" style="position: fixed; left: 50%; transform: translateX(-50%); bottom: 16px; z-index: 4000;"></div>

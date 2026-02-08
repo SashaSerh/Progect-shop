@@ -4265,6 +4265,14 @@ document.addEventListener('DOMContentLoaded', () => {
     initQuickSearch();
     initKeyboardShortcuts();
     initKbdHint();
+    initSectionDots();
+    initScrollProgress();
+    initHeroParallax();
+    // Delayed init: wait for components to load
+    setTimeout(() => {
+        try { initAnimatedThemeToggle(); } catch(_) {}
+        try { initClickToCopy(); } catch(_) {}
+    }, 1500);
 
     // Переинициализация мобильных эффектов при изменении размера окна
     let resizeTimeout;
@@ -4735,6 +4743,269 @@ function initKbdHint() {
             hint.classList.remove('visible');
         }, 8000);
     }, 3000);
+}
+
+// ========================================
+// DESKTOP UX: Section Dots Navigation (ScrollSpy)
+// ========================================
+function initSectionDots() {
+    const dotsContainer = document.getElementById('sectionDots');
+    if (!dotsContainer) return;
+    // Only on desktop
+    if (window.innerWidth < 769) return;
+
+    const lang = localStorage.getItem('language') || 'uk';
+    const sections = [
+        { id: 'home', label: { uk: 'Головна', ru: 'Главная' } },
+        { id: 'services-container', label: { uk: 'Послуги', ru: 'Услуги' } },
+        { id: 'portfolio-container', label: { uk: 'Портфоліо', ru: 'Портфолио' } },
+        { id: 'reviews-container', label: { uk: 'Відгуки', ru: 'Отзывы' } },
+        { id: 'faq-container', label: { uk: 'FAQ', ru: 'FAQ' } },
+        { id: 'contacts-container', label: { uk: 'Контакти', ru: 'Контакты' } },
+        { id: 'footer-container', label: { uk: 'Підвал', ru: 'Подвал' } }
+    ];
+
+    dotsContainer.innerHTML = sections.map(s => `
+        <div class="section-dots__item" data-section="${s.id}" role="button" tabindex="0" aria-label="${s.label[lang] || s.label.uk}">
+            <button class="section-dots__dot" aria-hidden="true"></button>
+            <span class="section-dots__tooltip">${s.label[lang] || s.label.uk}</span>
+        </div>
+    `).join('');
+
+    // Click handler
+    dotsContainer.addEventListener('click', (e) => {
+        const item = e.target.closest('.section-dots__item');
+        if (!item) return;
+        const sectionId = item.dataset.section;
+        const target = document.getElementById(sectionId);
+        if (target) {
+            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    });
+
+    // Keyboard handler
+    dotsContainer.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            const item = e.target.closest('.section-dots__item');
+            if (!item) return;
+            const sectionId = item.dataset.section;
+            const target = document.getElementById(sectionId);
+            if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    });
+
+    // ScrollSpy observer
+    let activeSectionId = null;
+    const observerMap = new Map();
+
+    const spyObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            observerMap.set(entry.target.id, entry.isIntersecting);
+        });
+
+        // Find the topmost visible section
+        for (const s of sections) {
+            if (observerMap.get(s.id)) {
+                if (activeSectionId !== s.id) {
+                    activeSectionId = s.id;
+                    dotsContainer.querySelectorAll('.section-dots__item').forEach(d => {
+                        d.classList.toggle('active', d.dataset.section === s.id);
+                    });
+                }
+                break;
+            }
+        }
+    }, {
+        threshold: 0.15,
+        rootMargin: '-10% 0px -60% 0px'
+    });
+
+    sections.forEach(s => {
+        const el = document.getElementById(s.id);
+        if (el) spyObserver.observe(el);
+    });
+
+    // Show dots after first scroll
+    let dotsShown = false;
+    window.addEventListener('scroll', () => {
+        if (dotsShown) return;
+        if (window.scrollY > 200) {
+            dotsContainer.classList.add('visible');
+            dotsShown = true;
+        }
+    }, { passive: true });
+}
+
+// ========================================
+// DESKTOP UX: Animated Theme Toggle (Circular Reveal)
+// ========================================
+function initAnimatedThemeToggle() {
+    // Intercept all theme toggle clicks to add circular reveal
+    const themeButtons = document.querySelectorAll('#settingsThemeToggle, #mobileThemeToggle, .theme-toggle, .mobile-theme-toggle');
+    if (!themeButtons.length) return;
+
+    const overlay = document.getElementById('themeRevealOverlay');
+    if (!overlay) return;
+
+    themeButtons.forEach(btn => {
+        // Remove existing click listener from theme.js; we'll wrap it
+        const newBtn = btn.cloneNode(true);
+        btn.parentNode.replaceChild(newBtn, btn);
+
+        newBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+            // Get click position for reveal origin
+            const rect = newBtn.getBoundingClientRect();
+            const x = ((rect.left + rect.width / 2) / window.innerWidth * 100).toFixed(1);
+            const y = ((rect.top + rect.height / 2) / window.innerHeight * 100).toFixed(1);
+
+            const supportsClipPath = typeof CSS !== 'undefined' && CSS.supports && CSS.supports('clip-path', 'circle(0% at 50% 50%)');
+            if (prefersReduced || !supportsClipPath) {
+                // Fallback: just toggle without animation
+                if (typeof window.toggleTheme === 'function') window.toggleTheme();
+                return;
+            }
+
+            // Determine next theme color for overlay
+            const isCurrentlyLight = document.body.classList.contains('light-theme');
+            const nextBg = isCurrentlyLight
+                ? getComputedStyle(document.documentElement).getPropertyValue('--background-color').trim() || '#000'
+                : '#f2f2f7';
+
+            overlay.style.setProperty('--reveal-x', x + '%');
+            overlay.style.setProperty('--reveal-y', y + '%');
+            overlay.style.background = nextBg;
+
+            // Prevent flickering: disable transitions during reveal
+            document.body.classList.add('theme-circular-reveal');
+            overlay.classList.add('animating');
+
+            // At animation midpoint, actually toggle theme
+            setTimeout(() => {
+                if (typeof window.toggleTheme === 'function') window.toggleTheme();
+            }, 250);
+
+            // Remove overlay after animation ends
+            const cleanup = () => {
+                overlay.classList.remove('animating');
+                overlay.style.background = '';
+                document.body.classList.remove('theme-circular-reveal');
+            };
+            overlay.addEventListener('animationend', cleanup, { once: true });
+            // Safety fallback
+            setTimeout(cleanup, 700);
+        });
+    });
+}
+
+// ========================================
+// DESKTOP UX: Click-to-Copy Phone + Toast
+// ========================================
+function initClickToCopy() {
+    // Only for devices with fine pointer (desktop)
+    try {
+        if (!window.matchMedia || !window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+    } catch (_) { return; }
+
+    const phoneLinks = document.querySelectorAll('[data-copy]');
+    if (!phoneLinks.length) return;
+
+    const lang = localStorage.getItem('language') || 'uk';
+    const copyMsg = lang === 'uk' ? '📋 Номер скопійовано!' : '📋 Номер скопирован!';
+
+    phoneLinks.forEach(link => {
+        link.addEventListener('click', async (e) => {
+            e.preventDefault();
+            const number = link.dataset.copy;
+            try {
+                await navigator.clipboard.writeText(number);
+                showCopyToast(copyMsg);
+                // Brief visual feedback
+                link.style.transform = 'scale(0.95)';
+                setTimeout(() => { link.style.transform = ''; }, 150);
+                if (navigator.vibrate) navigator.vibrate(20);
+            } catch (err) {
+                // Fallback: open tel link
+                window.location.href = 'tel:' + number;
+            }
+        });
+    });
+}
+
+function showCopyToast(msg) {
+    const container = document.getElementById('toast-container');
+    if (!container) return;
+    const toast = document.createElement('div');
+    toast.className = 'toast--copy';
+    toast.textContent = msg;
+    toast.setAttribute('role', 'status');
+    container.appendChild(toast);
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transition = 'opacity 0.3s ease';
+        setTimeout(() => toast.remove(), 350);
+    }, 2500);
+}
+
+// ========================================
+// DESKTOP UX: Circular Scroll Progress Button
+// ========================================
+function initScrollProgress() {
+    const scrollBtn = document.querySelector('.scroll-to-top');
+    if (!scrollBtn) return;
+    const progressCircle = scrollBtn.querySelector('.scroll-progress-ring__progress');
+    if (!progressCircle) return;
+
+    const circumference = 2 * Math.PI * 25; // r=25
+    progressCircle.style.strokeDasharray = String(circumference);
+    progressCircle.style.strokeDashoffset = String(circumference);
+
+    const updateProgress = () => {
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        const docHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+        if (docHeight <= 0) return;
+        const progress = Math.min(scrollTop / docHeight, 1);
+        const offset = circumference * (1 - progress);
+        progressCircle.style.strokeDashoffset = String(offset);
+    };
+
+    window.addEventListener('scroll', updateProgress, { passive: true });
+    updateProgress();
+}
+
+// ========================================
+// DESKTOP UX: Parallax Hero Effect
+// ========================================
+function initHeroParallax() {
+    const hero = document.querySelector('.hero--parallax');
+    if (!hero) return;
+    // Only apply parallax on desktop
+    if (window.innerWidth < 769) return;
+    // Skip if reduced motion preferred
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    let ticking = false;
+    const onScroll = () => {
+        if (ticking) return;
+        ticking = true;
+        requestAnimationFrame(() => {
+            const scrollY = window.pageYOffset;
+            const heroHeight = hero.offsetHeight;
+            // Parallax only while hero is visible
+            if (scrollY < heroHeight * 1.5) {
+                const offset = scrollY * 0.35;
+                hero.style.backgroundPositionY = `calc(50% + ${offset}px)`;
+            }
+            ticking = false;
+        });
+    };
+
+    window.addEventListener('scroll', onScroll, { passive: true });
 }
 
 // Современные мобильные эффекты
@@ -5412,6 +5683,11 @@ window.initTrustCounters = initTrustCounters;
 window.initQuickSearch = initQuickSearch;
 window.initKeyboardShortcuts = initKeyboardShortcuts;
 window.initKbdHint = initKbdHint;
+window.initSectionDots = initSectionDots;
+window.initAnimatedThemeToggle = initAnimatedThemeToggle;
+window.initClickToCopy = initClickToCopy;
+window.initScrollProgress = initScrollProgress;
+window.initHeroParallax = initHeroParallax;
 window.initMobileHeader = initMobileHeader;
 window.initMobileToggles = initMobileToggles;
 // Экспортируем ключевые функции product-detail для тестов и внешнего использования

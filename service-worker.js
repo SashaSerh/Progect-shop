@@ -1,5 +1,5 @@
 const CACHE_VERSION = 'v82'; // FAB inside floating-buttons
-const CACHE_NAME = 'climat-control-v115'; // desktop UX improvements (footer, scroll-reveal, glass, hovers, stats, quick-search)
+const CACHE_NAME = 'climat-control-v116'; // section dots, theme reveal, copy phone, scroll progress, parallax hero
 const urlsToCache = [
     '/',
     '/index.html',

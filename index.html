@@ -176,7 +176,13 @@
     
     <!-- Плавающие кнопки справа (scroll-to-top + настройки + FAB) -->
     <div class="floating-buttons" id="floating-buttons">
-        <button class="scroll-to-top" aria-label="Прокрутить наверх" title="Наверх">↑</button>
+        <button class="scroll-to-top" aria-label="Прокрутить наверх" title="Наверх">
+            <svg class="scroll-progress-ring" viewBox="0 0 56 56">
+                <circle class="scroll-progress-ring__bg" cx="28" cy="28" r="25"/>
+                <circle class="scroll-progress-ring__progress" cx="28" cy="28" r="25" stroke-dasharray="157" stroke-dashoffset="157"/>
+            </svg>
+            <span class="scroll-progress-arrow" aria-hidden="true">↑</span>
+        </button>
         <!-- Кнопка настроек (тема + язык) -->
         <div class="settings-container" id="settings-container">
             <button class="settings-trigger" aria-label="Настройки" aria-expanded="false" aria-controls="settings-actions">
@@ -256,6 +262,12 @@
     <div class="kbd-hint" id="kbdHint" aria-hidden="true">
         <kbd>⌘</kbd><kbd>K</kbd> <span data-i18n="kbd-hint-search">— быстрый поиск</span>
     </div>
+
+    <!-- Section Dots Navigation (desktop scroll spy) -->
+    <nav class="section-dots" id="sectionDots" aria-label="Навигация по секциям"></nav>
+
+    <!-- Theme Reveal Overlay (circular clip-path animation) -->
+    <div class="theme-reveal-overlay" id="themeRevealOverlay"></div>
     
     <!-- Toast area for cart Undo messages -->
     <div id="toast-container" aria-live="polite" aria-atomic="true" class="toast-container" style="position: fixed; left: 50%; transform: translateX(-50%); bottom: 16px; z-index: 4000;"></div>

@@ -6328,12 +6328,16 @@ function initMobileMainNav() {
         if (href === '#back-to-menu') {
             e.preventDefault();
             restoreMainMenu(navList);
+        } else if (href === '#services') {
+            // Мобильная навигация: показать список услуг (slide справа налево)
+            e.preventDefault();
+            showServicesList(navList);
         } else if (href && href.startsWith('#service-')) {
             // Ссылки на страницы услуг - устанавливаем hash для навигации
             e.preventDefault();
             location.hash = href;
         } else if (href && href.startsWith('#')) {
-            // Все остальные хеш-ссылки (services, portfolio-page, reviews-page, faq-page, contacts, about)
+            // Все остальные хеш-ссылки (portfolio-page, reviews-page, faq-page, contacts, about)
             e.preventDefault();
             location.hash = href;
         }

@@ -2126,30 +2126,20 @@ function setupServiceRouting() {
                 return;
             }
 
-            // Для services / services-page
-            if (hash === 'services' || hash === 'services-page') {
+            // #services - smooth scroll to services section (landing page mode, no separate page)
+            if (hash === 'services') {
+                // Keep all landing containers visible, just scroll to services
                 LANDING_CONTAINERS.forEach(id => {
-                    setHiddenById(id, !['services-container', 'footer-container'].includes(id));
+                    setHiddenById(id, !alwaysVisible.includes(id));
                 });
-                // Добавить кнопку возврата (вариант: ghost), если нет
-                try {
-                    const container = document.getElementById('services-container');
-                    const section = container?.querySelector('.services');
-                    if (section && !section.querySelector('.back-to-main')) {
-                        const btn = document.createElement('a');
-                        btn.className = 'back-to-main btn service-page__back glass';
-                        btn.setAttribute('data-variant','ghost');
-                        btn.href = '#';
-                        btn.setAttribute('aria-label', 'Назад на главную');
-                        btn.title = 'Назад';
-                        btn.innerText = '←';
-                        // back click handled by delegated handler to provide smooth exit animation and focus
-                        section.insertBefore(btn, section.firstChild);
+                // Smooth scroll to services section
+                setTimeout(() => {
+                    const servicesSection = document.getElementById('services');
+                    if (servicesSection) {
+                        servicesSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
                     }
-                } catch(_) { /* noop */ }
-                scrollToSectionTop('services');
+                }, 100);
                 setActiveNav('services');
-                focusSectionHeading('services', 'h2');
                 return;
             }
 
@@ -4578,7 +4568,7 @@ function initQuickSearch() {
     // Search items (all main sections)
     const searchItems = [
         { icon: '🏠', name: { uk: 'Головна', ru: 'Главная' }, hash: '', section: '' },
-        { icon: '🔧', name: { uk: 'Послуги', ru: 'Услуги' }, hash: '#services-page', section: '' },
+        { icon: '🔧', name: { uk: 'Послуги', ru: 'Услуги' }, hash: '#services', section: '' },
         { icon: '❄️', name: { uk: 'Монтаж кондиціонерів', ru: 'Монтаж кондиционеров' }, hash: '#service-ac-install', section: { uk: 'Послуги', ru: 'Услуги' } },
         { icon: '🌬️', name: { uk: 'Монтаж рекуператорів', ru: 'Монтаж рекуператоров' }, hash: '#service-recuperator-install', section: { uk: 'Послуги', ru: 'Услуги' } },
         { icon: '🛠️', name: { uk: 'Обслуговування систем', ru: 'Обслуживание систем' }, hash: '#service-maintenance', section: { uk: 'Послуги', ru: 'Услуги' } },
@@ -4722,7 +4712,7 @@ function initKeyboardShortcuts() {
         if (e.metaKey || e.ctrlKey || e.altKey) return;
 
         const sectionMap = {
-            '1': '#services-page',
+            '1': '#services',
             '2': '#portfolio-page',
             '3': '#reviews-page',
             '4': '#faq-page',
@@ -5226,7 +5216,6 @@ function initBreadcrumbsOnRoute() {
     const hash = (location.hash || '').replace('#', '');
 
     const breadcrumbMap = {
-        'services-page': { uk: 'Послуги', ru: 'Услуги' },
         'services': { uk: 'Послуги', ru: 'Услуги' },
         'portfolio-page': { uk: 'Портфоліо', ru: 'Портфолио' },
         'reviews-page': { uk: 'Відгуки', ru: 'Отзывы' },
@@ -5250,7 +5239,7 @@ function initBreadcrumbsOnRoute() {
         if (serviceName) {
             updateBreadcrumbs([
                 { label: home, hash: '#' },
-                { label: breadcrumbMap['services-page'][lang], hash: '#services-page' },
+                { label: breadcrumbMap['services'][lang], hash: '#services' },
                 { label: serviceName[lang] }
             ]);
             return;
@@ -6388,10 +6377,7 @@ function initMobileMainNav() {
         if (!link) return;
 
         const href = link.getAttribute('href');
-        if (href === '#services-page') {
-            e.preventDefault();
-            showServicesList(navList);
-        } else if (href === '#back-to-menu') {
+        if (href === '#back-to-menu') {
             e.preventDefault();
             restoreMainMenu(navList);
         } else if (href && href.startsWith('#service-')) {
@@ -6399,7 +6385,7 @@ function initMobileMainNav() {
             e.preventDefault();
             location.hash = href;
         } else if (href && href.startsWith('#')) {
-            // Все остальные хеш-ссылки (portfolio-page, reviews-page, faq-page, contacts, about)
+            // Все остальные хеш-ссылки (services, portfolio-page, reviews-page, faq-page, contacts, about)
             e.preventDefault();
             location.hash = href;
         }
@@ -6487,7 +6473,7 @@ function restoreMainMenu(navList) {
     setTimeout(() => {
         const menuHTML = `
             <li class="main-nav-mobile__item">
-                <a href="#services-page" class="main-nav-mobile__link">
+                <a href="#services" class="main-nav-mobile__link">
                     <span class="main-nav-mobile__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 6h16M4 12h16M4 18h16"/></svg></span>
                     <span class="main-nav-mobile__text" data-i18n="nav-services">Услуги</span>
                 </a>

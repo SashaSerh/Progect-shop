@@ -24,7 +24,6 @@ export function initBottomTabBar() {
             '': 'home',
             'home': 'home',
             'services': 'services',
-            'services-page': 'services',
             'service-ac-install': 'services',
             'service-recuperator-install': 'services',
             'service-maintenance': 'services',

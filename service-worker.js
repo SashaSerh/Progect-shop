@@ -1,5 +1,5 @@
 const CACHE_VERSION = 'v82'; // FAB inside floating-buttons
-const CACHE_NAME = 'climat-control-v118'; // desktop layout standardization
+const CACHE_NAME = 'climat-control-v119'; // remove services-page duplicate, services now scroll-only
 const urlsToCache = [
     '/',
     '/index.html',

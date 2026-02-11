@@ -8,6 +8,8 @@
        Modern responsive container with fluid spacing
        ======================================== */
     --container-max-width: 1400px;
+    /* Legacy alias — older sections reference this variable */
+    --container-width: 1200px;
     --container-padding-mobile: 16px;
     --container-padding-tablet: 24px;
     --container-padding-desktop: 32px;
@@ -1280,7 +1282,7 @@ html {
 
 .main-nav-mobile__list {
     gap: 16px;
-    max-width: 960px;
+    max-width: 1000px;
     margin: 0 auto;
 }
 }
@@ -1753,6 +1755,7 @@ main {
 @media (min-width: 769px) {
 :root {
     --body-gutter: var(--container-padding-desktop);
+    --container-width: 1200px;
 }
 
 .container,
@@ -1771,7 +1774,7 @@ main {
 }
 
 .services__grid {
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 24px;
 }
 
@@ -1831,9 +1834,7 @@ section {
 }
 
 @media (min-width: 769px) {
-section {
-    padding: 48px 0;
-}
+/* section padding already set in DESKTOP EXPANSION block (64px 0) */
 
 .section__title,
 .hero__title,
@@ -1850,11 +1851,12 @@ section {
 @media (min-width: 1200px) {
 :root {
     --body-gutter: var(--container-padding-desktop);
+    --container-width: 1200px;
 }
 
 .container,
 .section-container {
-    max-width: 1320px;
+    max-width: 1200px;
     padding-inline: var(--container-padding-desktop);
 }
 
@@ -1882,6 +1884,7 @@ section {
 @media (min-width: 1440px) {
 :root {
     --body-gutter: var(--container-padding-wide);
+    --container-width: 1400px;
 }
 
 .container,
@@ -2679,13 +2682,13 @@ html {
 
 .faq__list {
     display: grid;
-    gap: 10px;
+    gap: 12px;
 }
 
 .faq-item {
     border: 1px solid var(--border,#e5e5e5);
-    border-radius: 12px;
-    padding: 10px 12px;
+    border-radius: 14px;
+    padding: 14px 16px;
     background: var(--surface,#fff);
     transition: background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
 }
@@ -3372,17 +3375,17 @@ html {
     margin: 0;
     padding: 0;
     display: grid;
-    gap: 14px;
+    gap: 16px;
 }
 
 .reviews__item {
-    padding: 12px 14px;
+    padding: 16px;
     border: 1px solid var(--border,#ddd);
-    border-radius: 14px;
+    border-radius: 16px;
     background: var(--surface,#fff);
     box-shadow: 0 2px 6px rgba(0,0,0,0.04);
     display: grid;
-    gap: 6px;
+    gap: 8px;
 }
 
 .reviews__item-header {
@@ -3969,8 +3972,7 @@ html {
 /* Page layout */
 
 .calculator-page {
-    /* padding: clamp(16px, 4vw, 32px); */
-    max-width: 1200px;
+    max-width: var(--container-width, 1200px);
     margin: 0 auto;
 }
 
@@ -6525,10 +6527,12 @@ select {
     will-change: transform, opacity;
 }
 
+/* Legacy .container override removed — unified system at line ~940 handles this.
+   Kept padding fallback for pages that still use --page-top / --gutter-sm */
 .container {
-    max-width: var(--container-width);
+    max-width: var(--container-max-width);
     margin: 0 auto;
-    padding: var(--page-top) var(--gutter-sm) 0;
+    padding: var(--page-top, 0) var(--gutter-sm, var(--container-padding)) 0;
 }
 
 .header {
@@ -8476,9 +8480,9 @@ body {
 /* Desktop: main-nav-mobile-card responsive grid */
 @media (min-width: 769px) {
 .main-nav-mobile-card {
-    max-width: 960px;
+    max-width: 1000px;
     margin: 0 auto 24px;
-    padding: 24px 28px;
+    padding: 24px 32px;
     border-radius: 22px;
     box-shadow: 0 8px 32px rgba(0,0,0,0.06);
 }
@@ -8600,7 +8604,13 @@ body {
 }
 
 .services {
-    padding: 40px 0;
+    padding: 48px 0;
+}
+
+@media (min-width: 769px) {
+    .services {
+        padding: 64px 0;
+    }
 }
 
 .services__title {
@@ -8614,14 +8624,14 @@ body {
 .services__grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 16px;
+    gap: 20px;
 }
 
 .service-card {
     background: var(--primary-color);
     backdrop-filter: blur(10px);
-    border-radius: 14px;
-    padding: 6px;
+    border-radius: 16px;
+    padding: 16px;
     text-align: center;
     box-shadow: var(--shadow);
     border: none;
@@ -10208,8 +10218,8 @@ textarea.form-input {
 
 .portfolio__grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px,1fr));
-    gap: 16px;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 20px;
 }
 
 .portfolio__item {
@@ -14867,9 +14877,9 @@ body {
     display: grid;
     grid-template-columns: 2fr 1fr 1.5fr;
     gap: 40px;
-    max-width: 1100px;
+    max-width: 1200px;
     margin: 0 auto;
-    padding: 40px 24px 24px;
+    padding: 40px var(--container-padding-desktop, 32px) 24px;
 }
 
 .footer__brand {
@@ -15005,9 +15015,9 @@ body {
 
 .footer__bottom {
     text-align: center;
-    padding: 16px 24px;
+    padding: 16px var(--container-padding-desktop, 32px);
     border-top: 1px solid rgba(255,255,255,0.1);
-    max-width: 1100px;
+    max-width: 1200px;
     margin: 0 auto;
 }
 
@@ -15187,15 +15197,14 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 20px;
-    padding: 20px 28px;
+    gap: 24px;
+    padding: 24px 32px;
     margin-top: 16px;
     border-radius: 16px;
     background: var(--glass-bg, rgba(0, 0, 0, 0.25));
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.12));
-   
     width: 100%;
 }
 
@@ -15221,7 +15230,7 @@ body {
 }
 
 .hero-trust-stats__number {
-    font-size: 32px;
+    font-size: 28px;
     font-weight: 800;
     color: var(--accent-color, #007AFF);
     line-height: 1;
@@ -15235,7 +15244,7 @@ body {
 }
 
 .hero-trust-stats__label {
-    font-size: 12px;
+    font-size: 13px;
     color: var(--nav-text-color, #D1D1D6);
     opacity: 0.8;
     text-align: center;
@@ -15792,7 +15801,7 @@ body.theme-circular-reveal * {
     position: relative;
     overflow: hidden;
     padding: 32px 0 40px;
-    max-width: 820px;
+    max-width: 1000px;
     margin: 24px auto 0;
 }
 
@@ -15815,7 +15824,7 @@ body.theme-circular-reveal * {
     -webkit-backdrop-filter: blur(10px);
     border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.12));
     border-radius: 16px;
-    padding: 28px 24px;
+    padding: 32px;
     text-align: center;
 }
 
@@ -15842,12 +15851,12 @@ body.theme-circular-reveal * {
 }
 
 .testimonials-carousel__text {
-    font-size: 15px;
+    font-size: 16px;
     line-height: 1.6;
     color: var(--nav-text-color, #D1D1D6);
     margin-bottom: 16px;
     font-style: italic;
-    max-width: 520px;
+    max-width: 640px;
     margin-left: auto;
     margin-right: auto;
 }
@@ -15944,7 +15953,7 @@ body.theme-circular-reveal * {
     overflow: hidden;
     border-radius: 16px;
     cursor: col-resize;
-    max-width: 700px;
+    max-width: 800px;
     margin: 0 auto;
     user-select: none;
     -webkit-user-select: none;
@@ -16042,18 +16051,22 @@ body.theme-circular-reveal * {
 /* ── 14. BREADCRUMBS (Enhanced) ── */
 
 .breadcrumbs-bar {
-    padding: 10px 0;
+    padding: 12px 0;
     margin-bottom: 8px;
+    max-width: var(--container-width, 1200px);
+    margin-left: auto;
+    margin-right: auto;
+    padding-inline: var(--container-padding, 16px);
 }
 
 .breadcrumbs-bar__list {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
     list-style: none;
     padding: 0;
     margin: 0;
-    font-size: 13px;
+    font-size: 14px;
     flex-wrap: wrap;
 }
 
@@ -16096,12 +16109,12 @@ body.theme-circular-reveal * {
     z-index: 9000;
     background: linear-gradient(135deg, var(--accent-color, #007AFF), #00c6ff);
     color: #fff;
-    padding: 10px 16px;
+    padding: 12px 32px;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 12px;
-    font-size: 14px;
+    gap: 16px;
+    font-size: 15px;
     font-weight: 500;
     transform: translateY(-100%);
     transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -16222,23 +16235,23 @@ body.theme-circular-reveal * {
 /* ── 17. QR CODE FOR DESKTOP ── */
 
 .footer__qr {
-    margin-top: 12px;
+    margin-top: 16px;
     text-align: center;
 }
 
 .footer__qr-title {
-    font-size: 11px;
+    font-size: 12px;
     color: var(--nav-text-color);
     opacity: 0.6;
-    margin-bottom: 6px;
+    margin-bottom: 8px;
 }
 
 .footer__qr-code {
-    width: 96px;
-    height: 96px;
-    border-radius: 8px;
+    width: 100px;
+    height: 100px;
+    border-radius: 10px;
     background: #fff;
-    padding: 6px;
+    padding: 8px;
     display: inline-block;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }

@@ -1,5 +1,5 @@
 const CACHE_VERSION = 'v82'; // FAB inside floating-buttons
-const CACHE_NAME = 'climat-control-v117'; // carousel, before/after, breadcrumbs, CTA banner, FAB badge, QR code
+const CACHE_NAME = 'climat-control-v118'; // desktop layout standardization
 const urlsToCache = [
     '/',
     '/index.html',

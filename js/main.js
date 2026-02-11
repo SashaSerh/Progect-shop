@@ -2128,10 +2128,10 @@ function setupServiceRouting() {
 
             // #services - smooth scroll to services section (landing page mode, no separate page)
             if (hash === 'services') {
-                // Keep all landing containers visible, just scroll to services
-                LANDING_CONTAINERS.forEach(id => {
-                    setHiddenById(id, !alwaysVisible.includes(id));
-                });
+                // Show all landing containers (home view) so services section is visible
+                LANDING_CONTAINERS.forEach(id => setHiddenById(id, false));
+                Object.values(SERVICE_MAP).forEach(id => setHiddenById(id, true));
+                CASE_CONTAINERS.forEach(id => setHiddenById(id, true));
                 // Smooth scroll to services section
                 setTimeout(() => {
                     const servicesSection = document.getElementById('services');
@@ -4251,7 +4251,6 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Desktop UX: scroll-reveal, counters, quick search, keyboard shortcuts
     initScrollReveal();
-    initTrustCounters();
     initQuickSearch();
     initKeyboardShortcuts();
     initKbdHint();
@@ -4472,7 +4471,6 @@ function initScrollReveal() {
     // Tag sections for reveal
     const sectionSelectors = [
         '.hero-calculator-promo',
-        '.hero-trust-stats',
         '.reviews',
         '.faq',
         '.portfolio',
@@ -4503,56 +4501,7 @@ function initScrollReveal() {
     });
 }
 
-// ========================================
-// DESKTOP UX: Trust Counter Animation
-// ========================================
-function initTrustCounters() {
-    const statsContainer = document.querySelector('.hero-trust-stats');
-    if (!statsContainer) return;
 
-    const items = statsContainer.querySelectorAll('.hero-trust-stats__item[data-count]');
-    if (!items.length) return;
-
-    let animated = false;
-
-    const animateCount = (el) => {
-        const target = parseInt(el.getAttribute('data-count'), 10);
-        const numberEl = el.querySelector('.hero-trust-stats__number');
-        if (!numberEl || isNaN(target)) return;
-
-        const duration = 1600; // ms
-        const start = performance.now();
-        const easeOutQuart = t => 1 - Math.pow(1 - t, 4);
-
-        const tick = (now) => {
-            const elapsed = now - start;
-            const progress = Math.min(elapsed / duration, 1);
-            const value = Math.round(easeOutQuart(progress) * target);
-            numberEl.textContent = value;
-            if (progress < 1) {
-                requestAnimationFrame(tick);
-            }
-        };
-        requestAnimationFrame(tick);
-    };
-
-    if (!('IntersectionObserver' in window)) {
-        items.forEach(animateCount);
-        return;
-    }
-
-    const counterObserver = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting && !animated) {
-                animated = true;
-                items.forEach(animateCount);
-                counterObserver.disconnect();
-            }
-        });
-    }, { threshold: 0.3 });
-
-    counterObserver.observe(statsContainer);
-}
 
 // ========================================
 // DESKTOP UX: Quick Search (Cmd+K)
@@ -6074,7 +6023,6 @@ function initMobileToggles() {
 // Экспорт функций
 window.initModernMobileEffects = initModernMobileEffects;
 window.initScrollReveal = initScrollReveal;
-window.initTrustCounters = initTrustCounters;
 window.initQuickSearch = initQuickSearch;
 window.initKeyboardShortcuts = initKeyboardShortcuts;
 window.initKbdHint = initKbdHint;

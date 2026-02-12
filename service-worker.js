@@ -1,5 +1,5 @@
 const CACHE_VERSION = 'v80'; // Added winter-kit service
-const CACHE_NAME = 'climat-control-v112'; // add scroll progress indicator
+const CACHE_NAME = 'climat-control-v114'; // update FAQ page content and styles
 const urlsToCache = [
     '/',
     '/index.html',

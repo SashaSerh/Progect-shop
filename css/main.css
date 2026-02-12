@@ -1279,6 +1279,8 @@ html {
 
 .settings-container {
     position: relative;
+    order: 2;
+    flex-shrink: 0;
 }
 
 .settings-trigger {
@@ -2621,66 +2623,296 @@ html {
     color: #b00020;
 }
 
-/* .faq { margin: clamp(28px, 8vw, 64px) 0; } */
+/* ========================================
+   FAQ ACCORDION STYLES
+   Современный аккордеон с анимациями
+   ======================================== */
+
+.faq {
+    padding: clamp(24px, 5vw, 48px) 0;
+}
+
+.faq__header {
+    text-align: center;
+    margin-bottom: 8px;
+}
+
+.faq__title {
+    font-size: clamp(24px, 5vw, 36px);
+    font-weight: 700;
+    margin: 0;
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary, #00d4aa) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.faq__subtitle {
+    margin: 8px 0 0;
+    font-size: 14px;
+    color: var(--text-secondary, #666);
+    font-weight: 400;
+}
+
+[data-theme="dark"] .faq__subtitle,
+.theme-dark .faq__subtitle {
+    color: var(--text-secondary, #94a3b8);
+}
+
+.faq-header-card {
+    margin-bottom: 16px;
+    padding: 20px 24px;
+}
+
+.faq-card {
+    padding: 16px;
+}
 
 .faq__list {
     display: grid;
-    gap: 10px;
+    gap: 12px;
 }
 
+/* FAQ Item — details/summary аккордеон */
 .faq-item {
-    border: 1px solid var(--border,#e5e5e5);
-    border-radius: 12px;
-    padding: 10px 12px;
-    background: var(--surface,#fff);
-    transition: background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+    border: 1px solid var(--border, rgba(0,0,0,0.08));
+    border-radius: 16px;
+    padding: 0;
+    background: var(--surface, #fff);
+    overflow: hidden;
+    transition: 
+        background 0.2s ease, 
+        border-color 0.2s ease, 
+        box-shadow 0.25s ease,
+        transform 0.2s ease;
 }
 
+.faq-item:hover {
+    border-color: var(--color-primary);
+    box-shadow: 0 4px 20px rgba(0, 122, 255, 0.08);
+}
+
+.faq-item[open] {
+    border-color: var(--color-primary);
+    box-shadow: 0 8px 32px rgba(0, 122, 255, 0.12);
+}
+
+/* Summary (вопрос) */
 .faq-item__q {
-    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 18px 20px;
+    font-weight: 600;
+    font-size: 15px;
+    line-height: 1.4;
     cursor: pointer;
+    list-style: none;
+    color: var(--on-surface, #1a1a1a);
+    transition: color 0.2s ease, background 0.2s ease;
+    user-select: none;
+}
+
+.faq-item__q::-webkit-details-marker {
+    display: none;
+}
+
+.faq-item__q::marker {
+    display: none;
+    content: '';
+}
+
+/* Иконка стрелки */
+.faq-item__q::after {
+    content: '';
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    background: var(--color-primary);
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E") center/contain no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E") center/contain no-repeat;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.faq-item[open] .faq-item__q::after {
+    transform: rotate(180deg);
+}
+
+.faq-item__q:hover {
+    background: rgba(0, 122, 255, 0.04);
 }
 
 .faq-item__q:focus-visible {
-    outline: 2px solid var(--accent-color,#007aff);
-    outline-offset: 2px;
-    border-radius: 8px;
+    outline: none;
+    background: rgba(0, 122, 255, 0.08);
+    box-shadow: inset 0 0 0 2px var(--color-primary);
+    border-radius: 16px 16px 0 0;
 }
 
+/* Ответ */
 .faq-item__a {
-    margin-bottom: 8px;
+    padding: 0 20px 20px 20px;
     font-size: 14px;
-    line-height: 1.55;
-    color: var(--on-surface,#222);
+    line-height: 1.65;
+    color: var(--text-secondary, #555);
+    animation: faqSlideDown 0.3s ease-out;
 }
 
-/* Dark theme: FAQ items */
+@keyframes faqSlideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
 
+/* Нумерация вопросов */
+.faq__list {
+    counter-reset: faq-counter;
+}
+
+.faq-item {
+    counter-increment: faq-counter;
+}
+
+.faq-item__q::before {
+    content: counter(faq-counter);
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    color: #fff;
+    background: linear-gradient(135deg, var(--color-primary), var(--color-secondary, #00d4aa));
+    border-radius: 50%;
+    margin-right: 4px;
+}
+
+/* ========================================
+   FAQ DARK THEME
+   ======================================== */
+[data-theme="dark"] .faq-item,
 .theme-dark .faq-item {
-    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-    border: 1px solid rgba(255,255,255,0.06);
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.01);
-    color: var(--text-primary, #f0f0f0);
+    background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+    border: 1px solid rgba(255,255,255,0.08);
 }
 
+[data-theme="dark"] .faq-item:hover,
 .theme-dark .faq-item:hover {
-    background: linear-gradient(180deg, rgba(255,255,255,0.035), rgba(59,130,246,0.02));
-    border-color: rgba(59,130,246,0.08);
-    box-shadow: 0 6px 18px rgba(59,130,246,0.04);
-    transform: translateY(-2px);
+    background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(59,130,246,0.03));
+    border-color: rgba(59,130,246,0.2);
+    box-shadow: 0 8px 24px rgba(59,130,246,0.08);
 }
 
+[data-theme="dark"] .faq-item[open],
+.theme-dark .faq-item[open] {
+    border-color: rgba(59,130,246,0.3);
+    box-shadow: 0 12px 40px rgba(59,130,246,0.15);
+}
+
+[data-theme="dark"] .faq-item__q,
 .theme-dark .faq-item__q {
     color: var(--text-primary, #f0f0f0);
 }
 
-.theme-dark .faq-item__a {
-    color: var(--text-secondary, #cbd5e1);
+[data-theme="dark"] .faq-item__q:hover,
+.theme-dark .faq-item__q:hover {
+    background: rgba(59,130,246,0.08);
 }
 
+[data-theme="dark"] .faq-item__q:focus-visible,
 .theme-dark .faq-item__q:focus-visible {
-    outline: 2px solid rgba(59,130,246,0.16);
-    box-shadow: 0 0 0 6px rgba(59,130,246,0.06);
+    background: rgba(59,130,246,0.12);
+    box-shadow: inset 0 0 0 2px rgba(59,130,246,0.5);
+}
+
+[data-theme="dark"] .faq-item__a,
+.theme-dark .faq-item__a {
+    color: var(--text-secondary, #94a3b8);
+}
+
+[data-theme="dark"] .faq-item__q::after,
+.theme-dark .faq-item__q::after {
+    background: #60a5fa;
+}
+
+/* ========================================
+   FAQ LIGHT THEME REFINEMENTS
+   ======================================== */
+.light-theme .faq__title {
+    background: linear-gradient(135deg, #0066cc 0%, #00a86b 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+}
+
+.light-theme .faq-item {
+    background: #fff;
+    border-color: rgba(0,0,0,0.06);
+}
+
+.light-theme .faq-item:hover {
+    border-color: #0066cc;
+    box-shadow: 0 6px 24px rgba(0, 102, 204, 0.1);
+}
+
+/* ========================================
+   FAQ MOBILE RESPONSIVE
+   ======================================== */
+@media (max-width: 768px) {
+    .faq-header-card {
+        padding: 16px 20px;
+        margin-bottom: 12px;
+    }
+    
+    .faq-card {
+        padding: 12px;
+    }
+    
+    .faq__list {
+        gap: 10px;
+    }
+    
+    .faq-item__q {
+        padding: 16px;
+        font-size: 14px;
+        gap: 12px;
+    }
+    
+    .faq-item__q::before {
+        width: 24px;
+        height: 24px;
+        font-size: 11px;
+    }
+    
+    .faq-item__q::after {
+        width: 20px;
+        height: 20px;
+    }
+    
+    .faq-item__a {
+        padding: 0 16px 16px 16px;
+        font-size: 13px;
+    }
+}
+
+@media (max-width: 480px) {
+    .faq-item__q {
+        padding: 14px 12px;
+        font-size: 13px;
+    }
+    
+    .faq-item__a {
+        padding: 0 12px 14px 12px;
+        font-size: 12.5px;
+        line-height: 1.6;
+    }
 }
 
 /* Tiny admin buttons for conflict actions */
@@ -6766,10 +6998,10 @@ select {
 /* FAB (Floating Action Button) для связи */
 
 .fab-container {
-    position: fixed;
-    right: 20px;
-    bottom: 20px;
-    z-index: 1000;
+    position: relative;
+    z-index: 2;
+    order: 3;
+    flex-shrink: 0;
 }
 
 .fab-trigger {
@@ -10391,43 +10623,45 @@ textarea.form-input {
 
 }
 
-/* Floating buttons container для лучшей группировки */
+/* Единый контейнер плавающих кнопок — горизонтальный ряд */
 
 .floating-buttons {
     position: fixed;
-    right: var(--fab-right, 24px);
-    bottom: 90px;
-    /* Выше FAB кнопки */
+    right: var(--fab-right, 20px);
+    bottom: 20px;
     display: flex;
-    flex-direction: column;
-    gap: var(--fab-gap, 12px);
-    z-index: 999;
-    /* Ниже FAB */
-    align-items: center;
-    /* Центрируем кнопки для идеального выравнивания */
+    flex-direction: row;
+    align-items: flex-end;
+    gap: 10px;
+    z-index: 1000;
     transition: bottom 300ms ease, transform 300ms ease;
-}
-
-/* Смещение вверх при открытом FAB меню (только десктоп) */
-
-@media (min-width: 769px) {
-.floating-buttons.fab-open {
-    bottom: 460px;
-    /* Поднимаем выше открытого меню FAB (6 кнопок × ~60px + отступы) */
-}
-
 }
 
 @media (max-width: 768px) {
 .floating-buttons {
-    bottom: 170px;
-    /* Поднимаем всю группу выше мобильной навигации и FAB */
-    gap: 12px;
+    right: 12px;
+    bottom: 16px;
+    gap: 8px;
 }
 
-.floating-buttons.fab-open {
-    bottom: 340px;
-    /* Поднимаем выше дуги кнопок FAB (радиус ~170px + отступы) */
+}
+
+/* На очень маленьких экранах — компактные кнопки */
+@media (max-width: 380px) {
+.floating-buttons {
+    gap: 6px;
+    right: 8px;
+}
+
+.floating-buttons .scroll-to-top,
+.floating-buttons .settings-trigger,
+.floating-buttons .fab-trigger {
+    width: 46px;
+    height: 46px;
+}
+
+.floating-buttons .scroll-to-top {
+    font-size: 20px;
 }
 
 }
@@ -10448,8 +10682,9 @@ textarea.form-input {
     align-items: center;
     justify-content: center;
     font-size: 24px;
-    order: 2;
+    order: 1;
     position: relative;
+    flex-shrink: 0;
     transition: transform 200ms ease, box-shadow 200ms ease, background 200ms ease;
 }
 

@@ -1,5 +1,5 @@
-const CACHE_VERSION = 'v82'; // FAB inside floating-buttons
-const CACHE_NAME = 'climat-control-v119'; // remove services-page duplicate, services now scroll-only
+const CACHE_VERSION = 'v80'; // Added winter-kit service
+const CACHE_NAME = 'climat-control-v112'; // add scroll progress indicator
 const urlsToCache = [
     '/',
     '/index.html',
@@ -53,8 +53,6 @@ const urlsToCache = [
         '/components/reviews.html',
         '/components/faq.html',
     '/components/footer.html',
-    '/components/bottom-tab-bar.html',
-    '/js/bottom-tab-bar.js',
     '/components/cart.html',
     '/offline.html',
     '/robots.txt',

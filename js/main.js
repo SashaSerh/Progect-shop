@@ -875,8 +875,7 @@ async function initApp() {
         ...(LANDING_MODE ? [] : [loadComponent('comparison-container', 'components/compare-bar.html')]),
         ...(LANDING_MODE ? [] : [loadComponent('compare-modal-container', 'components/compare-modal.html')]),
         loadComponent('breadcrumbs-container', 'components/breadcrumbs.html'),
-        loadComponent('footer-container', 'components/footer.html'),
-        loadComponent('bottom-tab-bar-container', 'components/bottom-tab-bar.html')
+        loadComponent('footer-container', 'components/footer.html')
     ]);
 
     // Применяем тему по умолчанию (теперь светлая) и синхронизируем иконки/ARIA
@@ -902,13 +901,6 @@ async function initApp() {
 
     // Инициализация мобильного главного меню
     initMobileMainNav();
-
-    // Bottom Tab Bar (mobile app navigation)
-    import('./bottom-tab-bar.js').then(mod => {
-        if (mod && typeof mod.initBottomTabBar === 'function') {
-            mod.initBottomTabBar();
-        }
-    }).catch(() => {});
 
     // Cart modal open is deprecated in favor of dedicated cart page
     const openCartModalButton = document.querySelector('#openCartModal');
@@ -1702,6 +1694,32 @@ async function initApp() {
         }
     }
 
+    // === Scroll Progress Indicator (mobile) ===
+    const pageProgress = document.getElementById('page-progress');
+    if (pageProgress) {
+        let progressRAF = null;
+        const updateProgress = () => {
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            const docHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            if (docHeight > 0) {
+                const percent = Math.min((scrollTop / docHeight) * 100, 100);
+                pageProgress.style.width = percent + '%';
+                // Показываем только когда начали скроллить
+                if (scrollTop > 10) {
+                    pageProgress.classList.add('active');
+                } else {
+                    pageProgress.classList.remove('active');
+                }
+            }
+            progressRAF = null;
+        };
+        window.addEventListener('scroll', () => {
+            if (!progressRAF) {
+                progressRAF = requestAnimationFrame(updateProgress);
+            }
+        }, { passive: true });
+    }
+
     const scrollToTopButton = document.querySelector('.scroll-to-top');
     if (scrollToTopButton) {
         let lastScrollTop = 0;
@@ -1967,10 +1985,12 @@ function setupServiceRouting() {
 
     function applyRoute() {
         const hash = (location.hash || '').replace('#', '');
+        const isMobile = window.innerWidth <= 768;
 
-        // Единая SPA-логика маршрутизации для всех экранов (mobile-first)
-        // По умолчанию показать только hero, меню навигации и футер
-        const alwaysVisible = ['hero-container', 'mobile-main-nav-container', 'footer-container'];
+        if (isMobile) {
+            // Мобильная логика маршрутизации
+            // По умолчанию показать только hero, мобильное меню и футер
+            const alwaysVisible = ['hero-container', 'mobile-main-nav-container', 'footer-container'];
             LANDING_CONTAINERS.forEach(id => {
                 setHiddenById(id, !alwaysVisible.includes(id));
             });
@@ -2050,8 +2070,7 @@ function setupServiceRouting() {
                 'reviews-page': 'reviews-container',
                 'faq-page': 'faq-container',
                 'contacts': 'contacts-container',
-                'about-page': 'about-page-container',
-                'about': 'about-page-container'
+                'about-page': 'about-page-container'
             };
 
             const targetPage = pageMap[hash];
@@ -2126,20 +2145,30 @@ function setupServiceRouting() {
                 return;
             }
 
-            // #services - smooth scroll to services section (landing page mode, no separate page)
+            // Для services-page
             if (hash === 'services') {
-                // Show all landing containers (home view) so services section is visible
-                LANDING_CONTAINERS.forEach(id => setHiddenById(id, false));
-                Object.values(SERVICE_MAP).forEach(id => setHiddenById(id, true));
-                CASE_CONTAINERS.forEach(id => setHiddenById(id, true));
-                // Smooth scroll to services section
-                setTimeout(() => {
-                    const servicesSection = document.getElementById('services');
-                    if (servicesSection) {
-                        servicesSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                LANDING_CONTAINERS.forEach(id => {
+                    setHiddenById(id, !['services-container', 'footer-container'].includes(id));
+                });
+                // Добавить кнопку возврата (вариант: ghost), если нет
+                try {
+                    const container = document.getElementById('services-container');
+                    const section = container?.querySelector('.services');
+                    if (section && !section.querySelector('.back-to-main')) {
+                        const btn = document.createElement('a');
+                        btn.className = 'back-to-main btn service-page__back glass';
+                        btn.setAttribute('data-variant','ghost');
+                        btn.href = '#';
+                        btn.setAttribute('aria-label', 'Назад на главную');
+                        btn.title = 'Назад';
+                        btn.innerText = '←';
+                        // back click handled by delegated handler to provide smooth exit animation and focus
+                        section.insertBefore(btn, section.firstChild);
                     }
-                }, 100);
+                } catch(_) { /* noop */ }
+                scrollToSectionTop('services');
                 setActiveNav('services');
+                focusSectionHeading('services', 'h2');
                 return;
             }
 
@@ -2169,6 +2198,134 @@ function setupServiceRouting() {
             } catch(_) {}
 
             return;
+        }
+
+        // Десктопная логика маршрутизации
+        const targetContainerId = SERVICE_MAP[hash];
+        const isServiceView = Boolean(targetContainerId);
+
+        // Если контейнер сервиса ещё не загружен — попробуем подгрузить его на лету и повторно применить маршрут
+        if (isServiceView && !document.getElementById(targetContainerId)) {
+            try {
+                const base = targetContainerId.replace(/-container$/, '');
+                loadComponent(targetContainerId, `components/${base}.html`).then(() => {
+                    applyRoute();
+                }).catch(() => {});
+            } catch (_) {}
+            return;
+        }
+
+        // На главной (нет хеша или не сервис/кейс) показываем все лендинговые секции
+        if (!isServiceView && !CASE_HASHES.includes(hash)) {
+            LANDING_CONTAINERS.forEach(id => setHiddenById(id, false));
+            CASE_CONTAINERS.forEach(id => setHiddenById(id, true));
+            setHiddenById('breadcrumbs-container', true);
+            Object.values(SERVICE_MAP).forEach(id => setHiddenById(id, true));
+            setActiveNav('');
+            return;
+        }
+
+        // Для сервисных страниц
+        LANDING_CONTAINERS.forEach(id => setHiddenById(id, !isServiceView));
+        CASE_CONTAINERS.forEach(id => setHiddenById(id, !isServiceView));
+        setHiddenById('breadcrumbs-container', !CASE_HASHES.includes(hash));
+        Object.values(SERVICE_MAP).forEach(id => setHiddenById(id, true));
+
+        if (isServiceView) {
+            // Показать только нужную сервисную секцию с анимацией
+            const onlyId = targetContainerId;
+            setHiddenById(onlyId, false);
+            try {
+                const section = document.getElementById(onlyId)?.querySelector('.service-page');
+                if (section) {
+                    const navDir = sessionStorage.getItem('service_nav_direction');
+                    if (navDir) sessionStorage.removeItem('service_nav_direction');
+                    const enterFromLeft = navDir === 'back-to-maintenance';
+                    const enterClass = enterFromLeft ? 'service-page--slide-in-from-left' : 'service-page--slide-in-from-right';
+                    section.classList.add(enterClass);
+                    requestAnimationFrame(() => {
+                        section.classList.remove(enterClass);
+                        section.classList.add('service-page--slide-in');
+                        animateServiceEntrance(section);
+                    });
+                }
+            } catch(_) { /* noop */ }
+            scrollToSectionTop(targetContainerId);
+            setActiveNav('services');
+            // Фокус на заголовке страницы услуги
+            focusSectionHeading(targetContainerId, 'h2');
+            return;
+        }
+
+        // Якорь секции услуг или возвращение на лендинг
+        if (hash === 'services') {
+            LANDING_CONTAINERS.forEach(id => setHiddenById(id, false));
+            // Скрыть сервисные разделы полностью
+            Object.values(SERVICE_MAP).forEach(id => setHiddenById(id, true));
+            // Кейсы скрываем на лендинге
+            CASE_CONTAINERS.forEach(id => setHiddenById(id, true));
+            // Хлебные крошки скрыть
+            setHiddenById('breadcrumbs-container', true);
+            scrollToSectionTop('services');
+            setActiveNav('services');
+            focusSectionHeading('services', 'h2');
+            return;
+        }
+
+        // Обработка переходов к секциям лендинга (portfolio, reviews, faq и т.д.)
+        // Landing-only page map: prefer explicit "-page" suffix to avoid collisions with SPA routes
+        const desktopPageMap = {
+            'portfolio-page': 'portfolio-container',
+            'reviews-page': 'reviews-container',
+            'faq-page': 'faq-container',
+            'contacts': 'contacts-container',
+            'about-page': 'about-page-container'
+        };
+        const desktopTargetPage = desktopPageMap[hash];
+        if (desktopTargetPage) {
+            LANDING_CONTAINERS.forEach(id => setHiddenById(id, false));
+            Object.values(SERVICE_MAP).forEach(id => setHiddenById(id, true));
+            CASE_CONTAINERS.forEach(id => setHiddenById(id, true));
+            setHiddenById('breadcrumbs-container', true);
+            scrollToSectionTop(desktopTargetPage);
+            setActiveNav(hash.replace('-page', ''));
+            focusSectionHeading(desktopTargetPage, 'h2');
+            if (hash === 'portfolio-page') {
+                // Defensive visibility cleanup for desktop transitions as well
+                try {
+                    const pc = document.getElementById('portfolio-container');
+                    const ps = document.getElementById('portfolio');
+                    if (pc && pc.hasAttribute('hidden')) pc.removeAttribute('hidden');
+                    if (ps && ps.hasAttribute('hidden')) ps.removeAttribute('hidden');
+                    [pc, ps].forEach(el => {
+                        if (!el) return;
+                        el.classList.remove('service-page--slide-out-to-right', 'service-page--slide-out-to-left', 'service-page--slide-in', 'service-page--slide-in-from-right', 'service-page--slide-in-from-left');
+                    });
+                    // Ensure portfolio grid is rendered for desktop as well
+                    try { renderPortfolio(); } catch(_) {}
+                } catch(_) {}
+                const portfolioSection = document.getElementById(desktopTargetPage)?.querySelector('.portfolio');
+                try { renderPortfolio(); } catch(_) {}
+                animatePortfolioEntrance(portfolioSection);
+            }
+            return;
+        }
+
+        // Прочие якоря лендинга: просто снять актив и ничего не прятать дополнительно
+        setActiveNav('');
+        // На главной скрываем подробные страницы услуг, показываем лендинг
+        LANDING_CONTAINERS.forEach(id => setHiddenById(id, false));
+        Object.values(SERVICE_MAP).forEach(id => {
+            setHiddenById(id, true);
+            try {
+                const section = document.getElementById(id)?.querySelector('.service-page');
+                if (section) section.classList.remove('service-page--slide-in');
+            } catch(_) {}
+        });
+        // Кейсы скрываем на главной
+        CASE_CONTAINERS.forEach(id => setHiddenById(id, true));
+        // Хлебные крошки скрыть
+        setHiddenById('breadcrumbs-container', true);
     }
 
     window.addEventListener('hashchange', applyRoute, { passive: true });
@@ -4249,29 +4406,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // Инициализация современных мобильных эффектов
     initModernMobileEffects();
     
-    // Desktop UX: scroll-reveal, counters, quick search, keyboard shortcuts
-    initScrollReveal();
-    initQuickSearch();
-    initKeyboardShortcuts();
-    initKbdHint();
-    initSectionDots();
-    initScrollProgress();
-    initHeroParallax();
-    initCtaBanner();
-    initFabNotification();
-    // Delayed init: wait for components to load
-    setTimeout(() => {
-        try { initAnimatedThemeToggle(); } catch(_) {}
-        try { initClickToCopy(); } catch(_) {}
-        try { initTestimonialsCarousel(); } catch(_) {}
-        try { initBeforeAfterSliders(); } catch(_) {}
-        try { initQrCode(); } catch(_) {}
-    }, 1500);
-
-    // Breadcrumbs on route change
-    window.addEventListener('hashchange', () => { try { initBreadcrumbsOnRoute(); } catch(_) {} });
-    setTimeout(() => { try { initBreadcrumbsOnRoute(); } catch(_) {} }, 500);
-
     // Переинициализация мобильных эффектов при изменении размера окна
     let resizeTimeout;
     window.addEventListener('resize', () => {
@@ -4445,916 +4579,12 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-// ========================================
-// DESKTOP UX: Scroll-Reveal Animations
-// ========================================
-function initScrollReveal() {
-    if (!('IntersectionObserver' in window)) {
-        // Fallback: show everything immediately
-        document.querySelectorAll('.scroll-reveal, .scroll-reveal--scale').forEach(el => el.classList.add('revealed'));
-        return;
-    }
-
-    // Auto-tag service cards and main-nav cards with scroll-reveal + stagger
-    const serviceCards = document.querySelectorAll('.services__grid .service-card');
-    serviceCards.forEach((card, i) => {
-        card.classList.add('scroll-reveal');
-        card.setAttribute('data-reveal-delay', String(i));
-    });
-
-    const navCards = document.querySelectorAll('.main-nav-mobile__item');
-    navCards.forEach((card, i) => {
-        card.classList.add('scroll-reveal');
-        card.setAttribute('data-reveal-delay', String(i));
-    });
-
-    // Tag sections for reveal
-    const sectionSelectors = [
-        '.hero-calculator-promo',
-        '.reviews',
-        '.faq',
-        '.portfolio',
-        '.contacts',
-        '.footer__desktop-grid'
-    ];
-    sectionSelectors.forEach(sel => {
-        const el = document.querySelector(sel);
-        if (el && !el.classList.contains('scroll-reveal')) {
-            el.classList.add('scroll-reveal');
-        }
-    });
-
-    const revealObserver = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('revealed');
-                revealObserver.unobserve(entry.target);
-            }
-        });
-    }, {
-        threshold: 0.08,
-        rootMargin: '0px 0px -40px 0px'
-    });
-
-    document.querySelectorAll('.scroll-reveal, .scroll-reveal--scale').forEach(el => {
-        revealObserver.observe(el);
-    });
-}
-
-
-
-// ========================================
-// DESKTOP UX: Quick Search (Cmd+K)
-// ========================================
-function initQuickSearch() {
-    const overlay = document.getElementById('quickSearchOverlay');
-    const input = document.getElementById('quickSearchInput');
-    const resultsList = document.getElementById('quickSearchResults');
-    if (!overlay || !input || !resultsList) return;
-
-    const currentLang = () => localStorage.getItem('language') || 'uk';
-
-    // Search items (all main sections)
-    const searchItems = [
-        { icon: '🏠', name: { uk: 'Головна', ru: 'Главная' }, hash: '', section: '' },
-        { icon: '🔧', name: { uk: 'Послуги', ru: 'Услуги' }, hash: '#services', section: '' },
-        { icon: '❄️', name: { uk: 'Монтаж кондиціонерів', ru: 'Монтаж кондиционеров' }, hash: '#service-ac-install', section: { uk: 'Послуги', ru: 'Услуги' } },
-        { icon: '🌬️', name: { uk: 'Монтаж рекуператорів', ru: 'Монтаж рекуператоров' }, hash: '#service-recuperator-install', section: { uk: 'Послуги', ru: 'Услуги' } },
-        { icon: '🛠️', name: { uk: 'Обслуговування систем', ru: 'Обслуживание систем' }, hash: '#service-maintenance', section: { uk: 'Послуги', ru: 'Услуги' } },
-        { icon: '📦', name: { uk: 'Демонтаж кондиціонера', ru: 'Демонтаж кондиционера' }, hash: '#service-ac-removal', section: { uk: 'Послуги', ru: 'Услуги' } },
-        { icon: '🔌', name: { uk: 'Закладка траси', ru: 'Закладка трассы' }, hash: '#service-ac-laying', section: { uk: 'Послуги', ru: 'Услуги' } },
-        { icon: '🧊', name: { uk: 'Зимовий комплект', ru: 'Зимний комплект' }, hash: '#service-winter-kit', section: { uk: 'Послуги', ru: 'Услуги' } },
-        { icon: '📸', name: { uk: 'Наші роботи', ru: 'Наши работы' }, hash: '#portfolio-page', section: '' },
-        { icon: '⭐', name: { uk: 'Відгуки клієнтів', ru: 'Отзывы клиентов' }, hash: '#reviews-page', section: '' },
-        { icon: '❓', name: { uk: 'Питання та відповіді', ru: 'Вопросы и ответы' }, hash: '#faq-page', section: '' },
-        { icon: 'ℹ️', name: { uk: 'Про нас', ru: 'О нас' }, hash: '#about', section: '' },
-        { icon: '📞', name: { uk: 'Контакти', ru: 'Контакты' }, hash: '#contacts', section: '' },
-        { icon: '🧮', name: { uk: 'Калькулятор', ru: 'Калькулятор' }, hash: '#calculator', section: '' },
-    ];
-
-    let activeIndex = 0;
-
-    function getItemName(item) {
-        const lang = currentLang();
-        return typeof item.name === 'string' ? item.name : (item.name[lang] || item.name.uk || '');
-    }
-
-    function getItemSection(item) {
-        const lang = currentLang();
-        if (!item.section) return '';
-        return typeof item.section === 'string' ? item.section : (item.section[lang] || item.section.uk || '');
-    }
-
-    function render(query) {
-        const q = (query || '').toLowerCase().trim();
-        const filtered = q
-            ? searchItems.filter(item => {
-                  const nameUk = (item.name.uk || '').toLowerCase();
-                  const nameRu = (item.name.ru || '').toLowerCase();
-                  return nameUk.includes(q) || nameRu.includes(q);
-              })
-            : searchItems;
-
-        activeIndex = 0;
-        resultsList.innerHTML = filtered.map((item, i) => `
-            <li class="quick-search__result ${i === 0 ? 'active' : ''}"
-                role="option" data-hash="${item.hash}" data-index="${i}">
-                <span class="quick-search__result-icon">${item.icon}</span>
-                <span class="quick-search__result-text">
-                    <span class="quick-search__result-name">${getItemName(item)}</span>
-                    ${getItemSection(item) ? `<span class="quick-search__result-section">${getItemSection(item)}</span>` : ''}
-                </span>
-            </li>
-        `).join('');
-    }
-
-    function openQuickSearch() {
-        overlay.style.display = 'flex';
-        input.value = '';
-        render('');
-        requestAnimationFrame(() => input.focus());
-    }
-
-    function closeQuickSearch() {
-        overlay.style.display = 'none';
-        input.value = '';
-    }
-
-    function navigate(hash) {
-        closeQuickSearch();
-        location.hash = hash;
-        if (!hash) {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-    }
-
-    function updateActive(newIndex) {
-        const items = resultsList.querySelectorAll('.quick-search__result');
-        if (!items.length) return;
-        activeIndex = Math.max(0, Math.min(newIndex, items.length - 1));
-        items.forEach((el, i) => el.classList.toggle('active', i === activeIndex));
-        items[activeIndex]?.scrollIntoView({ block: 'nearest' });
-    }
-
-    // Event listeners
-    input.addEventListener('input', () => render(input.value));
-
-    input.addEventListener('keydown', (e) => {
-        if (e.key === 'ArrowDown') {
-            e.preventDefault();
-            updateActive(activeIndex + 1);
-        } else if (e.key === 'ArrowUp') {
-            e.preventDefault();
-            updateActive(activeIndex - 1);
-        } else if (e.key === 'Enter') {
-            e.preventDefault();
-            const active = resultsList.querySelector('.quick-search__result.active');
-            if (active) navigate(active.dataset.hash);
-        } else if (e.key === 'Escape') {
-            closeQuickSearch();
-        }
-    });
-
-    overlay.addEventListener('click', (e) => {
-        if (e.target === overlay) closeQuickSearch();
-    });
-
-    resultsList.addEventListener('click', (e) => {
-        const item = e.target.closest('.quick-search__result');
-        if (item) navigate(item.dataset.hash);
-    });
-
-    // Global open handler
-    window._openQuickSearch = openQuickSearch;
-    window._closeQuickSearch = closeQuickSearch;
-}
-
-// ========================================
-// DESKTOP UX: Keyboard Shortcuts
-// ========================================
-function initKeyboardShortcuts() {
-    document.addEventListener('keydown', (e) => {
-        // Cmd+K or Ctrl+K → Quick Search
-        if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-            e.preventDefault();
-            if (typeof window._openQuickSearch === 'function') {
-                window._openQuickSearch();
-            }
-        }
-
-        // Escape → Home (only when no modal/overlay is open)
-        if (e.key === 'Escape') {
-            const overlay = document.getElementById('quickSearchOverlay');
-            if (overlay && overlay.style.display !== 'none') return; // handled by quick search
-            // Check for any open modals
-            const openModals = document.querySelectorAll('.modal[style*="display: block"], .modal[style*="display:block"]');
-            if (openModals.length) return;
-            // Go home
-            if (location.hash) {
-                location.hash = '';
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            }
-        }
-
-        // Number keys 1-6 for quick section navigation (only when not in input)
-        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable) return;
-        if (e.metaKey || e.ctrlKey || e.altKey) return;
-
-        const sectionMap = {
-            '1': '#services',
-            '2': '#portfolio-page',
-            '3': '#reviews-page',
-            '4': '#faq-page',
-            '5': '#about',
-            '6': '#contacts'
-        };
-
-        if (sectionMap[e.key]) {
-            location.hash = sectionMap[e.key];
-        }
-    });
-}
-
-// ========================================
-// DESKTOP UX: Keyboard Hint Badge
-// ========================================
-function initKbdHint() {
-    const hint = document.getElementById('kbdHint');
-    if (!hint) return;
-    // Only show on desktop with pointer device
-    if (window.innerWidth < 769) return;
-
-    // Show hint after 3 seconds, hide after 8 more
-    setTimeout(() => {
-        hint.classList.add('visible');
-        setTimeout(() => {
-            hint.classList.remove('visible');
-        }, 8000);
-    }, 3000);
-}
-
-// ========================================
-// DESKTOP UX: Section Dots Navigation (ScrollSpy)
-// ========================================
-function initSectionDots() {
-    const dotsContainer = document.getElementById('sectionDots');
-    if (!dotsContainer) return;
-    // Only on desktop
-    if (window.innerWidth < 769) return;
-
-    const lang = localStorage.getItem('language') || 'uk';
-    const sections = [
-        { id: 'home', label: { uk: 'Головна', ru: 'Главная' } },
-        { id: 'services-container', label: { uk: 'Послуги', ru: 'Услуги' } },
-        { id: 'portfolio-container', label: { uk: 'Портфоліо', ru: 'Портфолио' } },
-        { id: 'reviews-container', label: { uk: 'Відгуки', ru: 'Отзывы' } },
-        { id: 'faq-container', label: { uk: 'FAQ', ru: 'FAQ' } },
-        { id: 'contacts-container', label: { uk: 'Контакти', ru: 'Контакты' } },
-        { id: 'footer-container', label: { uk: 'Підвал', ru: 'Подвал' } }
-    ];
-
-    dotsContainer.innerHTML = sections.map(s => `
-        <div class="section-dots__item" data-section="${s.id}" role="button" tabindex="0" aria-label="${s.label[lang] || s.label.uk}">
-            <button class="section-dots__dot" aria-hidden="true"></button>
-            <span class="section-dots__tooltip">${s.label[lang] || s.label.uk}</span>
-        </div>
-    `).join('');
-
-    // Click handler
-    dotsContainer.addEventListener('click', (e) => {
-        const item = e.target.closest('.section-dots__item');
-        if (!item) return;
-        const sectionId = item.dataset.section;
-        const target = document.getElementById(sectionId);
-        if (target) {
-            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-    });
-
-    // Keyboard handler
-    dotsContainer.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            const item = e.target.closest('.section-dots__item');
-            if (!item) return;
-            const sectionId = item.dataset.section;
-            const target = document.getElementById(sectionId);
-            if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-    });
-
-    // ScrollSpy observer
-    let activeSectionId = null;
-    const observerMap = new Map();
-
-    const spyObserver = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            observerMap.set(entry.target.id, entry.isIntersecting);
-        });
-
-        // Find the topmost visible section
-        for (const s of sections) {
-            if (observerMap.get(s.id)) {
-                if (activeSectionId !== s.id) {
-                    activeSectionId = s.id;
-                    dotsContainer.querySelectorAll('.section-dots__item').forEach(d => {
-                        d.classList.toggle('active', d.dataset.section === s.id);
-                    });
-                }
-                break;
-            }
-        }
-    }, {
-        threshold: 0.15,
-        rootMargin: '-10% 0px -60% 0px'
-    });
-
-    sections.forEach(s => {
-        const el = document.getElementById(s.id);
-        if (el) spyObserver.observe(el);
-    });
-
-    // Show dots after first scroll
-    let dotsShown = false;
-    window.addEventListener('scroll', () => {
-        if (dotsShown) return;
-        if (window.scrollY > 200) {
-            dotsContainer.classList.add('visible');
-            dotsShown = true;
-        }
-    }, { passive: true });
-}
-
-// ========================================
-// DESKTOP UX: Animated Theme Toggle (Circular Reveal)
-// ========================================
-function initAnimatedThemeToggle() {
-    // Intercept all theme toggle clicks to add circular reveal
-    const themeButtons = document.querySelectorAll('#settingsThemeToggle, #mobileThemeToggle, .theme-toggle, .mobile-theme-toggle');
-    if (!themeButtons.length) return;
-
-    const overlay = document.getElementById('themeRevealOverlay');
-    if (!overlay) return;
-
-    themeButtons.forEach(btn => {
-        // Remove existing click listener from theme.js; we'll wrap it
-        const newBtn = btn.cloneNode(true);
-        btn.parentNode.replaceChild(newBtn, btn);
-
-        newBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-
-            const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-            // Get click position for reveal origin
-            const rect = newBtn.getBoundingClientRect();
-            const x = ((rect.left + rect.width / 2) / window.innerWidth * 100).toFixed(1);
-            const y = ((rect.top + rect.height / 2) / window.innerHeight * 100).toFixed(1);
-
-            const supportsClipPath = typeof CSS !== 'undefined' && CSS.supports && CSS.supports('clip-path', 'circle(0% at 50% 50%)');
-            if (prefersReduced || !supportsClipPath) {
-                // Fallback: just toggle without animation
-                if (typeof window.toggleTheme === 'function') window.toggleTheme();
-                return;
-            }
-
-            // Determine next theme color for overlay
-            const isCurrentlyLight = document.body.classList.contains('light-theme');
-            const nextBg = isCurrentlyLight
-                ? getComputedStyle(document.documentElement).getPropertyValue('--background-color').trim() || '#000'
-                : '#f2f2f7';
-
-            overlay.style.setProperty('--reveal-x', x + '%');
-            overlay.style.setProperty('--reveal-y', y + '%');
-            overlay.style.background = nextBg;
-
-            // Prevent flickering: disable transitions during reveal
-            document.body.classList.add('theme-circular-reveal');
-            overlay.classList.add('animating');
-
-            // At animation midpoint, actually toggle theme
-            setTimeout(() => {
-                if (typeof window.toggleTheme === 'function') window.toggleTheme();
-            }, 250);
-
-            // Remove overlay after animation ends
-            const cleanup = () => {
-                overlay.classList.remove('animating');
-                overlay.style.background = '';
-                document.body.classList.remove('theme-circular-reveal');
-            };
-            overlay.addEventListener('animationend', cleanup, { once: true });
-            // Safety fallback
-            setTimeout(cleanup, 700);
-        });
-    });
-}
-
-// ========================================
-// DESKTOP UX: Click-to-Copy Phone + Toast
-// ========================================
-function initClickToCopy() {
-    // Only for devices with fine pointer (desktop)
-    try {
-        if (!window.matchMedia || !window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
-    } catch (_) { return; }
-
-    const phoneLinks = document.querySelectorAll('[data-copy]');
-    if (!phoneLinks.length) return;
-
-    const lang = localStorage.getItem('language') || 'uk';
-    const copyMsg = lang === 'uk' ? '📋 Номер скопійовано!' : '📋 Номер скопирован!';
-
-    phoneLinks.forEach(link => {
-        link.addEventListener('click', async (e) => {
-            e.preventDefault();
-            const number = link.dataset.copy;
-            try {
-                await navigator.clipboard.writeText(number);
-                showCopyToast(copyMsg);
-                // Brief visual feedback
-                link.style.transform = 'scale(0.95)';
-                setTimeout(() => { link.style.transform = ''; }, 150);
-                if (navigator.vibrate) navigator.vibrate(20);
-            } catch (err) {
-                // Fallback: open tel link
-                window.location.href = 'tel:' + number;
-            }
-        });
-    });
-}
-
-function showCopyToast(msg) {
-    const container = document.getElementById('toast-container');
-    if (!container) return;
-    const toast = document.createElement('div');
-    toast.className = 'toast--copy';
-    toast.textContent = msg;
-    toast.setAttribute('role', 'status');
-    container.appendChild(toast);
-    setTimeout(() => {
-        toast.style.opacity = '0';
-        toast.style.transition = 'opacity 0.3s ease';
-        setTimeout(() => toast.remove(), 350);
-    }, 2500);
-}
-
-// ========================================
-// DESKTOP UX: Circular Scroll Progress Button
-// ========================================
-function initScrollProgress() {
-    const scrollBtn = document.querySelector('.scroll-to-top');
-    if (!scrollBtn) return;
-    const progressCircle = scrollBtn.querySelector('.scroll-progress-ring__progress');
-    if (!progressCircle) return;
-
-    const circumference = 2 * Math.PI * 25; // r=25
-    progressCircle.style.strokeDasharray = String(circumference);
-    progressCircle.style.strokeDashoffset = String(circumference);
-
-    const updateProgress = () => {
-        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-        const docHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-        if (docHeight <= 0) return;
-        const progress = Math.min(scrollTop / docHeight, 1);
-        const offset = circumference * (1 - progress);
-        progressCircle.style.strokeDashoffset = String(offset);
-    };
-
-    window.addEventListener('scroll', updateProgress, { passive: true });
-    updateProgress();
-}
-
-// ========================================
-// DESKTOP UX: Parallax Hero Effect
-// ========================================
-function initHeroParallax() {
-    const hero = document.querySelector('.hero--parallax');
-    if (!hero) return;
-    // Only apply parallax on desktop
-    if (window.innerWidth < 769) return;
-    // Skip if reduced motion preferred
-    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-
-    let ticking = false;
-    const onScroll = () => {
-        if (ticking) return;
-        ticking = true;
-        requestAnimationFrame(() => {
-            const scrollY = window.pageYOffset;
-            const heroHeight = hero.offsetHeight;
-            // Parallax only while hero is visible
-            if (scrollY < heroHeight * 1.5) {
-                const offset = scrollY * 0.35;
-                hero.style.backgroundPositionY = `calc(50% + ${offset}px)`;
-            }
-            ticking = false;
-        });
-    };
-
-    window.addEventListener('scroll', onScroll, { passive: true });
-}
-
-// ========================================
-// DESKTOP UX: Testimonials Carousel
-// ========================================
-function initTestimonialsCarousel() {
-    const track = document.getElementById('testimonialsTrack');
-    const dotsContainer = document.getElementById('testimonialsDots');
-    const prevBtn = document.getElementById('testimonialsPrev');
-    const nextBtn = document.getElementById('testimonialsNext');
-    if (!track || !dotsContainer) return;
-
-    const lang = localStorage.getItem('language') || 'uk';
-    const testimonials = [
-        {
-            initials: 'ОК',
-            name: { uk: 'Олексій К.', ru: 'Алексей К.' },
-            role: { uk: 'власник квартири', ru: 'владелец квартиры' },
-            text: { uk: 'Встановили кондиціонер за один день. Працюють акуратно, після себе прибрали. Вже рік працює без нарікань!', ru: 'Установили кондиционер за один день. Работают аккуратно, после себя убрали. Уже год работает без нареканий!' },
-            stars: 5
-        },
-        {
-            initials: 'МД',
-            name: { uk: 'Марія Д.', ru: 'Мария Д.' },
-            role: { uk: 'дизайнер інтер\'єрів', ru: 'дизайнер интерьеров' },
-            text: { uk: 'Рекомендую своїм клієнтам вже третій рік. Завжди знаходять оптимальне рішення по розташуванню блоків, щоб не псувати дизайн.', ru: 'Рекомендую своим клиентам уже третий год. Всегда находят оптимальное решение по расположению блоков, чтобы не портить дизайн.' },
-            stars: 5
-        },
-        {
-            initials: 'ІП',
-            name: { uk: 'Ігор П.', ru: 'Игорь П.' },
-            role: { uk: 'власник офісу', ru: 'владелец офиса' },
-            text: { uk: 'Обслуговують нашу мульти-спліт систему на 6 блоків. Приїжджають вчасно, ціни адекватні. Після ТО кондиціонер працює як новий.', ru: 'Обслуживают нашу мульти-сплит систему на 6 блоков. Приезжают вовремя, цены адекватные. После ТО кондиционер работает как новый.' },
-            stars: 5
-        },
-        {
-            initials: 'НВ',
-            name: { uk: 'Наталія В.', ru: 'Наталья В.' },
-            role: { uk: 'мама двох дітей', ru: 'мама двоих детей' },
-            text: { uk: 'Дуже переймалися вибором моделі для дитячої. Менеджер все пояснив, підібрав тихий варіант. Діти сплять спокійно!', ru: 'Очень переживали за выбор модели для детской. Менеджер всё объяснил, подобрал тихий вариант. Дети спят спокойно!' },
-            stars: 5
-        },
-        {
-            initials: 'ДС',
-            name: { uk: 'Дмитро С.', ru: 'Дмитрий С.' },
-            role: { uk: 'власник ресторану', ru: 'владелец ресторана' },
-            text: { uk: 'Встановили промислову систему вентиляції з рекуператором. Повітря свіже, кухня не тягне в зал. Проєкт зробили під ключ.', ru: 'Установили промышленную систему вентиляции с рекуператором. Воздух свежий, кухня не тянет в зал. Проект сделали под ключ.' },
-            stars: 5
-        }
-    ];
-
-    let current = 0;
-
-    // Render slides
-    track.innerHTML = testimonials.map(t => `
-        <div class="testimonials-carousel__slide">
-            <div class="testimonials-carousel__card">
-                <div class="testimonials-carousel__avatar">${t.initials}</div>
-                <div class="testimonials-carousel__stars">${'★'.repeat(t.stars)}${'☆'.repeat(5 - t.stars)}</div>
-                <p class="testimonials-carousel__text">"${t.text[lang] || t.text.uk}"</p>
-                <div class="testimonials-carousel__author">${t.name[lang] || t.name.uk}</div>
-                <div class="testimonials-carousel__role">${t.role[lang] || t.role.uk}</div>
-            </div>
-        </div>
-    `).join('');
-
-    // Render dots
-    dotsContainer.innerHTML = testimonials.map((_, i) => `
-        <button class="testimonials-carousel__dot${i === 0 ? ' active' : ''}" data-index="${i}" aria-label="Отзыв ${i + 1}"></button>
-    `).join('');
-
-    function goTo(index) {
-        current = ((index % testimonials.length) + testimonials.length) % testimonials.length;
-        track.style.transform = `translateX(-${current * 100}%)`;
-        dotsContainer.querySelectorAll('.testimonials-carousel__dot').forEach((d, i) => {
-            d.classList.toggle('active', i === current);
-        });
-    }
-
-    if (prevBtn) prevBtn.addEventListener('click', () => goTo(current - 1));
-    if (nextBtn) nextBtn.addEventListener('click', () => goTo(current + 1));
-    dotsContainer.addEventListener('click', (e) => {
-        const dot = e.target.closest('.testimonials-carousel__dot');
-        if (dot) goTo(Number(dot.dataset.index));
-    });
-
-    // Touch swipe support
-    let startX = 0;
-    track.addEventListener('touchstart', (e) => { startX = e.touches[0].clientX; }, { passive: true });
-    track.addEventListener('touchend', (e) => {
-        const diff = startX - e.changedTouches[0].clientX;
-        if (Math.abs(diff) > 50) goTo(current + (diff > 0 ? 1 : -1));
-    }, { passive: true });
-
-    // Auto-advance every 6 seconds
-    let autoTimer = setInterval(() => goTo(current + 1), 6000);
-    const carousel = document.getElementById('testimonialsCarousel');
-    if (carousel) {
-        carousel.addEventListener('mouseenter', () => clearInterval(autoTimer));
-        carousel.addEventListener('mouseleave', () => {
-            autoTimer = setInterval(() => goTo(current + 1), 6000);
-        });
-    }
-}
-
-// ========================================
-// DESKTOP UX: Before/After Slider
-// ========================================
-function initBeforeAfterSliders() {
-    const sliders = document.querySelectorAll('.ba-slider');
-    if (!sliders.length) return;
-
-    sliders.forEach(slider => {
-        const handle = slider.querySelector('.ba-slider__handle');
-        const grip = slider.querySelector('.ba-slider__grip');
-        const afterImg = slider.querySelector('.ba-slider__img--after');
-        if (!handle || !afterImg) return;
-
-        let isDragging = false;
-
-        function updatePosition(clientX) {
-            const rect = slider.getBoundingClientRect();
-            let x = (clientX - rect.left) / rect.width;
-            x = Math.max(0.02, Math.min(0.98, x));
-            const pct = x * 100;
-            handle.style.left = pct + '%';
-            if (grip) grip.style.left = pct + '%';
-            afterImg.style.clipPath = `inset(0 ${100 - pct}% 0 0)`;
-        }
-
-        slider.addEventListener('pointerdown', (e) => {
-            isDragging = true;
-            slider.setPointerCapture(e.pointerId);
-            updatePosition(e.clientX);
-        });
-
-        slider.addEventListener('pointermove', (e) => {
-            if (!isDragging) return;
-            updatePosition(e.clientX);
-        });
-
-        slider.addEventListener('pointerup', () => { isDragging = false; });
-        slider.addEventListener('pointercancel', () => { isDragging = false; });
-    });
-}
-
-// ========================================
-// DESKTOP UX: Dynamic Breadcrumbs
-// ========================================
-function updateBreadcrumbs(items) {
-    // items: array of { label, hash } — last item has no hash (current page)
-    const containers = document.querySelectorAll('#breadcrumbs-container, .breadcrumbs-bar');
-    // Create new breadcrumbs bar if needed
-    let bar = document.querySelector('.breadcrumbs-bar');
-    if (!bar) {
-        bar = document.createElement('nav');
-        bar.className = 'breadcrumbs-bar';
-        bar.setAttribute('aria-label', 'Навигация');
-        const heroContainer = document.getElementById('hero-container');
-        if (heroContainer && heroContainer.parentNode) {
-            heroContainer.parentNode.insertBefore(bar, heroContainer.nextSibling);
-        } else {
-            return; // nowhere to put breadcrumbs
-        }
-    }
-
-    if (!items || items.length === 0) {
-        bar.style.display = 'none';
-        return;
-    }
-
-    bar.style.display = '';
-    const ol = document.createElement('ol');
-    ol.className = 'breadcrumbs-bar__list container';
-    items.forEach((item, i) => {
-        const li = document.createElement('li');
-        li.className = 'breadcrumbs-bar__item';
-
-        if (i > 0) {
-            const sep = document.createElement('span');
-            sep.className = 'breadcrumbs-bar__sep';
-            sep.textContent = '›';
-            sep.setAttribute('aria-hidden', 'true');
-            li.appendChild(sep);
-        }
-
-        if (item.hash && i < items.length - 1) {
-            const a = document.createElement('a');
-            a.className = 'breadcrumbs-bar__link';
-            a.href = item.hash;
-            a.textContent = item.label;
-            li.appendChild(a);
-        } else {
-            const span = document.createElement('span');
-            span.textContent = item.label;
-            span.setAttribute('aria-current', 'page');
-            li.appendChild(span);
-        }
-        ol.appendChild(li);
-    });
-
-    bar.innerHTML = '';
-    bar.appendChild(ol);
-}
-
-function initBreadcrumbsOnRoute() {
-    const lang = localStorage.getItem('language') || 'uk';
-    const home = lang === 'uk' ? 'Головна' : 'Главная';
-    const hash = (location.hash || '').replace('#', '');
-
-    const breadcrumbMap = {
-        'services': { uk: 'Послуги', ru: 'Услуги' },
-        'portfolio-page': { uk: 'Портфоліо', ru: 'Портфолио' },
-        'reviews-page': { uk: 'Відгуки', ru: 'Отзывы' },
-        'faq-page': { uk: 'FAQ', ru: 'FAQ' },
-        'contacts': { uk: 'Контакти', ru: 'Контакты' },
-        'about': { uk: 'Про нас', ru: 'О нас' },
-        'calculator': { uk: 'Калькулятор', ru: 'Калькулятор' }
-    };
-
-    // Service sub-pages
-    if (hash.startsWith('service-')) {
-        const serviceNames = {
-            'service-ac-install': { uk: 'Монтаж кондиціонерів', ru: 'Монтаж кондиционеров' },
-            'service-recuperator-install': { uk: 'Монтаж рекуператорів', ru: 'Монтаж рекуператоров' },
-            'service-maintenance': { uk: 'Обслуговування', ru: 'Обслуживание' },
-            'service-ac-removal': { uk: 'Демонтаж', ru: 'Демонтаж' },
-            'service-ac-laying': { uk: 'Прокладання траси', ru: 'Прокладка трассы' },
-            'service-winter-kit': { uk: 'Зимовий комплект', ru: 'Зимний комплект' }
-        };
-        const serviceName = serviceNames[hash];
-        if (serviceName) {
-            updateBreadcrumbs([
-                { label: home, hash: '#' },
-                { label: breadcrumbMap['services'][lang], hash: '#services' },
-                { label: serviceName[lang] }
-            ]);
-            return;
-        }
-    }
-
-    const mapped = breadcrumbMap[hash];
-    if (mapped) {
-        updateBreadcrumbs([
-            { label: home, hash: '#' },
-            { label: mapped[lang] }
-        ]);
-    } else if (!hash || hash === '' || hash === 'home') {
-        updateBreadcrumbs([]); // hide on home
-    }
-}
-
-// ========================================
-// DESKTOP UX: Sticky CTA Banner
-// ========================================
-function initCtaBanner() {
-    const banner = document.getElementById('ctaBanner');
-    const closeBtn = document.getElementById('ctaBannerClose');
-    if (!banner) return;
-
-    // Check if dismissed this session
-    if (sessionStorage.getItem('cta-dismissed')) return;
-
-    // Show after 3 seconds
-    setTimeout(() => {
-        banner.classList.add('visible');
-    }, 3000);
-
-    if (closeBtn) {
-        closeBtn.addEventListener('click', () => {
-            banner.classList.remove('visible');
-            sessionStorage.setItem('cta-dismissed', '1');
-        });
-    }
-}
-
-// ========================================
-// DESKTOP UX: FAB Notification Badge
-// ========================================
-function initFabNotification() {
-    const badge = document.getElementById('fabBadge');
-    const tooltip = document.getElementById('fabTooltip');
-    const fabTrigger = document.querySelector('.fab-trigger');
-    if (!badge || !tooltip) return;
-
-    // Show badge + tooltip after 10 seconds
-    setTimeout(() => {
-        badge.classList.remove('hidden');
-
-        // Show tooltip for 5 seconds then hide
-        tooltip.classList.add('visible');
-        setTimeout(() => {
-            tooltip.classList.remove('visible');
-        }, 5000);
-    }, 10000);
-
-    // Hide badge when FAB is clicked
-    if (fabTrigger) {
-        fabTrigger.addEventListener('click', () => {
-            badge.classList.add('hidden');
-            tooltip.classList.remove('visible');
-        }, { once: true });
-    }
-}
-
-// ========================================
-// DESKTOP UX: QR Code Generator (SVG-based, no dependencies)
-// ========================================
-function initQrCode() {
-    const container = document.getElementById('footerQrCode');
-    if (!container) return;
-    // Only on desktop
-    if (window.innerWidth < 769) return;
-
-    const url = 'https://t.me/climatechprovent';
-    // Generate simple QR-like SVG as a visual placeholder
-    // We'll create a compact pixel-art QR representation
-    generateSimpleQr(container, url);
-}
-
-function generateSimpleQr(container, url) {
-    // Use a deterministic pattern based on URL hash for a QR-like appearance
-    const size = 21; // Standard QR code size
-    const cellSize = Math.floor(84 / size);
-    const svgSize = size * cellSize;
-
-    // Simple hash function for generating pseudo-random but deterministic pattern
-    let hash = 0;
-    for (let i = 0; i < url.length; i++) {
-        hash = ((hash << 5) - hash) + url.charCodeAt(i);
-        hash = hash & hash;
-    }
-
-    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    svg.setAttribute('viewBox', `0 0 ${svgSize} ${svgSize}`);
-    svg.setAttribute('width', '84');
-    svg.setAttribute('height', '84');
-    svg.style.borderRadius = '4px';
-
-    // Background
-    const bg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-    bg.setAttribute('width', svgSize);
-    bg.setAttribute('height', svgSize);
-    bg.setAttribute('fill', '#fff');
-    svg.appendChild(bg);
-
-    // Finder patterns (3 corners)
-    const drawFinder = (x, y) => {
-        // Outer
-        for (let r = 0; r < 7; r++) {
-            for (let c = 0; c < 7; c++) {
-                if (r === 0 || r === 6 || c === 0 || c === 6 || (r >= 2 && r <= 4 && c >= 2 && c <= 4)) {
-                    const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-                    rect.setAttribute('x', (x + c) * cellSize);
-                    rect.setAttribute('y', (y + r) * cellSize);
-                    rect.setAttribute('width', cellSize);
-                    rect.setAttribute('height', cellSize);
-                    rect.setAttribute('fill', '#000');
-                    svg.appendChild(rect);
-                }
-            }
-        }
-    };
-
-    drawFinder(0, 0);
-    drawFinder(size - 7, 0);
-    drawFinder(0, size - 7);
-
-    // Data modules (pseudo-random based on URL)
-    let seed = Math.abs(hash);
-    for (let r = 0; r < size; r++) {
-        for (let c = 0; c < size; c++) {
-            // Skip finder pattern areas
-            if ((r < 8 && c < 8) || (r < 8 && c >= size - 8) || (r >= size - 8 && c < 8)) continue;
-
-            seed = (seed * 1103515245 + 12345) & 0x7fffffff;
-            if (seed % 3 === 0) {
-                const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-                rect.setAttribute('x', c * cellSize);
-                rect.setAttribute('y', r * cellSize);
-                rect.setAttribute('width', cellSize);
-                rect.setAttribute('height', cellSize);
-                rect.setAttribute('fill', '#000');
-                svg.appendChild(rect);
-            }
-        }
-    }
-
-    container.innerHTML = '';
-    container.appendChild(svg);
-    // Make it a link
-    container.style.cursor = 'pointer';
-    container.title = 'Telegram: @climatechprovent';
-    container.addEventListener('click', () => {
-        window.open(url, '_blank', 'noopener');
-    });
-}
-
 // Современные мобильные эффекты
 function initModernMobileEffects() {
-    // Микро-анимации для всех экранов
+    // Проверяем, что это мобильное устройство
+    if (window.innerWidth > 768) {
+        return; // Не применяем эффекты на десктопе
+    }
     
     // Добавляем микро-анимации для кнопок
     const buttons = document.querySelectorAll('.modern-button');
@@ -6022,21 +5252,6 @@ function initMobileToggles() {
 
 // Экспорт функций
 window.initModernMobileEffects = initModernMobileEffects;
-window.initScrollReveal = initScrollReveal;
-window.initQuickSearch = initQuickSearch;
-window.initKeyboardShortcuts = initKeyboardShortcuts;
-window.initKbdHint = initKbdHint;
-window.initSectionDots = initSectionDots;
-window.initAnimatedThemeToggle = initAnimatedThemeToggle;
-window.initClickToCopy = initClickToCopy;
-window.initScrollProgress = initScrollProgress;
-window.initHeroParallax = initHeroParallax;
-window.initTestimonialsCarousel = initTestimonialsCarousel;
-window.initBeforeAfterSliders = initBeforeAfterSliders;
-window.updateBreadcrumbs = updateBreadcrumbs;
-window.initCtaBanner = initCtaBanner;
-window.initFabNotification = initFabNotification;
-window.initQrCode = initQrCode;
 window.initMobileHeader = initMobileHeader;
 window.initMobileToggles = initMobileToggles;
 // Экспортируем ключевые функции product-detail для тестов и внешнего использования
@@ -6325,13 +5540,12 @@ function initMobileMainNav() {
         if (!link) return;
 
         const href = link.getAttribute('href');
-        if (href === '#back-to-menu') {
-            e.preventDefault();
-            restoreMainMenu(navList);
-        } else if (href === '#services') {
-            // Мобильная навигация: показать список услуг (slide справа налево)
+        if (href === '#services-page') {
             e.preventDefault();
             showServicesList(navList);
+        } else if (href === '#back-to-menu') {
+            e.preventDefault();
+            restoreMainMenu(navList);
         } else if (href && href.startsWith('#service-')) {
             // Ссылки на страницы услуг - устанавливаем hash для навигации
             e.preventDefault();
@@ -6425,7 +5639,7 @@ function restoreMainMenu(navList) {
     setTimeout(() => {
         const menuHTML = `
             <li class="main-nav-mobile__item">
-                <a href="#services" class="main-nav-mobile__link">
+                <a href="#services-page" class="main-nav-mobile__link">
                     <span class="main-nav-mobile__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 6h16M4 12h16M4 18h16"/></svg></span>
                     <span class="main-nav-mobile__text" data-i18n="nav-services">Услуги</span>
                 </a>

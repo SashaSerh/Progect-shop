@@ -7,7 +7,6 @@ Vanilla ES-модульный SPA для климатического обору
 npm run dev          # Vite dev server (порт 5173)
 npm test             # Vitest + JSDOM
 npm run build        # production build → dist/
-npm run visual:test  # визуальные тесты (Playwright)
 npm run images:gen   # responsive images (-320w/-480w/-768w/-1200w)
 ```
 
@@ -94,8 +93,7 @@ npm run images:gen   # responsive images (-320w/-480w/-768w/-1200w)
 
 ## PR-checklist
 1. `npm test` — unit тесты (включая lint-тесты типа no-legacy-btn-classes)
-2. `npm run visual:create-baseline` — при UI-изменениях (проверьте `tests/visual/baseline/`)
-3. `npm run images:gen` — при добавлении/изменении изображений в `picture/`
+2. `npm run images:gen` — при добавлении/изменении изображений в `picture/`
 4. Проверить `validateProduct()` при изменениях модели товара
 5. Обновить `CACHE_NAME` в `service-worker.js` при изменениях ассетов
 6. `npm run build && npm run preview` — проверить production-сборку

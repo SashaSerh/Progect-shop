@@ -15,6 +15,7 @@ import { reinitLazyLoading } from './image-loader.js';
 import { mobileAnimations } from './mobile-animations.js';
 import { pageTransitions, initPageTransitionHandlers } from './page-transitions.js';
 import { initPerformanceMonitoring, debounce, throttle } from './performance.js';
+import haptic from './haptic.js';
 
 // ========================================
 // Modular imports (refactored modules)
@@ -1642,6 +1643,7 @@ async function initApp() {
         servicesGrid.addEventListener('click', (e) => {
             if (e.target.classList.contains('service-card__button')) {
                 const productId = e.target.dataset.id;
+                haptic.cartAdd();
                 addToCart(productId, products);
                 updateCartUI(translations, savedLanguage);
                 showActionToast({ type: 'cart', message: getCartAddedMessage(savedLanguage) });
@@ -1739,6 +1741,7 @@ async function initApp() {
         });
         
         scrollToTopButton.addEventListener('click', () => {
+            haptic.button();
             window.scrollTo({ 
                 top: 0, 
                 behavior: 'smooth' 
@@ -2467,6 +2470,7 @@ function initFabContact() {
             trigger.setAttribute('aria-expanded', 'true');
             actions.setAttribute('aria-hidden', 'false');
             if (floatingButtons) floatingButtons.classList.add('fab-open');
+            haptic.menuOpen();
         };
         
         const close = () => {
@@ -2475,6 +2479,7 @@ function initFabContact() {
             trigger.setAttribute('aria-expanded', 'false');
             actions.setAttribute('aria-hidden', 'true');
             if (floatingButtons) floatingButtons.classList.remove('fab-open');
+            haptic.menuClose();
             const onEnd = () => {
                 fab.classList.remove('is-closing');
                 fab.removeEventListener('animationend', onEnd);
@@ -2526,6 +2531,7 @@ function initSettingsButton() {
         settingsContainer.classList.add('is-open');
         trigger.setAttribute('aria-expanded', 'true');
         actions.setAttribute('aria-hidden', 'false');
+        haptic.menuOpen();
     };
     
     const close = () => {
@@ -2533,6 +2539,7 @@ function initSettingsButton() {
         settingsContainer.classList.remove('is-open');
         trigger.setAttribute('aria-expanded', 'false');
         actions.setAttribute('aria-hidden', 'true');
+        haptic.menuClose();
         const onEnd = () => {
             settingsContainer.classList.remove('is-closing');
             settingsContainer.removeEventListener('animationend', onEnd);
@@ -2558,10 +2565,12 @@ function initSettingsButton() {
         
         const action = button.dataset.action;
         if (action === 'theme') {
+            haptic.toggle();
             if (typeof toggleTheme === 'function') {
                 toggleTheme();
             }
         } else if (action === 'language') {
+            haptic.toggle();
             // Переключаем между uk и ru
             const currentLang = localStorage.getItem('language') || 'uk';
             const newLang = currentLang === 'uk' ? 'ru' : 'uk';
@@ -2795,6 +2804,7 @@ document.addEventListener('click', (e) => {
         const input = card?.querySelector('.quantity-stepper__input');
         const qty = clampQuantity(input ? Number(input.value) : 1);
         if (input) input.value = String(qty);
+        haptic.cartAdd();
         addToCart(productId, products, qty);
         updateCartUI(translations, savedLanguage);
         showActionToast({ type: 'cart', message: getCartAddedMessage(savedLanguage) });

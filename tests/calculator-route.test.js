@@ -102,11 +102,9 @@ describe('Calculator route integration', () => {
     const ok = await waitFor(() => location.hash === '#service-ac-install', 1000);
     expect(ok).toBe(true);
 
-    // cleaned up prev_hash and from_calculator consumed by unified SPA routing
+    // cleaned up prev_hash and from_calculator set
     expect(sessionStorage.getItem('prev_hash')).toBeNull();
-    // from_calculator is set by the click handler and then immediately consumed
-    // by applyRoute() during hash navigation (used for enterFromLeft animation)
-    expect(sessionStorage.getItem('from_calculator')).toBeNull();
+    expect(sessionStorage.getItem('from_calculator')).toBe('true');
 
     hideSpy.mockRestore();
   });

@@ -1605,6 +1605,34 @@ html {
     display: block;
 }
 
+/* Instagram handle (desktop) */
+.footer__social-handle {
+    display: none; /* shown on desktop only */
+    margin-left: 8px;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-secondary, #6b7280);
+    text-decoration: none;
+    vertical-align: middle;
+}
+
+@media (min-width: 769px) {
+    .footer__social-handle { display: inline-flex; align-items: center; gap: 6px; }
+}
+
+/* Instagram handle (mobile) */
+.footer__ig-handle-mobile {
+    display: none;
+    margin-top: 6px;
+    font-size: 13px;
+    color: var(--text-secondary, #9aa0a6);
+    text-decoration: none;
+}
+
+@media (max-width: 768px) {
+    .footer__ig-handle-mobile { display: block; text-align: center; }
+}
+
 .footer__fab--tg {
     background: #229ED9;
 }

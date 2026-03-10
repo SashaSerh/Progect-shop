@@ -431,7 +431,7 @@ export function initAdminProducts(translations, lang = 'ru') {
   const loginCancelBtn = document.getElementById('adminLoginCancel');
   const adminLoginBtn = document.getElementById('adminLoginBtn');
 
-  if (import.meta.env.DEV) console.log('Admin modal initialization:', {
+  if (import.meta.env?.DEV) console.log('Admin modal initialization:', {
     loginModal: !!loginModal,
     loginForm: !!loginForm,
     loginCloseBtn: !!loginCloseBtn,
@@ -483,7 +483,7 @@ export function initAdminProducts(translations, lang = 'ru') {
 
   // Keyboard shortcut for admin login (Ctrl+Alt+A)
   document.addEventListener('keydown', (e) => {
-    if (import.meta.env.DEV) console.log('Key event:', {
+    if (import.meta.env?.DEV) console.log('Key event:', {
       key: e.key,
       code: e.code,
       ctrlKey: e.ctrlKey,
@@ -496,20 +496,20 @@ export function initAdminProducts(translations, lang = 'ru') {
     const isAdminShortcut = (e.ctrlKey || e.metaKey) && e.altKey && (e.key === 'A' || e.key === 'a');
     if (isAdminShortcut) {
       e.preventDefault();
-      if (import.meta.env.DEV) console.log('Admin shortcut triggered, isAdminMode:', isAdmin(), 'loginModal exists:', !!loginModal);
+      if (import.meta.env?.DEV) console.log('Admin shortcut triggered, isAdminMode:', isAdmin(), 'loginModal exists:', !!loginModal);
 
       if (!isAdmin() && loginModal) {
-        if (import.meta.env.DEV) console.log('Opening admin login modal');
+        if (import.meta.env?.DEV) console.log('Opening admin login modal');
         loginModal.style.display = 'flex';
-        if (import.meta.env.DEV) console.log('Modal display style set to flex, computed style:', getComputedStyle(loginModal).display);
+        if (import.meta.env?.DEV) console.log('Modal display style set to flex, computed style:', getComputedStyle(loginModal).display);
         const passwordInput = document.getElementById('adminPassword');
         if (passwordInput) {
           passwordInput.focus();
-          if (import.meta.env.DEV) console.log('Focused password input');
+          if (import.meta.env?.DEV) console.log('Focused password input');
         }
         showToast('Режим администратора: введите пароль (Ctrl+Alt+A)', 2000);
       } else if (isAdmin()) {
-        if (import.meta.env.DEV) console.log('Already in admin mode');
+        if (import.meta.env?.DEV) console.log('Already in admin mode');
         showToast('Вы уже в режиме администратора (Ctrl+Alt+A для входа)', 2000);
       } else {
         console.error('Cannot open admin modal: not in admin mode or modal not found');
@@ -543,9 +543,9 @@ export function initAdminProducts(translations, lang = 'ru') {
         updateAdminControlsVisibility();
         showToast('Вход выполнен успешно');
         if (loginModal) {
-          if (import.meta.env.DEV) console.log('Closing admin login modal after successful login');
+          if (import.meta.env?.DEV) console.log('Closing admin login modal after successful login');
           loginModal.style.display = 'none';
-          if (import.meta.env.DEV) console.log('Modal display style set to none');
+          if (import.meta.env?.DEV) console.log('Modal display style set to none');
         }
         loginForm.reset();
 
@@ -569,10 +569,10 @@ export function initAdminProducts(translations, lang = 'ru') {
   [loginCloseBtn, loginCancelBtn].forEach(btn => {
     if (btn) {
       btn.addEventListener('click', () => {
-        if (import.meta.env.DEV) console.log('Closing admin login modal via button');
+        if (import.meta.env?.DEV) console.log('Closing admin login modal via button');
         if (loginModal) {
           loginModal.style.display = 'none';
-          if (import.meta.env.DEV) console.log('Modal display style set to none');
+          if (import.meta.env?.DEV) console.log('Modal display style set to none');
         }
         loginForm.reset();
       });
@@ -583,9 +583,9 @@ export function initAdminProducts(translations, lang = 'ru') {
   if (loginModal) {
     loginModal.addEventListener('click', (e) => {
       if (e.target === loginModal) {
-        if (import.meta.env.DEV) console.log('Closing admin login modal via backdrop click');
+        if (import.meta.env?.DEV) console.log('Closing admin login modal via backdrop click');
         loginModal.style.display = 'none';
-        if (import.meta.env.DEV) console.log('Modal display style set to none');
+        if (import.meta.env?.DEV) console.log('Modal display style set to none');
         loginForm.reset();
       }
     });
@@ -1228,7 +1228,7 @@ export function initAdminProducts(translations, lang = 'ru') {
   try { window.__initialProducts = window.products || []; } catch {}
 
   // Log keyboard shortcut hint for developers
-  if (import.meta.env.DEV) console.log('💡 Admin mode: Press Ctrl+Shift+A to open admin login');
+  if (import.meta.env?.DEV) console.log('💡 Admin mode: Press Ctrl+Shift+A to open admin login');
 }
 
 export default { initAdminProducts };

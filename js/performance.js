@@ -24,7 +24,7 @@ export function initPerformanceMonitoring() {
       for (const entry of list.getEntries()) {
         if (entry.name === 'first-contentful-paint') {
           metricsBuffer.FCP = entry.startTime;
-          if (import.meta.env.DEV) console.log('FCP:', entry.startTime.toFixed(2), 'ms');
+          if (import.meta.env?.DEV) console.log('FCP:', entry.startTime.toFixed(2), 'ms');
           reportMetric('FCP', entry.startTime);
         }
       }
@@ -38,7 +38,7 @@ export function initPerformanceMonitoring() {
       const entries = list.getEntries();
       const lastEntry = entries[entries.length - 1];
       metricsBuffer.LCP = lastEntry.startTime;
-      if (import.meta.env.DEV) console.log('LCP:', lastEntry.startTime.toFixed(2), 'ms');
+      if (import.meta.env?.DEV) console.log('LCP:', lastEntry.startTime.toFixed(2), 'ms');
       reportMetric('LCP', lastEntry.startTime);
     });
     lcpObserver.observe({ type: 'largest-contentful-paint', buffered: true });
@@ -49,7 +49,7 @@ export function initPerformanceMonitoring() {
     const fidObserver = new PerformanceObserver((list) => {
       for (const entry of list.getEntries()) {
         metricsBuffer.FID = entry.processingStart - entry.startTime;
-        if (import.meta.env.DEV) console.log('FID:', metricsBuffer.FID.toFixed(2), 'ms');
+        if (import.meta.env?.DEV) console.log('FID:', metricsBuffer.FID.toFixed(2), 'ms');
         reportMetric('FID', metricsBuffer.FID);
       }
     });
@@ -66,7 +66,7 @@ export function initPerformanceMonitoring() {
         }
       }
       metricsBuffer.CLS = clsValue;
-      if (import.meta.env.DEV) console.log('CLS:', clsValue.toFixed(4));
+      if (import.meta.env?.DEV) console.log('CLS:', clsValue.toFixed(4));
       reportMetric('CLS', clsValue);
     });
     clsObserver.observe({ type: 'layout-shift', buffered: true });
@@ -77,7 +77,7 @@ export function initPerformanceMonitoring() {
     const navigationEntry = performance.getEntriesByType('navigation')[0];
     if (navigationEntry) {
       metricsBuffer.TTFB = navigationEntry.responseStart - navigationEntry.requestStart;
-      if (import.meta.env.DEV) console.log('TTFB:', metricsBuffer.TTFB.toFixed(2), 'ms');
+      if (import.meta.env?.DEV) console.log('TTFB:', metricsBuffer.TTFB.toFixed(2), 'ms');
       reportMetric('TTFB', metricsBuffer.TTFB);
     }
   } catch (e) {}
@@ -153,7 +153,7 @@ export function measurePerformance(name, func) {
   const start = performance.now();
   const result = func();
   const end = performance.now();
-  if (import.meta.env.DEV) console.log(`⏱️ ${name}: ${(end - start).toFixed(2)}ms`);
+  if (import.meta.env?.DEV) console.log(`⏱️ ${name}: ${(end - start).toFixed(2)}ms`);
   return result;
 }
 
@@ -164,7 +164,7 @@ export async function measurePerformanceAsync(name, func) {
   const start = performance.now();
   const result = await func();
   const end = performance.now();
-  if (import.meta.env.DEV) console.log(`⏱️ ${name}: ${(end - start).toFixed(2)}ms`);
+  if (import.meta.env?.DEV) console.log(`⏱️ ${name}: ${(end - start).toFixed(2)}ms`);
   return result;
 }
 

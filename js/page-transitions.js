@@ -529,5 +529,5 @@ export function initPageTransitionHandlers() {
         await pageTransitions.scrollToWithAnimation(targetId, 'top');
     });
 
-    if (import.meta.env.DEV) console.debug('[PageTransitions] Handlers initialized');
+    if (import.meta.env?.DEV) console.debug('[PageTransitions] Handlers initialized');
 }

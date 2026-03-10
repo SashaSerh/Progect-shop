@@ -7,18 +7,18 @@ export default defineConfig({
   
   // Настройки сервера разработки
   server: {
-    port: 5173,
-    strictPort: true, // если порт занят, процесс завершится с ошибкой (не будет падать на свободный порт)
+    port: 5175,
+    strictPort: false, // если порт занят, выберет свободный
     host: '0.0.0.0', // слушать на всех интерфейсах (поможет при проксировании/контейнерах)
-    open: true,
+    open: false, // отключено, чтобы избежать проблем с автооткрытием
     cors: true,
-    // Явно указываем HMR параметры чтобы клиент подключался на правильный порт/протокол.
-    // Если браузер видит страницу на проксированном порту (например при форвардинге), укажите clientPort.
+    // Настройки HMR
     hmr: {
-      protocol: 'ws',      // 'wss' при HTTPS/прокси
-      host: 'localhost',   // адрес для WebSocket (можно менять на ваш хост)
-      port: 5173,          // порт, на котором работает dev server
-      clientPort: 5173     // клиент WebSocket подключается на тот же порт, что и dev server
+      overlay: false // отключить оверлей ошибок, который может вызывать перезагрузки
+    },
+    // Настройки вотчера
+    watch: {
+      ignored: ['**/node_modules/**', '**/dist/**', '**/.git/**']
     }
   },
   
@@ -54,7 +54,7 @@ export default defineConfig({
         manualChunks: (id) => {
           // Вендоры
           if (id.includes('node_modules')) {
-            if (id.includes('@supabase')) return 'vendor';
+            // if (id.includes('@supabase')) return 'vendor';
             return 'vendor';
           }
           // Админ модули (редко используются)
@@ -92,7 +92,7 @@ export default defineConfig({
   
   // Оптимизация зависимостей
   optimizeDeps: {
-    include: ['@supabase/supabase-js']
+    // include: ['@supabase/supabase-js'] // удалено, так как зависимость не установлена
   },
   
   // CSS настройки

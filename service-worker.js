@@ -1,40 +1,19 @@
-const CACHE_VERSION = 'v80'; // Added winter-kit service
-const CACHE_NAME = 'climat-control-v115'; // DEV fixes and build config update
+const CACHE_VERSION = 'v81';
+const CACHE_NAME = 'climat-control-v116';
 const urlsToCache = [
     '/',
     '/index.html',
     '/css/main.css',
     '/js/main.js',
-    '/js/cart.js',
-    '/js/products.js',
-    '/js/compare-bar.js',
-    '/js/compare-modal.js',
-    '/js/marketing.js',
     '/js/content-config.js',
-    '/js/i18n.js',
-    '/js/image-loader.js',
-    '/js/admin-products.js',
-    '/js/admin-page.js',
+    '/js/product-schema.js',
     '/js/data-provider.js',
-    '/js/flags-color.js',
-    '/js/merge-utils.js',
-    '/js/theme.js',
-    '/js/page-transitions.js',
-    '/js/mobile-animations.js',
-    '/js/lazy-loader.js',
-    '/js/toast.js',
-    '/js/catalog-dropdown.js',
-    '/js/component-loader.js',
-    '/js/search.js',
-    '/components/admin-products.html',
     '/components/header.html',
     '/components/hero.html',
     '/components/mobile-main-nav.html',
     '/components/services.html',
     '/components/products.html',
     '/components/product-detail.html',
-    '/components/compare-bar.html',
-    '/components/compare-modal.html',
     '/components/contacts.html',
     '/components/portfolio.html',
     '/components/service-ac-install.html',
@@ -50,34 +29,23 @@ const urlsToCache = [
     '/components/case-1.html',
     '/components/case-2.html',
     '/components/case-3.html',
-        '/components/reviews.html',
-        '/components/faq.html',
+    '/components/reviews.html',
+    '/components/faq.html',
     '/components/footer.html',
     '/components/cart.html',
     '/offline.html',
-    '/robots.txt',
-    '/sitemap.xml',
-    // Social icons used in footer
+    // Icons
     '/icons/facebook-icon_1.svg',
     '/icons/telegram-logo-icon_1.svg',
     '/icons/instagram-icon_1.svg',
     '/icons/whatsapp-icon_1.svg',
     '/icons/gmail.svg',
-    // Mobile background
+    // Hero images
     '/picture/hero-picture/background-blur-mobile.png',
-    // Hero background images (static + responsive)
     '/picture/hero-picture/hero-1-1200w.jpg',
     '/picture/hero-picture/Hero-banner-768*432px.png',
     '/picture/hero-picture/Hero-banner-480*270px.png',
-    '/picture/hero-picture/Hero-banner-320*180px.png',
-    '/picture/about-banner-1200.jpg',
-    '/picture/about-banner-768.jpg',
-    '/picture/about-banner-480.jpg',
-    '/picture/about-banner-320.jpg',
-    '/picture/about-banner-1200.webp',
-    '/picture/about-banner-768.webp',
-    '/picture/about-banner-480.webp',
-    '/picture/about-banner-320.webp'
+    '/picture/hero-picture/Hero-banner-320*180px.png'
 ];
 
 self.addEventListener('install', event => {

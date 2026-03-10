@@ -7,16 +7,12 @@ export default defineConfig({
   
   // Настройки сервера разработки
   server: {
-    port: 5175,
-    strictPort: false, // если порт занят, выберет свободный
-    host: '0.0.0.0', // слушать на всех интерфейсах (поможет при проксировании/контейнерах)
-    open: false, // отключено, чтобы избежать проблем с автооткрытием
+    port: 5173,
+    strictPort: false,
+    host: 'localhost',
+    open: false,
     cors: true,
-    // Настройки HMR
-    hmr: {
-      overlay: false // отключить оверлей ошибок, который может вызывать перезагрузки
-    },
-    // Настройки вотчера
+    hmr: true,
     watch: {
       ignored: ['**/node_modules/**', '**/dist/**', '**/.git/**']
     }
@@ -48,7 +44,6 @@ export default defineConfig({
         manualChunks: (id) => {
           // Вендоры
           if (id.includes('node_modules')) {
-            // if (id.includes('@supabase')) return 'vendor';
             return 'vendor';
           }
           // Админ модули (редко используются)
@@ -84,26 +79,8 @@ export default defineConfig({
     }
   },
   
-  // Оптимизация зависимостей
-  optimizeDeps: {
-    // include: ['@supabase/supabase-js'] // удалено, так как зависимость не установлена
-  },
-  
   // CSS настройки
   css: {
-    devSourcemap: true,
-    // Минификация CSS в production
-    postcss: {
-      plugins: [
-        // PurgeCSS будет удалять неиспользуемые стили
-      ]
-    }
-  },
-  
-  // Экспериментальные функции для оптимизации
-  experimental: {
-    renderBuiltUrl(filename) {
-      return '/' + filename;
-    }
+    devSourcemap: true
   }
 });

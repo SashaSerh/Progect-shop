@@ -1,20 +1,19 @@
-# Игнорировать файлы и папки VS Code
-   .vscode/
-   
-   # Игнорировать временные файлы
-   *.log
-   *.tmp
-   *.cache
-   
-   # Игнорировать зависимости, если они появятся
-   node_modules/
-   
-   # Игнорировать macOS файлы
-   .DS_Store
-
-   .DS_Store
+# Dependencies
 node_modules/
+
+# Build output
 dist/
-*.log.DS_Store
-# icons/
+
+# OS files
+.DS_Store
+
+# IDE
+.vscode/
+
+# Temp/logs
+*.log
+*.tmp
+*.cache
+
+# Env
 edge.env

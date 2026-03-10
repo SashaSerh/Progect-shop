@@ -97,6 +97,6 @@ export function initWelcomeOverlay(currentLang, options = {}) {
 
 export function ensureWelcomeOverlay(language) {
     if (needsWelcomeOverlay()) {
-        return import('./welcome.js'); // pointless self import for bundlers; kept for pattern
+        return Promise.resolve(); // module already loaded statically by main.js
     }
 }

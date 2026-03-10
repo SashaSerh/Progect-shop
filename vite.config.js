@@ -28,17 +28,11 @@ export default defineConfig({
     assetsDir: 'assets',
     
     // Минификация
-    minify: 'esbuild', // изменено с 'terser' на 'esbuild' (terser удален из зависимостей)
-    terserOptions: {
-      compress: {
-        drop_console: true, // Удаляем все console.* в production
-        drop_debugger: true,
-        pure_funcs: ['console.info', 'console.debug', 'console.trace'],
-        passes: 2 // Дополнительный проход для лучшей минификации
-      },
-      mangle: {
-        safari10: true // Совместимость с Safari 10+
-      }
+    minify: 'esbuild',
+    
+    // Удаляем console в production
+    esbuildOptions: {
+      drop: ['console', 'debugger']
     },
     
     // CSS минификация

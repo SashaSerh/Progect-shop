@@ -28,7 +28,7 @@ export default defineConfig({
     assetsDir: 'assets',
     
     // Минификация
-    minify: 'terser',
+    minify: 'esbuild', // изменено с 'terser' на 'esbuild' (terser удален из зависимостей)
     terserOptions: {
       compress: {
         drop_console: true, // Удаляем все console.* в production
